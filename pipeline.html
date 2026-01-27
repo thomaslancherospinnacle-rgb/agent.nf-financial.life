@@ -797,14 +797,24 @@
          * ══════════════════════════════════════════════════════════════
          **********************/
         function copyReferralLink() {
-            const url = $("myReferralUrl").textContent;
-            navigator.clipboard.writeText(url).then(() => {
-                showToast('✓ Link copied to clipboard!', 'success');
-            }).catch(err => {
-                console.error('Error copying:', err);
-                alert('Link: ' + url);
-            });
+          const el = document.getElementById("myReferralUrl");
+          const url = (el?.textContent || "").trim();
+        
+          if (!url || url === "—") {
+            showToast("Referral link not ready yet. Wait 1 sec and try again.", "error");
+            return;
+          }
+        
+          // Modern clipboard attempt
+          if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(url)
+              .then(() => showToast("✓ Link copied!", "success"))
+              .catch(() => legacyCopy(url));
+          } else {
+            legacyCopy(url);
+          }
         }
+        
 
         function showQRCode() {
             const url = $("myReferralUrl").textContent;
@@ -931,6 +941,24 @@
             toast.textContent = message;
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 2000);
+        }
+        function legacyCopy(text) {
+            const textarea = document.createElement("textarea");
+            textarea.value = text;
+            textarea.style.position = "fixed";
+            textarea.style.opacity = "0";
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+        
+            try {
+                document.execCommand("copy");
+                showToast('✓ Link copied!', 'success');
+            } catch (e) {
+                alert("Copy failed. Link:\n\n" + text);
+            }
+        
+            document.body.removeChild(textarea);
         }
     </script>
 </body>
