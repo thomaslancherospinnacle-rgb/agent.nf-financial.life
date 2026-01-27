@@ -1,159 +1,268 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Session Test</title>
+    <title>Permissions Debug</title>
     <style>
-        body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #0f0; }
-        .box { background: #000; border: 1px solid #0f0; padding: 15px; margin: 10px 0; }
-        button { background: #0f0; color: #000; border: none; padding: 10px 20px; cursor: pointer; margin: 5px; }
+        body {
+            font-family: monospace;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #0f0;
+        }
+        h1 { color: #0ff; }
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #0f0;
+            background: #000;
+            border-radius: 10px;
+        }
+        button {
+            background: #0f0;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background: #0ff; }
+        pre {
+            background: #002200;
+            padding: 15px;
+            overflow-x: auto;
+            border-left: 3px solid #0f0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
         .error { color: #f00; }
         .success { color: #0f0; }
+        .info { color: #0ff; }
+        input {
+            background: #000;
+            border: 1px solid #0f0;
+            color: #0f0;
+            padding: 10px;
+            font-family: monospace;
+            width: 300px;
+            margin: 5px;
+        }
     </style>
 </head>
 <body>
-    <h1>🔐 Session Tester</h1>
-    
-    <div class="box">
-        <h2>Step 1: Check Session</h2>
+    <h1>🔍 Permissions API Debugger</h1>
+
+    <!-- Step 1: Check Session -->
+    <div class="section">
+        <h2>Step 1: Check Your Session</h2>
         <button onclick="checkSession()">Check Session</button>
         <div id="sessionResult"></div>
     </div>
-    
-    <div class="box">
-        <h2>Step 2: Test Login</h2>
-        <input type="text" id="email" placeholder="Email" style="width: 300px; padding: 5px;">
-        <input type="password" id="password" placeholder="Password" style="width: 300px; padding: 5px;">
-        <br><br>
-        <button onclick="testLogin()">Test Login</button>
-        <div id="loginResult"></div>
+
+    <!-- Step 2: Get Permissions -->
+    <div class="section">
+        <h2>Step 2: Fetch Permissions</h2>
+        <label>Username: <input type="text" id="username" value="Thomas Lancheros"></label>
+        <button onclick="getPermissions()">Get Permissions</button>
+        <div id="permissionsResult"></div>
     </div>
-    
-    <div class="box">
-        <h2>Step 3: Test /me Endpoint</h2>
-        <button onclick="testMe()">Test /me</button>
-        <div id="meResult"></div>
+
+    <!-- Step 3: Get All Sources -->
+    <div class="section">
+        <h2>Step 3: Get All Available Sources</h2>
+        <button onclick="getSources()">Get Sources</button>
+        <div id="sourcesResult"></div>
     </div>
-    
+
+    <!-- Step 4: Save Test Permission -->
+    <div class="section">
+        <h2>Step 4: Test Save Permission</h2>
+        <label>Caller: <input type="text" id="testCaller" value="Thomas Lancheros"></label><br>
+        <label>Source Type: <input type="text" id="testSourceType" value="CSV"></label><br>
+        <label>Source Name: <input type="text" id="testSourceName" value="NCEssentials"></label><br>
+        <button onclick="testSavePermission()">Save Test Permission</button>
+        <div id="saveResult"></div>
+    </div>
+
     <script src="config.js"></script>
+    <script src="auth.js"></script>
+
     <script>
-        const LS_TOKEN = "cc_token";
-        
-        function getCookie(name) {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
-            return null;
+        function show(elementId, html) {
+            document.getElementById(elementId).innerHTML = html;
         }
-        
-        function setCookie(name, value, hours) {
-            const expires = new Date();
-            expires.setTime(expires.getTime() + hours * 60 * 60 * 1000);
-            document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
-        }
-        
-        function getToken() {
-            const cookieToken = getCookie(LS_TOKEN);
-            if (cookieToken) return cookieToken;
+
+        async function checkSession() {
+            show('sessionResult', '<div class="info">Checking session...</div>');
             
             try {
-                const localToken = localStorage.getItem(LS_TOKEN);
-                if (localToken) return localToken;
-            } catch (e) {}
-            
-            return "";
+                const token = Auth.getToken();
+                if (!token) {
+                    show('sessionResult', '<div class="error">❌ No token found. Please login first.</div>');
+                    return;
+                }
+
+                const response = await Auth.apiCall('me', { token });
+                
+                const result = `
+<div class="success">✅ Session Valid</div>
+<pre>${JSON.stringify(response, null, 2)}</pre>
+<div class="info">
+<strong>Derived username:</strong> ${response.username || response.loginEmail?.split('@')[0].replace('.ail', '') || 'N/A'}
+<br>
+<strong>This is what will be used for permission lookups</strong>
+</div>
+                `;
+                show('sessionResult', result);
+                
+                // Auto-populate username field
+                const derivedUsername = response.username || response.loginEmail?.split('@')[0].replace('.ail', '') || '';
+                document.getElementById('username').value = derivedUsername;
+                document.getElementById('testCaller').value = derivedUsername;
+                
+            } catch (e) {
+                show('sessionResult', `<div class="error">❌ Error: ${e.message}</div>`);
+            }
         }
-        
-        function checkSession() {
-            const result = document.getElementById('sessionResult');
-            const token = getToken();
+
+        async function getPermissions() {
+            show('permissionsResult', '<div class="info">Fetching permissions...</div>');
             
-            result.innerHTML = `
-                <h3>Session Info:</h3>
-                <p><strong>Cookie:</strong> ${getCookie(LS_TOKEN) || 'NOT FOUND'}</p>
-                <p><strong>localStorage:</strong> ${localStorage.getItem(LS_TOKEN) || 'NOT FOUND'}</p>
-                <p><strong>Token:</strong> ${token || 'NONE'}</p>
-                <p><strong>Status:</strong> <span class="${token ? 'success' : 'error'}">${token ? 'LOGGED IN' : 'NOT LOGGED IN'}</span></p>
-            `;
-        }
-        
-        async function testLogin() {
-            const result = document.getElementById('loginResult');
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            if (!email || !password) {
-                result.innerHTML = '<p class="error">Enter email and password!</p>';
+            const username = document.getElementById('username').value.trim();
+            if (!username) {
+                show('permissionsResult', '<div class="error">Please enter a username</div>');
                 return;
             }
-            
-            result.innerHTML = '<p>Testing login...</p>';
-            
+
             try {
-                const res = await fetch(`${CFWORKER}/login`, {
+                const response = await fetch(LEADSDB, {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        loginEmail: email,
-                        password: password
+                        action: 'getPermissions',
+                        caller: username
                     })
                 });
+
+                const data = await response.json();
                 
-                const data = await res.json();
+                const result = `
+<div class="info">Request sent:</div>
+<pre>{
+  "action": "getPermissions",
+  "caller": "${username}"
+}</pre>
+
+<div class="info">Response received:</div>
+<pre>${JSON.stringify(data, null, 2)}</pre>
+
+<div class="${Array.isArray(data) && data.length > 0 ? 'success' : 'error'}">
+${Array.isArray(data) && data.length > 0 ? '✅ Permissions found!' : '❌ No permissions found (empty array)'}
+</div>
+                `;
+                show('permissionsResult', result);
                 
-                if (data.ok && data.token) {
-                    setCookie(LS_TOKEN, data.token, 12);
-                    localStorage.setItem(LS_TOKEN, data.token);
-                    
-                    result.innerHTML = `
-                        <p class="success">✓ LOGIN SUCCESS!</p>
-                        <p>Token: ${data.token.substring(0, 20)}...</p>
-                        <p>Email: ${data.loginEmail}</p>
-                    `;
-                } else {
-                    result.innerHTML = `<p class="error">✗ LOGIN FAILED: ${data.error || data.message || 'Unknown error'}</p>`;
-                }
             } catch (e) {
-                result.innerHTML = `<p class="error">✗ ERROR: ${e.message}</p>`;
+                show('permissionsResult', `<div class="error">❌ Error: ${e.message}</div>`);
             }
         }
-        
-        async function testMe() {
-            const result = document.getElementById('meResult');
-            const token = getToken();
-            
-            if (!token) {
-                result.innerHTML = '<p class="error">No token found! Login first.</p>';
-                return;
-            }
-            
-            result.innerHTML = '<p>Testing /me endpoint...</p>';
+
+        async function getSources() {
+            show('sourcesResult', '<div class="info">Fetching sources...</div>');
             
             try {
-                const res = await fetch(`${CFWORKER}/me`, {
+                const response = await fetch(LEADSDB, {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ token: token })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'getSources'
+                    })
                 });
+
+                const data = await response.json();
                 
-                const data = await res.json();
+                const result = `
+<div class="info">Request sent:</div>
+<pre>{
+  "action": "getSources"
+}</pre>
+
+<div class="info">Response received:</div>
+<pre>${JSON.stringify(data, null, 2)}</pre>
+
+<div class="success">
+✅ Found ${Array.isArray(data) ? data.length : 0} sources
+</div>
+                `;
+                show('sourcesResult', result);
                 
-                if (data.ok) {
-                    result.innerHTML = `
-                        <p class="success">✓ SESSION VALID!</p>
-                        <p>Email: ${data.loginEmail}</p>
-                        <p>Status: ${data.status}</p>
-                        <pre>${JSON.stringify(data, null, 2)}</pre>
-                    `;
-                } else {
-                    result.innerHTML = `<p class="error">✗ SESSION INVALID: ${data.error || 'Unknown error'}</p>`;
-                }
             } catch (e) {
-                result.innerHTML = `<p class="error">✗ ERROR: ${e.message}</p>`;
+                show('sourcesResult', `<div class="error">❌ Error: ${e.message}</div>`);
             }
         }
-        
-        // Auto-check on load
-        window.onload = checkSession;
+
+        async function testSavePermission() {
+            show('saveResult', '<div class="info">Saving test permission...</div>');
+            
+            const caller = document.getElementById('testCaller').value.trim();
+            const sourceType = document.getElementById('testSourceType').value.trim();
+            const sourceName = document.getElementById('testSourceName').value.trim();
+            
+            if (!caller || !sourceType || !sourceName) {
+                show('saveResult', '<div class="error">Please fill all fields</div>');
+                return;
+            }
+
+            try {
+                const permissions = [{
+                    callerName: caller,
+                    sourceType: sourceType,
+                    sourceName: sourceName,
+                    hasAccess: 'YES'
+                }];
+
+                const response = await fetch(LEADSDB, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'savePermissions',
+                        permissions: permissions
+                    })
+                });
+
+                const data = await response.json();
+                
+                const result = `
+<div class="info">Request sent:</div>
+<pre>${JSON.stringify({
+    action: 'savePermissions',
+    permissions: permissions
+}, null, 2)}</pre>
+
+<div class="info">Response received:</div>
+<pre>${JSON.stringify(data, null, 2)}</pre>
+
+<div class="${data.success ? 'success' : 'error'}">
+${data.success ? '✅ Permission saved!' : '❌ Failed to save'}
+</div>
+
+<div class="info">
+Now try clicking "Get Permissions" above to verify it was saved!
+</div>
+                `;
+                show('saveResult', result);
+                
+            } catch (e) {
+                show('saveResult', `<div class="error">❌ Error: ${e.message}</div>`);
+            }
+        }
+
+        // Auto-check session on load
+        window.addEventListener('load', () => {
+            checkSession();
+        });
     </script>
 </body>
 </html>
