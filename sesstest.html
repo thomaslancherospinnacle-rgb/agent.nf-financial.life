@@ -1,159 +1,239 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Session Test</title>
+    <title>Session Tester</title>
     <style>
-        body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #0f0; }
-        .box { background: #000; border: 1px solid #0f0; padding: 15px; margin: 10px 0; }
-        button { background: #0f0; color: #000; border: none; padding: 10px 20px; cursor: pointer; margin: 5px; }
-        .error { color: #f00; }
-        .success { color: #0f0; }
+        body {
+            font-family: monospace;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #0f0;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #0f0;
+            border-radius: 10px;
+            background: #000;
+        }
+        h1 { color: #0ff; }
+        h2 { color: #0f0; margin-top: 0; }
+        .pass { color: #0f0; }
+        .fail { color: #f00; }
+        .info { color: #0ff; }
+        button {
+            background: #0f0;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        button:hover { background: #0ff; }
+        pre { 
+            background: #002200; 
+            padding: 10px; 
+            overflow-x: auto;
+            border-left: 3px solid #0f0;
+        }
+        input {
+            background: #000;
+            border: 1px solid #0f0;
+            color: #0f0;
+            padding: 10px;
+            font-family: monospace;
+            width: 100%;
+            margin: 5px 0;
+        }
+        .status { font-size: 18px; font-weight: bold; }
     </style>
 </head>
 <body>
     <h1>🔐 Session Tester</h1>
     
-    <div class="box">
+    <!-- Current Session Status -->
+    <div class="section">
         <h2>Step 1: Check Session</h2>
         <button onclick="checkSession()">Check Session</button>
-        <div id="sessionResult"></div>
+        <div id="sessionStatus"></div>
     </div>
-    
-    <div class="box">
+
+    <!-- Test Login -->
+    <div class="section">
         <h2>Step 2: Test Login</h2>
-        <input type="text" id="email" placeholder="Email" style="width: 300px; padding: 5px;">
-        <input type="password" id="password" placeholder="Password" style="width: 300px; padding: 5px;">
-        <br><br>
+        <input type="text" id="username" placeholder="Thomas Lancheros" value="Thomas Lancheros">
+        <input type="password" id="password" placeholder="Your password">
         <button onclick="testLogin()">Test Login</button>
-        <div id="loginResult"></div>
+        <div id="loginStatus"></div>
     </div>
-    
-    <div class="box">
+
+    <!-- Test /me Endpoint -->
+    <div class="section">
         <h2>Step 3: Test /me Endpoint</h2>
         <button onclick="testMe()">Test /me</button>
-        <div id="meResult"></div>
+        <div id="meStatus"></div>
     </div>
-    
+
+    <!-- Logout -->
+    <div class="section">
+        <h2>Step 4: Logout</h2>
+        <button onclick="doLogout()">Logout</button>
+        <button onclick="clearAll()">Clear All Storage</button>
+        <div id="logoutStatus"></div>
+    </div>
+
     <script src="config.js"></script>
+    <script src="auth.js"></script>
+
     <script>
-        const LS_TOKEN = "cc_token";
-        
-        function getCookie(name) {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
-            return null;
+        function showResult(elementId, type, message, data = null) {
+            const el = document.getElementById(elementId);
+            let html = `<div class="${type} status">`;
+            
+            if (type === 'pass') html += '✅ ';
+            if (type === 'fail') html += '❌ ';
+            if (type === 'info') html += '📋 ';
+            
+            html += message + '</div>';
+            
+            if (data) {
+                html += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            }
+            
+            el.innerHTML = html;
         }
-        
-        function setCookie(name, value, hours) {
-            const expires = new Date();
-            expires.setTime(expires.getTime() + hours * 60 * 60 * 1000);
-            document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
-        }
-        
-        function getToken() {
-            const cookieToken = getCookie(LS_TOKEN);
-            if (cookieToken) return cookieToken;
+
+        async function checkSession() {
+            const statusEl = document.getElementById('sessionStatus');
+            statusEl.innerHTML = '<div class="info">Checking session...</div>';
             
             try {
-                const localToken = localStorage.getItem(LS_TOKEN);
-                if (localToken) return localToken;
-            } catch (e) {}
-            
-            return "";
+                const isValid = Auth.isSessionValid();
+                
+                if (isValid) {
+                    const token = Auth.getToken();
+                    const userData = Auth.getUserData();
+                    
+                    let info = {
+                        "Session Valid": true,
+                        "Token": token ? token.substring(0, 20) + "..." : "NONE",
+                        "User Data": userData
+                    };
+                    
+                    // Try to validate with server
+                    try {
+                        await Auth.validateSession();
+                        info["Server Validation"] = "✅ PASSED";
+                        showResult('sessionStatus', 'pass', 'Session is VALID', info);
+                    } catch (e) {
+                        info["Server Validation"] = "❌ FAILED: " + e.message;
+                        showResult('sessionStatus', 'fail', 'Session token exists but server rejected it', info);
+                    }
+                } else {
+                    showResult('sessionStatus', 'info', 'No active session', {
+                        "Cookie": "NOT FOUND",
+                        "localStorage": "NOT FOUND",
+                        "Token": "NONE",
+                        "Status": "NOT LOGGED IN"
+                    });
+                }
+            } catch (e) {
+                showResult('sessionStatus', 'fail', 'Error checking session: ' + e.message);
+            }
         }
-        
-        function checkSession() {
-            const result = document.getElementById('sessionResult');
-            const token = getToken();
-            
-            result.innerHTML = `
-                <h3>Session Info:</h3>
-                <p><strong>Cookie:</strong> ${getCookie(LS_TOKEN) || 'NOT FOUND'}</p>
-                <p><strong>localStorage:</strong> ${localStorage.getItem(LS_TOKEN) || 'NOT FOUND'}</p>
-                <p><strong>Token:</strong> ${token || 'NONE'}</p>
-                <p><strong>Status:</strong> <span class="${token ? 'success' : 'error'}">${token ? 'LOGGED IN' : 'NOT LOGGED IN'}</span></p>
-            `;
-        }
-        
+
         async function testLogin() {
-            const result = document.getElementById('loginResult');
-            const email = document.getElementById('email').value;
+            const statusEl = document.getElementById('loginStatus');
+            const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
             
-            if (!email || !password) {
-                result.innerHTML = '<p class="error">Enter email and password!</p>';
+            if (!username || !password) {
+                showResult('loginStatus', 'fail', 'Missing username or password!');
                 return;
             }
             
-            result.innerHTML = '<p>Testing login...</p>';
+            statusEl.innerHTML = '<div class="info">Attempting login...</div>';
             
             try {
-                const res = await fetch(`${CFWORKER}/login`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        loginEmail: email,
-                        password: password
-                    })
+                const result = await Auth.login(username, password);
+                showResult('loginStatus', 'pass', 'LOGIN SUCCESS!', {
+                    "Username": username,
+                    "Token": result.token ? result.token.substring(0, 20) + "..." : "N/A",
+                    "User Data": result.userData,
+                    "Next Step": "Session is now active. Try 'Check Session' again."
                 });
-                
-                const data = await res.json();
-                
-                if (data.ok && data.token) {
-                    setCookie(LS_TOKEN, data.token, 12);
-                    localStorage.setItem(LS_TOKEN, data.token);
-                    
-                    result.innerHTML = `
-                        <p class="success">✓ LOGIN SUCCESS!</p>
-                        <p>Token: ${data.token.substring(0, 20)}...</p>
-                        <p>Email: ${data.loginEmail}</p>
-                    `;
-                } else {
-                    result.innerHTML = `<p class="error">✗ LOGIN FAILED: ${data.error || data.message || 'Unknown error'}</p>`;
-                }
             } catch (e) {
-                result.innerHTML = `<p class="error">✗ ERROR: ${e.message}</p>`;
+                showResult('loginStatus', 'fail', 'LOGIN FAILED: ' + e.message, {
+                    "Error": e.message,
+                    "Possible Reasons": [
+                        "1. Wrong password",
+                        "2. User doesn't exist",
+                        "3. API is down",
+                        "4. Network error"
+                    ]
+                });
             }
         }
-        
+
         async function testMe() {
-            const result = document.getElementById('meResult');
-            const token = getToken();
+            const statusEl = document.getElementById('meStatus');
+            statusEl.innerHTML = '<div class="info">Testing /me endpoint...</div>';
             
+            const token = Auth.getToken();
             if (!token) {
-                result.innerHTML = '<p class="error">No token found! Login first.</p>';
+                showResult('meStatus', 'fail', 'No token found. Please login first.');
                 return;
             }
             
-            result.innerHTML = '<p>Testing /me endpoint...</p>';
-            
             try {
-                const res = await fetch(`${CFWORKER}/me`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ token: token })
-                });
-                
-                const data = await res.json();
-                
-                if (data.ok) {
-                    result.innerHTML = `
-                        <p class="success">✓ SESSION VALID!</p>
-                        <p>Email: ${data.loginEmail}</p>
-                        <p>Status: ${data.status}</p>
-                        <pre>${JSON.stringify(data, null, 2)}</pre>
-                    `;
-                } else {
-                    result.innerHTML = `<p class="error">✗ SESSION INVALID: ${data.error || 'Unknown error'}</p>`;
-                }
+                const result = await Auth.apiCall('me', { token });
+                showResult('meStatus', 'pass', '/me endpoint SUCCESS', result);
             } catch (e) {
-                result.innerHTML = `<p class="error">✗ ERROR: ${e.message}</p>`;
+                showResult('meStatus', 'fail', '/me endpoint FAILED: ' + e.message, {
+                    "Token": token.substring(0, 20) + "...",
+                    "Error": e.message
+                });
             }
         }
-        
-        // Auto-check on load
-        window.onload = checkSession;
+
+        async function doLogout() {
+            const statusEl = document.getElementById('logoutStatus');
+            statusEl.innerHTML = '<div class="info">Logging out...</div>';
+            
+            try {
+                const token = Auth.getToken();
+                if (token) {
+                    await Auth.apiCall('logout', { token }).catch(() => {});
+                }
+                Auth.logout();
+                showResult('logoutStatus', 'pass', 'Logged out successfully', {
+                    "Session": "CLEARED",
+                    "Token": "REMOVED",
+                    "Cookies": "DELETED",
+                    "localStorage": "CLEARED"
+                });
+            } catch (e) {
+                showResult('logoutStatus', 'fail', 'Logout error: ' + e.message);
+            }
+        }
+
+        function clearAll() {
+            Auth.clearSession();
+            localStorage.clear();
+            document.cookie.split(";").forEach(c => {
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+            });
+            showResult('logoutStatus', 'pass', 'All storage cleared!');
+        }
+
+        // Auto-check session on load
+        window.addEventListener('load', () => {
+            checkSession();
+        });
     </script>
 </body>
 </html>
