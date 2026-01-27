@@ -562,10 +562,7 @@ American Income Life</p>`
           body: JSON.stringify({
             to: document.getElementById('to').value,
             subject: document.getElementById('subject').value,
-            body: document.getElementById('body').value,
-            from: fromEmail,
-            fromName: 'Thomas Lancheros - American Income Life',
-            html: true
+            html: document.getElementById('body').value,  // ← Changed from 'body' to 'html'
           })
         });
         
