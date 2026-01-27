@@ -468,8 +468,15 @@
         .map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase())
         .join(' ');
       
-      // Get phone from user data if available, otherwise use placeholder
-      const phone = userData.phone || '+1 (XXX) XXX-XXXX';
+      // Get phone from user data if available, otherwise use user-specific defaults
+      const phoneMap = {
+        'thomaslancheros': '+1 (586) 224-6692',
+        'thomas': '+1 (586) 224-6692',
+        // Add other agents here:
+        // 'johnsmith': '+1 (XXX) XXX-XXXX',
+      };
+      
+      const phone = userData.phone || phoneMap[normalizedUsername] || '+1 (XXX) XXX-XXXX';
       const phoneLink = phone.replace(/\D/g, ''); // Remove non-digits for tel: link
       
       return `
