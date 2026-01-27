@@ -455,6 +455,63 @@
     let currentView = 'inbox';
     let gmailConnected = false;
 
+    // Generate email signature based on user
+    function generateSignature(userData) {
+      const username = userData.username || userData.email.split('@')[0];
+      const normalizedUsername = username.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const email = `${normalizedUsername}@americanincome.life`;
+      
+      // Format name properly (capitalize each word)
+      const parts = username.split(/[\s\-_]+/);
+      const displayName = parts
+        .filter(p => p.length > 0)
+        .map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase())
+        .join(' ');
+      
+      // Get phone from user data if available, otherwise use placeholder
+      const phone = userData.phone || '+1 (XXX) XXX-XXXX';
+      const phoneLink = phone.replace(/\D/g, ''); // Remove non-digits for tel: link
+      
+      return `
+<table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; font-size: 14px; color: #333; margin-top: 20px; border-top: 2px solid #1e3a8a; padding-top: 15px;">
+  <tr>
+    <td style="padding-right: 20px; vertical-align: top;">
+      <img src="https://agent.nf-financial.life/email/signature.png" alt="${displayName}" style="width: 120px; height: auto; display: block; border-radius: 8px;">
+    </td>
+    <td style="vertical-align: top;">
+      <table cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td style="padding-bottom: 5px;">
+            <strong style="font-size: 16px; color: #1e3a8a;">${displayName}</strong>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding-bottom: 3px; font-size: 13px;">
+            <a href="https://ailife.com" style="color: #666; text-decoration: none;" target="_blank">American Income Life</a>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding-bottom: 10px; font-size: 13px;">
+            <a href="https://home.globelifeinsurance.com/" style="color: #666; text-decoration: none;" target="_blank">Globe Life</a>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding-bottom: 5px;">
+            <span style="color: #1e3a8a;">📞</span> Call or Text me: <a href="tel:+${phoneLink}" style="color: #1e3a8a; text-decoration: none;">${phone}</a>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <span style="color: #1e3a8a;">✉️</span> Email Me: <a href="mailto:${email}" style="color: #1e3a8a; text-decoration: none;">${email}</a>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+      `;
+    }
+
     // Initialize on page load
     (async function() {
       if (!Auth.isSessionValid()) {
@@ -669,6 +726,10 @@
       document.getElementById('composeModal').classList.add('active');
       document.getElementById('composeForm').reset();
       document.getElementById('composeStatus').style.display = 'none';
+      
+      // Auto-add signature to body
+      const signature = generateSignature(currentUser);
+      document.getElementById('body').value = '<p>Write your message here...</p>\n\n' + signature;
     }
 
     // Close compose modal
