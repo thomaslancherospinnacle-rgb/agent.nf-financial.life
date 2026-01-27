@@ -797,17 +797,24 @@
          * ══════════════════════════════════════════════════════════════
          **********************/
         function copyReferralLink() {
-            const url = document.getElementById("myReferralUrl").textContent.trim();
+          const el = document.getElementById("myReferralUrl");
+          const url = (el?.textContent || "").trim();
         
-            // Modern clipboard attempt
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(url)
-                    .then(() => showToast('✓ Link copied!', 'success'))
-                    .catch(() => legacyCopy(url));
-            } else {
-                legacyCopy(url);
-            }
+          if (!url || url === "—") {
+            showToast("Referral link not ready yet. Wait 1 sec and try again.", "error");
+            return;
+          }
+        
+          // Modern clipboard attempt
+          if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(url)
+              .then(() => showToast("✓ Link copied!", "success"))
+              .catch(() => legacyCopy(url));
+          } else {
+            legacyCopy(url);
+          }
         }
+        
 
         function showQRCode() {
             const url = $("myReferralUrl").textContent;
