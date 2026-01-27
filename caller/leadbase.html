@@ -533,6 +533,16 @@ function renderSourceGrid() {
   `).join('');
 }
 
+function showSourceSelection() {
+  // Show source selection view, hide others
+  document.getElementById('sourceView').classList.remove('hidden');
+  document.getElementById('listView').classList.add('hidden');
+  document.getElementById('detailView').classList.add('hidden');
+  
+  // Render the source grid
+  renderSourceGrid();
+}
+
 function selectSource(index) {
   document.querySelectorAll('.source-card').forEach(el => el.classList.remove('selected'));
   document.querySelector(`.source-card[data-index="${index}"]`).classList.add('selected');
