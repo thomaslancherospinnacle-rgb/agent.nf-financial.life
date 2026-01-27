@@ -12,8 +12,8 @@ const Auth = (function() {
     // ============================================================
     // CONSTANTS
     // ============================================================
-    const TOKEN_KEY = 'nf_auth_token';
-    const EXPIRES_KEY = 'nf_auth_expires';
+    const TOKEN_KEY = 'cc_token';  // Changed to match legacy pages
+    const EXPIRES_KEY = 'cc_expires_at';  // Changed to match legacy pages
     const USER_KEY = 'nf_user_data';
     const ADMIN_KEY = 'nf_admin_auth';
     const ADMIN_EMAIL_KEY = 'nf_admin_email';

@@ -3,6 +3,7 @@
 <head>
 <!-- Auth Protection Script -->
 <script src="config.js"></script>
+<script src="auth.js"></script>
 
 <script>
   function updateAuthStatus(message) {
@@ -23,7 +24,8 @@
     window.location.href = "/login.html";
   }
 
-  const LS_TOKEN = "cc_token";
+  // Use Auth.js functions instead of duplicates
+  const LS_TOKEN = "cc_token";  // Keep for backwards compatibility
 
   function getCookie(name) {
     const value = `; ${document.cookie}`;
@@ -33,21 +35,11 @@
   }
 
   function getToken() {
-    const cookieToken = getCookie(LS_TOKEN);
-    if (cookieToken) return cookieToken;
-    try { return localStorage.getItem(LS_TOKEN) || ""; }
-    catch (e) { return ""; }
+    return Auth.getToken();  // Use auth.js
   }
 
   async function api(action, payload) {
-    const res = await fetch(`${CFWORKER}/${action}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.error || "API error");
-    return data;
+    return Auth.apiCall(action, payload);  // Use auth.js
   }
 </script>
 
