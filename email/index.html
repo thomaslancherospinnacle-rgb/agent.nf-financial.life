@@ -280,22 +280,54 @@
     </div>
   </div>
 
-  <script>
-    // Check authentication
-    (async function() {
-      if (!Auth.isSessionValid()) {
-        window.location.href = '../login.html';
-        return;
-      }
-      
-      const userData = Auth.getUserData();
-      if (userData) {
-        // Convert @nf-financial.life to @americanincome.life
-        const username = userData.username || userData.email.split('@')[0];
-        const ailEmail = username.toLowerCase().replace(/\s+/g, '') + '@americanincome.life';
-        document.getElementById('userEmail').textContent = ailEmail;
-      }
-    })();
+<script>
+  // Check authentication AND ensure email alias exists
+  (async function() {
+    if (!Auth.isSessionValid()) {
+      window.location.href = '../login.html';
+      return;
+    }
+    
+    const userData = Auth.getUserData();
+    if (!userData) {
+      window.location.href = '../login.html';
+      return;
+    }
+    
+    // Get user info
+    const username = userData.username || userData.email.split('@')[0];
+    const forwardToEmail = userData.email; // Their @nf-financial.life email
+    const ailEmail = username.toLowerCase().replace(/\s+/g, '') + '@americanincome.life';
+    
+    // Display their email immediately
+    document.getElementById('userEmail').textContent = ailEmail;
+    
+    // Try to create email alias (will succeed if doesn't exist, or return success if already exists)
+    try {
+      const response = await fetch(CFWORKER + '/email/create-alias', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: username,
+          forwardTo: forwardToEmail
+        })
+      });
+    
+    const result = await response.json();
+    
+    if (result.ok || result.alreadyExists) {
+      console.log('✅ Email alias ready:', ailEmail);
+    } else {
+      console.warn('⚠️ Email alias creation failed, but you can still send:', result);
+    }
+    
+  } catch (error) {
+    console.error('Error checking/creating email alias:', error);
+    // Don't block the user, they can still send emails
+  }
+})();
 
     // Email templates
     const templates = {
