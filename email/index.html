@@ -207,11 +207,13 @@
     .modal-content {
       background: white;
       border-radius: 12px;
-      width: 90%;
-      max-width: 700px;
+      width: 95%;
+      max-width: 900px;
       max-height: 90vh;
-      overflow-y: auto;
+      overflow: hidden;
       box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
     }
     
     .modal-header {
@@ -247,49 +249,142 @@
     }
     
     .modal-body {
-      padding: 30px;
+      padding: 0;
+      overflow-y: auto;
+      flex: 1;
     }
     
     .form-group {
-      margin-bottom: 20px;
+      padding: 0 30px;
+      margin-bottom: 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .form-group.no-border {
+      border-bottom: none;
     }
     
     label {
-      display: block;
+      display: inline-block;
       font-weight: 600;
-      color: #374151;
-      margin-bottom: 8px;
+      color: #6b7280;
+      margin-right: 12px;
       font-size: 14px;
+      min-width: 60px;
     }
     
     input[type="email"],
-    input[type="text"],
-    textarea {
-      width: 100%;
-      padding: 12px 16px;
-      border: 2px solid #e5e7eb;
-      border-radius: 8px;
+    input[type="text"] {
+      border: none;
+      padding: 16px 0;
       font-size: 15px;
       font-family: inherit;
-      transition: all 0.2s;
-    }
-    
-    input:focus,
-    textarea:focus {
+      flex: 1;
       outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
     
-    textarea {
-      min-height: 200px;
-      resize: vertical;
-      font-family: 'Courier New', monospace;
+    .input-row {
+      display: flex;
+      align-items: center;
+    }
+    
+    /* Rich Text Editor */
+    .editor-toolbar {
+      padding: 12px 30px;
+      background: #f9fafb;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    .toolbar-group {
+      display: flex;
+      gap: 4px;
+      padding-right: 12px;
+      border-right: 1px solid #d1d5db;
+    }
+    
+    .toolbar-group:last-child {
+      border-right: none;
+    }
+    
+    .toolbar-btn {
+      padding: 8px 12px;
+      border: 1px solid #d1d5db;
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .toolbar-btn:hover {
+      background: #f3f4f6;
+      border-color: #9ca3af;
+    }
+    
+    .toolbar-btn.active {
+      background: #dbeafe;
+      border-color: #3b82f6;
+      color: #1e40af;
+    }
+    
+    select.toolbar-btn {
+      padding: 6px 10px;
+    }
+    
+    .preset-btn {
+      background: #10b981;
+      color: white;
+      border-color: #059669;
+    }
+    
+    .preset-btn:hover {
+      background: #059669;
+    }
+    
+    .editor-container {
+      padding: 20px 30px;
+      min-height: 350px;
+    }
+    
+    #bodyEditor {
+      min-height: 300px;
+      outline: none;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #333;
+    }
+    
+    #bodyEditor:empty:before {
+      content: 'Write your message here...';
+      color: #9ca3af;
+    }
+    
+    .signature-preview {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 2px solid #e5e7eb;
+    }
+    
+    .modal-footer {
+      padding: 20px 30px;
+      background: #f9fafb;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     
     .send-btn {
-      width: 100%;
-      padding: 14px;
+      padding: 12px 32px;
       background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
       color: white;
       border: none;
@@ -311,11 +406,11 @@
     }
     
     .status {
-      margin-top: 16px;
-      padding: 12px;
+      padding: 12px 16px;
       border-radius: 6px;
       display: none;
       font-size: 14px;
+      font-weight: 500;
     }
     
     .status.success {
@@ -346,27 +441,88 @@
       background: rgba(255,255,255,0.9);
     }
 
-    .toolbar {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
+    /* Preset Menu */
+    .preset-menu {
+      display: none;
+      position: absolute;
+      background: white;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      min-width: 200px;
+      z-index: 1001;
+      margin-top: 4px;
     }
     
-    .toolbar button {
-      padding: 8px 14px;
-      border: 1px solid #d1d5db;
-      background: white;
-      border-radius: 6px;
+    .preset-menu.active {
+      display: block;
+    }
+    
+    .preset-item {
+      padding: 12px 16px;
       cursor: pointer;
-      font-size: 13px;
+      transition: background 0.2s;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 14px;
       font-weight: 500;
+    }
+    
+    .preset-item:last-child {
+      border-bottom: none;
+    }
+    
+    .preset-item:hover {
+      background: #f3f4f6;
+    }
+    
+    .preset-item .preset-label {
+      display: block;
+      color: #1f2937;
+      margin-bottom: 2px;
+    }
+    
+    .preset-item .preset-desc {
+      display: block;
+      font-size: 12px;
+      color: #6b7280;
+      font-weight: 400;
+    }
+
+    /* Color Picker */
+    .color-picker-popup {
+      display: none;
+      position: absolute;
+      background: white;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      z-index: 1001;
+      margin-top: 4px;
+    }
+    
+    .color-picker-popup.active {
+      display: block;
+    }
+    
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 6px;
+    }
+    
+    .color-swatch {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 2px solid transparent;
       transition: all 0.2s;
     }
     
-    .toolbar button:hover {
-      background: #f3f4f6;
-      border-color: #9ca3af;
+    .color-swatch:hover {
+      border-color: #3b82f6;
+      transform: scale(1.1);
     }
   </style>
 </head>
@@ -412,40 +568,137 @@
   <div class="compose-modal" id="composeModal">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>✏️ Compose Email</h2>
+        <h2>✏️ New Message</h2>
         <button class="close-modal" onclick="closeCompose()">&times;</button>
       </div>
+      
       <div class="modal-body">
         <form id="composeForm">
           <div class="form-group">
-            <label for="to">To:</label>
-            <input type="email" id="to" required placeholder="recipient@example.com">
-          </div>
-          
-          <div class="form-group">
-            <label for="subject">Subject:</label>
-            <input type="text" id="subject" required placeholder="Email subject">
-          </div>
-          
-          <div class="form-group">
-            <label for="body">Message:</label>
-            <div class="toolbar">
-              <button type="button" onclick="insertTag('h1')"><b>H1</b></button>
-              <button type="button" onclick="insertTag('h2')"><b>H2</b></button>
-              <button type="button" onclick="insertTag('p')">¶ Para</button>
-              <button type="button" onclick="insertTag('strong')"><b>Bold</b></button>
-              <button type="button" onclick="insertTag('em')"><i>Italic</i></button>
-              <button type="button" onclick="insertLink()">🔗 Link</button>
+            <div class="input-row">
+              <label for="to">To:</label>
+              <input type="email" id="to" required placeholder="recipient@example.com">
             </div>
-            <textarea id="body" required placeholder="Write your message..."></textarea>
           </div>
           
-          <button type="submit" class="send-btn" id="sendBtn">
-            Send Email
-          </button>
+          <div class="form-group">
+            <div class="input-row">
+              <label for="subject">Subject:</label>
+              <input type="text" id="subject" required placeholder="Email subject">
+            </div>
+          </div>
           
-          <div id="composeStatus" class="status"></div>
+          <!-- Rich Text Editor Toolbar -->
+          <div class="editor-toolbar">
+            <div class="toolbar-group">
+              <button type="button" class="toolbar-btn preset-btn" onclick="togglePresetMenu(event)">
+                📋 Presets
+              </button>
+              <!-- Preset Menu -->
+              <div class="preset-menu" id="presetMenu">
+                <div class="preset-item" onclick="insertChildSafeKit()">
+                  <span class="preset-label">🛡️ Child Safe Kit</span>
+                  <span class="preset-desc">App download links</span>
+                </div>
+                <div class="preset-item" onclick="insertWillKit()">
+                  <span class="preset-label">📄 Will Kit</span>
+                  <span class="preset-desc">Attach PDF document</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="toolbar-group">
+              <select class="toolbar-btn" onchange="changeFontSize(this.value)">
+                <option value="">Size</option>
+                <option value="1">Small</option>
+                <option value="3" selected>Normal</option>
+                <option value="5">Large</option>
+                <option value="7">Huge</option>
+              </select>
+              
+              <select class="toolbar-btn" onchange="changeFontFamily(this.value)">
+                <option value="">Font</option>
+                <option value="Arial" selected>Arial</option>
+                <option value="Courier New">Courier</option>
+                <option value="Georgia">Georgia</option>
+                <option value="Times New Roman">Times</option>
+                <option value="Verdana">Verdana</option>
+              </select>
+            </div>
+            
+            <div class="toolbar-group">
+              <button type="button" class="toolbar-btn" onclick="formatText('bold')" title="Bold (Ctrl+B)">
+                <strong>B</strong>
+              </button>
+              <button type="button" class="toolbar-btn" onclick="formatText('italic')" title="Italic (Ctrl+I)">
+                <em>I</em>
+              </button>
+              <button type="button" class="toolbar-btn" onclick="formatText('underline')" title="Underline (Ctrl+U)">
+                <u>U</u>
+              </button>
+              <button type="button" class="toolbar-btn" onclick="formatText('strikeThrough')" title="Strikethrough">
+                <s>S</s>
+              </button>
+            </div>
+            
+            <div class="toolbar-group">
+              <button type="button" class="toolbar-btn" onclick="toggleColorPicker('text', event)" title="Text Color">
+                🎨 Text
+              </button>
+              <button type="button" class="toolbar-btn" onclick="toggleColorPicker('bg', event)" title="Background">
+                🖍️ BG
+              </button>
+            </div>
+            
+            <div class="toolbar-group">
+              <button type="button" class="toolbar-btn" onclick="formatText('justifyLeft')" title="Align Left">
+                ⬅️
+              </button>
+              <button type="button" class="toolbar-btn" onclick="formatText('justifyCenter')" title="Center">
+                ↔️
+              </button>
+              <button type="button" class="toolbar-btn" onclick="formatText('justifyRight')" title="Align Right">
+                ➡️
+              </button>
+            </div>
+            
+            <div class="toolbar-group">
+              <button type="button" class="toolbar-btn" onclick="formatText('insertUnorderedList')" title="Bullet List">
+                • List
+              </button>
+              <button type="button" class="toolbar-btn" onclick="formatText('insertOrderedList')" title="Numbered List">
+                1. List
+              </button>
+            </div>
+            
+            <div class="toolbar-group">
+              <button type="button" class="toolbar-btn" onclick="insertLink()" title="Insert Link">
+                🔗 Link
+              </button>
+              <button type="button" class="toolbar-btn" onclick="formatText('removeFormat')" title="Clear Formatting">
+                🧹 Clear
+              </button>
+            </div>
+          </div>
+          
+          <!-- Color Picker Popup -->
+          <div class="color-picker-popup" id="colorPicker">
+            <div class="color-grid" id="colorGrid"></div>
+          </div>
+          
+          <!-- Editor Area -->
+          <div class="editor-container">
+            <div id="bodyEditor" contenteditable="true"></div>
+            <div class="signature-preview" id="signaturePreview"></div>
+          </div>
         </form>
+      </div>
+      
+      <div class="modal-footer">
+        <div id="composeStatus" class="status"></div>
+        <button type="button" class="send-btn" id="sendBtn" onclick="sendEmail()">
+          Send Email
+        </button>
       </div>
     </div>
   </div>
@@ -454,6 +707,7 @@
     let currentUser = null;
     let currentView = 'inbox';
     let gmailConnected = false;
+    let currentColorType = 'text';
 
     // Generate email signature based on user
     function generateSignature(userData) {
@@ -461,23 +715,14 @@
       const normalizedUsername = username.toLowerCase().replace(/[^a-z0-9]/g, '');
       const email = `${normalizedUsername}@americanincome.life`;
       
-      // Format name properly (capitalize each word)
       const parts = username.split(/[\s\-_]+/);
       const displayName = parts
         .filter(p => p.length > 0)
         .map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase())
         .join(' ');
       
-      // Get phone from user data if available, otherwise use user-specific defaults
-      const phoneMap = {
-        'thomaslancheros': '+1 (586) 224-6692',
-        'thomas': '+1 (586) 224-6692',
-        // Add other agents here:
-        // 'johnsmith': '+1 (XXX) XXX-XXXX',
-      };
-      
-      const phone = userData.phone || phoneMap[normalizedUsername] || '+1 (XXX) XXX-XXXX';
-      const phoneLink = phone.replace(/\D/g, ''); // Remove non-digits for tel: link
+      const phone = userData.phone || '+1 (586) 224-6692';
+      const phoneLink = phone.replace(/\D/g, '');
       
       return `
 <table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; font-size: 14px; color: #333; margin-top: 20px; border-top: 2px solid #1e3a8a; padding-top: 15px;">
@@ -519,6 +764,25 @@
       `;
     }
 
+    // Initialize color picker
+    function initColorPicker() {
+      const colors = [
+        '#000000', '#434343', '#666666', '#999999', '#B7B7B7', '#CCCCCC', '#D9D9D9', '#EFEFEF',
+        '#F3F3F3', '#FFFFFF', '#980000', '#FF0000', '#FF9900', '#FFFF00', '#00FF00', '#00FFFF',
+        '#4A86E8', '#0000FF', '#9900FF', '#FF00FF', '#E6B8AF', '#F4CCCC', '#FCE5CD', '#FFF2CC',
+        '#D9EAD3', '#D0E0E3', '#C9DAF8', '#CFE2F3', '#D9D2E9', '#EAD1DC'
+      ];
+      
+      const grid = document.getElementById('colorGrid');
+      colors.forEach(color => {
+        const swatch = document.createElement('div');
+        swatch.className = 'color-swatch';
+        swatch.style.background = color;
+        swatch.onclick = () => applyColor(color);
+        grid.appendChild(swatch);
+      });
+    }
+
     // Initialize on page load
     (async function() {
       if (!Auth.isSessionValid()) {
@@ -534,24 +798,19 @@
       
       currentUser = userData;
       
-      // Get username and normalize it to fnamelname format (remove spaces, special chars)
       const rawUsername = userData.username || userData.email.split('@')[0];
       const normalizedUsername = rawUsername.toLowerCase().replace(/[^a-z0-9]/g, '');
       const ailEmail = normalizedUsername + '@americanincome.life';
       
       document.getElementById('userEmail').textContent = ailEmail;
       
-      // Check Gmail connection status
+      initColorPicker();
       await checkGmailStatus();
-      
-      // Load initial view
       await loadEmails();
     })();
 
     // Check if Gmail is connected
     async function checkGmailStatus() {
-      // In a real implementation, you'd check if tokens exist in the backend
-      // For now, we'll just set a flag based on localStorage
       gmailConnected = localStorage.getItem('gmail_connected') === 'true';
       updateGmailButton();
     }
@@ -575,14 +834,12 @@
       }
       
       try {
-        // Use raw username for OAuth state (will be normalized on backend)
         const username = currentUser.username || currentUser.email.split('@')[0];
         
         const response = await fetch(CFWORKER + '/gmail/auth?username=' + encodeURIComponent(username));
         const data = await response.json();
         
         if (data.ok && data.authUrl) {
-          // Open OAuth popup
           const width = 600;
           const height = 700;
           const left = (screen.width - width) / 2;
@@ -594,7 +851,6 @@
             `width=${width},height=${height},left=${left},top=${top}`
           );
           
-          // Listen for OAuth completion
           window.addEventListener('message', function(event) {
             if (event.data.type === 'gmail_oauth_success') {
               gmailConnected = true;
@@ -615,7 +871,6 @@
     function switchView(view) {
       currentView = view;
       
-      // Update nav items
       document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('active');
       });
@@ -635,7 +890,6 @@
       listEl.innerHTML = '<div class="loading">Loading emails...</div>';
       
       try {
-        // Use raw username - backend will normalize it
         const username = currentUser.username || currentUser.email.split('@')[0];
         
         let endpoint, body;
@@ -693,7 +947,6 @@
           return;
         }
         
-        // Render emails
         listEl.innerHTML = '';
         data.emails.forEach(email => {
           const item = document.createElement('div');
@@ -731,59 +984,164 @@
     // Open compose modal
     function openCompose() {
       document.getElementById('composeModal').classList.add('active');
-      document.getElementById('composeForm').reset();
+      document.getElementById('to').value = '';
+      document.getElementById('subject').value = '';
+      document.getElementById('bodyEditor').innerHTML = '<p>Write your message here...</p>';
       document.getElementById('composeStatus').style.display = 'none';
       
-      // Auto-add signature to body
-      const signature = generateSignature(currentUser);
-      document.getElementById('body').value = '<p>Write your message here...</p>\n\n' + signature;
+      // Show signature preview
+      document.getElementById('signaturePreview').innerHTML = generateSignature(currentUser);
     }
 
     // Close compose modal
     function closeCompose() {
       document.getElementById('composeModal').classList.remove('active');
+      document.getElementById('presetMenu').classList.remove('active');
+      document.getElementById('colorPicker').classList.remove('active');
     }
 
-    // HTML formatting helpers
-    function insertTag(tag) {
-      const textarea = document.getElementById('body');
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const selectedText = textarea.value.substring(start, end);
-      const before = textarea.value.substring(0, start);
-      const after = textarea.value.substring(end);
-      
-      const newText = `<${tag}>${selectedText || 'Text here'}</${tag}>`;
-      textarea.value = before + newText + after;
-      
-      const newPos = start + newText.length;
-      textarea.setSelectionRange(newPos, newPos);
-      textarea.focus();
+    // Rich text formatting
+    function formatText(command) {
+      document.execCommand(command, false, null);
+      document.getElementById('bodyEditor').focus();
+    }
+
+    function changeFontSize(size) {
+      if (size) {
+        document.execCommand('fontSize', false, size);
+        document.getElementById('bodyEditor').focus();
+      }
+    }
+
+    function changeFontFamily(font) {
+      if (font) {
+        document.execCommand('fontName', false, font);
+        document.getElementById('bodyEditor').focus();
+      }
     }
 
     function insertLink() {
       const url = prompt('Enter URL:', 'https://');
-      if (!url) return;
-      
-      const textarea = document.getElementById('body');
-      const start = textarea.selectionStart;
-      const selectedText = textarea.value.substring(start, textarea.selectionEnd);
-      const linkText = selectedText || 'Link text';
-      
-      const link = `<a href="${url}">${linkText}</a>`;
-      const before = textarea.value.substring(0, start);
-      const after = textarea.value.substring(textarea.selectionEnd);
-      
-      textarea.value = before + link + after;
-      textarea.focus();
+      if (url) {
+        document.execCommand('createLink', false, url);
+        document.getElementById('bodyEditor').focus();
+      }
     }
 
-    // Handle compose form submission
-    document.getElementById('composeForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
+    // Color picker
+    function toggleColorPicker(type, event) {
+      event.stopPropagation();
+      currentColorType = type;
+      const picker = document.getElementById('colorPicker');
+      const btn = event.target.closest('.toolbar-btn');
+      const rect = btn.getBoundingClientRect();
       
+      picker.style.left = rect.left + 'px';
+      picker.style.top = (rect.bottom + 4) + 'px';
+      picker.classList.toggle('active');
+    }
+
+    function applyColor(color) {
+      if (currentColorType === 'text') {
+        document.execCommand('foreColor', false, color);
+      } else {
+        document.execCommand('backColor', false, color);
+      }
+      document.getElementById('colorPicker').classList.remove('active');
+      document.getElementById('bodyEditor').focus();
+    }
+
+    // Preset menu
+    function togglePresetMenu(event) {
+      event.stopPropagation();
+      const menu = document.getElementById('presetMenu');
+      const btn = event.target.closest('.toolbar-btn');
+      const rect = btn.getBoundingClientRect();
+      
+      menu.style.left = rect.left + 'px';
+      menu.style.top = (rect.bottom + 4) + 'px';
+      menu.classList.toggle('active');
+    }
+
+    // Insert Child Safe Kit preset
+    function insertChildSafeKit() {
+      const editor = document.getElementById('bodyEditor');
+      const content = `
+<p>Hi there,</p>
+
+<p>Here is the Virtual Child Safe Kit, thank you for protecting your child</p>
+
+<p><strong>Download the Child Safe Kit app:</strong></p>
+
+<p>
+📱 <strong>Apple iPhone/iPad:</strong><br>
+<a href="https://apps.apple.com/us/app/child-safe-kit/id1296310200" target="_blank" style="color: #3b82f6; text-decoration: none;">Download from App Store →</a>
+</p>
+
+<p>
+🤖 <strong>Android:</strong><br>
+<a href="https://play.google.com/store/search?q=child%20safe%20kit&c=apps&hl=en_US" target="_blank" style="color: #3b82f6; text-decoration: none;">Download from Google Play →</a>
+</p>
+
+<p>This app includes features like emergency contacts, safety checklists, and important information storage to keep your children safe.</p>
+
+<p>Let me know if you have any questions!</p>
+
+<p>Best regards,</p>
+      `;
+      
+      editor.innerHTML = content;
+      document.getElementById('presetMenu').classList.remove('active');
+      editor.focus();
+    }
+
+    // Insert Will Kit preset (with PDF attachment note)
+    function insertWillKit() {
+      const editor = document.getElementById('bodyEditor');
+      const content = `
+<p>Hi there,</p>
+
+<p>I'm pleased to share with you our comprehensive <strong>Will Kit</strong> guide. This document will help you understand the importance of estate planning and guide you through creating your will.</p>
+
+<p><strong>📄 Will Kit PDF is attached to this email.</strong></p>
+
+<p>Inside the Will Kit, you'll find:</p>
+<ul>
+  <li>Step-by-step instructions for creating a will</li>
+  <li>Important considerations for estate planning</li>
+  <li>Sample templates and forms</li>
+  <li>Checklist to ensure nothing is overlooked</li>
+</ul>
+
+<p>Planning your estate is one of the most important steps you can take to protect your family's future. Please review the attached document carefully.</p>
+
+<p>If you have any questions or would like to discuss your specific situation, feel free to reach out. I'm here to help!</p>
+
+<p>Best regards,</p>
+      `;
+      
+      editor.innerHTML = content;
+      document.getElementById('presetMenu').classList.remove('active');
+      
+      alert('📎 Note: You\'ll need to manually attach willkit.pdf from your /email/ folder when sending. The email template has been inserted!');
+      
+      editor.focus();
+    }
+
+    // Send email
+    async function sendEmail() {
       const sendBtn = document.getElementById('sendBtn');
       const status = document.getElementById('composeStatus');
+      const to = document.getElementById('to').value;
+      const subject = document.getElementById('subject').value;
+      const bodyContent = document.getElementById('bodyEditor').innerHTML;
+      const signature = document.getElementById('signaturePreview').innerHTML;
+      
+      if (!to || !subject || !bodyContent.trim()) {
+        status.className = 'status error';
+        status.textContent = '❌ Please fill in all fields';
+        return;
+      }
       
       sendBtn.disabled = true;
       sendBtn.textContent = 'Sending...';
@@ -793,14 +1151,17 @@
         const userData = currentUser;
         const username = userData.username || userData.email.split('@')[0];
         
+        // Combine body + signature
+        const fullHtml = bodyContent + signature;
+        
         const response = await fetch(CFWORKER + '/email/send', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             username: username,
-            to: document.getElementById('to').value,
-            subject: document.getElementById('subject').value,
-            html: document.getElementById('body').value,
+            to: to,
+            subject: subject,
+            html: fullHtml,
           })
         });
         
@@ -827,7 +1188,7 @@
         sendBtn.disabled = false;
         sendBtn.textContent = 'Send Email';
       }
-    });
+    }
 
     // Utility: Escape HTML
     function escapeHtml(text) {
@@ -836,10 +1197,36 @@
       return div.innerHTML;
     }
 
+    // Close menus when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.preset-btn')) {
+        document.getElementById('presetMenu').classList.remove('active');
+      }
+      if (!e.target.closest('.toolbar-btn[onclick*="Color"]')) {
+        document.getElementById('colorPicker').classList.remove('active');
+      }
+    });
+
     // Close modal when clicking outside
     document.getElementById('composeModal').addEventListener('click', function(e) {
       if (e.target === this) {
         closeCompose();
+      }
+    });
+
+    // Keyboard shortcuts
+    document.getElementById('bodyEditor').addEventListener('keydown', function(e) {
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'b') {
+          e.preventDefault();
+          formatText('bold');
+        } else if (e.key === 'i') {
+          e.preventDefault();
+          formatText('italic');
+        } else if (e.key === 'u') {
+          e.preventDefault();
+          formatText('underline');
+        }
       }
     });
   </script>
