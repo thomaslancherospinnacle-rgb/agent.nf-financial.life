@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Closing Coalition - API Debug Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .auth-section {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #334155;
+        }
+
+        .auth-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .status-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ef4444;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.connected {
+            background: #10b981;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: #1e293b;
+            border: 2px solid #334155;
+            border-radius: 8px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover {
+            background: #334155;
+        }
+
+        .tab.active {
+            background: #667eea;
+            border-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .endpoint-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .endpoint-card {
+            background: #1e293b;
+            border: 2px solid #334155;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .endpoint-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .endpoint-card h3 {
+            color: #60a5fa;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .endpoint-card p {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .endpoint-card .method {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .method.post {
+            background: #10b981;
+            color: white;
+        }
+
+        .method.get {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #60a5fa;
+        }
+
+        .close-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            background: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 6px;
+            color: #e2e8f0;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #334155;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .response-section {
+            margin-top: 20px;
+        }
+
+        .response-section h3 {
+            color: #60a5fa;
+            margin-bottom: 10px;
+        }
+
+        .response-box {
+            background: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 6px;
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .response-box pre {
+            color: #e2e8f0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .success {
+            border-color: #10b981;
+        }
+
+        .error {
+            border-color: #ef4444;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .info-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #334155;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .storage-info {
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .storage-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #334155;
+        }
+
+        .storage-item:last-child {
+            border-bottom: none;
+        }
+
+        .storage-key {
+            color: #60a5fa;
+            font-weight: 600;
+        }
+
+        .storage-value {
+            color: #94a3b8;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Closing Coalition API Debug Dashboard</h1>
+            <p>Comprehensive testing tool for all endpoints</p>
+        </div>
+
+        <div class="auth-section">
+            <div class="auth-status">
+                <div class="status-indicator" id="statusIndicator"></div>
+                <div>
+                    <strong>Authentication Status</strong>
+                    <p id="authStatus">Checking...</p>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <button class="btn btn-primary" onclick="checkAuth()">🔄 Refresh Auth</button>
+                <button class="btn btn-secondary" onclick="showStorage()">💾 View Storage</button>
+                <button class="btn btn-secondary" onclick="clearAllStorage()">🗑️ Clear Storage</button>
+                <button class="btn btn-secondary" onclick="testAllEndpoints()">🚀 Test All</button>
+            </div>
+
+            <div class="storage-info" id="storageInfo" style="display:none;"></div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('auth')">🔐 AUTH</div>
+            <div class="tab" onclick="switchTab('leaddb')">📋 LEADDB</div>
+            <div class="tab" onclick="switchTab('refdb')">🔗 REFDB</div>
+            <div class="tab" onclick="switchTab('appdb')">📝 APPDB</div>
+        </div>
+
+        <!-- AUTH Tab -->
+        <div class="tab-content active" id="auth-content"></div>
+
+        <!-- LEADDB Tab -->
+        <div class="tab-content" id="leaddb-content"></div>
+
+        <!-- REFDB Tab -->
+        <div class="tab-content" id="refdb-content"></div>
+
+        <!-- APPDB Tab -->
+        <div class="tab-content" id="appdb-content"></div>
+    </div>
+
+    <!-- Modal for endpoint testing -->
+    <div class="modal" id="testModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Test Endpoint</h2>
+                <button class="close-btn" onclick="closeModal()">✕ Close</button>
+            </div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://cfworkerapi.thomastcc.workers.dev';
+        let currentToken = null;
+        let currentUser = null;
+
+        // Endpoint definitions
+        const endpoints = {
+            auth: [
+                {
+                    name: 'signup',
+                    path: '/signup',
+                    method: 'POST',
+                    description: 'Create new user account',
+                    params: [
+                        { name: 'username', type: 'text', required: true, placeholder: 'Thomas Lancheros' },
+                        { name: 'password', type: 'password', required: true, placeholder: 'Password (min 6 chars)' },
+                        { name: 'phone', type: 'tel', required: false, placeholder: '5862246692' }
+                    ]
+                },
+                {
+                    name: 'verify',
+                    path: '/verify',
+                    method: 'POST',
+                    description: 'Verify email with code',
+                    params: [
+                        { name: 'username', type: 'text', required: true, placeholder: 'Thomas Lancheros' },
+                        { name: 'code', type: 'text', required: true, placeholder: '123456' }
+                    ]
+                },
+                {
+                    name: 'login',
+                    path: '/login',
+                    method: 'POST',
+                    description: 'Login to get session token',
+                    params: [
+                        { name: 'username', type: 'text', required: true, placeholder: 'Thomas Lancheros' },
+                        { name: 'password', type: 'password', required: true, placeholder: 'Password' }
+                    ]
+                },
+                {
+                    name: 'me',
+                    path: '/me',
+                    method: 'POST',
+                    description: 'Get current user session info',
+                    params: [
+                        { name: 'token', type: 'text', required: true, placeholder: 'Auto-filled from storage', autoFill: 'token' }
+                    ]
+                },
+                {
+                    name: 'logout',
+                    path: '/logout',
+                    method: 'POST',
+                    description: 'End current session',
+                    params: [
+                        { name: 'token', type: 'text', required: true, placeholder: 'Auto-filled from storage', autoFill: 'token' }
+                    ]
+                },
+                {
+                    name: 'getUserProfile',
+                    path: '/getUserProfile',
+                    method: 'POST',
+                    description: 'Get detailed user profile',
+                    params: [
+                        { name: 'token', type: 'text', required: true, autoFill: 'token' }
+                    ]
+                },
+                {
+                    name: 'updatePhone',
+                    path: '/updatePhone',
+                    method: 'POST',
+                    description: 'Update user phone number',
+                    params: [
+                        { name: 'token', type: 'text', required: true, autoFill: 'token' },
+                        { name: 'phone', type: 'tel', required: true, placeholder: '5862246692' }
+                    ]
+                },
+                {
+                    name: 'sendVerification',
+                    path: '/sendVerification',
+                    method: 'POST',
+                    description: 'Send admin verification code',
+                    params: [
+                        { name: 'email', type: 'email', required: true, placeholder: 'admin@email.com' }
+                    ]
+                },
+                {
+                    name: 'verifyCode',
+                    path: '/verifyCode',
+                    method: 'POST',
+                    description: 'Verify admin code',
+                    params: [
+                        { name: 'email', type: 'email', required: true, placeholder: 'admin@email.com' },
+                        { name: 'code', type: 'text', required: true, placeholder: '123456' }
+                    ]
+                },
+                {
+                    name: 'getUsers',
+                    path: '/getUsers',
+                    method: 'POST',
+                    description: 'Get all users (admin)',
+                    params: []
+                },
+                {
+                    name: 'sendEmail',
+                    path: '/sendEmail',
+                    method: 'POST',
+                    description: 'Send email to user (admin)',
+                    params: [
+                        { name: 'to', type: 'email', required: true, placeholder: 'user@email.com' },
+                        { name: 'name', type: 'text', required: false, placeholder: 'User Name' },
+                        { name: 'subject', type: 'text', required: true, placeholder: 'Email Subject' },
+                        { name: 'message', type: 'textarea', required: true, placeholder: 'Email message...' }
+                    ]
+                },
+                {
+                    name: 'updateUserCallerSettings',
+                    path: '/updateUserCallerSettings',
+                    method: 'POST',
+                    description: 'Update caller settings for user',
+                    params: [
+                        { name: 'email', type: 'email', required: true, placeholder: 'user@email.com' },
+                        { name: 'callingFor', type: 'text', required: false, placeholder: 'Who they call for' },
+                        { name: 'calendlyUrl', type: 'url', required: false, placeholder: 'https://calendly.com/...' },
+                        { name: 'assignedTabs', type: 'json', required: false, placeholder: '["Tab1", "Tab2"]' }
+                    ]
+                },
+                {
+                    name: 'getUserCallerSettings',
+                    path: '/getUserCallerSettings',
+                    method: 'POST',
+                    description: 'Get caller settings for user',
+                    params: [
+                        { name: 'email', type: 'email', required: true, placeholder: 'user@email.com' }
+                    ]
+                },
+                {
+                    name: 'getAllUsersForDropdown',
+                    path: '/getAllUsersForDropdown',
+                    method: 'POST',
+                    description: 'Get all users for dropdown selection',
+                    params: []
+                },
+                {
+                    name: 'syncCallers',
+                    path: '/syncCallers',
+                    method: 'POST',
+                    description: 'Sync callers to LEADDB',
+                    params: []
+                },
+                {
+                    name: 'createSMSJob',
+                    path: '/createSMSJob',
+                    method: 'POST',
+                    description: 'Create SMS job(s)',
+                    params: [
+                        { name: 'jobs', type: 'json', required: true, placeholder: '[{"phone":"5551234567","name":"John","message":"Hello"}]' }
+                    ]
+                },
+                {
+                    name: 'getPendingSMSJobs',
+                    path: '/getPendingSMSJobs',
+                    method: 'POST',
+                    description: 'Get pending SMS jobs',
+                    params: [
+                        { name: 'limit', type: 'number', required: false, placeholder: '10' }
+                    ]
+                },
+                {
+                    name: 'updateSMSJobStatus',
+                    path: '/updateSMSJobStatus',
+                    method: 'POST',
+                    description: 'Update SMS job status',
+                    params: [
+                        { name: 'id', type: 'text', required: true, placeholder: 'sms_12345_abc' },
+                        { name: 'status', type: 'select', required: true, options: ['pending', 'sent', 'failed'] },
+                        { name: 'error', type: 'text', required: false, placeholder: 'Error message if failed' }
+                    ]
+                }
+            ],
+            leaddb: [
+                {
+                    name: 'getLeads',
+                    path: '/leadsdb',
+                    method: 'GET',
+                    description: 'Get leads for a caller and source',
+                    params: [
+                        { name: 'action', type: 'text', required: true, default: 'getLeads' },
+                        { name: 'caller', type: 'text', required: true, placeholder: 'Thomas Lancheros', autoFill: 'username' },
+                        { name: 'source', type: 'text', required: true, placeholder: 'NCessentials' }
+                    ]
+                },
+                {
+                    name: 'getAllSources',
+                    path: '/leadsdb',
+                    method: 'GET',
+                    description: 'Get all available lead sources',
+                    params: [
+                        { name: 'action', type: 'text', required: true, default: 'getAllSources' }
+                    ]
+                },
+                {
+                    name: 'updateLead',
+                    path: '/leadsdb',
+                    method: 'POST',
+                    description: 'Update lead information',
+                    params: [
+                        { name: 'action', type: 'text', required: true, default: 'updateLead' },
+                        { name: 'source', type: 'text', required: true, placeholder: 'NCessentials' },
+                        { name: 'rowIndex', type: 'number', required: true, placeholder: '2' },
+                        { name: 'updates', type: 'json', required: true, placeholder: '{"Status":"Called","Notes":"Left message"}' }
+                    ]
+                },
+                {
+                    name: 'addLead',
+                    path: '/leadsdb',
+                    method: 'POST',
+                    description: 'Add new lead',
+                    params: [
+                        { name: 'action', type: 'text', required: true, default: 'addLead' },
+                        { name: 'source', type: 'text', required: true, placeholder: 'NCessentials' },
+                        { name: 'leadData', type: 'json', required: true, placeholder: '{"First Name":"John","Last Name":"Doe","Phone":"555-1234"}' }
+                    ]
+                },
+                {
+                    name: 'syncCallers',
+                    path: '/leadsdb',
+                    method: 'POST',
+                    description: 'Sync callers from AUTH',
+                    params: [
+                        { name: 'action', type: 'text', required: true, default: 'syncCallers' }
+                    ]
+                },
+                {
+                    name: 'getCallerPermissions',
+                    path: '/leadsdb',
+                    method: 'GET',
+                    description: 'Get caller permissions',
+                    params: [
+                        { name: 'action', type: 'text', required: true, default: 'getCallerPermissions' },
+                        { name: 'email', type: 'email', required: true, placeholder: 'user@email.com', autoFill: 'email' }
+                    ]
+                },
+                {
+                    name: 'updateCallerPermissions',
+                    path: '/leadsdb',
+                    method: 'POST',
+                    description: 'Update caller permissions',
+                    params: [
+                        { name: 'action', type: 'text', required: true, default: 'updateCallerPermissions' },
+                        { name: 'email', type: 'email', required: true, placeholder: 'user@email.com' },
+                        { name: 'sources', type: 'json', required: true, placeholder: '["NCessentials","AnotherSource"]' }
+                    ]
+                }
+            ],
+            refdb: [
+                {
+                    name: 'getReferrals',
+                    path: '/refdb',
+                    method: 'GET',
+                    description: 'Get referrals for a user and tab',
+                    params: [
+                        { name: 'action', type: 'text', required: true, default: 'getReferrals' },
+                        { name: 'user', type: 'text', required: true, placeholder: 'Thomas Lancheros', autoFill: 'username' },
+                        { name: 'tabName', type: 'text', required: true, placeholder: 'Tab1' }
+                    ]
+                },
+                {
+                    name: 'getUserTabs',
+                    path: '/refdb',
+                    method: 'GET',
+                    description: 'Get all tabs for a user',
+                    params: [
+                        { name: 'action', type: 'text', required: true, default: 'getUserTabs' },
+                        { name: 'user', type: 'text', required: true, placeholder: 'Thomas Lancheros', autoFill: 'username' }
+                    ]
+                },
+                {
+                    name: 'updateReferral',
+                    path: '/refdb',
+                    method: 'POST',
+                    description: 'Update referral information',
+                    params: [
+                        { name: 'action', type: 'text', required: true, default: 'updateReferral' },
+                        { name: 'tabName', type: 'text', required: true, placeholder: 'Tab1' },
+                        { name: 'rowIndex', type: 'number', required: true, placeholder: '2' },
+                        { name: 'updates', type: 'json', required: true, placeholder: '{"Status":"Called","Notes":"Interested"}' }
+                    ]
+                },
+                {
+                    name: 'addReferral',
+                    path: '/refdb',
+                    method: 'POST',
+                    description: 'Add new referral',
+                    params: [
+                        { name: 'action', type: 'text', required: true, default: 'addReferral' },
+                        { name: 'tabName', type: 'text', required: true, placeholder: 'Tab1' },
+                        { name: 'referralData', type: 'json', required: true, placeholder: '{"First Name":"Jane","Last Name":"Doe","Phone":"555-5678"}' }
+                    ]
+                },
+                {
+                    name: 'createTab',
+                    path: '/refdb',
+                    method: 'POST',
+                    description: 'Create new user tab',
+                    params: [
+                        { name: 'action', type: 'text', required: true, default: 'createTab' },
+                        { name: 'user', type: 'text', required: true, placeholder: 'Thomas Lancheros' },
+                        { name: 'tabName', type: 'text', required: true, placeholder: 'NewTab' }
+                    ]
+                }
+            ],
+            appdb: [
+                {
+                    name: 'getApplications',
+                    path: '/appdb',
+                    method: 'GET',
+                    description: 'Get recruiting applications',
+                    params: [
+                        { name: 'action', type: 'text', required: true, default: 'getApplications' },
+                        { name: 'recruiterRef', type: 'text', required: false, placeholder: 'Thomas Lancheros' }
+                    ]
+                },
+                {
+                    name: 'submitApplication',
+                    path: '/appdb',
+                    method: 'POST',
+                    description: 'Submit new application',
+                    params: [
+                        { name: 'action', type: 'text', required: true, default: 'submitApplication' },
+                        { name: 'applicationData', type: 'json', required: true, placeholder: '{"name":"John Doe","email":"john@email.com","phone":"555-1234"}' }
+                    ]
+                },
+                {
+                    name: 'updateApplication',
+                    path: '/appdb',
+                    method: 'POST',
+                    description: 'Update application status',
+                    params: [
+                        { name: 'action', type: 'text', required: true, default: 'updateApplication' },
+                        { name: 'rowIndex', type: 'number', required: true, placeholder: '2' },
+                        { name: 'updates', type: 'json', required: true, placeholder: '{"Status":"Interview","Notes":"Scheduled"}' }
+                    ]
+                }
+            ]
+        };
+
+        // Initialize
+        window.onload = function() {
+            checkAuth();
+            renderEndpoints();
+        };
+
+        // Authentication check
+        async function checkAuth() {
+            const indicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('authStatus');
+            
+            statusText.textContent = 'Checking authentication...';
+            indicator.classList.remove('connected');
+
+            // Get token from storage
+            currentToken = getToken();
+            
+            if (!currentToken) {
+                statusText.textContent = '❌ Not authenticated - No token found';
+                indicator.classList.remove('connected');
+                return;
+            }
+
+            // Test /me endpoint
+            try {
+                const response = await fetch(`${API_URL}/me`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: currentToken })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.ok) {
+                    currentUser = data;
+                    statusText.innerHTML = `✅ Authenticated as <strong>${data.username || data.loginEmail}</strong>`;
+                    indicator.classList.add('connected');
+                } else {
+                    statusText.textContent = '❌ Token invalid or expired';
+                    indicator.classList.remove('connected');
+                }
+            } catch (error) {
+                statusText.textContent = '❌ Connection error: ' + error.message;
+                indicator.classList.remove('connected');
+            }
+        }
+
+        // Get token from cookies or localStorage
+        function getToken() {
+            // Try localStorage first
+            try {
+                const lsToken = localStorage.getItem('cc_token');
+                if (lsToken) return lsToken;
+            } catch (e) {}
+
+            // Try cookies
+            const cookies = document.cookie.split(';');
+            const possibleNames = ['cc_token', 'session_token', 'token', 'auth_token'];
+            
+            for (let cookie of cookies) {
+                const [name, value] = cookie.trim().split('=');
+                if (possibleNames.includes(name)) {
+                    return decodeURIComponent(value);
+                }
+            }
+
+            return null;
+        }
+
+        // Get username from storage
+        function getUsername() {
+            try {
+                const lsUsername = localStorage.getItem('cc_username');
+                if (lsUsername) return lsUsername;
+            } catch (e) {}
+
+            if (currentUser) return currentUser.username;
+
+            return '';
+        }
+
+        // Get email from storage
+        function getEmail() {
+            try {
+                const lsEmail = localStorage.getItem('adminEmail');
+                if (lsEmail) return lsEmail;
+            } catch (e) {}
+
+            if (currentUser) return currentUser.loginEmail;
+
+            return '';
+        }
+
+        // Switch tabs
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tabName + '-content').classList.add('active');
+        }
+
+        // Render all endpoints
+        function renderEndpoints() {
+            Object.keys(endpoints).forEach(category => {
+                const container = document.getElementById(category + '-content');
+                container.innerHTML = '<div class="endpoint-grid"></div>';
+                const grid = container.querySelector('.endpoint-grid');
+
+                endpoints[category].forEach(endpoint => {
+                    const card = document.createElement('div');
+                    card.className = 'endpoint-card';
+                    card.onclick = () => openTestModal(category, endpoint);
+                    
+                    card.innerHTML = `
+                        <h3>${endpoint.name}</h3>
+                        <p>${endpoint.description}</p>
+                        <span class="method ${endpoint.method.toLowerCase()}">${endpoint.method}</span>
+                        <span class="info-badge">${endpoint.params.length} params</span>
+                    `;
+                    
+                    grid.appendChild(card);
+                });
+            });
+        }
+
+        // Open test modal
+        function openTestModal(category, endpoint) {
+            const modal = document.getElementById('testModal');
+            const title = document.getElementById('modalTitle');
+            const body = document.getElementById('modalBody');
+
+            title.textContent = `Test: ${endpoint.name}`;
+            
+            let html = `<p style="color: #94a3b8; margin-bottom: 15px;">${endpoint.description}</p>`;
+            html += `<p style="color: #94a3b8; margin-bottom: 15px;"><strong>Path:</strong> ${endpoint.path} <span class="method ${endpoint.method.toLowerCase()}">${endpoint.method}</span></p>`;
+            
+            html += '<form id="testForm" onsubmit="return false;">';
+            
+            endpoint.params.forEach(param => {
+                html += '<div class="form-group">';
+                html += `<label>${param.name} ${param.required ? '<span style="color:#ef4444;">*</span>' : ''}</label>`;
+                
+                let value = '';
+                if (param.autoFill === 'token') value = currentToken || '';
+                if (param.autoFill === 'username') value = getUsername();
+                if (param.autoFill === 'email') value = getEmail();
+                if (param.default) value = param.default;
+                
+                if (param.type === 'textarea') {
+                    html += `<textarea name="${param.name}" placeholder="${param.placeholder || ''}" ${param.required ? 'required' : ''}>${value}</textarea>`;
+                } else if (param.type === 'select') {
+                    html += `<select name="${param.name}" ${param.required ? 'required' : ''}>`;
+                    param.options.forEach(opt => {
+                        html += `<option value="${opt}">${opt}</option>`;
+                    });
+                    html += '</select>';
+                } else {
+                    html += `<input type="${param.type}" name="${param.name}" value="${value}" placeholder="${param.placeholder || ''}" ${param.required ? 'required' : ''}>`;
+                }
+                
+                html += '</div>';
+            });
+            
+            html += '<button type="button" class="btn btn-primary" onclick="executeTest(\'' + category + '\', \'' + endpoint.name + '\')">🚀 Execute Request</button>';
+            html += '</form>';
+            
+            html += '<div class="response-section" id="responseSection" style="display:none;">';
+            html += '<h3>Response:</h3>';
+            html += '<div class="response-box" id="responseBox"></div>';
+            html += '</div>';
+            
+            body.innerHTML = html;
+            modal.classList.add('active');
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('testModal').classList.remove('active');
+        }
+
+        // Execute test
+        async function executeTest(category, endpointName) {
+            const endpoint = endpoints[category].find(e => e.name === endpointName);
+            const form = document.getElementById('testForm');
+            const responseSection = document.getElementById('responseSection');
+            const responseBox = document.getElementById('responseBox');
+            
+            // Collect form data
+            const formData = new FormData(form);
+            const payload = {};
+            
+            for (let [key, value] of formData.entries()) {
+                // Try to parse JSON fields
+                if (value.trim().startsWith('{') || value.trim().startsWith('[')) {
+                    try {
+                        payload[key] = JSON.parse(value);
+                    } catch (e) {
+                        payload[key] = value;
+                    }
+                } else {
+                    payload[key] = value;
+                }
+            }
+
+            responseSection.style.display = 'block';
+            responseBox.className = 'response-box';
+            responseBox.innerHTML = '<pre>Sending request...\n<div class="loading"></div></pre>';
+
+            try {
+                let url = API_URL + endpoint.path;
+                let options = {
+                    method: endpoint.method,
+                    headers: { 'Content-Type': 'application/json' }
+                };
+
+                if (endpoint.method === 'POST') {
+                    options.body = JSON.stringify(payload);
+                } else if (endpoint.method === 'GET') {
+                    const params = new URLSearchParams();
+                    Object.keys(payload).forEach(key => {
+                        if (payload[key]) params.append(key, payload[key]);
+                    });
+                    if (params.toString()) url += '?' + params.toString();
+                }
+
+                console.log('Request:', { url, options, payload });
+
+                const response = await fetch(url, options);
+                const data = await response.json();
+
+                console.log('Response:', data);
+
+                responseBox.className = response.ok ? 'response-box success' : 'response-box error';
+                responseBox.innerHTML = `<pre>Status: ${response.status} ${response.statusText}\n\n${JSON.stringify(data, null, 2)}</pre>`;
+
+                // If login successful, store token
+                if (endpointName === 'login' && data.ok && data.token) {
+                    currentToken = data.token;
+                    try {
+                        localStorage.setItem('cc_token', data.token);
+                        localStorage.setItem('cc_expires_at', data.expires_at);
+                    } catch (e) {}
+                    checkAuth();
+                }
+
+            } catch (error) {
+                responseBox.className = 'response-box error';
+                responseBox.innerHTML = `<pre>Error: ${error.message}</pre>`;
+            }
+        }
+
+        // Show storage
+        function showStorage() {
+            const storageInfo = document.getElementById('storageInfo');
+            
+            if (storageInfo.style.display === 'none') {
+                let html = '<h3 style="margin-bottom:10px;">📦 Current Storage:</h3>';
+                
+                // Cookies
+                html += '<h4 style="color:#60a5fa; margin-top:15px;">Cookies:</h4>';
+                const cookies = document.cookie.split(';');
+                if (cookies.length === 0 || (cookies.length === 1 && cookies[0].trim() === '')) {
+                    html += '<div class="storage-item">No cookies found</div>';
+                } else {
+                    cookies.forEach(cookie => {
+                        const [name, value] = cookie.trim().split('=');
+                        html += `<div class="storage-item">
+                            <div class="storage-key">${name}</div>
+                            <div class="storage-value">${value.substring(0, 50)}${value.length > 50 ? '...' : ''}</div>
+                        </div>`;
+                    });
+                }
+                
+                // localStorage
+                html += '<h4 style="color:#60a5fa; margin-top:15px;">localStorage:</h4>';
+                try {
+                    let hasItems = false;
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const key = localStorage.key(i);
+                        const value = localStorage.getItem(key);
+                        hasItems = true;
+                        html += `<div class="storage-item">
+                            <div class="storage-key">${key}</div>
+                            <div class="storage-value">${value.substring(0, 50)}${value.length > 50 ? '...' : ''}</div>
+                        </div>`;
+                    }
+                    if (!hasItems) {
+                        html += '<div class="storage-item">No localStorage items</div>';
+                    }
+                } catch (e) {
+                    html += '<div class="storage-item">localStorage not accessible</div>';
+                }
+                
+                storageInfo.innerHTML = html;
+                storageInfo.style.display = 'block';
+            } else {
+                storageInfo.style.display = 'none';
+            }
+        }
+
+        // Clear all storage
+        function clearAllStorage() {
+            if (confirm('Are you sure you want to clear all cookies and localStorage? You will be logged out.')) {
+                // Clear cookies
+                document.cookie.split(';').forEach(cookie => {
+                    const name = cookie.split('=')[0].trim();
+                    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+                });
+                
+                // Clear localStorage
+                try {
+                    localStorage.clear();
+                } catch (e) {}
+                
+                alert('Storage cleared! Refreshing page...');
+                location.reload();
+            }
+        }
+
+        // Test all endpoints (simplified version)
+        async function testAllEndpoints() {
+            alert('This would test all endpoints sequentially. Implement as needed.');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <link rel="icon" type="image/x-icon" href="../favicon.ico">
+  <title>Lead Dialer</title>
+  <style>
+    :root{
+      --bg:#f5f5f5;
+      --card:#ffffff;
+      --ink:#333333;
+      --muted:#666666;
+      --line:#d0d0d0;
+      --brand:#007bff;
+      --brand2:#0056b3;
+      --good:#28a745;
+      --topbar:#2c3e50;
+      --shadow:0 2px 4px rgba(0,0,0,.1);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:var(--sans);color:var(--ink);background:var(--bg);font-size:14px}
+    a{color:inherit}
+    .app{min-height:100vh;display:flex;flex-direction:column}
+    .topbar{
+      height:50px;background:var(--topbar);color:#fff;
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 20px;box-shadow:var(--shadow);
+    }
+    .topbar .title{font-weight:600;font-size:16px;}
+    .topbar .right{display:flex;gap:12px;align-items:center}
+    .pill{
+      background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);
+      color:#fff;padding:4px 12px;font-size:13px;border-radius:4px;
+      display:flex;align-items:center;gap:8px;
+    }
+    .btn{
+      border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);
+      color:#fff;padding:6px 12px;cursor:pointer;font-weight:500;font-size:13px;border-radius:4px;
+    }
+    .btn:hover{background:rgba(255,255,255,.2)}
+    .wrap{max-width:1200px;margin:20px auto;padding:0 20px;width:100%;}
+    .panel{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:8px;}
+    .hidden{display:none !important}
+    .input{width:100%;padding:10px 14px;border:1px solid var(--line);border-radius:6px;font-size:16px;outline:none;}
+    .input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(0,123,255,.15)}
+    .primary{
+      background:var(--brand);color:#fff;border:none;padding:12px 20px;cursor:pointer;
+      font-weight:600;font-size:14px;border-radius:6px;width:100%;
+    }
+    .primary:hover{background:var(--brand2)}
+    .ghost{background:#fff;color:var(--ink);border:1px solid var(--line);padding:10px 16px;cursor:pointer;border-radius:6px;}
+    .ghost:hover{background:#f8f9fa}
+
+    /* Auth Overlay */
+    .auth-overlay{
+      position:fixed;inset:0;background:rgba(0,0,0,.85);
+      display:flex;align-items:center;justify-content:center;z-index:1000;
+    }
+    .auth-box{
+      background:#fff;padding:32px;border-radius:12px;width:90%;max-width:400px;
+      box-shadow:0 20px 60px rgba(0,0,0,.3);
+    }
+    .auth-box h2{margin:0 0 8px;font-size:24px;color:#333;}
+    .auth-box p{margin:0 0 24px;color:#666;font-size:14px;}
+    .auth-box .error{background:#fee;border:1px solid #fcc;color:#c00;padding:12px;border-radius:6px;margin-bottom:16px;font-size:13px;}
+    .auth-box .info{background:#e8f4fd;border:1px solid #b8daff;color:#004085;padding:12px;border-radius:6px;margin-bottom:16px;font-size:13px;}
+
+    /* Source Selection */
+    .source-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:20px;}
+    .source-card{
+      background:#fff;border:2px solid var(--line);border-radius:8px;padding:16px;cursor:pointer;
+      transition:all .2s;text-align:center;
+    }
+    .source-card:hover{border-color:var(--brand);background:#f8f9fa;}
+    .source-card.selected{border-color:var(--brand);background:#e8f4fd;}
+    .source-card .icon{font-size:28px;margin-bottom:8px;}
+    .source-card .name{font-weight:600;font-size:14px;}
+    .source-card .count{font-size:12px;color:var(--muted);margin-top:4px;}
+
+    /* Lead List */
+    .list-header{padding:12px 16px;border-bottom:2px solid var(--line);display:grid;gap:16px;background:#f8f9fa;font-weight:600;font-size:13px;}
+    .lead-row{padding:12px 16px;border-bottom:1px solid var(--line);display:grid;gap:16px;align-items:center;}
+    .lead-row:hover{background:#f8f9fa}
+    .name-link{color:var(--brand);font-weight:600;cursor:pointer;}
+    .name-link:hover{text-decoration:underline}
+    .icons{display:flex;gap:8px;justify-content:flex-end}
+    .icon-btn{width:32px;height:32px;border:1px solid var(--line);background:#fff;cursor:pointer;display:grid;place-items:center;font-size:16px;border-radius:4px;}
+    .icon-btn:hover{background:#f8f9fa}
+    .status-line{grid-column:1/-1;color:var(--muted);font-size:12px;margin-top:6px;padding:8px 12px;background:#f8f9fa;border:1px solid var(--line);border-radius:4px;}
+
+    /* Detail View */
+    .detail-head{padding:16px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;justify-content:space-between;background:#f8f9fa;}
+    .detail-body{padding:16px}
+    .kv{display:grid;grid-template-columns:140px 1fr;gap:8px;align-items:center;font-size:14px;margin-bottom:8px}
+    .kv .k{color:var(--muted);font-weight:600}
+    .actions{margin-top:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+    .action{border:1px solid var(--line);background:#fff;padding:12px;display:flex;flex-direction:column;gap:6px;align-items:center;cursor:pointer;border-radius:6px;}
+    .action:hover{background:#f8f9fa}
+    .action strong{font-size:12px}
+    .action span{font-size:18px}
+    .action.disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
+
+    /* Disposition Modal */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;z-index:100}
+    .sheet{background:#fff;width:100%;max-width:500px;border-radius:16px 16px 0 0;max-height:80vh;overflow:auto}
+    .sheethead{padding:16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;font-weight:600}
+    .sheetbody{padding:16px}
+    .dispo-btn{width:100%;padding:14px;margin-bottom:8px;border:1px solid var(--line);background:#fff;cursor:pointer;text-align:left;border-radius:8px;font-size:14px}
+    .dispo-btn:hover{background:#f0f0f0}
+    .dispo-btn.appt{border-color:var(--good);background:#e8f5e9}
+    .dispo-btn.resolve{border-color:#ff9800;background:#fff3e0}
+
+    .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:12px 24px;border-radius:8px;opacity:0;transition:opacity .3s;z-index:200}
+    .toast.show{opacity:1}
+
+    @media(max-width:600px){
+      .actions{grid-template-columns:repeat(2,1fr)}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <!-- Appointment Setter Selection Modal (for LEADDB sources) -->
+  <div id="apptSetterModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:linear-gradient(180deg, #1a2332, #0f1923); border:1px solid rgba(79,209,197,0.3); border-radius:18px; padding:30px; max-width:500px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.6);">
+      <h2 style="margin:0 0 10px; font-size:22px; color:#eaf2ff;">📅 Set Appointments For</h2>
+      <p style="color:rgba(234,242,255,0.7); font-size:14px; margin:0 0 20px;">Select which team member's Calendly link to use for appointments from this CSV source.</p>
+      
+      <select id="apptSetterSelect" style="width:100%; padding:12px; border-radius:10px; border:1px solid rgba(79,209,197,0.3); background:#0a1a2b; color:#eaf2ff; font-size:14px; font-weight:600; margin-bottom:20px; cursor:pointer;">
+        <option value="">Select a team member...</option>
+      </select>
+      
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button onclick="cancelApptSetter()" style="padding:10px 20px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.3); color:rgba(234,242,255,0.7); font-weight:700; cursor:pointer;">Cancel</button>
+        <button onclick="confirmApptSetter()" style="padding:10px 20px; border-radius:10px; border:1px solid rgba(79,209,197,0.3); background:linear-gradient(180deg, rgba(79,209,197,0.35), rgba(0,0,0,0.18)); color:#eaf2ff; font-weight:700; cursor:pointer;">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Auth Overlay (Loading/Redirect) -->
+  <div class="auth-overlay" id="authOverlay">
+    <div class="auth-box" style="text-align:center">
+      <div style="font-size:48px;margin-bottom:16px">🔐</div>
+      <h2 style="margin-bottom:8px">Verifying Session</h2>
+      <p id="authStatus">Checking authentication...</p>
+    </div>
+  </div>
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="title">📞 Lead Dialer</div>
+    <div class="right">
+      <div class="pill" id="userPill">
+        <span id="userName">—</span>
+      </div>
+      <button class="btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <!-- Source Selection View -->
+  <div id="sourceView" class="wrap hidden">
+    <div class="panel" style="padding:24px">
+      <h2 style="margin:0 0 8px">📁 Select Lead Source</h2>
+      <p style="color:var(--muted);margin:0">Choose which leads you want to call today.</p>
+      <div id="sourceGrid" class="source-grid">
+        <!-- Populated dynamically -->
+      </div>
+      <div style="margin-top:20px">
+        <button class="primary" id="loadSourceBtn" onclick="loadSelectedSource()" disabled>Load Selected Source</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lead List View -->
+  <div id="listView" class="wrap hidden">
+    <div class="panel">
+      <div style="padding:16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+        <div>
+          <strong id="sourceTitle">Leads</strong>
+          <span class="muted" id="leadCount"></span>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="ghost" onclick="showSourceSelection()">← Back</button>
+        </div>
+      </div>
+      <div class="list-header" id="listHeader"></div>
+      <div id="leadList"></div>
+    </div>
+  </div>
+
+  <!-- Detail View -->
+  <div id="detailView" class="wrap hidden">
+    <div class="panel">
+      <div class="detail-head">
+        <div>
+          <div style="font-size:20px;font-weight:700" id="dName"></div>
+          <div style="color:var(--muted);font-size:13px;margin-top:4px" id="dMeta"></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="ghost" id="prevLead" onclick="navLead(-1)">←</button>
+          <button class="ghost" id="nextLead" onclick="navLead(1)">→</button>
+          <button class="ghost" onclick="showListView()">Back to List</button>
+        </div>
+      </div>
+      <div class="detail-body">
+        <div id="detailKVs"></div>
+        <div class="actions">
+          <a class="action" id="callMobile" href="#">
+            <span>📱</span>
+            <strong>Call Mobile</strong>
+          </a>
+          <a class="action" id="callHome" href="#">
+            <span>🏠</span>
+            <strong>Call Home</strong>
+          </a>
+          <a class="action" id="sendText" href="#">
+            <span>💬</span>
+            <strong>Send Text</strong>
+          </a>
+          <a class="action" id="setAppt" href="#">
+            <span>📅</span>
+            <strong>Schedule Appt</strong>
+          </a>
+        </div>
+        <div style="margin-top:20px">
+          <strong>📝 Call Outcome</strong>
+          <div id="dispoList" style="margin-top:12px"></div>
+        </div>
+        <div style="margin-top:20px">
+          <strong>📜 History</strong>
+          <div id="historyBox" style="margin-top:8px;background:#f8f9fa;padding:12px;border-radius:6px;font-size:13px;max-height:200px;overflow-y:auto"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Disposition Modal -->
+<div class="overlay hidden" id="overlay">
+  <div class="sheet">
+    <div class="sheethead">
+      <div>Call Outcome</div>
+      <button class="ghost" onclick="closeOverlay()">✕</button>
+    </div>
+    <div class="sheetbody" id="modalDispoList"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Saved</div>
+
+<script src="../config.js"></script>
+<script>
+// ============================================================
+// STATE & CONSTANTS
+// ============================================================
+let currentUser = null;
+// Appointment assignment for LEADDB
+let selectedCalendlyUser = null;
+let allAvailableUsers = [];
+
+let availableSources = [];
+let selectedSource = null;
+let selectedApptSetter = null; // For LEADDB sources - who to set appointments for
+let allTeamMembers = []; // List of all verified users for dropdown
+let leads = [];
+let currentLeadIndex = -1;
+
+const DISPOSITIONS = [
+  { key: "No Pick Up", desc: "Client did not answer", class: "" },
+  { key: "Appointment Set", desc: "Virtual appointment scheduled", class: "appt" },
+  { key: "RESOLVE", desc: "Completed - no more calls needed", class: "resolve" }
+];
+
+// ============================================================
+// AUTH HELPERS
+// ============================================================
+function getToken() {
+  return localStorage.getItem('cc_token') || '';
+}
+
+function clearSession() {
+  localStorage.removeItem('cc_token');
+  localStorage.removeItem('cc_expires_at');
+}
+
+function goLogin() {
+  window.location.href = '../login.html';
+}
+
+// API helper - same as home.html
+async function api(action, payload) {
+  const res = await fetch(`${CFWORKER}/${action}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  const text = await res.text();
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error(text || 'Invalid response');
+  }
+
+  if (!data || data.ok !== true) {
+    const err = (data && (data.error || data.detail)) 
+      ? (data.error + (data.detail ? ` — ${data.detail}` : '')) 
+      : 'Request failed';
+    throw new Error(err);
+  }
+  return data;
+}
+
+// ============================================================
+// AUTH OVERLAY
+// ============================================================
+function showAuthOverlay() {
+  document.getElementById('authOverlay').classList.remove('hidden');
+}
+
+function hideAuthOverlay() {
+  document.getElementById('authOverlay').classList.add('hidden');
+}
+
+function updateAuthStatus(msg) {
+  const el = document.getElementById('authStatus');
+  if (el) el.textContent = msg;
+}
+
+// ============================================================
+// MAIN INIT - Check token via CFWORKER
+// ============================================================
+(async () => {
+  // Verify config is loaded
+  if (typeof CFWORKER === 'undefined' || typeof LEADSDB === 'undefined' || typeof REFDB === 'undefined') {
+    console.error('Config not loaded! CFWORKER:', typeof CFWORKER, 'LEADSDB:', typeof LEADSDB, 'REFDB:', typeof REFDB);
+    updateAuthStatus('Configuration error - please refresh');
+    return;
+  }
+  
+  console.log('Config loaded:', { CFWORKER, LEADSDB: LEADSDB.substring(0, 50) + '...', REFDB: REFDB.substring(0, 50) + '...' });
+  
+  const token = getToken();
+  
+  console.log('Token check:', token ? 'Token found' : 'No token');
+  
+  if (!token) {
+    console.log('No token, redirecting to login');
+    goLogin();
+    return;
+  }
+
+  try {
+    updateAuthStatus('Verifying session...');
+    
+    const token = getToken();
+    const data = await api('me', { token });
+    
+    console.log('Me response:', data);
+    
+    // Success - user is authenticated
+    currentUser = {
+      email: data.loginEmail || '',
+      username: data.username || data.loginEmail?.split('@')[0].replace('.ail', '') || 'User',
+      callingFor: data.callingFor || '',
+      calendlyUrl: data.calendlyUrl || '',
+      assignedTabs: data.assignedTabs || []
+    };
+    
+    console.log('Current user:', currentUser);
+    
+    // Update UI - but keep overlay visible while loading sources
+    document.getElementById('userName').textContent = currentUser.username;
+    
+    // Load available lead packs
+    updateAuthStatus('Loading lead sources...');
+    
+    try {
+      await loadAvailableSources();
+      console.log('Sources loaded successfully');
+      hideAuthOverlay();
+      showSourceSelection();
+    } catch (sourceError) {
+      console.error('Error loading sources:', sourceError);
+      updateAuthStatus('Error loading sources: ' + sourceError.message);
+      setTimeout(() => hideAuthOverlay(), 3000);
+    }
+    
+  } catch (e) {
+    console.error('Auth error:', e);
+    console.error('Error stack:', e.stack);
+    updateAuthStatus('Error: ' + e.message);
+    setTimeout(() => {
+      clearSession();
+      goLogin();
+    }, 3000);
+  }
+})();
+
+// ============================================================
+// SOURCE SELECTION - Load available lead packs
+// ============================================================
+async function loadAvailableSources() {
+  try {
+    console.log('[SOURCES] Starting to load sources for:', currentUser.username);
+    
+    // Get caller's permissions from LEADSDB
+    console.log('[SOURCES] Step 1: Fetching permissions from LEADSDB');
+    const permRes = await fetch(LEADSDB, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        action: 'getPermissions', 
+        caller: currentUser.username 
+      })
+    });
+    
+    if (!permRes.ok) {
+      throw new Error(`LEADSDB permissions fetch failed: ${permRes.status} ${permRes.statusText}`);
+    }
+    
+    const permissions = await permRes.json();
+    console.log('[SOURCES] User permissions:', permissions);
+
+    // Get all CSV sources from LEADSDB
+    console.log('[SOURCES] Step 2: Fetching CSV sources from LEADSDB');
+    const csvRes = await fetch(LEADSDB, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'getSources' })
+    });
+    
+    if (!csvRes.ok) {
+      throw new Error(`LEADSDB getSources failed: ${csvRes.status} ${csvRes.statusText}`);
+    }
+    
+    const csvData = await csvRes.json();
+    console.log('[SOURCES] CSV sources:', csvData);
+
+    // Get all REFDB tabs
+    console.log('[SOURCES] Step 3: Fetching REF sources from REFDB');
+    const refRes = await fetch(REFDB, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'listUsers' })
+    });
+    
+    if (!refRes.ok) {
+      throw new Error(`REFDB listUsers failed: ${refRes.status} ${refRes.statusText}`);
+    }
+    
+    const refData = await refRes.json();
+    console.log('[SOURCES] REF sources response:', refData);
+
+    availableSources = [];
+
+    // Add permitted CSV sources (LEADDB)
+    console.log('[SOURCES] Step 4: Processing CSV sources');
+    if (Array.isArray(csvData)) {
+      csvData.forEach(src => {
+        const hasAccess = Array.isArray(permissions) && permissions.some(p => 
+          p.sourceType === 'CSV' && p.sourceName === src.name
+        );
+        console.log(`[SOURCES] CSV "${src.name}": hasAccess=${hasAccess}`);
+        if (hasAccess) {
+          availableSources.push({
+            name: src.name,
+            type: 'LEADDB',
+            count: src.leadCount || 0,
+            icon: '📁'
+          });
+        }
+      });
+    }
+
+    // Add permitted REFDB sources
+    console.log('[SOURCES] Step 5: Processing REF sources');
+    const refUsers = (refData && refData.ok && refData.users) ? refData.users : [];
+    console.log('[SOURCES] REF users to check:', refUsers);
+    
+    refUsers.forEach(src => {
+      const srcName = src.name || src.username;
+      const hasAccess = Array.isArray(permissions) && permissions.some(p => 
+        p.sourceType === 'Referrals' && p.sourceName === srcName
+      );
+      console.log(`[SOURCES] REF "${srcName}": hasAccess=${hasAccess}`);
+      if (hasAccess) {
+        availableSources.push({
+          name: srcName,
+          type: 'REFDB',
+          count: src.referralCount || src.count || 0,
+          icon: '👤',
+          owner: srcName
+        });
+      }
+    });
+
+    console.log('[SOURCES] Final available sources:', availableSources);
+    console.log('[SOURCES] Step 6: Rendering source grid');
+    renderSourceGrid();
+    console.log('[SOURCES] ✅ All sources loaded successfully');
+    
+  } catch (err) {
+    console.error('[SOURCES] ❌ Error loading sources:', err);
+    console.error('[SOURCES] Error stack:', err.stack);
+    throw err; // Re-throw to be caught by caller
+  }
+}
+
+function renderSourceGrid() {
+  const grid = document.getElementById('sourceGrid');
+  
+  if (availableSources.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;padding:40px 20px;color:var(--muted)">
+        <div style="font-size:48px;margin-bottom:12px">📭</div>
+        <div style="font-size:16px;font-weight:600;margin-bottom:8px">No Lead Packs Assigned</div>
+        <div style="font-size:13px">Contact your admin to get access to lead sources.</div>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = availableSources.map((src, i) => `
+    <div class="source-card" data-index="${i}" onclick="selectSource(${i})">
+      <div class="icon">${src.icon}</div>
+      <div class="name">${src.name}</div>
+      <div class="count">${src.count} leads • ${src.type}</div>
+    </div>
+  `).join('');
+}
+
+function selectSource(index) {
+  document.querySelectorAll('.source-card').forEach(el => el.classList.remove('selected'));
+  document.querySelector(`.source-card[data-index="${index}"]`).classList.add('selected');
+  selectedSource = availableSources[index];
+  document.getElementById('loadSourceBtn').disabled = false;
+}
+
+async function loadSelectedSource() {
+  if (!selectedSource) return;
+
+  // For LEADDB sources, show appointment assignment popup first
+  if (selectedSource.type === 'LEADDB') {
+    showAppointmentAssignmentPopup();
+    return;
+  }
+
+  const btn = document.getElementById('loadSourceBtn');
+  btn.textContent = 'Loading...';
+  btn.disabled = true;
+
+  try {
+    await continueLoadingSource();
+  } catch (err) {
+    console.error('[LOAD] Error:', err);
+    toast('Error: ' + err.message);
+  } finally {
+    btn.textContent = 'Load Selected Source';
+    btn.disabled = false;
+  }
+}
+
+// Show appointment assignment popup
+function showAppointmentAssignmentPopup() {
+  const popup = document.createElement('div');
+  popup.id = 'apptPopup';
+  popup.innerHTML = `
+    <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.88); z-index: 10000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+      <div style="background: linear-gradient(135deg, #0a1a2b, #071423); border: 1px solid rgba(79,209,197,0.35); border-radius: 20px; padding: 32px; max-width: 520px; width: 90%; box-shadow: 0 25px 70px rgba(0,0,0,0.6);">
+        <h2 style="margin: 0 0 8px; color: #4fd1c5; font-size: 26px; font-weight: 900;">📅 Set Appointments For</h2>
+        <p style="color: rgba(234,242,255,0.65); margin: 0 0 24px; font-size: 14px; line-height: 1.5;">Choose whose Calendly link will be used when scheduling appointments from this CSV source.</p>
+        
+        <div style="margin-bottom: 24px;">
+          <input 
+            type="text" 
+            id="userSearchInput" 
+            placeholder="🔍 Search by name..."
+            style="width: 100%; padding: 14px 16px; border-radius: 14px; border: 1px solid rgba(79,209,197,0.35); background: rgba(0,0,0,0.5); color: #eaf2ff; font-size: 15px; margin-bottom: 14px; font-family: inherit;"
+          />
+          <div id="userListContainer" style="max-height: 340px; overflow-y: auto; border: 1px solid rgba(79,209,197,0.25); border-radius: 14px; background: rgba(0,0,0,0.4); min-height: 80px;">
+            <div style="padding: 30px; text-align: center; color: rgba(234,242,255,0.5);">Loading users...</div>
+          </div>
+        </div>
+        
+        <div style="display: flex; gap: 12px;">
+          <button onclick="cancelApptPopup()" style="flex: 1; padding: 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.12); background: rgba(0,0,0,0.5); color: rgba(234,242,255,0.8); cursor: pointer; font-weight: 700; font-size: 15px;">Cancel</button>
+          <button id="confirmApptBtn" disabled style="flex: 1; padding: 14px; border-radius: 14px; border: 1px solid rgba(79,209,197,0.4); background: linear-gradient(135deg, rgba(79,209,197,0.4), rgba(79,209,197,0.2)); color: #eaf2ff; cursor: pointer; font-weight: 700; font-size: 15px; opacity: 0.4;">Continue →</button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(popup);
+  loadUsersForAppointment();
+  
+  document.getElementById('userSearchInput').addEventListener('input', (e) => {
+    filterApptUserList(e.target.value);
+  });
+}
+
+async function loadUsersForAppointment() {
+  try {
+    const response = await fetch(AUTH, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'getAllUsersForDropdown' })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success && data.users) {
+      allAvailableUsers = data.users;
+      renderApptUserList(allAvailableUsers);
+    } else {
+      document.getElementById('userListContainer').innerHTML = '<div style="padding: 24px; text-align: center; color: #ff5a7a;">Failed to load users</div>';
+    }
+  } catch (err) {
+    console.error('Error loading users:', err);
+    document.getElementById('userListContainer').innerHTML = '<div style="padding: 24px; text-align: center; color: #ff5a7a;">Error: ' + err.message + '</div>';
+  }
+}
+
+function renderApptUserList(users) {
+  const container = document.getElementById('userListContainer');
+  
+  if (users.length === 0) {
+    container.innerHTML = '<div style="padding: 24px; text-align: center; color: rgba(234,242,255,0.4);">No users found</div>';
+    return;
+  }
+  
+  container.innerHTML = users.map(user => `
+    <div class="appt-user-item" 
+         data-username="${user.username}" 
+         data-email="${user.email}" 
+         data-calendly="${user.calendlyUrl}" 
+         style="padding: 16px 18px; border-bottom: 1px solid rgba(255,255,255,0.06); cursor: pointer; transition: all 0.15s ease;"
+         onmouseenter="this.style.background='rgba(79,209,197,0.1)'" 
+         onmouseleave="if(!this.classList.contains('selected')) this.style.background='transparent'"
+         onclick="selectApptUser(this)">
+      <div style="font-weight: 800; color: #4fd1c5; margin-bottom: 6px; font-size: 15px;">${user.username}</div>
+      <div style="font-size: 11px; color: rgba(234,242,255,0.45); font-family: monospace;">${user.calendlyUrl}</div>
+    </div>
+  `).join('');
+}
+
+function selectApptUser(element) {
+  document.querySelectorAll('.appt-user-item').forEach(item => {
+    item.classList.remove('selected');
+    item.style.background = 'transparent';
+    item.style.borderLeft = 'none';
+  });
+  
+  element.classList.add('selected');
+  element.style.background = 'rgba(79,209,197,0.18)';
+  element.style.borderLeft = '4px solid #4fd1c5';
+  element.style.paddingLeft = '14px';
+  
+  const confirmBtn = document.getElementById('confirmApptBtn');
+  confirmBtn.disabled = false;
+  confirmBtn.style.opacity = '1';
+  confirmBtn.onclick = () => confirmApptSelection();
+}
+
+function filterApptUserList(searchTerm) {
+  const term = searchTerm.toLowerCase().trim();
+  const filtered = allAvailableUsers.filter(user => 
+    user.username.toLowerCase().includes(term) ||
+    user.email.toLowerCase().includes(term)
+  );
+  renderApptUserList(filtered);
+}
+
+function cancelApptPopup() {
+  const popup = document.getElementById('apptPopup');
+  if (popup) popup.remove();
+  selectedCalendlyUser = null;
+}
+
+async function confirmApptSelection() {
+  const selected = document.querySelector('.appt-user-item.selected');
+  if (!selected) return;
+  
+  selectedCalendlyUser = {
+    username: selected.dataset.username,
+    email: selected.dataset.email,
+    calendlyUrl: selected.dataset.calendly
+  };
+  
+  console.log('[APPT] Assigned:', selectedCalendlyUser);
+  
+  const popup = document.getElementById('apptPopup');
+  if (popup) popup.remove();
+  
+  const btn = document.getElementById('loadSourceBtn');
+  btn.textContent = 'Loading...';
+  btn.disabled = true;
+  
+  try {
+    await continueLoadingSource();
+  } catch (err) {
+    console.error('Error:', err);
+    toast('Error: ' + err.message);
+  } finally {
+    btn.textContent = 'Load Selected Source';
+    btn.disabled = false;
+  }
+}
+
+async function continueLoadingSource() {
+  try {
+    console.log('[LOAD] Loading source:', selectedSource);
+    
+    if (selectedSource.type === 'LEADDB') {
+      const res = await fetch(LEADSDB, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'getLeads', source: selectedSource.name })
+      });
+      const data = await res.json();
+      console.log('[LOAD] LEADDB data:', data);
+      
+      if (Array.isArray(data)) {
+        leads = data.map((row, idx) => {
+          const lead = { ...row };
+          lead.name = row.Name || row.name || row.firstName || row['First Name'] || row.fullName || row['Full Name'] || `Lead ${idx + 1}`;
+          lead.phone = row.Phone || row.phone || row.mobile || row.Mobile || row.cellPhone || row['Cell Phone'] || row.phoneNumber || row['Phone Number'] || '';
+          lead.outcome = row.outcome || row.Outcome || row.status || row.Status || 'Not Contacted';
+          return lead;
+        });
+      } else {
+        leads = [];
+      }
+      
+    } else if (selectedSource.type === 'REFDB') {
+      const res = await fetch(`${REFDB}?user=${encodeURIComponent(selectedSource.name)}`);
+      const data = await res.json();
+      console.log('[LOAD] REFDB data:', data);
+      
+      if (Array.isArray(data)) {
+        const validRefs = data.filter((ref) => {
+          const relation = ref['REF RELATION'] || ref['Ref Relation'] || ref.refRelation || ref.RefRelation || ref.relation || ref.Relation || '';
+          const relationStr = String(relation).toLowerCase().trim();
+          const isRootSponsor = relationStr === 'root/sponsor' || relationStr === 'root' || relationStr === 'sponsor';
+          if (isRootSponsor) console.log('[LOAD] Filtered Root/Sponsor:', ref['REF NAME'] || ref.name);
+          return !isRootSponsor;
+        });
+        
+        console.log(`[LOAD] Filtered ${data.length - validRefs.length} Root/Sponsor, ${validRefs.length} valid`);
+        
+        leads = validRefs.map((ref, idx) => {
+          const lead = { ...ref };
+          lead.name = ref['REF NAME'] || ref['Ref Name'] || ref.refName || ref.RefName || ref.name || ref.Name || `Referral ${idx + 1}`;
+          lead.phone = ref['REF NUMBER'] || ref['Ref Number'] || ref.refNumber || ref.RefNumber || ref['REF PHONE'] || ref.refPhone || ref.phone || ref.Phone || '';
+          lead.relation = ref['REF RELATION'] || ref['Ref Relation'] || ref.refRelation || ref.RefRelation || ref.relation || ref.Relation || '';
+          lead.sponsor = ref['SPONSOR NAME'] || ref['Sponsor Name'] || ref.sponsorName || ref.SponsorName || ref.sponsor || ref.Sponsor || '';
+          lead.sponsorPhone = ref['SPONSOR NUMBER'] || ref['Sponsor Number'] || ref.sponsorNumber || ref.SponsorNumber || ref.sponsorPhone || ref.SponsorPhone || '';
+          lead.outcome = ref.outcome || ref.Outcome || 'Not Contacted';
+          lead.tabOwner = selectedSource.name;
+          return lead;
+        });
+      } else {
+        leads = [];
+      }
+    }
+
+    console.log('[LOAD] Final leads:', leads.length);
+    document.getElementById('sourceTitle').textContent = selectedSource.name;
+    document.getElementById('leadCount').textContent = `(${leads.length} leads)`;
+    renderLeadList();
+    showListView();
+    
+  } catch (err) {
+    console.error('[LOAD] Error:', err);
+    throw err;
+  }
+}
+
+function showListView() {
+  document.getElementById('sourceView').classList.add('hidden');
+  document.getElementById('detailView').classList.add('hidden');
+  document.getElementById('listView').classList.remove('hidden');
+  
+  // Hide Export CSV for LEADDB sources
+  const exportBtn = document.getElementById('exportCSV');
+  if (exportBtn) {
+    if (selectedSource && selectedSource.type === 'LEADDB') {
+      exportBtn.style.display = 'none';
+      console.log('[UI] Export CSV hidden for LEADDB');
+    } else {
+      exportBtn.style.display = 'inline-flex';
+    }
+  }
+}
+
+// ============================================================
+// LEAD DETAIL
+// ============================================================
+function openLead(index) {
+  currentLeadIndex = index;
+  const lead = leads[index];
+
+  document.getElementById('dName').textContent = (lead.name || '—').toUpperCase();
+  document.getElementById('dMeta').textContent = `${selectedSource.name} • ${selectedSource.type}`;
+
+  const phone = formatPhone(lead.phone);
+  const homePhone = formatPhone(lead.sponsorPhone || lead.home);
+
+  // Start with phone fields (with tel: links)
+  let kvHtml = `
+    <div class="kv"><div class="k">Mobile</div><div class="v">${phone.ok ? `<a href="${phone.tel}" style="color:#4fd1c5;text-decoration:none">${phone.pretty}</a>` : '—'}</div></div>
+    <div class="kv"><div class="k">Home/Sponsor</div><div class="v">${homePhone.ok ? `<a href="${homePhone.tel}" style="color:#4fd1c5;text-decoration:none">${homePhone.pretty}</a>` : '—'}</div></div>
+  `;
+
+  // Auto-generate all other fields from the lead data
+  // Skip fields we've already displayed and internal fields
+  const skipFields = ['name', 'phone', 'sponsorPhone', 'home', 'outcome', 'status', 'tabOwner', '_raw'];
+  
+  Object.keys(lead).forEach(key => {
+    // Skip if already displayed, empty, or internal field
+    if (skipFields.includes(key) || !lead[key] || key.startsWith('_')) {
+      return;
+    }
+    
+    // Format the field name nicely
+    const fieldName = key
+      .replace(/([A-Z])/g, ' $1') // Add space before capitals
+      .replace(/^./, str => str.toUpperCase()) // Capitalize first letter
+      .trim();
+    
+    const value = String(lead[key]).trim();
+    
+    if (value) {
+      kvHtml += `<div class="kv"><div class="k">${fieldName}</div><div class="v">${value}</div></div>`;
+    }
+  });
+
+  document.getElementById('detailKVs').innerHTML = kvHtml;
+
+  // Set up action buttons
+  const callMobile = document.getElementById('callMobile');
+  const callHome = document.getElementById('callHome');
+  const sendText = document.getElementById('sendText');
+  const setAppt = document.getElementById('setAppt');
+
+  // Call Mobile button
+  if (phone.ok) {
+    callMobile.href = phone.tel;
+    callMobile.classList.remove('disabled');
+  } else {
+    callMobile.href = '#';
+    callMobile.classList.add('disabled');
+  }
+
+  // Call Home button
+  if (homePhone.ok) {
+    callHome.href = homePhone.tel;
+    callHome.classList.remove('disabled');
+  } else {
+    callHome.href = '#';
+    callHome.classList.add('disabled');
+  }
+
+  // Send Text button
+  if (phone.ok) {
+    sendText.href = `sms:${phone.digits}`;
+    sendText.classList.remove('disabled');
+  } else {
+    sendText.href = '#';
+    sendText.classList.add('disabled');
+  }
+
+    // Schedule Appointment button
+  if (selectedSource.type === 'REFDB') {
+    const ownerName = selectedSource.name.toLowerCase().replace(/[^a-z]/g, '');
+    const calendlyUrl = `https://calendly.com/${ownerName}-ail/30min`;
+    setAppt.onclick = (e) => {
+      e.preventDefault();
+      const name = encodeURIComponent(lead.name || '');
+      const phoneInfo = encodeURIComponent(phone.pretty || lead.phone || '');
+      window.open(`${calendlyUrl}?name=${name}&a3=${phoneInfo}`, '_blank');
+      toast('Opening Calendly');
+    };
+    setAppt.classList.remove('disabled');
+  } else if (selectedSource.type === 'LEADDB') {
+    if (selectedCalendlyUser && selectedCalendlyUser.calendlyUrl) {
+      setAppt.onclick = (e) => {
+        e.preventDefault();
+        const name = encodeURIComponent(lead.name || '');
+        const phoneInfo = encodeURIComponent(phone.pretty || lead.phone || '');
+        window.open(`${selectedCalendlyUser.calendlyUrl}?name=${name}&a3=${phoneInfo}`, '_blank');
+        toast(`Opening ${selectedCalendlyUser.username}'s Calendly`);
+      };
+      setAppt.classList.remove('disabled');
+    } else {
+      setAppt.onclick = (e) => { e.preventDefault(); toast('No Calendly assigned'); };
+      setAppt.classList.add('disabled');
+    }
+  }
+
+
+  renderDispositions();
+  renderHistory(lead);
+
+  document.getElementById('sourceView').classList.add('hidden');
+  document.getElementById('listView').classList.add('hidden');
+  document.getElementById('detailView').classList.remove('hidden');
+}
+
+function navLead(dir) {
+  const newIndex = currentLeadIndex + dir;
+  if (newIndex >= 0 && newIndex < leads.length) {
+    openLead(newIndex);
+  }
+}
+
+function renderDispositions() {
+  const container = document.getElementById('dispoList');
+  container.innerHTML = DISPOSITIONS.map(d => `
+    <button class="dispo-btn ${d.class}" onclick="setDisposition('${d.key}')">
+      <strong>${d.key}</strong><br><span style="font-size:12px;color:#666">${d.desc}</span>
+    </button>
+  `).join('');
+}
+
+function renderHistory(lead) {
+  const histKey = `history:${selectedSource.name}:${lead.phone}`;
+  const history = JSON.parse(localStorage.getItem(histKey) || '[]');
+  
+  const box = document.getElementById('historyBox');
+  if (history.length === 0) {
+    box.innerHTML = '<span style="color:var(--muted)">No history yet</span>';
+  } else {
+    box.innerHTML = history.map(h => `<div style="margin-bottom:8px"><strong>${h.outcome}</strong> - ${h.timestamp}</div>`).join('');
+  }
+}
+
+// ============================================================
+// DISPOSITIONS & OUTCOMES
+// ============================================================
+async function setDisposition(outcome) {
+  const lead = leads[currentLeadIndex];
+  
+  // Save to local history
+  const histKey = `history:${selectedSource.name}:${lead.phone}`;
+  const history = JSON.parse(localStorage.getItem(histKey) || '[]');
+  history.push({ outcome, timestamp: new Date().toLocaleString() });
+  localStorage.setItem(histKey, JSON.stringify(history));
+
+  // Update lead in memory
+  lead.outcome = outcome;
+  lead.status = outcome;
+
+  // Save to backend
+  try {
+    if (selectedSource.type === 'LEADDB') {
+      await fetch(LEADSDB, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'updateOutcome',
+          source: selectedSource.name,
+          phone: lead.phone,
+          outcome: outcome
+        })
+      });
+    } else if (selectedSource.type === 'REFDB') {
+      // For REFDB, we'd need an updateReferral endpoint
+      console.log('REFDB outcome update not yet implemented');
+    }
+  } catch (err) {
+    console.error('Error saving outcome:', err);
+  }
+
+  renderHistory(lead);
+  renderLeadList();
+  toast(`Saved: ${outcome}`);
+  closeOverlay();
+}
+
+function openCallModal() {
+  const modal = document.getElementById('modalDispoList');
+  modal.innerHTML = DISPOSITIONS.map(d => `
+    <button class="dispo-btn ${d.class}" onclick="setDisposition('${d.key}')">
+      <strong>${d.key}</strong><br><span style="font-size:12px;color:#666">${d.desc}</span>
+    </button>
+  `).join('');
+  document.getElementById('overlay').classList.remove('hidden');
+}
+
+function closeOverlay() {
+  document.getElementById('overlay').classList.add('hidden');
+}
+
+// ============================================================
+// CALENDLY APPOINTMENT SETTING - Now handled inline in openLead()
+// ============================================================
+
+// ============================================================
+// UTILITIES
+// ============================================================
+function formatPhone(raw) {
+  let digits = String(raw || '').replace(/\D/g, '');
+  if (digits.length === 11 && digits.startsWith('1')) digits = digits.slice(1);
+  if (digits.length !== 10) return { ok: false, digits: '', pretty: '—', tel: '#' };
+  const pretty = `(${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`;
+  return { ok: true, digits, pretty, tel: `tel:+1${digits}` };
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+// ============================================================
+// APPOINTMENT SETTER MODAL (for LEADDB sources)
+// ============================================================
+async function fetchAllTeamMembers() {
+  try {
+    const res = await fetch(CFWORKER, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'getAllUsersForDropdown', token: getToken() })
+    });
+    const data = await res.json();
+    
+    if (data.success && data.users) {
+      allTeamMembers = data.users;
+      console.log('[APPT] Loaded team members:', allTeamMembers.length);
+    }
+  } catch (err) {
+    console.error('[APPT] Error loading team members:', err);
+  }
+}
+
+async function showApptSetterModal() {
+  // Load team members if not already loaded
+  if (allTeamMembers.length === 0) {
+    await fetchAllTeamMembers();
+  }
+  
+  // Populate dropdown
+  const select = document.getElementById('apptSetterSelect');
+  select.innerHTML = '<option value="">Select a team member...</option>';
+  
+  allTeamMembers.forEach(member => {
+    const option = document.createElement('option');
+    option.value = JSON.stringify({
+      username: member.username,
+      email: member.email,
+      calendlyUrl: member.calendlyUrl
+    });
+    option.textContent = `${member.username} (${member.email})`;
+    select.appendChild(option);
+  });
+  
+  // Show modal
+  const modal = document.getElementById('apptSetterModal');
+  modal.style.display = 'flex';
+  
+  // Return a promise that resolves when user selects or cancels
+  return new Promise((resolve) => {
+    window._apptSetterResolve = resolve;
+  });
+}
+
+function confirmApptSetter() {
+  const select = document.getElementById('apptSetterSelect');
+  const value = select.value;
+  
+  if (!value) {
+    toast('Please select a team member');
+    return;
+  }
+  
+  selectedApptSetter = JSON.parse(value);
+  console.log('[APPT] Selected:', selectedApptSetter);
+  
+  // Hide modal
+  document.getElementById('apptSetterModal').style.display = 'none';
+  
+  // Resolve the promise
+  if (window._apptSetterResolve) {
+    window._apptSetterResolve(true);
+    window._apptSetterResolve = null;
+  }
+}
+
+function cancelApptSetter() {
+  selectedApptSetter = null;
+  
+  // Hide modal
+  document.getElementById('apptSetterModal').style.display = 'none';
+  
+  // Resolve the promise
+  if (window._apptSetterResolve) {
+    window._apptSetterResolve(false);
+    window._apptSetterResolve = null;
+  }
+}
+
+function exportLeads() {
+  if (leads.length === 0) return;
+  const headers = Object.keys(leads[0]);
+  const csv = [headers.join(',')].concat(
+    leads.map(l => headers.map(h => `"${String(l[h] || '').replace(/"/g, '""')}"`).join(','))
+  ).join('\n');
+  
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${selectedSource.name}_export.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

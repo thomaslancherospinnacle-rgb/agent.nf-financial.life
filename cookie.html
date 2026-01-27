@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cookie Test - Closing Coalition</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    h1 { color: #333; margin-top: 0; }
+    .status { 
+      padding: 15px; 
+      border-radius: 8px; 
+      margin: 15px 0;
+      font-weight: bold;
+    }
+    .success { background: #d4edda; color: #155724; }
+    .error { background: #f8d7da; color: #721c24; }
+    .warning { background: #fff3cd; color: #856404; }
+    .info { background: #d1ecf1; color: #0c5460; }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover { background: #0056b3; }
+    code {
+      background: #f4f4f4;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-family: monospace;
+      display: inline-block;
+      margin: 2px;
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🍪 Cookie & localStorage Test</h1>
+    <p>This page checks if your login token is stored correctly.</p>
+    
+    <div id="results"></div>
+    
+    <button onclick="runTest()">🧪 Run Test</button>
+    <button onclick="showCookies()">👀 Show All Cookies</button>
+    <button onclick="showLocalStorage()">💾 Show localStorage</button>
+    <button onclick="clearAll()">🗑️ Clear Everything</button>
+  </div>
+
+<script>
+  const LS_TOKEN = "cc_token";
+  const LS_EXPIRES = "cc_expires_at";
+
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+  }
+
+  function log(message, type = 'info') {
+    const results = document.getElementById('results');
+    const status = document.createElement('div');
+    status.className = `status ${type}`;
+    status.innerHTML = message;
+    results.appendChild(status);
+  }
+
+  function clearResults() {
+    document.getElementById('results').innerHTML = '';
+  }
+
+  function runTest() {
+    clearResults();
+    
+    log('🔍 Running authentication storage test...', 'info');
+    
+    // Test 1: Check cookie
+    const cookieToken = getCookie(LS_TOKEN);
+    const cookieExpires = getCookie(LS_EXPIRES);
+    
+    if (cookieToken) {
+      log(`✅ <strong>COOKIE TOKEN FOUND</strong><br>Token: <code>${cookieToken.substring(0, 30)}...</code><br>Expires: <code>${cookieExpires || 'Not set'}</code>`, 'success');
+    } else {
+      log('❌ <strong>COOKIE TOKEN NOT FOUND</strong><br>This means index.html is NOT the iOS-fixed version!', 'error');
+    }
+    
+    // Test 2: Check localStorage
+    let localToken = null;
+    let localExpires = null;
+    try {
+      localToken = localStorage.getItem(LS_TOKEN);
+      localExpires = localStorage.getItem(LS_EXPIRES);
+      
+      if (localToken) {
+        log(`✅ <strong>localStorage TOKEN FOUND</strong><br>Token: <code>${localToken.substring(0, 30)}...</code><br>Expires: <code>${localExpires || 'Not set'}</code>`, 'success');
+      } else {
+        log('⚠️ <strong>localStorage TOKEN NOT FOUND</strong>', 'warning');
+      }
+    } catch (e) {
+      log(`❌ <strong>localStorage BLOCKED</strong><br>Error: ${e.message}`, 'error');
+    }
+    
+    // Summary
+    if (cookieToken && localToken) {
+      log('🎉 <strong>PERFECT!</strong><br>Both cookie and localStorage have tokens. Site will work on all devices!', 'success');
+    } else if (cookieToken) {
+      log('✅ <strong>GOOD!</strong><br>Cookie has token. Site will work on iOS!', 'success');
+    } else if (localToken) {
+      log('⚠️ <strong>WARNING!</strong><br>Only localStorage has token. Site will NOT work on iOS!<br><br><strong>Fix:</strong> You need to upload index-ios-fixed.html as index.html', 'warning');
+    } else {
+      log('❌ <strong>NOT LOGGED IN</strong><br>No tokens found. Please login at index.html first.', 'error');
+      setTimeout(() => {
+        if (confirm('Go to login page?')) {
+          window.location.href = 'index.html';
+        }
+      }, 2000);
+    }
+  }
+
+  function showCookies() {
+    clearResults();
+    const cookies = document.cookie;
+    
+    if (!cookies) {
+      log('No cookies found', 'warning');
+      return;
+    }
+    
+    log('<strong>All Cookies:</strong><br><pre>' + cookies.split('; ').join('\n') + '</pre>', 'info');
+  }
+
+  function showLocalStorage() {
+    clearResults();
+    
+    try {
+      const items = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        const value = localStorage.getItem(key);
+        items.push(`${key}: ${value.substring(0, 50)}${value.length > 50 ? '...' : ''}`);
+      }
+      
+      if (items.length === 0) {
+        log('localStorage is empty', 'warning');
+      } else {
+        log('<strong>localStorage Contents:</strong><br><pre>' + items.join('\n') + '</pre>', 'info');
+      }
+    } catch (e) {
+      log(`Cannot access localStorage: ${e.message}`, 'error');
+    }
+  }
+
+  function clearAll() {
+    if (!confirm('Clear all cookies and localStorage?')) return;
+    
+    // Clear cookies
+    document.cookie.split(";").forEach(c => {
+      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+    });
+    
+    // Clear localStorage
+    try {
+      localStorage.clear();
+    } catch (e) {}
+    
+    clearResults();
+    log('✅ All data cleared!', 'success');
+    setTimeout(() => runTest(), 500);
+  }
+
+  // Auto-run on load
+  window.addEventListener('load', () => {
+    setTimeout(runTest, 300);
+  });
+</script>
+</body>
+</html>

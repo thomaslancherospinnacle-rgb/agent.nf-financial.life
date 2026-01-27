@@ -1,0 +1,1869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADMIN Dashboard</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .user-row:hover { background-color: #f3f4f6; }
+        
+        /* RECRUITS TAB STYLES */
+        .recruiter-card {
+            transition: all 0.3s ease;
+        }
+        .recruiter-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .prospects-list {
+            animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                max-height: 0;
+            }
+            to {
+                opacity: 1;
+                max-height: 2000px;
+            }
+        }
+        .prospect-row {
+            transition: background-color 0.2s;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+    <!-- Login Page -->
+    <div id="loginPage" class="flex items-center justify-center min-h-screen">
+        <div class="bg-white p-8 rounded-lg shadow-lg w-96">
+            <h1 class="text-2xl font-bold mb-6 text-center text-gray-800">Admin Login</h1>
+            <div id="loginForm">
+                <input type="email" id="loginEmail" placeholder="Admin Email" 
+                    class="w-full p-3 border border-gray-300 rounded mb-4 focus:outline-none focus:border-blue-500">
+                <button onclick="sendVerificationCode()" 
+                    class="w-full bg-blue-500 text-white p-3 rounded hover:bg-blue-600 transition">
+                    Send Verification Code
+                </button>
+            </div>
+            <div id="verificationForm" class="hidden">
+                <p class="text-sm text-gray-600 mb-4">Enter the 6-digit code sent to your email</p>
+                <input type="text" id="verificationCode" placeholder="000000" maxlength="6"
+                    class="w-full p-3 border border-gray-300 rounded mb-4 text-center text-2xl tracking-widest focus:outline-none focus:border-blue-500">
+                <button onclick="verifyCode()" 
+                    class="w-full bg-green-500 text-white p-3 rounded hover:bg-green-600 transition">
+                    Verify & Login
+                </button>
+                <button onclick="backToLogin()" 
+                    class="w-full mt-2 text-sm text-gray-600 hover:text-gray-800">
+                    ← Back to login
+                </button>
+            </div>
+            <div id="loginMessage" class="mt-4 text-sm text-center"></div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" class="hidden">
+        <!-- Header -->
+        <header class="bg-blue-600 text-white p-4 shadow-lg">
+            <div class="container mx-auto flex justify-between items-center">
+                <h1 class="text-2xl font-bold">Admin Dashboard</h1>
+                <div class="flex items-center gap-4">
+                    <span id="adminEmailDisplay" class="text-sm"></span>
+                    <button onclick="logout()" class="bg-red-500 px-4 py-2 rounded hover:bg-red-600 transition">
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <div class="bg-white border-b">
+            <div class="container mx-auto">
+                <nav class="flex gap-4 p-4 overflow-x-auto">
+                    <button onclick="showTab('overview')" class="tab-btn px-4 py-2 rounded hover:bg-gray-100 font-semibold text-blue-600 bg-blue-50 whitespace-nowrap">
+                        Overview
+                    </button>
+                    <button onclick="showTab('users')" class="tab-btn px-4 py-2 rounded hover:bg-gray-100 whitespace-nowrap">
+                        User List
+                    </button>
+                    <button onclick="showTab('recruits')" class="tab-btn px-4 py-2 rounded hover:bg-gray-100 whitespace-nowrap">
+                        📊 Recruits
+                    </button>
+                    <button onclick="showTab('email')" class="tab-btn px-4 py-2 rounded hover:bg-gray-100 whitespace-nowrap">
+                        Send Emails
+                    </button>
+                    <button onclick="showTab('sms')" class="tab-btn px-4 py-2 rounded hover:bg-gray-100 whitespace-nowrap">
+                        Send SMS
+                    </button>
+                    <button onclick="showTab('caller')" class="tab-btn px-4 py-2 rounded hover:bg-gray-100 whitespace-nowrap">
+                        📞 Caller Access
+                    </button>
+                    <button onclick="showTab('callerSettings')" class="tab-btn px-4 py-2 rounded hover:bg-gray-100 whitespace-nowrap">
+                        ⚙️ Caller Settings
+                    </button>
+                    <button onclick="showTab('settings')" class="tab-btn px-4 py-2 rounded hover:bg-gray-100 whitespace-nowrap">
+                        Settings
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="container mx-auto p-6">
+            
+            <!-- Overview Tab -->
+            <div id="overviewTab" class="tab-content active">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 class="text-gray-500 text-sm font-semibold mb-2">Total Users</h3>
+                        <p id="totalUsers" class="text-3xl font-bold text-blue-600">0</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 class="text-gray-500 text-sm font-semibold mb-2">Total Recruiters</h3>
+                        <p id="totalRecruiters" class="text-3xl font-bold text-purple-600">0</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 class="text-gray-500 text-sm font-semibold mb-2">Selected Users</h3>
+                        <p id="selectedUsers" class="text-3xl font-bold text-green-600">0</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 class="text-gray-500 text-sm font-semibold mb-2">Emails Sent Today</h3>
+                        <p id="emailsSent" class="text-3xl font-bold text-orange-600">0</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h2 class="text-xl font-bold mb-4">Quick Actions</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <button onclick="showTab('users')" class="p-4 border-2 border-blue-500 rounded-lg hover:bg-blue-50 transition text-left">
+                            <h3 class="font-semibold text-blue-600 mb-1">📋 View Users</h3>
+                            <p class="text-sm text-gray-600">View and manage user list from Google Sheets</p>
+                        </button>
+                        <button onclick="showTab('recruits')" class="p-4 border-2 border-purple-500 rounded-lg hover:bg-purple-50 transition text-left">
+                            <h3 class="font-semibold text-purple-600 mb-1">📊 View Recruits</h3>
+                            <p class="text-sm text-gray-600">See all recruiters and their prospects</p>
+                        </button>
+                        <button onclick="showTab('email')" class="p-4 border-2 border-green-500 rounded-lg hover:bg-green-50 transition text-left">
+                            <h3 class="font-semibold text-green-600 mb-1">✉️ Send Email</h3>
+                            <p class="text-sm text-gray-600">Compose and send emails to selected users</p>
+                        </button>
+                        <button onclick="loadUsersFromSheets()" class="p-4 border-2 border-orange-500 rounded-lg hover:bg-orange-50 transition text-left">
+                            <h3 class="font-semibold text-orange-600 mb-1">🔄 Refresh Data</h3>
+                            <p class="text-sm text-gray-600">Reload user data from Google Sheets</p>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Tab -->
+            <div id="usersTab" class="tab-content">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold">User List</h2>
+                        <div class="flex gap-2">
+                            <button onclick="selectAll()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                                Select All
+                            </button>
+                            <button onclick="deselectAll()" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">
+                                Deselect All
+                            </button>
+                            <button onclick="loadUsersFromSheets()" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                                🔄 Refresh
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <input type="text" id="searchUsers" placeholder="Search users..." 
+                            onkeyup="filterUsers()"
+                            class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-blue-500">
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 border-b">
+                                <tr>
+                                    <th class="p-3 text-left">
+                                        <input type="checkbox" id="selectAllCheckbox" onclick="selectAll()">
+                                    </th>
+                                    <th class="p-3 text-left">Name</th>
+                                    <th class="p-3 text-left">Email</th>
+                                    <th class="p-3 text-left">Phone</th>
+                                    <th class="p-3 text-left">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userTableBody">
+                                <tr>
+                                    <td colspan="5" class="p-8 text-center text-gray-500">
+                                        No users loaded. Click "Refresh" to load users.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="userCount" class="mt-4 text-sm text-gray-600"></div>
+                </div>
+            </div>
+
+            <!-- RECRUITS TAB -->
+            <div id="recruitsTab" class="tab-content">
+                <div class="bg-white p-6 rounded-lg shadow mb-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h2 class="text-2xl font-bold">Recruits Overview</h2>
+                            <p class="text-sm text-gray-600 mt-1">View all recruiters and their prospects</p>
+                        </div>
+                        <button onclick="loadAllRecruits()" 
+                                class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition font-semibold">
+                            🔄 Refresh All
+                        </button>
+                    </div>
+
+                    <!-- Summary Stats -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+                            <div class="text-sm text-blue-600 font-semibold mb-1">Total Recruiters</div>
+                            <div id="recruitsStatsRecruiters" class="text-3xl font-bold text-blue-700">0</div>
+                        </div>
+                        <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
+                            <div class="text-sm text-green-600 font-semibold mb-1">Total Prospects</div>
+                            <div id="recruitsStatsProspects" class="text-3xl font-bold text-green-700">0</div>
+                        </div>
+                        <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
+                            <div class="text-sm text-purple-600 font-semibold mb-1">In Course</div>
+                            <div id="recruitsStatsInCourse" class="text-3xl font-bold text-purple-700">0</div>
+                        </div>
+                        <div class="bg-gradient-to-br from-orange-50 to-orange-100 p-4 rounded-lg border border-orange-200">
+                            <div class="text-sm text-orange-600 font-semibold mb-1">Licensed</div>
+                            <div id="recruitsStatsLicensed" class="text-3xl font-bold text-orange-700">0</div>
+                        </div>
+                    </div>
+
+                    <!-- Search and Filter -->
+                    <div class="mb-4 flex gap-4">
+                        <input type="text" id="searchRecruits" 
+                               placeholder="Search recruiters or prospects..." 
+                               onkeyup="filterRecruits()"
+                               class="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                        <select id="filterRecruitsStatus" onchange="filterRecruits()"
+                                class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                            <option value="">All Statuses</option>
+                            <option value="Prospect">Prospect</option>
+                            <option value="In Course">In Course</option>
+                            <option value="Testing">Testing</option>
+                            <option value="Licensed">Licensed</option>
+                        </select>
+                    </div>
+
+                    <!-- Recruiters List -->
+                    <div id="recruitsListContainer">
+                        <div class="text-center py-12 text-gray-500">
+                            Click "Refresh All" to load recruiters and their prospects
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email Tab -->
+            <div id="emailTab" class="tab-content">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h2 class="text-xl font-bold mb-4">Send Email to Selected Users</h2>
+                    
+                    <div id="selectedUsersList" class="mb-4 p-4 bg-blue-50 rounded">
+                        <h3 class="font-semibold mb-2">Selected Recipients: <span id="recipientCount">0</span></h3>
+                        <div id="recipientEmails" class="text-sm text-gray-700"></div>
+                    </div>
+
+                    <form id="emailForm" onsubmit="sendEmails(event)">
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold mb-2">Subject</label>
+                            <input type="text" id="emailSubject" required
+                                class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                                placeholder="Enter email subject">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold mb-2">Message</label>
+                            <textarea id="emailMessage" rows="10" required
+                                class="w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                                placeholder="Enter your message here..."></textarea>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" id="includePersonalization">
+                                <span class="text-sm">Include personalization (use {name} in message)</span>
+                            </label>
+                        </div>
+
+                        <button type="submit" 
+                            class="w-full bg-green-500 text-white p-3 rounded hover:bg-green-600 transition font-semibold">
+                            📧 Send Email to <span id="sendCount">0</span> Recipients
+                        </button>
+                    </form>
+
+                    <div id="emailStatus" class="mt-4"></div>
+                </div>
+            </div>
+
+            <!-- SMS Tab -->
+            <div id="smsTab" class="tab-content">
+              <h2 style="margin-top: 0;">📱 Send SMS Messages</h2>
+              
+              <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                <div style="font-weight: 600; color: #1e40af; margin-bottom: 8px;">🚀 Queue-Based SMS System</div>
+                <div style="color: #1e3a8a; font-size: 14px; line-height: 1.6;">
+                  1. Select recipients and write your message<br>
+                  2. Click "Queue Messages" to add jobs to the queue<br>
+                  3. <a href="https://voice.google.com" target="_blank" style="color: #2563eb; font-weight: 600;">Open Google Voice in new tab →</a><br>
+                  4. Tampermonkey will automatically detect and send pending messages
+                </div>
+              </div>
+            
+              <div style="margin-bottom: 24px;">
+                <label style="display: block; font-weight: 600; margin-bottom: 10px;">
+                  📋 Select Recipients (with phone numbers only)
+                </label>
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                  <button onclick="selectAllSMS()" style="padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                    Select All
+                  </button>
+                  <button onclick="deselectAllSMS()" style="padding: 8px 16px; background: #6b7280; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                    Deselect All
+                  </button>
+                  <span id="smsSelectedCount" style="padding: 8px 16px; background: #f3f4f6; border-radius: 6px; font-weight: 600;">
+                    0 selected
+                  </span>
+                </div>
+            
+                <div id="smsRecipientsList" style="max-height: 300px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; background: white;">
+                  <div style="color: #6b7280; text-align: center; padding: 20px;">
+                    Load users first
+                  </div>
+                </div>
+              </div>
+            
+              <div style="margin-bottom: 24px;">
+                <label style="display: block; font-weight: 600; margin-bottom: 10px;">
+                  ✍️ Message Template
+                </label>
+                <div style="font-size: 13px; color: #6b7280; margin-bottom: 8px;">
+                  Use {name}, {email}, {phone} for personalization
+                </div>
+                <textarea 
+                  id="smsMessageTemplate" 
+                  placeholder="Hi {name}, this is a message from Non-Forfeiture Financial..."
+                  style="width: 100%; min-height: 120px; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; resize: vertical;"
+                ></textarea>
+                <div style="font-size: 13px; color: #6b7280; margin-top: 6px;">
+                  Character count: <span id="smsCharCount">0</span>/160
+                </div>
+              </div>
+            
+              <div id="smsQueueStatus" style="display: none; background: #f0fdf4; border: 1px solid #86efac; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                <div style="font-weight: 600; color: #16a34a; margin-bottom: 8px;">
+                  ✅ Messages Queued Successfully!
+                </div>
+                <div id="smsQueueStatusText" style="color: #15803d; font-size: 14px;"></div>
+              </div>
+            
+              <div id="smsError" style="display: none; background: #fef2f2; border: 1px solid #fca5a5; padding: 16px; border-radius: 8px; margin-bottom: 20px; color: #991b1b;">
+              </div>
+            
+              <div>
+                <button 
+                  id="queueSMSBtn" 
+                  onclick="queueSMSMessages()"
+                  style="padding: 14px 28px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 16px; cursor: pointer; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);"
+                >
+                  📤 Queue Messages
+                </button>
+                
+                <a 
+                  href="https://voice.google.com" 
+                  target="_blank"
+                  style="margin-left: 12px; padding: 14px 28px; background: white; color: #667eea; border: 2px solid #667eea; border-radius: 8px; font-weight: 700; font-size: 16px; text-decoration: none; display: inline-block;"
+                >
+                  🌐 Open Google Voice →
+                </a>
+              </div>
+            </div>
+
+            <!-- Caller Settings Tab (NEW) -->
+            <div id="callerSettingsTab" class="tab-content">
+                <div class="bg-white p-6 rounded-lg shadow mb-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800">⚙️ Caller Settings</h2>
+                            <p class="text-gray-600 mt-1">Set "Calling For" assignments and Calendly URLs for each caller</p>
+                        </div>
+                        <button onclick="saveAllCallerSettings()" class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition font-semibold">
+                            💾 Save All Settings
+                        </button>
+                    </div>
+                    
+                    <div id="callerSettingsStatus" class="mb-4"></div>
+                    
+                    <!-- Instructions -->
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                        <h3 class="font-bold text-blue-800 mb-2">📋 How it works:</h3>
+                        <ul class="text-sm text-blue-700 space-y-1">
+                            <li>• <strong>Calling For</strong>: When this caller dials LEADDB leads, appointments use the selected person's Calendly</li>
+                            <li>• <strong>Calendly URL</strong>: Each user's personal Calendly link (auto-generated but editable)</li>
+                            <li>• For REFDB referrals, the Calendly link is determined by the tab owner (e.g., "Thomas Lancheros" tab → Thomas's Calendly)</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Caller Settings Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full border-collapse">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="p-3 text-left font-semibold">Caller Name</th>
+                                    <th class="p-3 text-left font-semibold">Email</th>
+                                    <th class="p-3 text-left font-semibold">Calling For (LEADDB)</th>
+                                    <th class="p-3 text-left font-semibold">Personal Calendly URL</th>
+                                </tr>
+                            </thead>
+                            <tbody id="callerSettingsTableBody">
+                                <!-- Populated by loadCallerSettings() -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settingsTab" class="tab-content">
+                <div class="bg-white p-6 rounded-lg shadow mb-6">
+                    <h2 class="text-xl font-bold mb-4">API Configuration</h2>
+                    
+                    <div class="mb-4 p-4 bg-yellow-50 border-2 border-yellow-300 rounded">
+                        <h3 class="font-semibold mb-2 text-yellow-800">⚠️ UPDATE RECRUITING API URL</h3>
+                        <p class="text-sm text-yellow-700 mb-2">Search for: <code class="bg-white px-2 py-1 rounded">RECRUITING_API_URL</code></p>
+                        <p class="text-xs text-yellow-600">Update with your deployed Google Apps Script URL</p>
+                    </div>
+
+                    <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded">
+                        <h3 class="font-semibold mb-2">✅ Connected Services</h3>
+                        <div class="text-sm space-y-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-green-600">●</span>
+                                <span>Cloudflare Worker API</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-green-600">●</span>
+                                <span>Google Apps Script Backend</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-green-600">●</span>
+                                <span>Google Sheets Database</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4 p-4 bg-gray-50 rounded">
+                        <h3 class="font-semibold mb-2">API Endpoint</h3>
+                        <code class="text-sm bg-white px-3 py-2 rounded border block break-all">
+                            https://closing-coalition-api.thomaslancheros06.workers.dev/
+                        </code>
+                    </div>
+
+                    <div class="mb-4 p-4 bg-gray-50 rounded">
+                        <h3 class="font-semibold mb-2">Google Sheets</h3>
+                        <code class="text-sm bg-white px-3 py-2 rounded border block break-all">
+                            https://script.google.com/macros/s/AKfycbzyOmxYVDoYJ6zmBMslbneUavlEKeWwplzA8zH8CvkXUx6sOTnfC7JPEsoTbjfJ2scvBQ/exec
+                        </code>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h2 class="text-xl font-bold mb-4">System Actions</h2>
+                    
+                    <div class="space-y-3">
+                        <button onclick="resetEmailCount()" 
+                            class="w-full p-4 border-2 border-orange-500 rounded-lg hover:bg-orange-50 transition text-left">
+                            <h3 class="font-semibold text-orange-600 mb-1">🔄 Reset Email Counter</h3>
+                            <p class="text-sm text-gray-600">Reset today's sent email count to 0</p>
+                        </button>
+
+                        <button onclick="clearCache()" 
+                            class="w-full p-4 border-2 border-red-500 rounded-lg hover:bg-red-50 transition text-left">
+                            <h3 class="font-semibold text-red-600 mb-1">🗑️ Clear Cache</h3>
+                            <p class="text-sm text-gray-600">Clear all cached data and statistics</p>
+                        </button>
+
+                        <button onclick="loadUsersFromSheets()" 
+                            class="w-full p-4 border-2 border-green-500 rounded-lg hover:bg-green-50 transition text-left">
+                            <h3 class="font-semibold text-green-600 mb-1">📥 Reload Users</h3>
+                            <p class="text-sm text-gray-600">Fetch latest user data from Google Sheets</p>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Caller Access Tab -->
+            <div id="callerTab" class="tab-content">
+                <div class="bg-white p-6 rounded-lg shadow mb-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800">Caller Access Management</h2>
+                            <p class="text-gray-600 mt-1">Assign lead sources to callers</p>
+                        </div>
+                        <button onclick="saveCallerPermissions()" class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition font-semibold">
+                            💾 Save All Permissions
+                        </button>
+                    </div>
+                    
+                    <div id="callerStatus" class="mb-4"></div>
+                    
+                    <!-- All Callers List -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-lg font-semibold text-gray-700">📋 All Callers</h3>
+                            <button onclick="loadCallers()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition text-sm font-semibold">
+                                🔄 Refresh Users
+                            </button>
+                        </div>
+                        <div id="callersList" class="flex flex-wrap gap-2">
+                            <!-- Populated by loadCallers() -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CSV Lead Sources -->
+                <div class="bg-white p-6 rounded-lg shadow mb-6">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">📁 CSV Lead Sources</h3>
+                    <div id="csvSourcesContainer">
+                        <!-- Populated by loadCallerSources() -->
+                    </div>
+                </div>
+
+                <!-- User Referral Sources -->
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">👤 User Referral Databases</h3>
+                    <div id="referralSourcesContainer">
+                        <!-- Populated by loadCallerSources() -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <script src="config.js"></script>
+    <script>
+        // ============================================================
+        // ⚠️⚠️⚠️ CONFIGURATION - UPDATE THESE URLS ⚠️⚠️⚠️
+        // ============================================================
+        
+        // Main API - Use CFWORKER from config.js
+        const API_URL = typeof CFWORKER !== 'undefined' ? CFWORKER : '';
+        // LEADSDB and REFDB are already defined in config.js - don't redeclare!
+        // Recruiting API (Google Apps Script for recruits tab)
+        const RECRUITING_API_URL = typeof APPDB !== 'undefined' ? APPDB : '';
+        
+        const ADMIN_EMAIL = 'thomaslancheros.ail@gmail.com';
+        
+        // ============================================================
+        // GLOBAL VARIABLES
+        // ============================================================
+        let users = [];
+        let recruiters = [];
+        let selectedUserEmails = new Set();
+        let allRecruitsData = [];
+
+        // ============================================================
+        // INITIALIZATION
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+        });
+
+        // ============================================================
+        // AUTHENTICATION
+        // ============================================================
+        function checkAuth() {
+            const isAuthenticated = localStorage.getItem('adminAuth') === 'true';
+            const savedEmail = localStorage.getItem('adminEmail');
+            
+            if (isAuthenticated && savedEmail === ADMIN_EMAIL) {
+                showDashboard();
+            } else {
+                showLogin();
+            }
+        }
+
+        function showLogin() {
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+        }
+
+        function showDashboard() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.remove('hidden');
+            document.getElementById('adminEmailDisplay').textContent = ADMIN_EMAIL;
+            loadUsersFromSheets();
+            updateStats();
+        }
+
+        async function sendVerificationCode() {
+            const email = document.getElementById('loginEmail').value.trim();
+            
+            if (!email) {
+                showMessage('Please enter your email address', 'error');
+                return;
+            }
+
+            if (email !== ADMIN_EMAIL) {
+                showMessage('Unauthorized email address', 'error');
+                return;
+            }
+            
+            showMessage('Sending verification code...', 'info');
+
+            try {
+                const response = await fetch(API_URL + '/sendVerification', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: email
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('loginForm').classList.add('hidden');
+                    document.getElementById('verificationForm').classList.remove('hidden');
+                    showMessage('Verification code sent to your email!', 'success');
+                } else {
+                    showMessage(data.message || 'Failed to send verification code', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Error sending verification code. Please try again.', 'error');
+            }
+        }
+
+        async function verifyCode() {
+            const enteredCode = document.getElementById('verificationCode').value.trim();
+            const email = document.getElementById('loginEmail').value.trim();
+            
+            if (!enteredCode) {
+                showMessage('Please enter the verification code', 'error');
+                return;
+            }
+
+            showMessage('Verifying...', 'info');
+
+            try {
+                const response = await fetch(API_URL + '/verifyCode', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: email,
+                        code: enteredCode
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    localStorage.setItem('adminAuth', 'true');
+                    localStorage.setItem('adminEmail', ADMIN_EMAIL);
+                    showMessage('Login successful!', 'success');
+                    setTimeout(() => {
+                        showDashboard();
+                    }, 1000);
+                } else {
+                    showMessage(data.message || 'Invalid verification code', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Error verifying code. Please try again.', 'error');
+            }
+        }
+
+        function backToLogin() {
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('verificationForm').classList.add('hidden');
+            document.getElementById('verificationCode').value = '';
+            showMessage('', '');
+        }
+
+        function logout() {
+            localStorage.removeItem('adminAuth');
+            localStorage.removeItem('adminEmail');
+            showLogin();
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('verificationCode').value = '';
+            backToLogin();
+        }
+
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('loginMessage');
+            const colors = {
+                success: 'text-green-600',
+                error: 'text-red-600',
+                info: 'text-blue-600'
+            };
+            messageDiv.className = `mt-4 text-sm text-center ${colors[type] || ''}`;
+            messageDiv.textContent = message;
+        }
+
+        // ============================================================
+        // TAB NAVIGATION
+        // ============================================================
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('font-semibold', 'text-blue-600', 'bg-blue-50');
+            });
+            
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            
+            event.target.classList.add('font-semibold', 'text-blue-600', 'bg-blue-50');
+            
+            if (tabName === 'email') {
+                updateRecipientList();
+            }
+            
+            // Auto-load recruits data when tab is shown
+            if (tabName === 'recruits' && allRecruitsData.length === 0) {
+                loadAllRecruits();
+            }
+            
+            // Auto-load caller data when tab is shown
+            if (tabName === 'caller') {
+                initCallerTab();
+            }
+            
+            // Auto-load caller settings when tab is shown
+            if (tabName === 'callerSettings') {
+                loadCallerSettings();
+            }
+        }
+
+        // ============================================================
+        // CONFIGURATION
+        // ============================================================
+        function clearCache() {
+            if (confirm('Are you sure you want to clear all cached data?')) {
+                localStorage.removeItem('emailsSentToday');
+                updateStats();
+                alert('Cache cleared successfully!');
+            }
+        }
+
+        function resetEmailCount() {
+            if (confirm('Reset today\'s email count to 0?')) {
+                localStorage.setItem('emailsSentToday', '0');
+                updateStats();
+                alert('Email count reset!');
+            }
+        }
+
+        // ============================================================
+        // USER MANAGEMENT
+        // ============================================================
+        async function loadUsersFromSheets() {
+            try {
+                const response = await fetch(API_URL + '/getUsers', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.users) {
+                    users = data.users.filter(user => user.email);
+                    displayUsers();
+                    updateStats();
+                    populateSMSRecipients(data.users);
+                    console.log(`Loaded ${users.length} users from Google Sheets`);
+                } else {
+                    console.error('Error loading users:', data.message);
+                    alert('Error loading users: ' + (data.message || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+                alert('Error loading users from Google Sheets. Please check your connection.');
+            }
+        }
+
+        function displayUsers() {
+            const tbody = document.getElementById('userTableBody');
+            tbody.innerHTML = '';
+
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-500">No users found</td></tr>';
+                return;
+            }
+
+            users.forEach((user) => {
+                const row = document.createElement('tr');
+                row.className = 'user-row border-b';
+                row.innerHTML = `
+                    <td class="p-3">
+                        <input type="checkbox" class="user-checkbox" data-email="${user.email}" 
+                            onchange="toggleUserSelection('${user.email}')">
+                    </td>
+                    <td class="p-3">${user.name}</td>
+                    <td class="p-3">${user.email}</td>
+                    <td class="p-3">${user.phone || 'N/A'}</td>
+                    <td class="p-3">
+                        <span class="px-2 py-1 rounded text-xs ${user.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                            ${user.status}
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            document.getElementById('userCount').textContent = `Showing ${users.length} users`;
+        }
+
+        function filterUsers() {
+            const searchTerm = document.getElementById('searchUsers').value.toLowerCase();
+            const rows = document.querySelectorAll('.user-row');
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        }
+
+        function selectAll() {
+            document.querySelectorAll('.user-checkbox').forEach(checkbox => {
+                checkbox.checked = true;
+                selectedUserEmails.add(checkbox.dataset.email);
+            });
+            document.getElementById('selectAllCheckbox').checked = true;
+            updateStats();
+            updateRecipientList();
+        }
+
+        function deselectAll() {
+            document.querySelectorAll('.user-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            document.getElementById('selectAllCheckbox').checked = false;
+            selectedUserEmails.clear();
+            updateStats();
+            updateRecipientList();
+        }
+
+        function toggleUserSelection(email) {
+            if (selectedUserEmails.has(email)) {
+                selectedUserEmails.delete(email);
+            } else {
+                selectedUserEmails.add(email);
+            }
+            updateStats();
+            updateRecipientList();
+        }
+
+        function updateStats() {
+            document.getElementById('totalUsers').textContent = users.length;
+            document.getElementById('selectedUsers').textContent = selectedUserEmails.size;
+            document.getElementById('totalRecruiters').textContent = allRecruitsData.length;
+            
+            const emailsSent = localStorage.getItem('emailsSentToday') || 0;
+            document.getElementById('emailsSent').textContent = emailsSent;
+        }
+
+        function updateRecipientList() {
+            const count = selectedUserEmails.size;
+            document.getElementById('recipientCount').textContent = count;
+            document.getElementById('sendCount').textContent = count;
+            
+            const emailsDiv = document.getElementById('recipientEmails');
+            if (count === 0) {
+                emailsDiv.innerHTML = '<p class="text-gray-500 italic">No users selected. Go to User List tab to select recipients.</p>';
+            } else {
+                const emailList = Array.from(selectedUserEmails).slice(0, 10).join(', ');
+                emailsDiv.innerHTML = emailList + (count > 10 ? ` ... and ${count - 10} more` : '');
+            }
+        }
+
+        // ============================================================
+        // EMAIL FUNCTIONS
+        // ============================================================
+        async function sendEmails(event) {
+            event.preventDefault();
+
+            if (selectedUserEmails.size === 0) {
+                alert('Please select at least one user to send email to');
+                return;
+            }
+
+            const subject = document.getElementById('emailSubject').value;
+            const message = document.getElementById('emailMessage').value;
+            const includePersonalization = document.getElementById('includePersonalization').checked;
+
+            const statusDiv = document.getElementById('emailStatus');
+            statusDiv.innerHTML = '<div class="p-4 bg-blue-50 rounded"><p>Sending emails...</p><div class="mt-2 bg-gray-200 rounded h-2"><div id="progressBar" class="bg-blue-500 h-2 rounded transition-all duration-300" style="width: 0%"></div></div></div>';
+
+            let sent = 0;
+            let failed = 0;
+            const total = selectedUserEmails.size;
+
+            for (const email of selectedUserEmails) {
+                const user = users.find(u => u.email === email);
+                const personalizedMessage = includePersonalization && user 
+                    ? message.replace(/{name}/g, user.name)
+                    : message;
+
+                try {
+                    const response = await fetch(API_URL + '/sendEmail', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            to: email,
+                            name: user?.name || '',
+                            subject: subject,
+                            message: personalizedMessage
+                        })
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        sent++;
+                    } else {
+                        failed++;
+                        console.error(`Failed to send to ${email}:`, data.message);
+                    }
+                } catch (error) {
+                    console.error(`Failed to send to ${email}:`, error);
+                    failed++;
+                }
+
+                const progress = ((sent + failed) / total) * 100;
+                document.getElementById('progressBar').style.width = progress + '%';
+            }
+
+            const currentSent = parseInt(localStorage.getItem('emailsSentToday') || 0);
+            localStorage.setItem('emailsSentToday', currentSent + sent);
+            updateStats();
+
+            statusDiv.innerHTML = `
+                <div class="p-4 ${sent > 0 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'} border rounded">
+                    <p class="${sent > 0 ? 'text-green-800' : 'text-red-800'} font-semibold">
+                        ${sent > 0 ? '✅ Email campaign completed!' : '❌ Email campaign failed'}
+                    </p>
+                    <p class="text-sm mt-2">Successfully sent: ${sent} / ${total}</p>
+                    ${failed > 0 ? `<p class="text-sm text-red-600">Failed: ${failed}</p>` : ''}
+                </div>
+            `;
+
+            if (failed === 0) {
+                setTimeout(() => {
+                    document.getElementById('emailForm').reset();
+                }, 3000);
+            }
+        }
+
+        // ============================================================
+        // SMS FUNCTIONS
+        // ============================================================
+        const smsTemplate = document.getElementById('smsMessageTemplate');
+        if (smsTemplate) {
+            smsTemplate.addEventListener('input', (e) => {
+                const charCount = e.target.value.length;
+                const charCountEl = document.getElementById('smsCharCount');
+                if (charCountEl) {
+                    charCountEl.textContent = charCount;
+                }
+            });
+        }
+
+        function populateSMSRecipients(users) {
+            const listDiv = document.getElementById('smsRecipientsList');
+            if (!listDiv) return;
+
+            const usersWithPhone = users.filter(u => u.phone && u.phone.trim().length >= 10);
+
+            if (usersWithPhone.length === 0) {
+                listDiv.innerHTML = `
+                    <div style="color: #dc2626; text-align: center; padding: 20px;">
+                        ⚠️ No users have phone numbers yet.
+                    </div>
+                `;
+                return;
+            }
+
+            listDiv.innerHTML = usersWithPhone.map(user => `
+                <label style="display: flex; align-items: center; padding: 10px; cursor: pointer; border-radius: 6px; margin-bottom: 4px;" 
+                       onmouseover="this.style.background='#f9fafb'" 
+                       onmouseout="this.style.background='white'">
+                    <input 
+                        type="checkbox" 
+                        class="sms-recipient-checkbox" 
+                        value="${user.email}"
+                        data-name="${user.name}"
+                        data-phone="${user.phone}"
+                        style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;"
+                        onchange="updateSMSSelectedCount()"
+                    />
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; color: #111827;">${user.name}</div>
+                        <div style="font-size: 13px; color: #6b7280;">📧 ${user.email}</div>
+                        <div style="font-size: 13px; color: #6b7280;">📱 ${user.phone}</div>
+                    </div>
+                </label>
+            `).join('');
+
+            updateSMSSelectedCount();
+        }
+
+        function selectAllSMS() {
+            document.querySelectorAll('.sms-recipient-checkbox').forEach(cb => {
+                cb.checked = true;
+            });
+            updateSMSSelectedCount();
+        }
+
+        function deselectAllSMS() {
+            document.querySelectorAll('.sms-recipient-checkbox').forEach(cb => {
+                cb.checked = false;
+            });
+            updateSMSSelectedCount();
+        }
+
+        function updateSMSSelectedCount() {
+            const checked = document.querySelectorAll('.sms-recipient-checkbox:checked').length;
+            const countEl = document.getElementById('smsSelectedCount');
+            if (countEl) {
+                countEl.textContent = `${checked} selected`;
+            }
+        }
+
+        async function queueSMSMessages() {
+            const messageTemplate = document.getElementById('smsMessageTemplate').value.trim();
+            const selectedCheckboxes = document.querySelectorAll('.sms-recipient-checkbox:checked');
+
+            document.getElementById('smsQueueStatus').style.display = 'none';
+            document.getElementById('smsError').style.display = 'none';
+
+            if (selectedCheckboxes.length === 0) {
+                showSMSError('Please select at least one recipient');
+                return;
+            }
+
+            if (!messageTemplate) {
+                showSMSError('Please enter a message template');
+                return;
+            }
+
+            const jobs = [];
+            selectedCheckboxes.forEach(checkbox => {
+                const name = checkbox.dataset.name;
+                const email = checkbox.value;
+                const phone = checkbox.dataset.phone;
+
+                let personalizedMessage = messageTemplate
+                    .replace(/\{name\}/g, name)
+                    .replace(/\{email\}/g, email)
+                    .replace(/\{phone\}/g, phone);
+
+                jobs.push({
+                    phone: phone,
+                    name: name,
+                    message: personalizedMessage
+                });
+            });
+
+            const btn = document.getElementById('queueSMSBtn');
+            const originalText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = '⏳ Queueing...';
+
+            try {
+                const response = await fetch(API_URL + '/createSMSJob', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        jobs: jobs
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('smsQueueStatus').style.display = 'block';
+                    document.getElementById('smsQueueStatusText').textContent = 
+                        `Queued ${data.created} message(s). Open Google Voice in a new tab to process them.`;
+                    
+                    deselectAllSMS();
+                    document.getElementById('smsMessageTemplate').value = '';
+                    document.getElementById('smsCharCount').textContent = '0';
+                } else {
+                    showSMSError(data.message || 'Failed to queue messages');
+                }
+
+            } catch (error) {
+                console.error('Queue error:', error);
+                showSMSError('Network error: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        }
+
+        function showSMSError(message) {
+            const errorDiv = document.getElementById('smsError');
+            errorDiv.textContent = '❌ ' + message;
+            errorDiv.style.display = 'block';
+        }
+
+        // ============================================================
+        // RECRUITS TAB FUNCTIONS
+        // ============================================================
+        async function loadAllRecruits() {
+            if (RECRUITING_API_URL === 'YOUR_DEPLOYMENT_URL_HERE') {
+                alert('⚠️ Recruiting API not configured!\n\nPlease update RECRUITING_API_URL in this file.');
+                return;
+            }
+
+            const container = document.getElementById('recruitsListContainer');
+            container.innerHTML = '<div class="text-center py-12"><div class="text-xl font-semibold text-gray-600">Loading recruiters...</div></div>';
+
+            try {
+                // First get all recruiters
+                const recruitersResponse = await fetch(RECRUITING_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({
+                        action: 'getAllRecruiters'
+                    })
+                });
+
+                const recruitersResult = await recruitersResponse.json();
+
+                if (!recruitersResult.success || !recruitersResult.recruiters || recruitersResult.recruiters.length === 0) {
+                    container.innerHTML = '<div class="text-center py-12 text-gray-500">No recruiters found. Recruiters are created automatically when someone uses a referral link.</div>';
+                    return;
+                }
+
+                // Now fetch prospects for each recruiter
+                const recruiterDataPromises = recruitersResult.recruiters.map(async (recruiter) => {
+                    try {
+                        const prospectsResponse = await fetch(RECRUITING_API_URL + '?action=getProspects&recruiterRef=' + recruiter.tabName);
+                        const prospectsResult = await prospectsResponse.json();
+                        
+                        return {
+                            ...recruiter,
+                            prospects: prospectsResult.success ? (prospectsResult.prospects || []) : []
+                        };
+                    } catch (error) {
+                        console.error('Error loading prospects for ' + recruiter.tabName, error);
+                        return {
+                            ...recruiter,
+                            prospects: []
+                        };
+                    }
+                });
+
+                allRecruitsData = await Promise.all(recruiterDataPromises);
+                displayRecruits(allRecruitsData);
+                updateRecruitsStats(allRecruitsData);
+
+            } catch (error) {
+                console.error('Error loading recruits:', error);
+                container.innerHTML = '<div class="text-center py-12 text-red-500">Error loading data. Check console for details.</div>';
+            }
+        }
+
+        function displayRecruits(recruitsData) {
+            const container = document.getElementById('recruitsListContainer');
+            
+            if (recruitsData.length === 0) {
+                container.innerHTML = '<div class="text-center py-12 text-gray-500">No recruiters found matching your search.</div>';
+                return;
+            }
+
+            container.innerHTML = recruitsData.map((recruiter, index) => {
+                const prospectsByStatus = {
+                    'Prospect': recruiter.prospects.filter(p => p.status === 'Prospect').length,
+                    'In Course': recruiter.prospects.filter(p => p.status === 'In Course').length,
+                    'Testing': recruiter.prospects.filter(p => p.status === 'Testing').length,
+                    'Licensed': recruiter.prospects.filter(p => p.status === 'Licensed').length
+                };
+
+                return `
+                    <div class="recruiter-card mb-4 border-2 border-gray-200 rounded-lg overflow-hidden" data-recruiter="${recruiter.tabName}">
+                        <div class="recruiter-header bg-gradient-to-r from-blue-50 to-purple-50 p-4 cursor-pointer hover:from-blue-100 hover:to-purple-100 transition"
+                             onclick="toggleRecruiterProspects('recruiter-${index}')">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-4 flex-1">
+                                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold text-xl">
+                                        ${recruiter.fullName.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="font-bold text-lg text-gray-800">${capitalizeWords(recruiter.fullName)}</div>
+                                        <div class="text-sm text-gray-600">
+                                            <code class="bg-white px-2 py-1 rounded text-xs">${recruiter.tabName}</code>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center gap-6 mr-4">
+                                    <div class="flex gap-2">
+                                        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">
+                                            ${prospectsByStatus['Prospect']} Prospects
+                                        </span>
+                                        <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-semibold">
+                                            ${prospectsByStatus['In Course']} In Course
+                                        </span>
+                                        <span class="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs font-semibold">
+                                            ${prospectsByStatus['Testing']} Testing
+                                        </span>
+                                        <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
+                                            ${prospectsByStatus['Licensed']} Licensed
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="text-2xl font-bold text-gray-700">
+                                        ${recruiter.prospects.length}
+                                        <span class="text-sm font-normal text-gray-500">total</span>
+                                    </div>
+                                </div>
+                                
+                                <div id="arrow-recruiter-${index}" class="text-2xl text-gray-500 transition-transform">
+                                    ▼
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="recruiter-${index}" class="prospects-list hidden">
+                            ${recruiter.prospects.length === 0 ? 
+                                '<div class="p-8 text-center text-gray-500">No prospects yet</div>' 
+                                : 
+                                `<div class="overflow-x-auto">
+                                    <table class="w-full">
+                                        <thead class="bg-gray-50 border-y border-gray-200">
+                                            <tr>
+                                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Name</th>
+                                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Phone</th>
+                                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Date Added</th>
+                                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-gray-200">
+                                            ${recruiter.prospects.map(prospect => `
+                                                <tr class="prospect-row hover:bg-gray-50" data-status="${prospect.status}">
+                                                    <td class="px-6 py-4">
+                                                        <div class="font-medium text-gray-800">${prospect.name}</div>
+                                                    </td>
+                                                    <td class="px-6 py-4">
+                                                        <div class="text-gray-600">${prospect.phone}</div>
+                                                    </td>
+                                                    <td class="px-6 py-4">
+                                                        <div class="text-sm text-gray-500">
+                                                            ${new Date(prospect.datetime).toLocaleDateString('en-US', { 
+                                                                month: 'short', 
+                                                                day: 'numeric',
+                                                                year: 'numeric',
+                                                                hour: '2-digit',
+                                                                minute: '2-digit'
+                                                            })}
+                                                        </div>
+                                                    </td>
+                                                    <td class="px-6 py-4">
+                                                        ${getStatusBadge(prospect.status)}
+                                                    </td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>`
+                            }
+                            
+                            <div class="bg-gray-50 px-6 py-3 border-t border-gray-200">
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-gray-600">
+                                        Referral URL: <code class="bg-white px-2 py-1 rounded text-xs">${recruiter.referralUrl}</code>
+                                    </span>
+                                    <button onclick="copyText('${recruiter.referralUrl}')" 
+                                            class="text-blue-600 hover:underline font-semibold">
+                                        📋 Copy Link
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleRecruiterProspects(id) {
+            const prospectsDiv = document.getElementById(id);
+            const arrow = document.getElementById('arrow-' + id);
+            
+            if (prospectsDiv.classList.contains('hidden')) {
+                prospectsDiv.classList.remove('hidden');
+                arrow.style.transform = 'rotate(180deg)';
+            } else {
+                prospectsDiv.classList.add('hidden');
+                arrow.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                'Prospect': '<span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">Prospect</span>',
+                'In Course': '<span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-semibold">In Course</span>',
+                'Testing': '<span class="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs font-semibold">Testing</span>',
+                'Licensed': '<span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">Licensed</span>'
+            };
+            return badges[status] || '<span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs font-semibold">' + status + '</span>';
+        }
+
+        function updateRecruitsStats(recruitsData) {
+            const totalRecruiters = recruitsData.length;
+            const totalProspects = recruitsData.reduce((sum, r) => sum + r.prospects.length, 0);
+            const totalInCourse = recruitsData.reduce((sum, r) => sum + r.prospects.filter(p => p.status === 'In Course').length, 0);
+            const totalLicensed = recruitsData.reduce((sum, r) => sum + r.prospects.filter(p => p.status === 'Licensed').length, 0);
+
+            document.getElementById('recruitsStatsRecruiters').textContent = totalRecruiters;
+            document.getElementById('recruitsStatsProspects').textContent = totalProspects;
+            document.getElementById('recruitsStatsInCourse').textContent = totalInCourse;
+            document.getElementById('recruitsStatsLicensed').textContent = totalLicensed;
+        }
+
+        function filterRecruits() {
+            const searchTerm = document.getElementById('searchRecruits').value.toLowerCase();
+            const statusFilter = document.getElementById('filterRecruitsStatus').value;
+
+            let filteredData = allRecruitsData;
+
+            if (searchTerm) {
+                filteredData = filteredData.map(recruiter => {
+                    const recruiterMatches = recruiter.fullName.toLowerCase().includes(searchTerm) || 
+                                             recruiter.tabName.toLowerCase().includes(searchTerm);
+                    
+                    const filteredProspects = recruiter.prospects.filter(p => 
+                        p.name.toLowerCase().includes(searchTerm) || 
+                        p.phone.includes(searchTerm)
+                    );
+
+                    if (recruiterMatches || filteredProspects.length > 0) {
+                        return {
+                            ...recruiter,
+                            prospects: recruiterMatches ? recruiter.prospects : filteredProspects
+                        };
+                    }
+                    return null;
+                }).filter(r => r !== null);
+            }
+
+            if (statusFilter) {
+                filteredData = filteredData.map(recruiter => ({
+                    ...recruiter,
+                    prospects: recruiter.prospects.filter(p => p.status === statusFilter)
+                })).filter(r => r.prospects.length > 0);
+            }
+
+            displayRecruits(filteredData);
+        }
+
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✅ Copied to clipboard:\n\n' + text);
+            }).catch(err => {
+                console.error('Error copying:', err);
+                prompt('Copy this URL:', text);
+            });
+        }
+
+        function capitalizeWords(str) {
+            return str.replace(/\b\w/g, l => l.toUpperCase());
+        }
+
+        // ============================================================
+        // CALLER ACCESS TAB FUNCTIONS
+        // ============================================================
+        let allCallers = [];
+        let csvSources = [];
+        let referralSources = [];
+        let callerPermissions = {};
+
+        // Load all callers from LEADSDB
+        async function loadCallers() {
+            try {
+                // Get ALL users directly from AUTH (no verification filter)
+                const response = await fetch(API_URL + '/getUsers', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ action: 'getUsers' }) 
+                });
+                const data = await response.json();
+                
+                console.log('Auth users response:', data);
+                
+                // getUsers returns { success: true, users: [...] }
+                if (data && data.success && Array.isArray(data.users)) {
+                    // Map ALL users to caller format (no verification filter)
+                    allCallers = data.users.map(user => ({
+                        name: user.username || user.name || user.login_email,
+                        email: user.login_email || user.email,
+                        phone: user.phone || '',
+                        verified: user.verified === true || user.verified === 'TRUE',
+                        active: 'YES'
+                    }));
+                } else {
+                    allCallers = [];
+                }
+                
+                console.log('Verified callers:', allCallers);
+                
+                const container = document.getElementById('callersList');
+                if (allCallers.length === 0) {
+                    container.innerHTML = '<p class="text-gray-500">No users found in AUTH system.</p>';
+                    return;
+                }
+                
+                container.innerHTML = allCallers.map(caller => `
+                    <span class="bg-blue-100 text-blue-700 px-3 py-2 rounded-full text-sm font-semibold">
+                        ${caller.verified ? '✅' : '⏳'} ${caller.name}
+                    </span>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error loading callers:', error);
+                allCallers = [];
+                showCallerMessage('Error loading callers: ' + error.message, 'error');
+            }
+        }
+
+        // Load all sources (CSV + Referrals)
+        async function loadCallerSources() {
+            try {
+                console.log('Loading CSV sources from:', LEADSDB);
+                console.log('Loading REF sources from:', REFDB);
+                
+                // Load CSV sources from LEADSDB
+                const csvResponse = await fetch(LEADSDB, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ action: 'getSources' }) 
+                });
+                const csvData = await csvResponse.json();
+                console.log('CSV Response:', csvData);
+                
+                // LEADDB returns array directly
+                csvSources = Array.isArray(csvData) ? csvData : [];
+                
+                // Load referral sources from REFDB
+                const refResponse = await fetch(REFDB, { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ action: 'listUsers' }) 
+                });
+                const refData = await refResponse.json();
+                console.log('REF Response:', refData);
+                
+                // REFDB returns { ok: true, users: [...] } - extract users array
+                referralSources = (refData && refData.ok && refData.users) ? refData.users : [];
+                
+                // Convert count to referralCount for consistency
+                referralSources = referralSources.map(source => ({
+                    ...source,
+                    referralCount: source.count || 0
+                }));
+                
+                console.log('CSV Sources:', csvSources);
+                console.log('REF Sources:', referralSources);
+                
+                // Load existing permissions
+                await loadExistingPermissions();
+                
+                // Render sources
+                renderSourceCards('csvSourcesContainer', csvSources, 'CSV');
+                renderSourceCards('referralSourcesContainer', referralSources, 'Referrals');
+                
+            } catch (error) {
+                console.error('Error loading sources:', error);
+                csvSources = [];
+                referralSources = [];
+                showCallerMessage('Error loading sources: ' + error.message, 'error');
+            }
+        }
+
+        // Load existing permissions from LEADSDB
+        async function loadExistingPermissions() {
+            try {
+                callerPermissions = {};
+                
+                for (const caller of allCallers) {
+                    const response = await fetch(LEADSDB, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'getPermissions', caller: caller.name }) });
+                    const permissions = await response.json();
+                    
+                    // Ensure permissions is always an array
+                    callerPermissions[caller.name] = Array.isArray(permissions) ? permissions : [];
+                    console.log(`[PERMS] Loaded ${callerPermissions[caller.name].length} permissions for ${caller.name}`);
+                }
+            } catch (error) {
+                console.error('Error loading permissions:', error);
+            }
+        }
+
+        // Render source cards with caller checkboxes
+        function renderSourceCards(containerId, sources, sourceType) {
+            const container = document.getElementById(containerId);
+            
+            if (!container) {
+                console.error('Container not found:', containerId);
+                return;
+            }
+            
+            if (!sources || sources.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 p-4">No sources available</p>';
+                return;
+            }
+            
+            if (!allCallers || allCallers.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 p-4">Load callers first by clicking "Sync from AUTH"</p>';
+                return;
+            }
+            
+            container.innerHTML = sources.map(source => {
+                const accessCount = allCallers.filter(caller => 
+                    hasAccess(caller.name, sourceType, source.name || source.username)
+                ).length;
+                
+                const sourceName = source.name || source.username || 'Unnamed';
+                const leadCount = source.leadCount || source.referralCount || source.count || 0;
+                
+                return `
+                    <div class="border-2 border-gray-200 rounded-lg p-5 mb-4 hover:border-blue-400 transition">
+                        <div class="flex justify-between items-center mb-4 pb-4 border-b-2 border-gray-100">
+                            <div class="flex items-center gap-3">
+                                <span class="text-3xl">${sourceType === 'CSV' ? '📁' : '👤'}</span>
+                                <div>
+                                    <div class="font-bold text-lg text-gray-800">${sourceName}</div>
+                                    <div class="text-sm text-gray-500">
+                                        ${sourceType} • ${leadCount} ${sourceType === 'CSV' ? 'leads' : 'referrals'}
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-semibold">
+                                ${accessCount} caller${accessCount !== 1 ? 's' : ''}
+                            </span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            ${allCallers.map(caller => {
+                                const isChecked = hasAccess(caller.name, sourceType, sourceName);
+                                return `
+                                    <label class="flex items-center gap-2 p-3 rounded-lg cursor-pointer transition
+                                        ${isChecked ? 'bg-purple-100 border-2 border-purple-400' : 'bg-gray-50 border-2 border-transparent hover:bg-gray-100'}">
+                                        <input type="checkbox" 
+                                            ${isChecked ? 'checked' : ''}
+                                            onchange="toggleCallerAccess('${caller.name}', '${sourceType}', '${sourceName}', this.checked)"
+                                            class="w-5 h-5 accent-purple-600 cursor-pointer">
+                                        <span class="text-sm font-medium text-gray-700">${caller.name}</span>
+                                    </label>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Check if caller has access to a source
+        function hasAccess(callerName, sourceType, sourceName) {
+            if (!callerPermissions[callerName]) return false;
+            
+            // Ensure it's an array before using .some()
+            const perms = Array.isArray(callerPermissions[callerName]) ? callerPermissions[callerName] : [];
+            
+            return perms.some(p => 
+                p.sourceType === sourceType && p.sourceName === sourceName
+            );
+        }
+
+        // Toggle caller access
+        function toggleCallerAccess(callerName, sourceType, sourceName, hasAccessNow) {
+            // Ensure the caller has an array for permissions
+            if (!callerPermissions[callerName] || !Array.isArray(callerPermissions[callerName])) {
+                callerPermissions[callerName] = [];
+            }
+            
+            if (hasAccessNow) {
+                // Add permission
+                callerPermissions[callerName].push({ sourceType, sourceName });
+            } else {
+                // Remove permission
+                callerPermissions[callerName] = callerPermissions[callerName].filter(p => 
+                    !(p.sourceType === sourceType && p.sourceName === sourceName)
+                );
+            }
+            
+            // Update access count in UI
+            const allSources = [...csvSources, ...referralSources];
+            const source = allSources.find(s => s.name === sourceName);
+            if (source) {
+                const accessCount = allCallers.filter(caller => 
+                    hasAccess(caller.name, sourceType, sourceName)
+                ).length;
+                
+                // Update the counter (find the parent card and update)
+                const cards = document.querySelectorAll('.border-2');
+                cards.forEach(card => {
+                    if (card.textContent.includes(sourceName)) {
+                        const counter = card.querySelector('.bg-blue-600');
+                        if (counter) {
+                            counter.textContent = `${accessCount} caller${accessCount !== 1 ? 's' : ''}`;
+                        }
+                    }
+                });
+            }
+        }
+
+        // Save all caller permissions
+        async function saveCallerPermissions() {
+            try {
+                showCallerMessage('Saving permissions...', 'info');
+                
+                // Build permissions array
+                const permissions = [];
+                
+                for (const callerName in callerPermissions) {
+                    for (const perm of callerPermissions[callerName]) {
+                        permissions.push({
+                            callerName: callerName,
+                            sourceType: perm.sourceType,
+                            sourceName: perm.sourceName,
+                            hasAccess: 'YES'
+                        });
+                    }
+                }
+                
+                const response = await fetch(LEADSDB, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'savePermissions',
+                        permissions: permissions
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showCallerMessage('✅ Permissions saved successfully!', 'success');
+                } else {
+                    showCallerMessage('❌ ' + result.message, 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error saving permissions:', error);
+                showCallerMessage('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        // Show message in caller tab
+        function showCallerMessage(message, type) {
+            const container = document.getElementById('callerStatus');
+            const colors = {
+                success: 'bg-green-100 border-green-400 text-green-700',
+                error: 'bg-red-100 border-red-400 text-red-700',
+                info: 'bg-blue-100 border-blue-400 text-blue-700'
+            };
+            
+            container.innerHTML = `
+                <div class="${colors[type] || colors.info} border-l-4 p-4 rounded">
+                    ${message}
+                </div>
+            `;
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    container.innerHTML = '';
+                }, 3000);
+            }
+        }
+
+        // Initialize caller tab when shown
+        function initCallerTab() {
+            loadCallers().then(() => {
+                loadCallerSources();
+            });
+        }
+
+        // Sync callers from AUTH system
+        async function syncCallersFromAuth() {
+            try {
+                showCallerMessage('Syncing callers from AUTH system...', 'info');
+                
+                const response = await fetch(LEADSDB, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'syncCallersFromAuth',
+                        authUrl: API_URL
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showCallerMessage(`✅ ${result.message} (Total: ${result.total}, Added: ${result.added}, Existing: ${result.existing})`, 'success');
+                    // Reload callers
+                    await loadCallers();
+                    loadCallerSources();
+                } else {
+                    showCallerMessage('❌ ' + result.message, 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error syncing callers:', error);
+                showCallerMessage('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        // ============================================================
+        // CALLER SETTINGS TAB FUNCTIONS (NEW)
+        // ============================================================
+        let allUsersForDropdown = [];
+        let callerSettingsData = {};
+
+        async function loadCallerSettings() {
+            try {
+                showCallerSettingsMessage('Loading caller settings...', 'info');
+                
+                const callersResponse = await fetch(LEADSDB, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'getCallers' }) });
+                const callers = await callersResponse.json();
+                
+                const usersResponse = await fetch(API_URL + '/getAllUsersForDropdown', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                const usersData = await usersResponse.json();
+                
+                if (usersData.success) {
+                    allUsersForDropdown = usersData.users || [];
+                }
+                
+                callerSettingsData = {};
+                callers.forEach(caller => {
+                    callerSettingsData[caller.name] = {
+                        name: caller.name,
+                        email: caller.email,
+                        callingFor: caller.callingFor || '',
+                        calendlyUrl: caller.calendlyUrl || ''
+                    };
+                });
+                
+                renderCallerSettingsTable(callers);
+                showCallerSettingsMessage('', '');
+                
+            } catch (error) {
+                console.error('Error loading caller settings:', error);
+                showCallerSettingsMessage('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        function renderCallerSettingsTable(callers) {
+            const tbody = document.getElementById('callerSettingsTableBody');
+            
+            if (callers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-500">No callers found. Sync from AUTH first.</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = callers.map(caller => {
+                const dropdownOptions = ['<option value="">-- None --</option>']
+                    .concat(allUsersForDropdown.map(u => 
+                        `<option value="${u.username}" ${caller.callingFor === u.username ? 'selected' : ''}>${u.username}</option>`
+                    )).join('');
+                
+                return `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-3 font-medium">${caller.name}</td>
+                        <td class="p-3 text-gray-600 text-sm">${caller.email}</td>
+                        <td class="p-3">
+                            <select onchange="updateCallerSetting('${caller.name}', 'callingFor', this.value)"
+                                class="w-full p-2 border rounded focus:border-blue-500 focus:outline-none">
+                                ${dropdownOptions}
+                            </select>
+                        </td>
+                        <td class="p-3">
+                            <input type="text" value="${caller.calendlyUrl || ''}"
+                                onchange="updateCallerSetting('${caller.name}', 'calendlyUrl', this.value)"
+                                placeholder="https://calendly.com/..."
+                                class="w-full p-2 border rounded focus:border-blue-500 focus:outline-none text-sm">
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateCallerSetting(callerName, field, value) {
+            if (!callerSettingsData[callerName]) {
+                callerSettingsData[callerName] = { name: callerName };
+            }
+            callerSettingsData[callerName][field] = value;
+            callerSettingsData[callerName].modified = true;
+        }
+
+        async function saveAllCallerSettings() {
+            try {
+                showCallerSettingsMessage('Saving settings...', 'info');
+                let saved = 0;
+                
+                for (const callerName in callerSettingsData) {
+                    const data = callerSettingsData[callerName];
+                    if (!data.modified) continue;
+                    
+                    await fetch(LEADSDB, {
+                        method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'updateCallerSettings',
+                            callerName: callerName,
+                            callingFor: data.callingFor || '',
+                            calendlyUrl: data.calendlyUrl || ''
+                        })
+                    });
+                    saved++;
+                }
+                
+                showCallerSettingsMessage(`✅ Saved ${saved} caller settings!`, 'success');
+                
+            } catch (error) {
+                console.error('Error saving settings:', error);
+                showCallerSettingsMessage('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        function showCallerSettingsMessage(message, type) {
+            const container = document.getElementById('callerSettingsStatus');
+            if (!message) { container.innerHTML = ''; return; }
+            const colors = {
+                success: 'bg-green-100 border-green-400 text-green-700',
+                error: 'bg-red-100 border-red-400 text-red-700',
+                info: 'bg-blue-100 border-blue-400 text-blue-700'
+            };
+            container.innerHTML = `<div class="${colors[type] || colors.info} border-l-4 p-4 rounded">${message}</div>`;
+            if (type === 'success') setTimeout(() => container.innerHTML = '', 3000);
+        }
+    </script>
+</body>
+</html>

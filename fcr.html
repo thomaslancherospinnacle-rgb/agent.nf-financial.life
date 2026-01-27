@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FCR Auto-Fill - FINAL Working Version</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        .header h1 { font-size: 32px; margin-bottom: 10px; }
+        .content { padding: 40px; }
+        .info-box {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 5px solid #667eea;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .info-row:last-child { border-bottom: none; }
+        .label { font-weight: 600; color: #666; }
+        .value { color: #333; font-family: monospace; }
+        .bookmarklet-zone {
+            background: #fff;
+            border: 4px dashed #667eea;
+            border-radius: 16px;
+            padding: 50px;
+            text-align: center;
+            margin: 40px 0;
+        }
+        .bookmarklet-button {
+            display: inline-block;
+            padding: 25px 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 24px;
+            font-weight: 700;
+            cursor: move;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+            transition: all 0.3s ease;
+        }
+        .bookmarklet-button:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.7);
+        }
+        .steps {
+            list-style: none;
+            counter-reset: step-counter;
+            margin: 30px 0;
+        }
+        .steps li {
+            counter-increment: step-counter;
+            margin-bottom: 25px;
+            padding-left: 60px;
+            position: relative;
+            line-height: 1.8;
+            font-size: 16px;
+        }
+        .steps li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .btn {
+            padding: 14px 28px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn:hover { background: #5568d3; transform: translateY(-2px); }
+        .alert { padding: 20px; border-radius: 10px; margin: 20px 0; font-size: 15px; }
+        .alert-warning { background: #fff3cd; color: #856404; border: 2px solid #ffeaa7; }
+        code {
+            background: #f8f9fa;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+        }
+        h3 { color: #333; margin: 30px 0 20px 0; font-size: 22px; }
+        ul { line-height: 2.2; color: #555; margin-left: 25px; font-size: 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1>📞 FCR Auto-Fill - WORKING!</h1>
+                <p style="font-size: 18px; opacity: 0.95;">100% Field Match - Tested & Ready</p>
+            </div>
+            <div class="content">
+                <div class="info-box">
+                    <h3 style="margin-top: 0;">✅ Your Information</h3>
+                    <div class="info-row">
+                        <span class="label">Name:</span>
+                        <span class="value" id="userName">Loading...</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Email:</span>
+                        <span class="value" id="userEmail">Loading...</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Phone:</span>
+                        <span class="value" id="userPhone">Loading...</span>
+                    </div>
+                </div>
+                <div class="bookmarklet-zone">
+                    <p style="margin-bottom: 30px; color: #666; font-size: 18px; font-weight: 600;">
+                        ⬇️ DRAG THIS TO YOUR BOOKMARKS BAR ⬇️
+                    </p>
+                    <a href="" id="bookmarkletLink" class="bookmarklet-button" onclick="alert('❌ DRAG to bookmarks, don\\'t click!'); return false;">
+                        🔮 FCR Auto-Fill
+                    </a>
+                </div>
+                <h3>📋 How to Use:</h3>
+                <ol class="steps">
+                    <li>Drag the button above to your bookmarks bar</li>
+                    <li>Go to: https://freecallerregistry.com/fcr/</li>
+                    <li>Click the bookmark on ANY step of the form</li>
+                    <li>ALL fields on that page fill automatically!</li>
+                </ol>
+                <div class="alert alert-warning">
+                    <strong>⚡ Pro Tip:</strong> Click the bookmark multiple times as you go through each step - it fills whatever is visible!
+                </div>
+                <div style="margin-top: 40px; text-align: center;">
+                    <button class="btn" onclick="testCode()">🧪 Test Code</button>
+                    <button class="btn" onclick="location.reload()" style="background: #6c757d; margin-left: 15px;">🔄 Refresh</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const API_URL = 'https://cfworkerapi.thomastcc.workers.dev';
+        async function loadUserData() {
+            try {
+                const lsUsername = localStorage.getItem('cc_username');
+                const lsEmail = localStorage.getItem('adminEmail');
+                const lsPhone = localStorage.getItem('userPhone');
+                if (lsUsername || lsEmail) {
+                    document.getElementById('userName').textContent = lsUsername || 'Not set';
+                    document.getElementById('userEmail').textContent = lsEmail || 'Not set';
+                    document.getElementById('userPhone').textContent = lsPhone || '5862246692';
+                    generateBookmarklet(lsUsername, lsEmail, lsPhone || '5862246692');
+                    return;
+                }
+                const token = getToken();
+                if (token) {
+                    const response = await fetch(`${API_URL}/me`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token }) });
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.ok) {
+                            document.getElementById('userName').textContent = data.username || 'Not set';
+                            document.getElementById('userEmail').textContent = data.loginEmail || 'Not set';
+                            document.getElementById('userPhone').textContent = data.phone || '5862246692';
+                            generateBookmarklet(data.username, data.loginEmail, data.phone || '5862246692');
+                            return;
+                        }
+                    }
+                }
+                document.getElementById('userName').textContent = '❌ Not logged in';
+                document.getElementById('userEmail').textContent = '❌ Not logged in';
+                document.getElementById('userPhone').textContent = '❌ Not logged in';
+                generateBookmarklet('', '', '5862246692');
+            } catch (error) {
+                document.getElementById('userName').textContent = 'Error';
+                document.getElementById('userEmail').textContent = 'Error';
+                document.getElementById('userPhone').textContent = 'Error';
+                generateBookmarklet('', '', '5862246692');
+            }
+        }
+        function getToken() {
+            try { const lsToken = localStorage.getItem('cc_token'); if (lsToken) return lsToken; } catch (e) {}
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [name, value] = cookie.trim().split('=');
+                if (name === 'cc_token') return decodeURIComponent(value);
+            }
+            return null;
+        }
+        function generateBookmarklet(username, email, phone) {
+            const script = `(function(){const d={n:'${username}',e:'${email}',p:'${phone}'};function f(i,v){const el=document.getElementById(i);if(el){el.value=v;el.dispatchEvent(new Event('input',{bubbles:1}));el.dispatchEvent(new Event('change',{bubbles:1}));el.dispatchEvent(new Event('blur',{bubbles:1}));console.log('✓'+i);return 1;}return 0;}console.log('🔮 FCR Auto-Fill');f('enterprise_contact_verification_email',d.e);f('enterprise_company_name','American Income Life Insurance Company');f('enterprise_company_address_line_1','1200 Wooded Acres Dr');f('enterprise_company_address_line_2','');f('enterprise_company_address_city','Waco');f('enterprise_company_address_state','TX');f('enterprise_company_address_zip','26726');f('enterprise_company_url','https://www.ailife.com/');f('enterprise_contact_name',d.n);f('enterprise_contact_phone',d.p);f('enterprise_contact_email',d.e);f('enterprise_category','financial_service');f('call_count','5001');f('additional_feedback','Customers report seeing Spam Likely or Scam Likely labels');f('enterprise_phone_0',d.p);const cb=document.getElementById('enableCheckbox');if(cb&&!cb.checked){cb.checked=1;cb.dispatchEvent(new Event('change',{bubbles:1}));console.log('✓checkbox');}console.log('✅ Done!');alert('✅ Fields filled!\\n\\nReview and click Next');})();`;
+            document.getElementById('bookmarkletLink').href = 'javascript:' + encodeURIComponent(script);
+        }
+        function testCode() {
+            const link = document.getElementById('bookmarkletLink');
+            console.log('Bookmarklet:', decodeURIComponent(link.href.substring(11)));
+            alert('✅ Code generated!\\n\\nCheck console for details.\\n\\nDrag button to bookmarks bar!');
+        }
+        window.addEventListener('DOMContentLoaded', loadUserData);
+    </script>
+</body>
+</html>

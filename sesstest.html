@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Session Test</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #0f0; }
+        .box { background: #000; border: 1px solid #0f0; padding: 15px; margin: 10px 0; }
+        button { background: #0f0; color: #000; border: none; padding: 10px 20px; cursor: pointer; margin: 5px; }
+        .error { color: #f00; }
+        .success { color: #0f0; }
+    </style>
+</head>
+<body>
+    <h1>🔐 Session Tester</h1>
+    
+    <div class="box">
+        <h2>Step 1: Check Session</h2>
+        <button onclick="checkSession()">Check Session</button>
+        <div id="sessionResult"></div>
+    </div>
+    
+    <div class="box">
+        <h2>Step 2: Test Login</h2>
+        <input type="text" id="email" placeholder="Email" style="width: 300px; padding: 5px;">
+        <input type="password" id="password" placeholder="Password" style="width: 300px; padding: 5px;">
+        <br><br>
+        <button onclick="testLogin()">Test Login</button>
+        <div id="loginResult"></div>
+    </div>
+    
+    <div class="box">
+        <h2>Step 3: Test /me Endpoint</h2>
+        <button onclick="testMe()">Test /me</button>
+        <div id="meResult"></div>
+    </div>
+    
+    <script src="config.js"></script>
+    <script>
+        const LS_TOKEN = "cc_token";
+        
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+        
+        function setCookie(name, value, hours) {
+            const expires = new Date();
+            expires.setTime(expires.getTime() + hours * 60 * 60 * 1000);
+            document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
+        }
+        
+        function getToken() {
+            const cookieToken = getCookie(LS_TOKEN);
+            if (cookieToken) return cookieToken;
+            
+            try {
+                const localToken = localStorage.getItem(LS_TOKEN);
+                if (localToken) return localToken;
+            } catch (e) {}
+            
+            return "";
+        }
+        
+        function checkSession() {
+            const result = document.getElementById('sessionResult');
+            const token = getToken();
+            
+            result.innerHTML = `
+                <h3>Session Info:</h3>
+                <p><strong>Cookie:</strong> ${getCookie(LS_TOKEN) || 'NOT FOUND'}</p>
+                <p><strong>localStorage:</strong> ${localStorage.getItem(LS_TOKEN) || 'NOT FOUND'}</p>
+                <p><strong>Token:</strong> ${token || 'NONE'}</p>
+                <p><strong>Status:</strong> <span class="${token ? 'success' : 'error'}">${token ? 'LOGGED IN' : 'NOT LOGGED IN'}</span></p>
+            `;
+        }
+        
+        async function testLogin() {
+            const result = document.getElementById('loginResult');
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                result.innerHTML = '<p class="error">Enter email and password!</p>';
+                return;
+            }
+            
+            result.innerHTML = '<p>Testing login...</p>';
+            
+            try {
+                const res = await fetch(`${CFWORKER}/login`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        loginEmail: email,
+                        password: password
+                    })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok && data.token) {
+                    setCookie(LS_TOKEN, data.token, 12);
+                    localStorage.setItem(LS_TOKEN, data.token);
+                    
+                    result.innerHTML = `
+                        <p class="success">✓ LOGIN SUCCESS!</p>
+                        <p>Token: ${data.token.substring(0, 20)}...</p>
+                        <p>Email: ${data.loginEmail}</p>
+                    `;
+                } else {
+                    result.innerHTML = `<p class="error">✗ LOGIN FAILED: ${data.error || data.message || 'Unknown error'}</p>`;
+                }
+            } catch (e) {
+                result.innerHTML = `<p class="error">✗ ERROR: ${e.message}</p>`;
+            }
+        }
+        
+        async function testMe() {
+            const result = document.getElementById('meResult');
+            const token = getToken();
+            
+            if (!token) {
+                result.innerHTML = '<p class="error">No token found! Login first.</p>';
+                return;
+            }
+            
+            result.innerHTML = '<p>Testing /me endpoint...</p>';
+            
+            try {
+                const res = await fetch(`${CFWORKER}/me`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ token: token })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    result.innerHTML = `
+                        <p class="success">✓ SESSION VALID!</p>
+                        <p>Email: ${data.loginEmail}</p>
+                        <p>Status: ${data.status}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    result.innerHTML = `<p class="error">✗ SESSION INVALID: ${data.error || 'Unknown error'}</p>`;
+                }
+            } catch (e) {
+                result.innerHTML = `<p class="error">✗ ERROR: ${e.message}</p>`;
+            }
+        }
+        
+        // Auto-check on load
+        window.onload = checkSession;
+    </script>
+</body>
+</html>

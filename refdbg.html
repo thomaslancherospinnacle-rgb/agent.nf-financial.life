@@ -1,0 +1,169 @@
+<!doctype html>
+<html>
+<head>
+  <title>Cookie Test - Closing Coalition</title>
+  <style>
+    body { font-family: sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+    .box { background: #f0f0f0; padding: 20px; margin: 20px 0; border-radius: 8px; }
+    .success { background: #d4edda; color: #155724; }
+    .error { background: #f8d7da; color: #721c24; }
+    button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    pre { background: white; padding: 15px; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h1>🔍 Referral Network - Debug Version</h1>
+  
+  <div class="box">
+    <h2>Status: <span id="status">Checking...</span></h2>
+    <p>User: <strong id="userName">Unknown</strong></p>
+  </div>
+  
+  <div class="box">
+    <h3>Debug Info:</h3>
+    <pre id="debugInfo">Loading...</pre>
+  </div>
+  
+  <button onclick="testAuth()">🧪 Test Auth</button>
+  <button onclick="showTokens()">🎫 Show Tokens</button>
+  <button onclick="clearAndLogin()">🗑️ Clear & Login</button>
+  <button onclick="location.href='index.html'">← Back to Login</button>
+
+<script>
+  const LS_TOKEN = "cc_token";
+  const API_URL = "https://closing-coalition-api.thomaslancheros06.workers.dev";
+  
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+  }
+  
+  function log(msg) {
+    const debugInfo = document.getElementById('debugInfo');
+    debugInfo.textContent += msg + '\n';
+    console.log(msg);
+  }
+  
+  function clearLog() {
+    document.getElementById('debugInfo').textContent = '';
+  }
+  
+  async function testAuth() {
+    clearLog();
+    log('=== AUTHENTICATION TEST ===\n');
+    
+    // Step 1: Check tokens
+    const cookieToken = getCookie(LS_TOKEN);
+    const localToken = localStorage.getItem(LS_TOKEN);
+    
+    log(`Cookie token: ${cookieToken ? 'EXISTS ✅' : 'MISSING ❌'}`);
+    log(`localStorage token: ${localToken ? 'EXISTS ✅' : 'MISSING ❌'}`);
+    
+    const token = cookieToken || localToken;
+    
+    if (!token) {
+      document.getElementById('status').textContent = 'NOT LOGGED IN';
+      document.getElementById('status').parentElement.className = 'box error';
+      log('\n❌ No token found - you need to login first!');
+      return;
+    }
+    
+    log(`\nUsing token: ${token.substring(0, 20)}...`);
+    
+    // Step 2: Test API
+    log('\n=== TESTING API ===\n');
+    log('Calling API...');
+    
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'me', token })
+      });
+      
+      log(`Response status: ${response.status}`);
+      
+      const data = await response.json();
+      log(`Response data: ${JSON.stringify(data, null, 2)}`);
+      
+      if (data.ok && data.loginEmail) {
+        const email = data.loginEmail;
+        const name = email.replace('.ail@gmail.com', '')
+                          .replace(/([a-z])([A-Z])/g, '$1 $2')
+                          .split(' ')
+                          .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+                          .join(' ');
+        
+        document.getElementById('status').textContent = 'LOGGED IN ✅';
+        document.getElementById('status').parentElement.className = 'box success';
+        document.getElementById('userName').textContent = name;
+        
+        log(`\n✅ SUCCESS!`);
+        log(`Email: ${email}`);
+        log(`Name: ${name}`);
+        
+      } else {
+        document.getElementById('status').textContent = 'API ERROR';
+        document.getElementById('status').parentElement.className = 'box error';
+        log(`\n❌ API returned error: ${data.error || 'Unknown'}`);
+        log(`This might mean your token expired.`);
+      }
+      
+    } catch (e) {
+      document.getElementById('status').textContent = 'API FAILED';
+      document.getElementById('status').parentElement.className = 'box error';
+      log(`\n❌ API call failed: ${e.message}`);
+      log(`This might be a network error or CORS issue.`);
+    }
+  }
+  
+  function showTokens() {
+    clearLog();
+    log('=== ALL TOKENS & COOKIES ===\n');
+    
+    // Show cookies
+    const allCookies = document.cookie;
+    if (allCookies) {
+      log('Cookies:');
+      allCookies.split('; ').forEach(c => log(`  ${c}`));
+    } else {
+      log('No cookies found');
+    }
+    
+    log('');
+    
+    // Show localStorage
+    try {
+      log('localStorage:');
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        const val = localStorage.getItem(key);
+        log(`  ${key}: ${val.substring(0, 50)}...`);
+      }
+    } catch (e) {
+      log(`Cannot access localStorage: ${e.message}`);
+    }
+  }
+  
+  function clearAndLogin() {
+    if (!confirm('Clear all data and go to login?')) return;
+    
+    // Clear cookies
+    document.cookie.split(";").forEach(c => {
+      document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+    });
+    
+    // Clear localStorage
+    localStorage.clear();
+    
+    alert('Data cleared! Redirecting to login...');
+    window.location.href = 'index.html';
+  }
+  
+  // Auto-run on load
+  window.addEventListener('load', testAuth);
+</script>
+</body>
+</html>

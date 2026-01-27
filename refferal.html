@@ -1,0 +1,1397 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>My Referral Network — Non-Forfeiture Financial</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <style>
+    :root{
+      --bg1:#071423;
+      --bg2:#0a1a2b;
+      --card: rgba(255,255,255,.06);
+      --card2: rgba(255,255,255,.08);
+      --line: rgba(255,255,255,.10);
+      --text:#eaf2ff;
+      --muted: rgba(234,242,255,.72);
+      --muted2: rgba(234,242,255,.52);
+      --accent:#4fd1c5;
+      --accent2:#2dd4bf;
+      --danger:#ff5a7a;
+      --ok:#22c55e;
+      --shadow: 0 18px 60px rgba(0,0,0,.55);
+      --r:18px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 20% 20%, rgba(79,209,197,.22), transparent 55%),
+        radial-gradient(1200px 700px at 80% 15%, rgba(45,212,191,.18), transparent 55%),
+        radial-gradient(900px 600px at 70% 80%, rgba(99,102,241,.16), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      min-height:100%;
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:10;
+      backdrop-filter: blur(12px);
+      background: linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.18));
+      border-bottom:1px solid var(--line);
+    }
+    .topbar-inner{
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 14px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px;
+    }
+    .dot{
+      width:38px; height:38px;
+      border-radius:12px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.35), rgba(255,255,255,.06) 42%, rgba(79,209,197,.22) 100%),
+                  linear-gradient(180deg, rgba(79,209,197,.55), rgba(45,212,191,.12));
+      border:1px solid rgba(255,255,255,.14);
+    }
+    .title{font-weight:900; letter-spacing:.2px; line-height:1.05}
+    .sub{font-size:12px; color:var(--muted2); margin-top:2px}
+
+    .user-info{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .pill{
+      font-family: var(--mono);
+      font-size:12px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.14);
+      color: var(--muted);
+    }
+    .btn-back{
+      padding:10px 16px;
+      text-decoration:none;
+      font-weight:900;
+      border-radius:12px;
+      background: rgba(0,0,0,.18);
+      border: 1px solid var(--line);
+      color: var(--text);
+      cursor:pointer;
+      transition: filter .15s ease;
+    }
+    .btn-back:hover{filter:brightness(1.1)}
+
+    .tabs{
+      background: rgba(0,0,0,.2);
+      border-bottom:1px solid var(--line);
+      display:flex;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 18px;
+      overflow-x:auto;
+    }
+    .tab{
+      padding: 14px 20px;
+      cursor:pointer;
+      border:none;
+      background:transparent;
+      color: var(--muted);
+      font-weight:700;
+      font-size:15px;
+      transition: all .15s ease;
+      border-bottom: 3px solid transparent;
+      white-space:nowrap;
+    }
+    .tab:hover{
+      color: var(--text);
+      background: rgba(255,255,255,.03);
+    }
+    .tab.active{
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    .content{
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px 18px;
+    }
+
+    .tab-content{display:none}
+    .tab-content.active{display:block}
+
+    .card{
+      background: linear-gradient(180deg, var(--card2), var(--card));
+      border:1px solid var(--line);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .stats-bar{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap:16px;
+      margin-bottom:20px;
+    }
+    .stat-card{
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      padding:20px;
+      border-radius: var(--r);
+      text-align:center;
+    }
+    .stat-number{
+      font-size:32px;
+      font-weight:900;
+      margin-bottom:5px;
+    }
+    .stat-label{
+      font-size:13px;
+      opacity:0.9;
+    }
+
+    .form-group{margin-bottom:15px}
+    .form-group label{
+      display:block;
+      margin-bottom:5px;
+      font-weight:600;
+      font-size:13px;
+      color: var(--muted);
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea{
+      width:100%;
+      padding:12px;
+      background: rgba(0,0,0,.2);
+      border:1px solid var(--line);
+      border-radius:10px;
+      color: var(--text);
+      font-size:14px;
+      font-family: var(--sans);
+    }
+    .form-group textarea{
+      min-height:80px;
+      resize:vertical;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus{
+      outline:none;
+      border-color: var(--accent);
+    }
+    .form-row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:15px;
+    }
+
+    .btn{
+      padding:12px 24px;
+      border:none;
+      border-radius:10px;
+      font-weight:700;
+      cursor:pointer;
+      transition: all .15s ease;
+      font-size:15px;
+    }
+    .btn-primary{
+      background: linear-gradient(180deg, rgba(79,209,197,.35), rgba(0,0,0,.18));
+      border: 1px solid rgba(79,209,197,.3);
+      color: var(--text);
+    }
+    .btn-primary:hover{filter:brightness(1.1)}
+    .btn-success{
+      background: var(--ok);
+      color:white;
+    }
+    .btn-success:hover{filter:brightness(1.1)}
+
+    .alert{
+      padding:15px;
+      border-radius:10px;
+      margin-bottom:15px;
+      border-left:4px solid;
+    }
+    .alert-success{
+      background: rgba(34, 197, 94, 0.1);
+      border-left-color: var(--ok);
+      color: var(--ok);
+    }
+    .alert-error{
+      background: rgba(255, 90, 122, 0.1);
+      border-left-color: var(--danger);
+      color: var(--danger);
+    }
+    .alert-info{
+      background: rgba(79, 209, 197, 0.1);
+      border-left-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .sponsor-group{
+      margin-bottom:40px;
+      padding:20px;
+      background: rgba(0,0,0,.15);
+      border-radius: var(--r);
+      border:1px solid var(--line);
+    }
+    .sponsor-card{
+      background: linear-gradient(135deg, var(--ok) 0%, #16a34a 100%);
+      color:white;
+      padding:25px;
+      border-radius: var(--r);
+      margin-bottom:20px;
+    }
+    .sponsor-name{
+      font-size:22px;
+      font-weight:900;
+      margin-bottom:10px;
+    }
+    .sponsor-info{
+      font-size:15px;
+      line-height:1.8;
+    }
+    .sponsor-info a{
+      color:white;
+      text-decoration:none;
+      font-weight:700;
+      border-bottom:2px solid rgba(255,255,255,0.4);
+    }
+    .sponsor-badge{
+      display:inline-block;
+      padding:5px 12px;
+      background: rgba(255,255,255,0.2);
+      border-radius:20px;
+      font-size:13px;
+      margin:5px 5px 0 0;
+    }
+
+    .referrals-container{
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap:16px;
+    }
+    .referral-card{
+      background: linear-gradient(180deg, var(--card2), var(--card));
+      border:1px solid var(--line);
+      border-left:4px solid var(--accent);
+      border-radius: var(--r);
+      padding:20px;
+      transition: all .15s ease;
+    }
+    .referral-card:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,.3);
+    }
+    .ref-name{
+      font-size:18px;
+      font-weight:900;
+      margin-bottom:10px;
+    }
+    .ref-detail{
+      margin:8px 0;
+      font-size:14px;
+      color: var(--muted);
+    }
+    .ref-detail a{
+      color: var(--accent);
+      text-decoration:none;
+      font-weight:600;
+    }
+    .ref-badge{
+      display:inline-block;
+      padding:4px 10px;
+      background: var(--accent);
+      color: var(--bg1);
+      border-radius:5px;
+      font-size:12px;
+      font-weight:700;
+    }
+    .ref-badge.hardcard{
+      background:#fbbf24;
+    }
+    
+    .outcome-badge{
+      display:inline-block;
+      padding:6px 12px;
+      border-radius:6px;
+      font-size:12px;
+      font-weight:700;
+      margin-top:8px;
+      text-transform:uppercase;
+      letter-spacing:0.5px;
+    }
+    .outcome-badge.not-contacted{
+      background: rgba(156, 163, 175, 0.2);
+      border: 1px solid #9ca3af;
+      color: #9ca3af;
+    }
+    .outcome-badge.dialed{
+      background: rgba(251, 191, 36, 0.2);
+      border: 1px solid #fbbf24;
+      color: #fbbf24;
+    }
+    .outcome-badge.scheduled{
+      background: rgba(59, 130, 246, 0.2);
+      border: 1px solid #3b82f6;
+      color: #3b82f6;
+    }
+    .outcome-badge.presented{
+      background: rgba(34, 197, 94, 0.2);
+      border: 1px solid #22c55e;
+      color: #22c55e;
+    }
+    .outcome-badge.dnc{
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid #ef4444;
+      color: #ef4444;
+    }
+    
+    .outcome-select{
+      width: 100%;
+      padding: 8px 10px;
+      background: rgba(0,0,0,.3);
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s ease;
+    }
+    .outcome-select:focus{
+      outline: none;
+      border-color: var(--accent);
+    }
+    .outcome-select option{
+      background: var(--bg2);
+      color: var(--text);
+      padding: 8px;
+    }
+    
+    .extension-box{
+      background: rgba(251, 191, 36, 0.1);
+      border-left:3px solid #fbbf24;
+      padding:12px;
+      margin:12px 0;
+      border-radius:8px;
+      font-style:italic;
+      color:#fbbf24;
+      font-size:13px;
+    }
+    .call-sponsor-btn{
+      width:100%;
+      padding:10px;
+      background: var(--ok);
+      color:white;
+      border:none;
+      border-radius:8px;
+      font-weight:700;
+      cursor:pointer;
+      margin-top:12px;
+      transition: all .15s ease;
+    }
+    .call-sponsor-btn:hover{filter:brightness(1.1)}
+
+    .sponsor-contact{
+      display:none;
+      background: rgba(34, 197, 94, 0.1);
+      border:1px solid var(--ok);
+      border-radius:8px;
+      padding:15px;
+      margin-top:10px;
+    }
+    .sponsor-contact.expanded{display:block}
+    .sponsor-contact-title{
+      font-weight:700;
+      color: var(--ok);
+      margin-bottom:8px;
+    }
+
+    .search-box{
+      width:100%;
+      padding:12px;
+      background: rgba(0,0,0,.2);
+      border:1px solid var(--line);
+      border-radius:10px;
+      color: var(--text);
+      font-size:14px;
+      margin-bottom:15px;
+    }
+    .search-box:focus{
+      outline:none;
+      border-color: var(--accent);
+    }
+
+    @media (max-width: 768px) {
+      .form-row{grid-template-columns:1fr}
+      .referrals-container{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+<!-- Auth Loading Overlay -->
+<div id="authOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #071423, #0a1a2b); z-index: 10000; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+  <div style="text-align: center;">
+    <div style="font-size: 48px; margin-bottom: 20px;">🔒</div>
+    <div style="font-size: 24px; font-weight: bold; margin-bottom: 10px; color: #eaf2ff;">Securing Connection...</div>
+    <div id="authStatus" style="font-size: 14px; color: #4fd1c5; min-height: 20px;"></div>
+  </div>
+</div>
+
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="dot"></div>
+        <div>
+          <div class="title">My Referral Network</div>
+          <div class="sub">The Closing Coalition</div>
+        </div>
+      </div>
+      <div class="user-info">
+        <span class="pill" id="userDisplay">Checking login...</span>
+        <a href="home.html" class="btn-back">← Back to Home</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('tree')">🌳 My Network</button>
+    <button class="tab" onclick="switchTab('add-referral')">➕ Add Referral</button>
+    <button class="tab" onclick="switchTab('add-sponsor')">⭐ Add Sponsor</button>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+    <!-- Family Tree Tab -->
+    <div id="tree" class="tab-content active">
+      <div class="stats-bar" id="statsBar" style="display: none;">
+        <div class="stat-card">
+          <div class="stat-number" id="totalReferrals">0</div>
+          <div class="stat-label">Total Referrals</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="totalSponsors">0</div>
+          <div class="stat-label">Sponsors</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="hardcardCount">0</div>
+          <div class="stat-label">Hardcards</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <button class="btn btn-primary" onclick="loadData()" style="margin-right: 10px;">🔄 Refresh</button>
+        <input type="text" class="search-box" id="searchBox" placeholder="🔍 Search..." oninput="filterTree()">
+        <div id="familyTree"></div>
+      </div>
+    </div>
+
+    <!-- Add Referral Tab -->
+    <div id="add-referral" class="tab-content">
+      <div class="card">
+        <h2 style="margin-bottom: 20px; font-size: 20px;">Add New Referral</h2>
+        <div id="addRefStatus"></div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Referral Name *</label>
+            <input type="text" id="refName" placeholder="Full name">
+          </div>
+          <div class="form-group">
+            <label>Phone Number * (10 digits)</label>
+            <input type="tel" id="refNumber" placeholder="3046849355" maxlength="10">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Relationship *</label>
+            <input type="text" id="refRelation" placeholder="Son, Daughter, Friend, etc.">
+          </div>
+          <div class="form-group">
+            <label>Lead Type *</label>
+            <select id="refLeadType">
+              <option value="Hardcard">Hardcard</option>
+              <option value="Referral">Referral</option>
+              <option value="Child Safe Kit">Child Safe Kit</option>
+              <option value="Request">Request</option>
+              <option value="Willkit">Willkit</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Select Sponsor *</label>
+          <select id="refSponsor">
+            <option value="">Choose a sponsor...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label style="display: block; margin-bottom: 10px;">Sponsor POS?</label>
+          <div style="display: flex; gap: 20px; align-items: center;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin: 0;">
+              <input type="radio" name="refSponsorPos" id="refSponsorPosYes" value="YES" style="width: auto; cursor: pointer;"/>
+              <span>Yes</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin: 0;">
+              <input type="radio" name="refSponsorPos" id="refSponsorPosNo" value="NO" checked style="width: auto; cursor: pointer;"/>
+              <span>No</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Why *</label>
+          <select id="refWhy" onchange="toggleRefWhyOther()">
+            <option value="">Choose a reason...</option>
+            <option value="Discount card">Discount card</option>
+            <option value="CSK">CSK</option>
+            <option value="Willkit">Willkit</option>
+            <option value="Bene">Bene</option>
+            <option value="Catch-Up">Catch-Up</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="refWhyOtherGroup" style="display: none;">
+          <label>Please specify *</label>
+          <input type="text" id="refWhyOther" placeholder="Enter reason..."/>
+        </div>
+
+        <div class="form-group">
+          <label>Extension *</label>
+          <textarea id="refExtension" placeholder="e.g., son, aunt, neighbor..."></textarea>
+        </div>
+
+        <button class="btn btn-success" onclick="addReferral()">➕ Add Referral</button>
+      </div>
+    </div>
+
+    <!-- Add Sponsor Tab -->
+    <div id="add-sponsor" class="tab-content">
+      <div class="card">
+        <h2 style="margin-bottom: 20px; font-size: 20px;">Add New Sponsor</h2>
+        <div id="addSponsorStatus"></div>
+
+        <div class="alert alert-info">
+          <strong>Sponsors</strong> are root-level people in your network.
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Sponsor Name *</label>
+            <input type="text" id="sponsorName" placeholder="Full name">
+          </div>
+          <div class="form-group">
+            <label>Phone Number * (10 digits)</label>
+            <input type="tel" id="sponsorNumber" placeholder="3046849355" maxlength="10">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Lead Type *</label>
+            <select id="sponsorLeadType">
+              <option value="Hardcard">Hardcard</option>
+              <option value="Referral">Referral</option>
+              <option value="Child Safe Kit">Child Safe Kit</option>
+              <option value="Request">Request</option>
+              <option value="Willkit">Willkit</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Sponsor has Policy?(NO COST ADB CARD COUNTS AS POLICY)</label>
+            <select id="sponsorPos">
+              <option value="NO">NO</option>
+              <option value="YES">YES</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Extension (Why?) *</label>
+          <textarea id="sponsorExtension" placeholder="e.g., Original contact, business owner, etc."></textarea>
+        </div>
+
+        <button class="btn btn-success" onclick="addSponsor()">⭐ Add Sponsor</button>
+      </div>
+    </div>
+  </div>
+<script src="config.js"></script>
+<script>
+  ;(() => {
+    "use strict";
+
+    // =========================
+    // REQUIRED GLOBALS / STATE
+    // =========================
+    let referralData = [];
+    let loginEmail = "";
+    let currentUser = ""; // set after auth/cached name
+
+    // =========================
+    // CONFIG (from config.js)
+    // =========================
+    const GOOGLE_SCRIPT_URL = typeof REFDB !== "undefined" ? REFDB : "";
+    const CLOUD_FLARE_URL   = typeof CFWORKER !== "undefined" ? CFWORKER : "";
+
+    // =========================
+    // AUTH CONSTANTS
+    // =========================
+    const LS_TOKEN   = "cc_token";
+    const LS_EXPIRES = "cc_expires_at";
+    const LS_USER    = "cc_username";
+
+    // =========================
+    // SAFE DOM HELPERS
+    // =========================
+    const $ = (id) => document.getElementById(id);
+
+    function setText(id, text) {
+      const el = $(id);
+      if (el) el.textContent = text;
+    }
+
+    function updateAuthStatus(message) {
+      setText("authStatus", message);
+    }
+
+    function hideAuthOverlay() {
+      const overlay = $("authOverlay");
+      if (!overlay) return;
+      overlay.style.opacity = "0";
+      overlay.style.transition = "opacity .25s ease";
+      setTimeout(() => (overlay.style.display = "none"), 250);
+    }
+
+    // =========================
+    // COOKIES (iOS FRIENDLY)
+    // =========================
+    function setCookie(name, value, hours) {
+      const expires = new Date(Date.now() + hours * 60 * 60 * 1000).toUTCString();
+      document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires};path=/;SameSite=Lax`;
+    }
+
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return decodeURIComponent(parts.pop().split(";").shift() || "");
+      return "";
+    }
+
+    function deleteCookie(name) {
+      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;SameSite=Lax`;
+    }
+
+    function logoutLocal() {
+      try {
+        localStorage.removeItem(LS_TOKEN);
+        localStorage.removeItem(LS_EXPIRES);
+        localStorage.removeItem(LS_USER);
+      } catch (e) {}
+      deleteCookie(LS_TOKEN);
+      deleteCookie(LS_EXPIRES);
+      deleteCookie(LS_USER);
+    }
+
+    // =========================
+    // TOKEN + USERNAME
+    // =========================
+    function getToken() {
+      // cookie first
+      const cookieToken = getCookie(LS_TOKEN);
+      if (cookieToken) return cookieToken;
+
+      // fallback localStorage
+      try {
+        const localToken = localStorage.getItem(LS_TOKEN) || "";
+        if (localToken) {
+          // migrate into cookie
+          setCookie(LS_TOKEN, localToken, 12);
+          return localToken;
+        }
+      } catch (e) {}
+      return "";
+    }
+
+    function getCachedUsername() {
+      const c = getCookie(LS_USER);
+      if (c) return c;
+      try {
+        return localStorage.getItem(LS_USER) || "";
+      } catch (e) {
+        return "";
+      }
+    }
+
+    function cacheUsername(name) {
+      if (!name) return;
+      setCookie(LS_USER, name, 12);
+      try {
+        localStorage.setItem(LS_USER, name);
+      } catch (e) {}
+    }
+
+    // =========================
+    // API
+    // =========================
+    async function api(action, payload) {
+      if (!CLOUD_FLARE_URL) throw new Error("CFWORKER not set in config.js");
+    
+      const base = String(CLOUD_FLARE_URL).replace(/\/+$/, ""); // strip trailing /
+      const url = `${base}/${encodeURIComponent(action)}`;
+    
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload || {}),
+      });
+    
+      const txt = await res.text();
+      let data;
+      try { data = JSON.parse(txt); }
+      catch { throw new Error(txt || `Bad JSON from ${action}`); }
+    
+      if (!data || data.ok !== true) {
+        throw new Error(data?.error || data?.detail || "API error");
+      }
+      return data;
+    }
+
+    // =========================
+    // ALERTS
+    // =========================
+    function showAlert(elementId, message, type) {
+      const statusDiv = $(elementId);
+      if (!statusDiv) return;
+      statusDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+      if (type === "success") setTimeout(() => (statusDiv.innerHTML = ""), 5000);
+    }
+
+    // =========================
+    // AUTH / LOGIN FLOW
+    // =========================
+    // Convert login email to a nice display name (customize if you want)
+    function emailToDisplayName(email) {
+      if (!email) return "";
+      // remove known suffixes
+      let base = email
+        .replace(/@.*$/i, "")             // strip domain
+        .replace(/\.ail$/i, "")           // just in case
+        .replace(/\./g, " ")              // dots -> spaces
+        .replace(/_/g, " ");              // underscores -> spaces
+    
+      // Title case words
+      base = base
+        .split(" ")
+        .filter(Boolean)
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(" ");
+    
+      return base || "";
+    }
+    
+    async function requireLogin() {
+      const token = getToken();
+      const cachedName = getCachedUsername();
+    
+      console.log("=== requireLogin() ===");
+      console.log("Token:", token ? "YES" : "NO");
+      console.log("Token source:", getCookie(LS_TOKEN) ? "COOKIE" : "localStorage/none");
+      console.log("Cached username:", cachedName || "(none)");
+    
+      // No token = not logged in
+      if (!token) {
+        setText("userDisplay", "Not logged in");
+        updateAuthStatus("No session token");
+    
+        const tree = $("familyTree");
+        if (tree) {
+          tree.innerHTML = `
+            <div class="alert alert-error">
+              <strong>❌ Not Logged In</strong><br><br>
+              You need to login first.<br><br>
+              <button class="btn btn-primary" onclick="location.href='index.html'">Go to Login</button>
+            </div>
+          `;
+        }
+    
+        // Keep overlay visible (feels secure). If you prefer it gone, call hideAuthOverlay().
+        throw new Error("Not logged in");
+      }
+    
+      // We have a token — verify with backend
+      setText("userDisplay", "Verifying login...");
+      updateAuthStatus("Verifying session...");
+    
+      try {
+        const me = await api("me", { token });
+    
+        // Worker should return: { ok:true, loginEmail:"..." }
+        const loginEmail = me.loginEmail || "";
+        const displayName = emailToDisplayName(loginEmail) || cachedName || "User";
+    
+        // set globals you already use elsewhere
+        window.loginEmail = loginEmail;
+        window.currentUser = displayName;
+    
+        // cache for offline fallback
+        try {
+          setCookie("cc_username", displayName, 12);
+          localStorage.setItem("cc_username", displayName);
+        } catch (e) {}
+    
+        console.log("✅ Login OK:", { loginEmail, displayName });
+    
+        setText("userDisplay", displayName);
+        updateAuthStatus("Session verified");
+        hideAuthOverlay(); // ✅ hide overlay on success
+        return { loginEmail, displayName };
+    
+      } catch (e) {
+        console.error("⚠️ Auth API failed:", e);
+    
+        // fallback: keep app usable with cached name
+        const fallback = cachedName || "User";
+        window.currentUser = fallback;
+    
+        setText("userDisplay", fallback + " (offline)");
+        updateAuthStatus("API offline — using cached user");
+    
+        // show warning, but do not block usage
+        const tree = $("familyTree");
+        if (tree) {
+          tree.innerHTML = `
+            <div class="alert alert-error">
+              <strong>⚠️ API Offline / Auth Failed</strong><br>
+              ${String(e.message || e)}<br><br>
+              <button class="btn btn-primary" onclick="location.reload()">🔄 Try Again</button>
+              <button class="btn btn-primary" onclick="location.href='index.html'">Go to Login</button>
+            </div>
+          `;
+        }
+    
+        hideAuthOverlay();
+    
+        return { loginEmail: "", displayName: fallback, offline: true };
+      }
+    }
+
+
+    // =========================
+    // DATA LOADING
+    // =========================
+    async function loadData() {
+      if (!GOOGLE_SCRIPT_URL) {
+        showAlert("familyTree", "❌ REFDB not set in config.js", "error");
+        return;
+      }
+      if (!currentUser) {
+        showAlert("familyTree", "Loading user info...", "info");
+        return;
+      }
+
+      const treeDiv = $("familyTree");
+      if (treeDiv) treeDiv.innerHTML = '<div class="alert alert-info">⏳ Loading your network...</div>';
+
+      try {
+        console.log("=== LOADING DATA ===", { currentUser });
+
+        const url = `${GOOGLE_SCRIPT_URL}?user=${encodeURIComponent(currentUser)}`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (!Array.isArray(data)) throw new Error("Invalid data format");
+
+        referralData = data;
+        console.log(`✅ Loaded ${data.length} referrals from tab "${currentUser}"`);
+
+        buildFamilyTree();
+        updateSponsorDropdowns();
+        updateStats();
+      } catch (error) {
+        console.error("Error loading data:", error);
+        if (treeDiv) treeDiv.innerHTML = `<div class="alert alert-error">❌ Error: ${error.message}</div>`;
+      }
+    }
+
+    // =========================
+    // FAMILY TREE BUILDING
+    // =========================
+    function buildFamilyTree() {
+      const treeDiv = $("familyTree");
+      if (!treeDiv) return;
+
+      if (!Array.isArray(referralData) || referralData.length === 0) {
+        treeDiv.innerHTML = '<div class="alert alert-info">📝 No referrals yet. Add a sponsor to get started!</div>';
+        return;
+      }
+
+      const sponsorsFromColumn = [...new Set(referralData.map(r => r.sponsorName).filter(Boolean))];
+      const rootSponsors = referralData
+        .filter(r => !r.sponsorName || String(r.sponsorName).trim() === "")
+        .map(r => r.refName)
+        .filter(Boolean);
+
+      const allSponsors = [...new Set([...sponsorsFromColumn, ...rootSponsors])];
+
+      let html = "";
+      allSponsors.forEach(sponsorName => {
+        const referrals = referralData.filter(r => r.sponsorName === sponsorName);
+        const sponsorInfo = referralData.find(r => r.refName === sponsorName);
+        html += buildSponsorGroupHTML(sponsorName, sponsorInfo, referrals);
+      });
+
+      treeDiv.innerHTML = html || '<div class="alert alert-info">No sponsors found yet.</div>';
+    }
+
+    function safePhone(v) {
+      return String(v || "").replace(/\D/g, "");
+    }
+
+    function esc(s) {
+      return String(s ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function buildSponsorGroupHTML(sponsorName, sponsorInfo, referrals) {
+      const sponsor = sponsorInfo || {
+        refName: sponsorName,
+        refNumber: referrals[0]?.sponsorNumber || "",
+        leadType: referrals[0]?.leadType || "",
+        sponsorPos: referrals[0]?.sponsorPos || "NO",
+        extension: "",
+      };
+
+      const cleanPhone = safePhone(sponsor.refNumber);
+
+      let html = `
+        <div class="sponsor-group">
+          <div class="sponsor-card">
+            <div class="sponsor-name">⭐ ${esc(sponsorName)}</div>
+            <div class="sponsor-info">
+              ${cleanPhone ? `📞 <a href="tel:${cleanPhone}">${cleanPhone}</a><br>` : ""}
+              ${sponsor.leadType ? `<span class="sponsor-badge">${esc(sponsor.leadType)}</span>` : ""}
+              ${sponsor.sponsorPos === "YES" ? '<span class="sponsor-badge">SPONSOR POS</span>' : ""}
+              ${sponsor.extension ? `<br><br><strong>📝 Why:</strong> ${esc(sponsor.extension)}` : ""}
+            </div>
+          </div>
+      `;
+
+      if (referrals && referrals.length > 0) {
+        html += '<div class="referrals-container">';
+        referrals.forEach(ref => {
+          const cleanRefPhone = safePhone(ref.refNumber);
+          
+          // Get outcome class for color coding
+          const outcome = ref.outcome || "Not Contacted";
+          const outcomeClass = outcome.toLowerCase().replace(/[^a-z]/g, "");
+          
+          html += `
+            <div class="referral-card">
+              <div class="ref-name">${esc(ref.refName)}</div>
+              ${cleanRefPhone ? `<div class="ref-detail">📞 <a href="tel:${cleanRefPhone}">${cleanRefPhone}</a></div>` : ""}
+              <div class="ref-detail"><strong>Relation:</strong> ${esc(ref.refRelation || "")}</div>
+              <div class="ref-detail">
+                <span class="ref-badge ${ref.leadType === "Hardcard" ? "hardcard" : ""}">${esc(ref.leadType || "")}</span>
+              </div>
+              <div class="form-group" style="margin-top: 12px;">
+                <label style="font-size: 12px; margin-bottom: 6px;">Update Outcome:</label>
+                <select class="outcome-select" data-ref-name="${esc(ref.refName)}" onchange="updateOutcome(this)">
+                  <option value="Not Contacted" ${outcome === "Not Contacted" ? "selected" : ""}>Not Contacted</option>
+                  <option value="Dialed" ${outcome === "Dialed" ? "selected" : ""}>Dialed</option>
+                  <option value="Scheduled" ${outcome === "Scheduled" ? "selected" : ""}>Scheduled</option>
+                  <option value="Presented" ${outcome === "Presented" ? "selected" : ""}>Presented</option>
+                  <option value="DNC" ${outcome === "DNC" ? "selected" : ""}>DNC/No Sale</option>
+                </select>
+              </div>
+              ${ref.extension ? `<div class="extension-box"><strong>📝 Why:</strong> ${esc(ref.extension)}</div>` : ""}
+              <button class="call-sponsor-btn" data-action="toggle-contact">📞 Call Sponsor</button>
+              <div class="sponsor-contact">
+                <div class="sponsor-contact-title">Contact ${esc(sponsor.refName)}</div>
+                <div class="ref-detail">
+                  ${cleanPhone ? `📞 <a href="tel:${cleanPhone}">${cleanPhone}</a><br>` : ""}
+                  💬 "Hi ${esc(sponsor.refName)}, calling about ${esc(ref.refName)}"
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        html += "</div>";
+      } else {
+        html += '<div class="alert alert-info">No referrals yet for this sponsor.</div>';
+      }
+
+      html += "</div>";
+      return html;
+    }
+
+    // =========================
+    // SPONSOR DROPDOWNS
+    // =========================
+    function updateSponsorDropdowns() {
+      const select = $("refSponsor");
+      if (!select) return;
+
+      select.innerHTML = '<option value="">Choose a sponsor...</option>';
+
+      const sponsorsFromColumn = [...new Set(referralData.map(r => r.sponsorName).filter(Boolean))];
+      const rootSponsors = referralData
+        .filter(r => !r.sponsorName || String(r.sponsorName).trim() === "")
+        .map(r => r.refName)
+        .filter(Boolean);
+
+      const allSponsors = [...new Set([...sponsorsFromColumn, ...rootSponsors])].sort();
+
+      allSponsors.forEach(sponsorName => {
+        const sponsorData = referralData.find(r => r.refName === sponsorName);
+        const phone = sponsorData ? safePhone(sponsorData.refNumber) : "";
+        const option = document.createElement("option");
+        option.value = sponsorName;
+        option.textContent = phone ? `${sponsorName} (${phone})` : sponsorName;
+        select.appendChild(option);
+      });
+    }
+
+    // =========================
+    // STATS
+    // =========================
+    function updateStats() {
+      const statsBar = $("statsBar");
+      if (!statsBar) return;
+
+      const totalReferrals = referralData.length;
+      const uniqueSponsors = [...new Set(referralData.map(r => r.sponsorName).filter(Boolean))].length;
+      const hardcards = referralData.filter(r => r.leadType === "Hardcard").length;
+
+      setText("totalReferrals", String(totalReferrals));
+      setText("totalSponsors", String(uniqueSponsors));
+      setText("hardcardCount", String(hardcards));
+
+      statsBar.style.display = totalReferrals > 0 ? "grid" : "none";
+    }
+
+    // =========================
+    // ADD REFERRAL / SPONSOR
+    // =========================
+    async function postToSheet(payload) {
+      const res = await fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+
+      const txt = await res.text();
+      let data;
+      try {
+        data = JSON.parse(txt);
+      } catch {
+        throw new Error(txt || "Bad response");
+      }
+      return data;
+    }
+
+    async function addReferral() {
+      const refName = ($("refName")?.value || "").trim();
+      const refNumber = safePhone($("refNumber")?.value || "");
+      const refRelation = ($("refRelation")?.value || "").trim();
+      const sponsorName = $("refSponsor")?.value || "";
+      const leadType = $("refLeadType")?.value || "";
+      const extension = ($("refExtension")?.value || "").trim();
+      
+      // Get Sponsor POS radio button value
+      const sponsorPosYes = $("refSponsorPosYes");
+      const sponsorPosNo = $("refSponsorPosNo");
+      const sponsorPos = sponsorPosYes?.checked ? "YES" : "NO";
+      
+      // Get Why value - if "Other", use the text input
+      const whySelect = $("refWhy")?.value || "";
+      const whyOther = ($("refWhyOther")?.value || "").trim();
+      const why = whySelect === "Other" ? whyOther : whySelect;
+
+      const refData = {
+        user: currentUser,
+        refName,
+        refNumber,
+        refRelation,
+        sponsorName,
+        sponsorNumber: "",
+        leadType,
+        sponsorPos,
+        why,
+        outcome: "Not Contacted", // Default outcome
+        extension,
+      };
+
+      if (!refName || !refNumber || !refRelation || !sponsorName || !extension || !why) {
+        showAlert("addRefStatus", "❌ Please fill in all fields", "error");
+        return;
+      }
+      if (refNumber.length !== 10) {
+        showAlert("addRefStatus", "❌ Phone must be 10 digits", "error");
+        return;
+      }
+
+      const sponsor = referralData.find(r => r.refName === sponsorName);
+      if (sponsor) refData.sponsorNumber = sponsor.refNumber;
+
+      showAlert("addRefStatus", "⏳ Adding...", "info");
+
+      try {
+        const result = await postToSheet({ action: "addReferral", referralData: refData });
+        if (result && result.success) {
+          showAlert("addRefStatus", "✅ Referral added!", "success");
+          ["refName", "refNumber", "refRelation", "refExtension", "refWhyOther"].forEach(id => { const el = $(id); if (el) el.value = ""; });
+          if ($("refSponsor")) $("refSponsor").value = "";
+          if ($("refWhy")) $("refWhy").value = "";
+          if ($("refWhyOtherGroup")) $("refWhyOtherGroup").style.display = "none";
+          if ($("refSponsorPosNo")) $("refSponsorPosNo").checked = true;
+          setTimeout(loadData, 600);
+        } else {
+          showAlert("addRefStatus", "❌ " + (result?.message || "Failed"), "error");
+        }
+      } catch (e) {
+        showAlert("addRefStatus", "❌ Error: " + e.message, "error");
+      }
+    }
+
+    async function addSponsor() {
+      const refName = ($("sponsorName")?.value || "").trim();
+      const refNumber = safePhone($("sponsorNumber")?.value || "");
+      const leadType = $("sponsorLeadType")?.value || "";
+      const sponsorPos = $("sponsorPos")?.value || "NO";
+      const extension = ($("sponsorExtension")?.value || "").trim();
+
+      const sponsorData = {
+        user: currentUser,
+        refName,
+        refNumber,
+        refRelation: "Root/Sponsor",
+        sponsorName: "",
+        sponsorNumber: "",
+        leadType,
+        sponsorPos,
+        why: "",
+        outcome: "Not Contacted",
+        extension,
+      };
+
+      if (!refName || !refNumber || !extension) {
+        showAlert("addSponsorStatus", "❌ Please fill in all fields", "error");
+        return;
+      }
+      if (refNumber.length !== 10) {
+        showAlert("addSponsorStatus", "❌ Phone must be 10 digits", "error");
+        return;
+      }
+
+      showAlert("addSponsorStatus", "⏳ Adding...", "info");
+
+      try {
+        const result = await postToSheet({ action: "addReferral", referralData: sponsorData });
+        if (result && result.success) {
+          showAlert("addSponsorStatus", "✅ Sponsor added!", "success");
+          ["sponsorName", "sponsorNumber", "sponsorExtension"].forEach(id => { const el = $(id); if (el) el.value = ""; });
+          setTimeout(loadData, 600);
+        } else {
+          showAlert("addSponsorStatus", "❌ " + (result?.message || "Failed"), "error");
+        }
+      } catch (e) {
+        showAlert("addSponsorStatus", "❌ Error: " + e.message, "error");
+      }
+    }
+
+    // =========================
+    // UPDATE OUTCOME
+    // =========================
+    async function updateOutcome(selectElement) {
+      const refName = selectElement.getAttribute('data-ref-name');
+      const newOutcome = selectElement.value;
+      
+      // Find the referral in our data
+      const referral = referralData.find(r => r.refName === refName);
+      if (!referral) {
+        alert("❌ Referral not found");
+        return;
+      }
+      
+      // Show loading state
+      selectElement.disabled = true;
+      const originalValue = referral.outcome;
+      
+      try {
+        // Update the referral with new outcome
+        const updatedData = {
+          ...referral,
+          outcome: newOutcome,
+          user: currentUser
+        };
+        
+        const result = await postToSheet({ 
+          action: "updateReferral", 
+          oldName: refName,
+          referralData: updatedData 
+        });
+        
+        if (result && result.success) {
+          // Update local data
+          referral.outcome = newOutcome;
+          // Show success feedback
+          selectElement.style.borderColor = "#22c55e";
+          setTimeout(() => {
+            selectElement.style.borderColor = "";
+            selectElement.disabled = false;
+          }, 1000);
+        } else {
+          throw new Error(result?.message || "Update failed");
+        }
+      } catch (e) {
+        alert("❌ Error updating outcome: " + e.message);
+        selectElement.value = originalValue; // Revert
+        selectElement.disabled = false;
+      }
+    }
+
+    // =========================
+    // SEARCH & FILTER
+    // =========================
+    function filterTree() {
+      const box = $("searchBox");
+      const searchTerm = (box?.value || "").toLowerCase();
+      const cards = document.querySelectorAll(".referral-card");
+      const groups = document.querySelectorAll(".sponsor-group");
+
+      if (!searchTerm) {
+        cards.forEach(card => (card.style.display = "block"));
+        groups.forEach(group => (group.style.display = "block"));
+        return;
+      }
+
+      cards.forEach(card => {
+        card.style.display = card.textContent.toLowerCase().includes(searchTerm) ? "block" : "none";
+      });
+
+      groups.forEach(group => {
+        const visibleCards = Array.from(group.querySelectorAll(".referral-card")).filter(c => c.style.display !== "none");
+        const sponsorCard = group.querySelector(".sponsor-card");
+        const sponsorText = sponsorCard ? sponsorCard.textContent.toLowerCase() : "";
+        group.style.display = visibleCards.length > 0 || sponsorText.includes(searchTerm) ? "block" : "none";
+      });
+    }
+
+    // =========================
+    // WHY DROPDOWN TOGGLE
+    // =========================
+    function toggleRefWhyOther() {
+      const whySelect = $("refWhy");
+      const otherGroup = $("refWhyOtherGroup");
+      const otherInput = $("refWhyOther");
+      
+      if (whySelect && otherGroup) {
+        if (whySelect.value === "Other") {
+          otherGroup.style.display = "block";
+          if (otherInput) otherInput.required = true;
+        } else {
+          otherGroup.style.display = "none";
+          if (otherInput) {
+            otherInput.required = false;
+            otherInput.value = "";
+          }
+        }
+      }
+    }
+
+    // =========================
+    // UI HELPERS
+    // =========================
+    function switchTab(tabName) {
+      document.querySelectorAll(".tab-content").forEach(tc => tc.classList.remove("active"));
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+
+      const panel = $(tabName);
+      if (panel) panel.classList.add("active");
+
+      const tabs = document.querySelectorAll(".tab");
+      if (tabName === "tree" && tabs[0]) tabs[0].classList.add("active");
+      if (tabName === "add-referral" && tabs[1]) tabs[1].classList.add("active");
+      if (tabName === "add-sponsor" && tabs[2]) tabs[2].classList.add("active");
+    }
+
+    // Event delegation: fixes inline onclick + keeps generated HTML clean
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-action]");
+      if (!btn) return;
+
+      const action = btn.getAttribute("data-action");
+      if (action === "toggle-contact") {
+        const contact = btn.nextElementSibling;
+        if (!contact) return;
+        contact.classList.toggle("expanded");
+        btn.textContent = contact.classList.contains("expanded") ? "✖️ Close" : "📞 Call Sponsor";
+      }
+    });
+
+    // Expose functions used by inline HTML attributes
+    window.switchTab = switchTab;
+    window.filterTree = filterTree;
+    window.loadData = loadData;
+    window.addReferral = addReferral;
+    window.addSponsor = addSponsor;
+    window.toggleRefWhyOther = toggleRefWhyOther;
+    window.updateOutcome = updateOutcome;
+
+    // =========================
+    // BOOT
+    // =========================
+    async function boot() {
+      console.log("=== BOOT ===", window.location.href);
+
+      // Show overlay status immediately (overlay exists in DOM already)
+      updateAuthStatus("Starting...");
+
+      try {
+        await requireLogin();
+      } catch (e) {
+        // already handled UI; continue
+        console.warn("requireLogin threw:", e.message);
+      }
+
+      // even offline mode: loadData will use currentUser (cached/User)
+      if (!currentUser) currentUser = getCachedUsername() || "User";
+      await loadData();
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", boot, { once: true });
+    } else {
+      boot();
+    }
+  })();
+</script>
+
+</body>
+</html>

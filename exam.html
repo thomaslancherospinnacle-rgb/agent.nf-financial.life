@@ -1,0 +1,1376 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Non-Forfeiture Financial — Exam</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <style>
+    :root{
+      --bg1:#071423;
+      --bg2:#0b1220;
+      --card: rgba(255,255,255,.06);
+      --card2: rgba(255,255,255,.08);
+      --line: rgba(255,255,255,.10);
+      --text:#eaf2ff;
+      --muted: rgba(234,242,255,.72);
+      --muted2: rgba(234,242,255,.52);
+      --accent:#2dd4bf;
+      --danger:#ff5a7a;
+      --ok:#22c55e;
+      --shadow: 0 18px 60px rgba(0,0,0,.55);
+      --r:18px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 20% 20%, rgba(45,212,191,.18), transparent 55%),
+        radial-gradient(900px 600px at 75% 80%, rgba(99,102,241,.14), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      padding:20px;
+    }
+    .wrap{width:min(1100px, 100%); margin:0 auto; display:grid; gap:14px;}
+    .card{
+      background: linear-gradient(180deg, var(--card2), var(--card));
+      border:1px solid var(--line);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .head{
+      padding:16px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      border-bottom:1px solid var(--line);
+    }
+    .brand{display:flex; gap:12px; align-items:center;}
+    .dot{
+      width:40px; height:40px;
+      border-radius:12px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.35), rgba(255,255,255,.06) 42%, rgba(45,212,191,.22) 100%),
+                  linear-gradient(180deg, rgba(45,212,191,.55), rgba(45,212,191,.12));
+      border:1px solid rgba(255,255,255,.14);
+    }
+    .title{font-weight:900; letter-spacing:.2px; line-height:1.05}
+    .sub{font-size:12px; color:var(--muted2); margin-top:2px}
+    .right{display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end}
+    .badge{
+      font-size:12px;
+      font-weight:900;
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.18);
+      color: var(--muted);
+      max-width: 320px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .badge.ok{border-color: rgba(34,197,94,.35); color: rgba(220,255,233,.92)}
+    .badge.err{border-color: rgba(255,90,122,.35); color: rgba(255,220,228,.92)}
+    .btn{
+      border:none;
+      cursor:pointer;
+      padding:10px 12px;
+      border-radius: 14px;
+      font-weight:900;
+      color: var(--text);
+      background: linear-gradient(180deg, rgba(45,212,191,.35), rgba(0,0,0,.18));
+      border:1px solid rgba(45,212,191,.28);
+      transition: transform .05s ease, filter .15s ease;
+    }
+    .btn.secondary{
+      background: rgba(0,0,0,.18);
+      border:1px solid var(--line);
+      color: var(--muted);
+    }
+    .btn:active{transform: translateY(1px)}
+    .btn:disabled{opacity:.55; cursor:not-allowed}
+
+    .body{padding:16px 18px 18px}
+    .grid{display:grid; grid-template-columns: 1fr; gap:12px;}
+    .row2{display:grid; grid-template-columns: 1fr; gap:12px;}
+    @media (min-width: 820px){ .row2{grid-template-columns: 1fr 1fr;} }
+
+    label{display:block; font-size:12px; color:var(--muted2); margin:0 0 6px}
+    select,input{
+      width:100%;
+      padding:12px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      outline:none;
+      font-size:14px;
+      font-family: var(--mono);
+    }
+    select:focus,input:focus{border-color: rgba(45,212,191,.45); box-shadow:0 0 0 4px rgba(45,212,191,.10)}
+    .pill{
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.12);
+      color: var(--text);
+      overflow:hidden;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+    }
+    .actions{display:flex; gap:10px; flex-wrap:wrap}
+    .muted{color:var(--muted); font-size:13px; line-height:1.5}
+    .hr{height:1px; background:var(--line); margin:14px 0}
+
+    /* Exam UI */
+    .qCard{
+      padding:16px;
+      border-radius: 16px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.12);
+    }
+    .qTop{display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap}
+    .qTitle{font-weight:900; letter-spacing:.2px}
+    .qMeta{color:var(--muted2); font-size:12px; font-family:var(--mono)}
+    .question{margin:12px 0 10px; font-size:18px; font-weight:900; line-height:1.25}
+    .choices{display:grid; gap:10px; margin-top:10px}
+    .choice{
+      padding:12px 12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.14);
+      cursor:pointer;
+      user-select:none;
+      font-weight:800;
+      line-height:1.25;
+    }
+    .choice:hover{filter:brightness(1.08)}
+    .choice.locked{cursor:default; opacity:.95}
+    .choice.correct{
+      border-color: rgba(34,197,94,.55);
+      box-shadow: 0 0 0 4px rgba(34,197,94,.10);
+      background: rgba(34,197,94,.14);
+      color: rgba(220,255,233,.96);
+    }
+    .choice.wrong{
+      border-color: rgba(255,90,122,.55);
+      box-shadow: 0 0 0 4px rgba(255,90,122,.10);
+      background: rgba(255,90,122,.12);
+      color: rgba(255,220,228,.96);
+    }
+    .exp{
+      margin-top:12px;
+      padding:12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.14);
+      color: var(--muted);
+      display:none;
+    }
+    .exp.show{display:block}
+    .exp b{color:var(--text)}
+    .footerRow{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:12px}
+    .kpiRow{display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:10px; margin-top:10px}
+    @media (max-width: 700px){ .kpiRow{grid-template-columns:1fr} }
+    .kpi{
+      padding:12px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.05);
+    }
+    .kpi .h{font-size:11px; color:var(--muted2)}
+    .kpi .v{font-family:var(--mono); font-weight:900; font-size:16px; margin-top:4px}
+
+    /* Dictionary Integration */
+    .dict-term{
+      text-decoration: underline dotted rgba(45,212,191,.55);
+      text-underline-offset: 3px;
+      cursor: help;
+      position: relative;
+    }
+    .dict-term:hover{
+      color: var(--accent);
+    }
+    .dict-tooltip{
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(180deg, rgba(15,23,42,.98), rgba(7,20,35,.98));
+      border: 1px solid rgba(45,212,191,.4);
+      border-radius: 12px;
+      padding: 8px 12px;
+      white-space: nowrap;
+      z-index: 1000;
+      box-shadow: 0 12px 32px rgba(0,0,0,.7);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .15s ease;
+    }
+    .dict-term:hover .dict-tooltip,
+    .dict-tooltip.show{
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .dict-tooltip-btn{
+      background: linear-gradient(180deg, rgba(45,212,191,.35), rgba(0,0,0,.18));
+      border: 1px solid rgba(45,212,191,.45);
+      border-radius: 8px;
+      padding: 6px 12px;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: filter .15s ease;
+    }
+    .dict-tooltip-btn:hover{
+      filter: brightness(1.15);
+    }
+    .dict-modal{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.85);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 20px;
+    }
+    .dict-modal.show{
+      display: flex;
+    }
+    .dict-modal-content{
+      background: linear-gradient(180deg, var(--card2), var(--card));
+      border: 1px solid rgba(45,212,191,.35);
+      border-radius: var(--r);
+      box-shadow: 0 24px 60px rgba(0,0,0,.8);
+      max-width: 600px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      animation: slideIn .2s ease;
+    }
+    @keyframes slideIn{
+      from{transform: translateY(-20px); opacity:0}
+      to{transform: translateY(0); opacity:1}
+    }
+    .dict-modal-header{
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .dict-modal-title{
+      font-weight: 900;
+      font-size: 18px;
+      color: var(--accent);
+    }
+    .dict-modal-close{
+      background: rgba(0,0,0,.18);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 6px 12px;
+      color: var(--muted);
+      font-weight: 800;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .dict-modal-close:hover{
+      filter: brightness(1.1);
+    }
+    .dict-modal-body{
+      padding: 18px;
+    }
+    .dict-category{
+      font-size: 11px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 8px;
+    }
+    .dict-definition{
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+  </style>
+</head>
+
+<body>
+<!-- Auth Loading Overlay -->
+<div id="authOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #071423, #0a1a2b); z-index: 10000; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+  <div style="text-align: center;">
+    <div style="font-size: 48px; margin-bottom: 20px;">🔒</div>
+    <div style="font-size: 24px; font-weight: bold; margin-bottom: 10px; color: #eaf2ff;">Securing Connection...</div>
+    <div id="authStatus" style="font-size: 14px; color: #4fd1c5; min-height: 20px;"></div>
+  </div>
+</div>
+
+
+  <div class="wrap">
+
+    <div class="card">
+      <div class="head">
+        <div class="brand">
+          <img 
+            src="logo.png"
+            alt="Non-Forfeiture Financial Logo"
+            style="
+              width:40px;
+              height:40px;
+              object-fit:contain;
+              border-radius:12px;
+              border:1px solid rgba(255,255,255,.14);
+              background:rgba(255,255,255,.04);
+              padding:6px;
+              display:block;
+            "
+          >
+          <div>
+            <div class="title"> Coalition — Exam</div>
+            <div class="sub">Select exam • select question count • click answers • instant explanation • uploads best result</div>
+          </div>
+        </div>
+
+        <div class="right">
+          <span id="userBadge" class="badge">Checking login…</span>
+          <button id="logoutBtn" class="btn secondary" style="display:none">Logout</button>
+        </div>
+      </div>
+
+      <div class="body">
+        <div class="grid">
+
+          <div class="row2">
+            <div>
+              <label for="examSelect">Select Exam</label>
+              <select id="examSelect">
+                <option value="MI" selected>MI</option>
+                <option value="TN">TN</option>
+              </select>
+              <div class="muted" style="margin-top:8px">
+                Files expected: <span style="font-family:var(--mono)">/exams/MIexam.js</span> and <span style="font-family:var(--mono)">/exams/TNexam.js</span>
+              </div>
+            </div>
+
+            <div>
+              <label for="qCount">Select questions (type a number)</label>
+              <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
+                <input id="qCount" type="number" min="1" value="25" style="flex:1; min-width:180px" />
+                <div id="loadedPill" class="pill" style="min-width:240px">Loaded: —</div>
+              </div>
+              <div class="muted" style="margin-top:8px">
+                Max will match the loaded exam bank.
+              </div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button id="loadBtn" class="btn secondary">Load Exam Bank</button>
+            <button id="startBtn" class="btn" disabled>Start Exam</button>
+            <button id="retakeMissedBtn" class="btn secondary" disabled>Retake Missed (0)</button>
+            <button id="finishBtn" class="btn secondary" disabled>Finish</button>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="kpiRow">
+            <div class="kpi"><div class="h">Timer</div><div class="v" id="timer">0:00</div></div>
+            <div class="kpi"><div class="h">Progress</div><div class="v" id="progress">—</div></div>
+            <div class="kpi"><div class="h">Score</div><div class="v" id="score">—</div></div>
+            <div class="kpi"><div class="h">Missed Queue</div><div class="v" id="missedCount">0</div></div>
+          </div>
+
+          <div id="examArea" class="qCard" style="display:none">
+            <div class="qTop">
+              <div class="qTitle" id="qTitle">Question</div>
+              <div class="qMeta" id="qMeta">—</div>
+            </div>
+
+            <div class="question" id="qText">—</div>
+            <div class="choices" id="choices"></div>
+            <div style="margin-top:14px">
+              <button id="nextBtn" class="btn secondary" disabled style="width:100%">
+                Next
+              </button>
+            </div>
+            <div class="exp" id="explainBox">
+              <b>Explanation:</b>
+              <div id="explainText" style="margin-top:6px"></div>
+            </div>
+
+            <div class="footerRow">
+              <span id="statusPill" class="badge">Pick an answer</span>
+              <span id="uploadPill" class="badge" style="display:none"></span>
+            </div>
+          </div>
+
+          <div id="doneArea" class="qCard" style="display:none">
+            <div class="qTitle">Completed</div>
+            <div class="muted" id="doneText" style="margin-top:10px"></div>
+            <div id="retakeMissedArea" style="margin-top:16px;display:none">
+              <button id="takeMissedBtn" class="btn accent">Take Missed?</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Dictionary Modal -->
+  <div id="dictModal" class="dict-modal">
+    <div class="dict-modal-content">
+      <div class="dict-modal-header">
+        <div class="dict-modal-title" id="dictModalTerm">Term</div>
+        <button class="dict-modal-close" id="dictModalClose">Close</button>
+      </div>
+      <div class="dict-modal-body">
+        <div class="dict-category" id="dictModalCategory">Category</div>
+        <div class="dict-definition" id="dictModalDefinition">Definition</div>
+      </div>
+    </div>
+  </div>
+
+<!-- Load shared dictionary -->
+<script src="config.js"></script>
+<script src="dictionary.js"></script>
+
+<script type="module">
+/**********************
+ * CONFIG (REPLACE THIS)
+ **********************/
+const CLOUD_FLARE_URL = typeof CFWORKER !== 'undefined' ? CFWORKER : "https://closing-coalition-api.thomaslancheros06.workers.dev";
+// Expected actions on backend: me, logout, saveExamResult
+
+/**********************
+ * DICTIONARY INTEGRATION
+ **********************/
+// TERMS loaded from dictionary.js
+
+// Build dictionary lookup map
+const termMap = new Map();
+TERMS.forEach(t => {
+  const key = t.term.toLowerCase();
+  termMap.set(key, t);
+  // Also add without parenthetical parts for easier matching
+  const baseKey = key.replace(/\s*\([^)]*\)/g, '').trim();
+  if (baseKey !== key) {
+    termMap.set(baseKey, t);
+  }
+});
+
+// Highlight terms in text
+function highlightTerms(text) {
+  if (!text) return text;
+  
+  // Create array of terms sorted by length (longest first to avoid partial matches)
+  const sortedTerms = Array.from(new Set(termMap.keys()))
+    .sort((a, b) => b.length - a.length);
+  
+  let result = text;
+  const matches = [];
+  
+  // Find all matches
+  sortedTerms.forEach(term => {
+    const regex = new RegExp(`\\b${term}\\b`, 'gi');
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+      matches.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        term: match[0],
+        termKey: term
+      });
+    }
+  });
+  
+  // Sort matches by position
+  matches.sort((a, b) => a.start - b.start);
+  
+  // Remove overlapping matches (keep first)
+  const filtered = [];
+  let lastEnd = -1;
+  matches.forEach(m => {
+    if (m.start >= lastEnd) {
+      filtered.push(m);
+      lastEnd = m.end;
+    }
+  });
+  
+  // Build result with highlights (work backwards to preserve indices)
+  filtered.reverse().forEach(m => {
+    const termData = termMap.get(m.termKey.toLowerCase());
+    if (termData) {
+      const before = result.substring(0, m.start);
+      const after = result.substring(m.end);
+      const highlighted = `<span class="dict-term" data-term="${m.termKey.toLowerCase()}">${m.term}<span class="dict-tooltip"><button class="dict-tooltip-btn" data-term-key="${m.termKey.toLowerCase()}">Define</button></span></span>`;
+      result = before + highlighted + after;
+    }
+  });
+  
+  return result;
+}
+
+// Show definition modal
+function showDefinition(termKey) {
+  const termData = termMap.get(termKey.toLowerCase());
+  if (!termData) return;
+  
+  document.getElementById('dictModalTerm').textContent = termData.term;
+  document.getElementById('dictModalCategory').textContent = termData.category;
+  document.getElementById('dictModalDefinition').textContent = termData.definition;
+  document.getElementById('dictModal').classList.add('show');
+}
+
+// Tooltip hover delay management
+let tooltipTimers = new Map();
+
+function setupTooltipHover(termElement) {
+  const tooltip = termElement.querySelector('.dict-tooltip');
+  if (!tooltip) return;
+  
+  // Prevent clicks on tooltip from bubbling to parent elements
+  tooltip.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+  
+  termElement.addEventListener('mouseenter', () => {
+    // Clear any existing timer for this tooltip
+    const timerId = tooltipTimers.get(tooltip);
+    if (timerId) {
+      clearTimeout(timerId);
+      tooltipTimers.delete(tooltip);
+    }
+    tooltip.classList.add('show');
+  });
+  
+  termElement.addEventListener('mouseleave', () => {
+    // Set timer to hide tooltip after 2 seconds
+    const timerId = setTimeout(() => {
+      tooltip.classList.remove('show');
+      tooltipTimers.delete(tooltip);
+    }, 2000);
+    tooltipTimers.set(tooltip, timerId);
+  });
+  
+  // Keep tooltip visible when hovering over it
+  tooltip.addEventListener('mouseenter', () => {
+    const timerId = tooltipTimers.get(tooltip);
+    if (timerId) {
+      clearTimeout(timerId);
+      tooltipTimers.delete(tooltip);
+    }
+  });
+  
+  tooltip.addEventListener('mouseleave', () => {
+    const timerId = setTimeout(() => {
+      tooltip.classList.remove('show');
+      tooltipTimers.delete(tooltip);
+    }, 2000);
+    tooltipTimers.set(tooltip, timerId);
+  });
+}
+
+// Apply tooltip hover behavior to all terms
+function initTooltips() {
+  document.querySelectorAll('.dict-term').forEach(setupTooltipHover);
+  
+  // Add click handlers to Define buttons with event stopping
+  document.querySelectorAll('.dict-tooltip-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation(); // Prevent click from bubbling to answer choice
+      e.preventDefault();
+      const termKey = btn.getAttribute('data-term-key');
+      showDefinition(termKey);
+    });
+  });
+}
+
+// Close modal
+document.getElementById('dictModalClose').addEventListener('click', () => {
+  document.getElementById('dictModal').classList.remove('show');
+});
+
+document.getElementById('dictModal').addEventListener('click', (e) => {
+  if (e.target.id === 'dictModal') {
+    document.getElementById('dictModal').classList.remove('show');
+  }
+});
+
+/**********************
+ * LOGIN GUARD (token) - iOS Compatible
+ **********************/
+const LS_TOKEN = "cc_token";
+const LS_EXPIRES = "cc_expires_at";
+
+// Cookie helpers (for iOS compatibility)
+function setCookie(name, value, hours) {
+  const expires = new Date();
+  expires.setTime(expires.getTime() + hours * 60 * 60 * 1000);
+  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
+}
+
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null;
+}
+
+function getToken() {
+  // Check cookie first (iOS-compatible)
+  const cookieToken = getCookie(LS_TOKEN);
+  if (cookieToken) return cookieToken;
+  
+  // Fallback to localStorage
+  try {
+    const localToken = localStorage.getItem(LS_TOKEN);
+    if (localToken) {
+      // Migrate to cookie for iOS compatibility
+      setCookie(LS_TOKEN, localToken, 12);
+      return localToken;
+    }
+  } catch (e) {
+    // localStorage blocked on iOS
+  }
+  return "";
+}
+
+const userBadge = document.getElementById("userBadge");
+const logoutBtn = document.getElementById("logoutBtn");
+
+function setBadge(kind, text){
+  userBadge.className = "badge " + (kind === "ok" ? "ok" : kind === "err" ? "err" : "");
+  userBadge.textContent = text;
+}
+
+async function api(action, payload){
+  const res = await fetch(`${CLOUD_FLARE_URL}/${action}`, {
+    method: "POST",
+    headers: { "Content-Type":"application/json" },
+    body: JSON.stringify(payload)
+  });
+  const txt = await res.text();
+  let data;
+  try { data = JSON.parse(txt); } catch { throw new Error(txt || "Bad response"); }
+  if (!data || data.ok !== true) {
+    const msg = (data && (data.error || data.detail)) ? (data.error + (data.detail ? " — " + data.detail : "")) : "Request failed";
+    throw new Error(msg);
+  }
+  return data;
+}
+
+let loginEmail = "";
+
+async function requireLogin(){
+  const token = getToken();
+  console.log('requireLogin: token =', token ? 'exists' : 'missing');
+  
+  if (!token){
+    console.log('No token found, redirecting to login');
+    window.location.href = "/login.html";
+    return;
+  }
+
+  try {
+    updateAuthStatus("Verifying session...");
+    console.log('Calling /me endpoint with token...');
+    const me = await api("me", { token });
+    console.log('Session verified:', me);
+
+    loginEmail = me.loginEmail || "";
+    setBadge("ok", loginEmail ? `Logged in: ${loginEmail}` : "Logged in");
+  } catch (e) {
+    // token invalid or expired - clear both cookie and localStorage
+    console.error('Session verification failed:', e.message);
+    document.cookie = `${LS_TOKEN}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+    document.cookie = `${LS_EXPIRES}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+    try {
+      localStorage.removeItem(LS_TOKEN);
+      localStorage.removeItem(LS_EXPIRES);
+    } catch (e) {}
+    console.log('Redirecting to login...');
+    window.location.href = "/login.html";
+  }
+}
+
+
+/**********************
+ * EXAM BANK LOADING
+ **********************/
+const examSelect = document.getElementById("examSelect");
+const loadBtn = document.getElementById("loadBtn");
+const startBtn = document.getElementById("startBtn");
+const nextBtn = document.getElementById("nextBtn");
+const finishBtn = document.getElementById("finishBtn");
+const qCountEl = document.getElementById("qCount");
+const loadedPill = document.getElementById("loadedPill");
+
+const examArea = document.getElementById("examArea");
+const doneArea = document.getElementById("doneArea");
+
+const qTitle = document.getElementById("qTitle");
+const qMeta = document.getElementById("qMeta");
+const qText = document.getElementById("qText");
+const choicesEl = document.getElementById("choices");
+
+const explainBox = document.getElementById("explainBox");
+const explainText = document.getElementById("explainText");
+
+const statusPill = document.getElementById("statusPill");
+const uploadPill = document.getElementById("uploadPill");
+
+const timerEl = document.getElementById("timer");
+const progressEl = document.getElementById("progress");
+const scoreEl = document.getElementById("score");
+const missedCountEl = document.getElementById("missedCount");
+const retakeMissedBtn = document.getElementById("retakeMissedBtn");
+const takeMissedBtn = document.getElementById("takeMissedBtn");
+const retakeMissedArea = document.getElementById("retakeMissedArea");
+
+let bank = [];
+let deck = [];
+let idx = 0;
+let correct = 0;
+let answered = 0;
+let locked = false;
+
+let startTs = 0;
+let timerInt = null;
+
+// Missed questions tracking
+let missedThisSession = []; // questions missed in current exam
+let missedFromServer = [];  // loaded from server for retake
+let isRetakeMode = false;
+let missedForRetake = [];   // stored for "Take Missed?" immediate retake
+
+// Domain tracking for readiness metrics
+let domainStats = {}; // { "domain_name": { correct: 0, total: 0 } }
+
+function fmtTime(sec){
+  sec = Math.max(0, Math.floor(sec));
+  const m = Math.floor(sec/60);
+  const s = sec % 60;
+  return m + ":" + (s < 10 ? "0" : "") + s;
+}
+
+function shuffle(arr){
+  return arr.map(v => [Math.random(), v]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
+}
+
+function clearGlobals(){
+  // remove common exports so we don't accidentally reuse stale values
+  try { delete window.EXAM_QUESTIONS; } catch {}
+  try { delete window.MI_EXAM_QUESTIONS; } catch {}
+  try { delete window.TN_EXAM_QUESTIONS; } catch {}
+  try { delete window.MIEXAM; } catch {}
+  try { delete window.TNEXAM; } catch {}
+}
+
+function pickQuestionsFromWindow(){
+  // priority list
+  const candidates = [
+    window.EXAM_QUESTIONS,
+    window.MI_EXAM_QUESTIONS,
+    window.TN_EXAM_QUESTIONS,
+    window.MIEXAM,
+    window.TNEXAM
+  ].filter(Array.isArray);
+
+  if (candidates.length) return candidates[0];
+
+  // last resort: scan window for an array of objects that look like questions
+  for (const k of Object.keys(window)){
+    const v = window[k];
+    if (Array.isArray(v) && v.length && v[0] && typeof v[0] === "object" && ("question" in v[0]) && ("correct" in v[0]) && ("wrongs" in v[0])){
+      return v;
+    }
+  }
+  return [];
+}
+
+function loadScript(src){
+  return new Promise((resolve, reject) => {
+    // Remove any existing script with the same source pattern
+    const existing = document.querySelector(`script[src^="${src.split('?')[0]}"]`);
+    if (existing) {
+      existing.remove();
+    }
+    
+    const s = document.createElement("script");
+    s.src = src + "?v=" + Date.now(); // cache-bust for updates
+    s.onload = () => {
+      console.log("Script loaded successfully:", src);
+      resolve();
+    };
+    s.onerror = (e) => {
+      console.error("Script failed to load:", src, e);
+      reject(new Error("Failed to load " + src));
+    };
+    document.head.appendChild(s);
+  });
+}
+
+async function loadExamBank(){
+  const code = examSelect.value; // "MI" or "TN"
+  const src = "./exams/" + code + "exam.js"; // MIexam.js / TNexam.js
+  // NOTE: your file names are MIexam.js and TNexam.js. This matches.
+  
+  console.log("Loading exam bank from:", src);
+
+  startBtn.disabled = true;
+  loadedPill.textContent = "Loaded: …";
+  bank = [];
+  deck = [];
+  idx = 0;
+
+  clearGlobals();
+
+  try {
+    await loadScript(src);
+  } catch(e) {
+    console.error("Failed to load script:", e);
+    throw e;
+  }
+
+  bank = pickQuestionsFromWindow();
+
+  const total = bank.length;
+  loadedPill.textContent = "Loaded: " + total;
+
+  // enforce max
+  qCountEl.max = String(total || 1);
+  if (Number(qCountEl.value) > total) qCountEl.value = String(total || 1);
+
+  if (!total){
+    startBtn.disabled = true;
+    statusPill.textContent = "No questions loaded";
+    return;
+  }
+
+  statusPill.textContent = "Ready";
+  startBtn.disabled = false;
+}
+
+loadBtn.addEventListener("click", async () => {
+  statusPill.textContent = "Loading exam bank…";
+  try{
+    await loadExamBank();
+  } catch(e){
+    loadedPill.textContent = "Loaded: 0";
+    startBtn.disabled = true;
+    statusPill.textContent = "Load failed: " + e.message;
+    console.error("Load error:", e);
+    alert("Failed to load exam: " + e.message + "\n\nMake sure the file exists at: ./exams/" + examSelect.value + "exam.js");
+  }
+});
+
+/**********************
+ * EXAM RUN
+ **********************/
+function resetExamState(){
+  deck = [];
+  idx = 0;
+  correct = 0;
+  answered = 0;
+  locked = false;
+  domainStats = {}; // Reset domain tracking
+  explainBox.classList.remove("show");
+  explainText.textContent = "";
+  uploadPill.style.display = "none";
+  uploadPill.textContent = "";
+  uploadPill.className = "badge";
+  doneArea.style.display = "none";
+  examArea.style.display = "none";
+  retakeMissedArea.style.display = "none";
+  nextBtn.disabled = true;
+  finishBtn.disabled = true;
+  progressEl.textContent = "—";
+  scoreEl.textContent = "—";
+  timerEl.textContent = "0:00";
+  if (timerInt) clearInterval(timerInt);
+  timerInt = null;
+}
+
+function startTimer(){
+  startTs = Date.now();
+  timerEl.textContent = "0:00";
+  if (timerInt) clearInterval(timerInt);
+  timerInt = setInterval(() => {
+    const sec = (Date.now() - startTs) / 1000;
+    timerEl.textContent = fmtTime(sec);
+  }, 250);
+}
+
+function stopTimer(){
+  if (timerInt) clearInterval(timerInt);
+  timerInt = null;
+  const sec = Math.floor((Date.now() - startTs) / 1000);
+  return Math.max(0, sec);
+}
+
+function render(){
+  const q = deck[idx];
+  if (!q){
+    finishExam();
+    return;
+  }
+
+  locked = false;
+  nextBtn.disabled = true;
+  finishBtn.disabled = false;
+
+  examArea.style.display = "";
+  doneArea.style.display = "none";
+
+  explainBox.classList.remove("show");
+  explainText.textContent = "";
+
+  qTitle.textContent = "Question";
+  qMeta.textContent = `#${idx + 1} / ${deck.length}`;
+
+  qText.innerHTML = highlightTerms(q.question || "—");
+  choicesEl.innerHTML = "";
+
+  const choices = shuffle([q.correct, ...(q.wrongs || [])]).filter(Boolean);
+
+  if (!choices.length){
+    const d = document.createElement("div");
+    d.className = "muted";
+    d.textContent = "No choices found for this question.";
+    choicesEl.appendChild(d);
+    return;
+  }
+
+  progressEl.textContent = `${idx + 1}/${deck.length}`;
+  scoreEl.textContent = `${correct}/${answered}`;
+
+  statusPill.textContent = "Pick an answer";
+  statusPill.className = "badge";
+
+  for (const opt of choices){
+    const c = document.createElement("div");
+    c.className = "choice";
+    c.innerHTML = highlightTerms(opt);
+
+    c.addEventListener("click", () => {
+      if (locked) return;
+      locked = true;
+
+      // lock all
+      const kids = Array.from(choicesEl.children);
+      kids.forEach(k => k.classList.add("locked"));
+
+      const isRight = opt === q.correct;
+
+      // Track domain stats
+      const domain = q.domain || q.category || "General";
+      if (!domainStats[domain]) {
+        domainStats[domain] = { correct: 0, total: 0 };
+      }
+      domainStats[domain].total++;
+      if (isRight) domainStats[domain].correct++;
+
+      // paint
+      kids.forEach(k => {
+        if (k.textContent === q.correct) k.classList.add("correct");
+      });
+      if (!isRight){
+        c.classList.add("wrong");
+        
+        // Track this missed question
+        missedThisSession.push({
+          question_text: q.question,
+          correct_answer: q.correct,
+          user_answer: opt,
+          explanation: q.explanation || "",
+          difficulty: q.difficulty || "",
+          wrongs: q.wrongs || [],
+          domain: domain
+        });
+      }
+
+      answered++;
+      if (isRight) correct++;
+
+      scoreEl.textContent = `${correct}/${answered}`;
+
+      // show explanation
+      const exp = (q.explanation || "").trim();
+      explainText.innerHTML = highlightTerms(exp || "No explanation provided.");
+      explainBox.classList.add("show");
+
+      statusPill.textContent = isRight ? "Correct" : "Wrong";
+      statusPill.className = "badge " + (isRight ? "ok" : "err");
+
+      // enable next
+      nextBtn.disabled = false;
+    });
+
+    choicesEl.appendChild(c);
+  }
+  
+  // Initialize tooltip hover behavior for all newly rendered terms
+  initTooltips();
+}
+
+startBtn.addEventListener("click", () => {
+  if (!bank.length){
+    alert("Load an exam bank first.");
+    return;
+  }
+
+  const n = Math.floor(Number(qCountEl.value || 0));
+  if (!n || n < 1){
+    alert("Enter a valid number of questions.");
+    return;
+  }
+  if (n > bank.length){
+    alert(`You asked for ${n}, but only ${bank.length} questions are loaded.`);
+    return;
+  }
+
+  resetExamState();
+  missedThisSession = []; // Clear missed questions for new exam
+  isRetakeMode = false;
+
+  deck = shuffle(bank).slice(0, n);
+  idx = 0;
+  correct = 0;
+  answered = 0;
+
+  startTimer();
+  render();
+
+  startBtn.disabled = true;
+  loadBtn.disabled = true;
+  examSelect.disabled = true;
+  qCountEl.disabled = true;
+  retakeMissedBtn.disabled = true;
+});
+
+nextBtn.addEventListener("click", () => {
+  if (idx < deck.length - 1){
+    idx++;
+    render();
+  } else {
+    finishExam();
+  }
+});
+
+finishBtn.addEventListener("click", () => finishExam());
+
+// "Take Missed?" button - retake only missed questions
+takeMissedBtn.addEventListener("click", () => {
+  if (!missedForRetake.length) {
+    alert("No missed questions to retake!");
+    return;
+  }
+
+  // Reset exam state but keep the missed questions
+  resetExamState();
+  missedThisSession = [];
+  isRetakeMode = true;
+
+  // Set deck to the missed questions (shuffled)
+  deck = shuffle([...missedForRetake]);
+  idx = 0;
+  correct = 0;
+  answered = 0;
+
+  // Update question count display
+  qCountEl.value = String(deck.length);
+
+  // Start the exam
+  startTimer();
+  render();
+
+  // Disable setup UI during exam
+  startBtn.disabled = true;
+  loadBtn.disabled = true;
+  examSelect.disabled = true;
+  qCountEl.disabled = true;
+
+  // Hide the retake area
+  retakeMissedArea.style.display = "none";
+});
+
+async function finishExam(){
+  const time_sec = stopTimer();
+  const total = deck.length || 0;
+
+  const score_pct = total ? Math.round((correct / total) * 100) : 0;
+  const pct = total ? Math.round((correct / total) * 1000) / 10 : 0;
+  examArea.style.display = "none";
+  doneArea.style.display = "";
+
+  const missedCount = missedThisSession.length;
+  
+  // Store missed questions for immediate retake
+  missedForRetake = missedThisSession.map(q => ({
+    question: q.question_text,
+    correct: q.correct_answer,
+    explanation: q.explanation || "",
+    difficulty: q.difficulty || "",
+    wrongs: q.wrongs || [],
+    domain: q.domain || "General"
+  }));
+  
+  // Calculate domain_low_pct (lowest score among all domains)
+  let domain_low_pct = score_pct; // Default to total score
+  const domainScores = {};
+  
+  for (const domain in domainStats) {
+    const stats = domainStats[domain];
+    if (stats.total > 0) {
+      const domainPct = Math.round((stats.correct / stats.total) * 100);
+      domainScores[domain] = domainPct;
+      if (domainPct < domain_low_pct) {
+        domain_low_pct = domainPct;
+      }
+    }
+  }
+  
+  document.getElementById("doneText").innerHTML = `
+    <div style="font-weight:900;font-size:18px">Score: ${correct}/${total} (${pct}%)</div>
+    <div style="margin-top:6px">Time: ${fmtTime(time_sec)} (${time_sec}s)</div>
+    ${missedCount > 0 ? `<div style="margin-top:6px;color:var(--danger)">${missedCount} question${missedCount > 1 ? 's' : ''} missed</div>` : `<div style="margin-top:6px;color:var(--ok)">Perfect! No missed questions!</div>`}
+    <div style="margin-top:10px;color:var(--muted);font-size:13px">
+      Uploading results & calculating readiness…
+    </div>
+    `;
+
+  // Show/hide "Take Missed?" button
+  if (missedCount > 0) {
+    retakeMissedArea.style.display = "";
+    takeMissedBtn.textContent = `Take Missed? (${missedCount})`;
+  } else {
+    retakeMissedArea.style.display = "none";
+  }
+
+  // re-enable setup UI
+  startBtn.disabled = false;
+  loadBtn.disabled = false;
+  examSelect.disabled = false;
+  qCountEl.disabled = false;
+  nextBtn.disabled = true;
+  finishBtn.disabled = true;
+
+  // Upload score (existing logic)
+  uploadPill.style.display = "";
+  uploadPill.textContent = "Uploading…";
+  uploadPill.className = "badge";
+
+  try{
+    await api("saveBestExam", {
+      token: getToken(),
+      exam: examSelect.value,
+      score_pct,
+      time_sec
+    });
+    uploadPill.textContent = "Score saved";
+    uploadPill.className = "badge ok";
+  } catch(e){
+    uploadPill.textContent = "Score upload failed";
+    uploadPill.className = "badge err";
+  }
+
+  // Save attempt metrics for readiness tracking (NEW)
+  let readinessData = null;
+  try {
+    readinessData = await api("saveAttemptMetrics", {
+      token: getToken(),
+      exam: examSelect.value,
+      total_score_pct: score_pct,
+      domain_low_pct: domain_low_pct,
+      time_total_sec: time_sec,
+      question_count: total
+    });
+    console.log("Readiness metrics saved:", readinessData);
+  } catch(e) {
+    console.error("Failed to save attempt metrics:", e);
+  }
+
+  // Log missed questions to spreadsheet (appends forever for review)
+  if (missedThisSession.length > 0) {
+    try {
+      await api("logMissedQuestions", {
+        token: getToken(),
+        exam: examSelect.value,
+        missed: missedThisSession.map(q => ({
+          question: q.question_text,
+          answer: q.correct_answer
+        }))
+      });
+      console.log("Missed questions logged to sheet:", missedThisSession.length);
+    } catch(e) {
+      console.error("Failed to log missed questions:", e);
+    }
+  }
+
+  // Update done screen with readiness info
+  let readinessHtml = "";
+  if (readinessData && readinessData.ok) {
+    const statusColor = readinessData.readiness_status === "READY" ? "var(--ok)" :
+                       readinessData.readiness_status === "BORDERLINE" ? "var(--accent)" :
+                       "var(--danger)";
+    
+    readinessHtml = `
+      <div style="margin-top:16px;padding:14px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.14)">
+        <div style="font-weight:900;font-size:14px;margin-bottom:8px">📊 Readiness Metrics</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.6">
+          <div><strong>Recent Score:</strong> ${readinessData.total_score_pct.toFixed(1)}%</div>
+          <div><strong>Last 3 Avg:</strong> ${readinessData.last3_avg_pct.toFixed(1)}%</div>
+          <div><strong>Lowest Domain:</strong> ${readinessData.domain_low_pct.toFixed(1)}%</div>
+          <div><strong>Time/Question:</strong> ${readinessData.time_per_q_sec.toFixed(1)}s</div>
+          <div style="margin-top:10px;padding:8px;border-radius:8px;background:rgba(0,0,0,.2);border:1px solid ${statusColor}">
+            <strong style="color:${statusColor}">Status: ${readinessData.readiness_status}</strong><br/>
+            <span style="font-size:12px">Readiness Score: ${readinessData.readiness_score_pct.toFixed(1)}%</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  document.getElementById("doneText").innerHTML = `
+    <div style="font-weight:900;font-size:18px">Score: ${correct}/${total} (${pct}%)</div>
+    <div style="margin-top:6px">Time: ${fmtTime(time_sec)} (${time_sec}s)</div>
+    ${missedCount > 0 ? `<div style="margin-top:6px;color:var(--danger)">${missedCount} question${missedCount > 1 ? 's' : ''} missed</div>` : `<div style="margin-top:6px;color:var(--ok)">Perfect! No missed questions!</div>`}
+    ${Object.keys(domainScores).length > 0 ? `
+      <div style="margin-top:12px;font-size:13px;color:var(--muted2)">
+        <strong>Domain Scores:</strong><br/>
+        ${Object.entries(domainScores).map(([d, s]) => `${d}: ${s}%`).join(' • ')}
+      </div>
+    ` : ''}
+    ${readinessHtml}
+  `;
+
+  // If in retake mode and got all correct, clear those questions
+  if (isRetakeMode && missedThisSession.length === 0 && deck.length > 0) {
+    try {
+      const questionTexts = deck.map(q => q.question);
+      await api("clearMissedQuestions", {
+        token: getToken(),
+        exam: examSelect.value,
+        questionTexts: questionTexts
+      });
+      console.log("Cleared mastered questions from review queue");
+    } catch(e) {
+      console.error("Failed to clear questions:", e);
+    }
+  }
+
+  // Refresh missed questions count
+  await loadMissedQuestions();
+  isRetakeMode = false;
+}
+
+/**********************
+ * MISSED QUESTIONS
+ **********************/
+async function loadMissedQuestions() {
+  try {
+    const exam = examSelect.value;
+    const result = await api("getMissedQuestions", {
+      token: getToken(),
+      exam: exam
+    });
+    
+    if (result.ok) {
+      missedFromServer = result.questions || [];
+      const count = missedFromServer.length;
+      missedCountEl.textContent = String(count);
+      retakeMissedBtn.textContent = `Retake Missed (${count})`;
+      retakeMissedBtn.disabled = count === 0;
+    }
+  } catch(e) {
+    console.error("Failed to load missed questions:", e);
+    missedFromServer = [];
+    missedCountEl.textContent = "?";
+    retakeMissedBtn.disabled = true;
+  }
+}
+
+retakeMissedBtn.addEventListener("click", async () => {
+  if (!missedFromServer.length) {
+    alert("No missed questions to review!");
+    return;
+  }
+
+  resetExamState();
+  missedThisSession = [];
+  isRetakeMode = true;
+
+  // Convert missed questions to exam format
+  deck = missedFromServer.map(q => ({
+    question: q.question_text,
+    correct: q.correct_answer,
+    explanation: q.explanation || "",
+    difficulty: q.difficulty || "",
+    wrongs: q.wrongs || []
+  }));
+
+  // Shuffle the deck
+  deck = shuffle(deck);
+  idx = 0;
+  correct = 0;
+  answered = 0;
+
+  qTitle.textContent = "Review Mode";
+  startTimer();
+  render();
+
+  startBtn.disabled = true;
+  loadBtn.disabled = true;
+  examSelect.disabled = true;
+  qCountEl.disabled = true;
+  retakeMissedBtn.disabled = true;
+});
+
+// Reload missed count when exam changes
+examSelect.addEventListener("change", async () => {
+  statusPill.textContent = "Switching exam…";
+  try{
+    await loadExamBank();
+    await loadMissedQuestions();
+  } catch(e){
+    loadedPill.textContent = "Loaded: 0";
+    startBtn.disabled = true;
+    statusPill.textContent = "Load failed";
+  }
+});
+
+/**********************
+ * BOOT
+ **********************/
+async function boot() {
+  try {
+    await requireLogin();         // blocks if not logged in
+    // auto-load initial exam bank
+    await loadExamBank();
+    // load missed questions count
+    await loadMissedQuestions();
+  } catch(e) {
+    console.error("Auto-load failed:", e);
+    statusPill.textContent = "Click 'Load Exam Bank' to start";
+    statusPill.className = "badge err";
+  }
+}
+
+boot();
+</script>
+</body>
+</html>

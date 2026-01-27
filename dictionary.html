@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Auth Protection Script -->
+  <script src="config.js"></script>
+  
+  <script>
+    function updateAuthStatus(message) {
+      const statusEl = document.getElementById('authStatus');
+      if (statusEl) statusEl.textContent = message;
+    }
+  
+    function hideAuthOverlay() {
+      const overlay = document.getElementById('authOverlay');
+      if (overlay) {
+        overlay.style.opacity = '0';
+        overlay.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => overlay.style.display = 'none', 300);
+      }
+    }
+  
+    function goLogin() {
+      window.location.href = "/login.html";
+    }
+  
+    const LS_TOKEN = "cc_token";
+    const LS_EXPIRES = "cc_expires_at";
+
+    function logoutLocal() {
+      try {
+        localStorage.removeItem(LS_TOKEN);
+        localStorage.removeItem(LS_EXPIRES);
+      } catch (e) {}
+    }
+    
+      
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+      return null;
+    }
+  
+    function getToken() {
+      const cookieToken = getCookie(LS_TOKEN);
+      if (cookieToken) return cookieToken;
+      try { return localStorage.getItem(LS_TOKEN) || ""; }
+      catch (e) { return ""; }
+    }
+  
+    async function api(action, payload) {
+      const res = await fetch(`${CFWORKER}/${action}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || "API error");
+      return data;
+    }
+  </script>
+
+  <meta charset="UTF-8" />
+  <title>Life Insurance Key Terms Glossary</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --bg-alt: #020617;
+      --card: #020617;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.15);
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --border-subtle: #1f2937;
+      --radius-lg: 18px;
+      --radius-pill: 999px;
+      --shadow-soft: 0 18px 40px rgba(15, 23, 42, 0.7);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1e293b 0, #020617 55%, #000 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 32px 16px 48px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 960px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      color: var(--text-muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+    }
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.9);
+    }
+
+    h1 {
+      font-size: clamp(26px, 4vw, 32px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .search-bar {
+      margin-top: 24px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(15, 23, 42, 0.95);
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border-subtle);
+      padding: 8px 14px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(16px);
+    }
+
+    .search-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: 2px solid var(--accent);
+      position: relative;
+    }
+
+    .search-icon::after {
+      content: "";
+      position: absolute;
+      width: 2px;
+      height: 8px;
+      background: var(--accent);
+      border-radius: 999px;
+      transform: rotate(45deg);
+      right: -6px;
+      bottom: -1px;
+    }
+
+    .search-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-main);
+      font-size: 14px;
+    }
+
+    .search-input::placeholder {
+      color: #6b7280;
+    }
+
+    .pill-hint {
+      font-size: 11px;
+      color: var(--accent);
+      background: rgba(56, 189, 248, 0.1);
+      border-radius: var(--radius-pill);
+      padding: 4px 10px;
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      white-space: nowrap;
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      padding-inline: 4px;
+    }
+
+    .meta-row span strong {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .tags-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .tag {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      color: var(--text-muted);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    @media (min-width: 640px) {
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    .card {
+      background: radial-gradient(circle at top left, #111827 0, #020617 55%);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(15, 23, 42, 0.95);
+      box-shadow: var(--shadow-soft);
+      padding: 14px 14px 16px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top right, var(--accent-soft), transparent 55%);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.14s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.9);
+      border-color: rgba(56, 189, 248, 0.5);
+    }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    .term {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      letter-spacing: -0.01em;
+    }
+
+    .category {
+      font-size: 11px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 8px;
+    }
+
+    .definition {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .badge-small {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .dot-soft {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .no-results {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-top: 24px;
+    }
+  </style>
+</head>
+<body>
+    
+<!-- Auth Loading Overlay -->
+<div id="authOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #071423, #0a1a2b); z-index: 10000; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+  <div style="text-align: center;">
+    <div style="font-size: 48px; margin-bottom: 20px;">🔒</div>
+    <div style="font-size: 24px; font-weight: bold; margin-bottom: 10px; color: #eaf2ff;">Securing Connection...</div>
+    <div id="authStatus" style="font-size: 14px; color: #4fd1c5; min-height: 20px;"></div>
+  </div>
+</div>
+<script>
+  (async () => {
+    updateAuthStatus("Verifying session...");
+    const token = getToken();
+    if (!token) return goLogin();
+
+    try {
+      await api("me", { token });
+      updateAuthStatus("Loading dictionary...");
+      hideAuthOverlay();
+    } catch (e) {
+      logoutLocal();
+      goLogin();
+    }
+  })();
+</script>
+
+
+  <div class="app">
+    <header class="header">
+      <div class="badge">
+        <span class="badge-dot"></span>
+        LIFE INSURANCE LICENSING GLOSSARY
+      </div>
+      <h1>Life Insurance Key Terms</h1>
+      <p class="subtitle">
+        Search core concepts that show up on most state life insurance licensing exams.
+      </p>
+
+      <div class="search-bar">
+        <div class="search-icon"></div>
+        <input
+          type="text"
+          id="searchInput"
+          class="search-input"
+          placeholder="Search by term or definition (e.g. 'contestability', 'cash value', 'rider')"
+        />
+        <div class="pill-hint">
+          Type to filter instantly
+        </div>
+      </div>
+
+      <div class="meta-row">
+        <div>
+          <span><strong id="termCount">0</strong> terms</span>
+          <div class="tags-row">
+            <span class="tag">Exam prep</span>
+            <span class="tag">Multi-state</span>
+            <span class="tag">Life insurance</span>
+          </div>
+        </div>
+        <div>
+          <span>Tip: focus on definitions that mention <strong>clauses</strong> and <strong>riders</strong>.</span>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section id="cardsContainer" class="grid"></section>
+      <p id="noResults" class="no-results hidden">
+        No terms match your search. Try a shorter keyword or a different concept.
+      </p>
+    </main>
+  </div>
+
+  <!-- Load shared dictionary -->
+  <script src="dictionary.js"></script>
+
+  <script>
+    // TERMS loaded from dictionary.js
+
+    const cardsContainer = document.getElementById("cardsContainer");
+    const searchInput = document.getElementById("searchInput");
+    const termCount = document.getElementById("termCount");
+    const noResults = document.getElementById("noResults");
+
+    function createCard(termObj) {
+      const card = document.createElement("article");
+      card.className = "card";
+      card.dataset.term = termObj.term.toLowerCase();
+      card.dataset.definition = termObj.definition.toLowerCase();
+
+      card.innerHTML = `
+        <div class="category">${termObj.category}</div>
+        <h2 class="term">${termObj.term}</h2>
+        <p class="definition">${termObj.definition}</p>
+        <div class="badge-small">
+          <span class="dot-soft"></span>
+          <span>Life insurance key term</span>
+        </div>
+      `;
+      return card;
+    }
+
+    function renderCards() {
+      cardsContainer.innerHTML = "";
+      TERMS.forEach((t) => {
+        cardsContainer.appendChild(createCard(t));
+      });
+      termCount.textContent = TERMS.length;
+    }
+
+    function filterCards(query) {
+      const q = query.trim().toLowerCase();
+      const cards = cardsContainer.querySelectorAll(".card");
+      let visibleCount = 0;
+
+      cards.forEach((card) => {
+        const inTerm = card.dataset.term.includes(q);
+        const inDefinition = card.dataset.definition.includes(q);
+        if (!q || inTerm || inDefinition) {
+          card.classList.remove("hidden");
+          visibleCount++;
+        } else {
+          card.classList.add("hidden");
+        }
+      });
+
+      noResults.classList.toggle("hidden", visibleCount > 0);
+      termCount.textContent = visibleCount;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      renderCards();
+      searchInput.addEventListener("input", (e) => {
+        filterCards(e.target.value);
+      });
+    });
+  </script>
+</body>
+</html>

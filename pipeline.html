@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Auth Protection Script -->
+<script src="config.js"></script>
+
+<script>
+  function updateAuthStatus(message) {
+    const statusEl = document.getElementById('authStatus');
+    if (statusEl) statusEl.textContent = message;
+  }
+
+  function hideAuthOverlay() {
+    const overlay = document.getElementById('authOverlay');
+    if (overlay) {
+      overlay.style.opacity = '0';
+      overlay.style.transition = 'opacity 0.3s ease';
+      setTimeout(() => overlay.style.display = 'none', 300);
+    }
+  }
+
+  function goLogin() {
+    window.location.href = "/login.html";
+  }
+
+  const LS_TOKEN = "cc_token";
+
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+  }
+
+  function getToken() {
+    const cookieToken = getCookie(LS_TOKEN);
+    if (cookieToken) return cookieToken;
+    try { return localStorage.getItem(LS_TOKEN) || ""; }
+    catch (e) { return ""; }
+  }
+
+  async function api(action, payload) {
+    const res = await fetch(`${CFWORKER}/${action}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || "API error");
+    return data;
+  }
+</script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Pipeline - Non-Forfeiture Financial</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root{
+            --bg1:#071423;
+            --bg2:#0a1a2b;
+            --card: rgba(255,255,255,.06);
+            --accent:#4fd1c5;
+            --accent2:#2dd4bf;
+        }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: 
+                radial-gradient(1200px 700px at 20% 20%, rgba(79,209,197,.22), transparent 55%),
+                radial-gradient(1200px 700px at 80% 15%, rgba(45,212,191,.18), transparent 55%),
+                radial-gradient(900px 600px at 70% 80%, rgba(99,102,241,.16), transparent 55%),
+                linear-gradient(180deg, var(--bg1), var(--bg2));
+            min-height: 100vh;
+        }
+        .stage-column {
+            min-width: 300px;
+            max-width: 340px;
+        }
+        .prospect-card {
+            transition: all 0.3s ease;
+            position: relative;
+            cursor: pointer;
+        }
+        .prospect-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .prospect-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+        }
+        
+        .prospect-card-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            padding: 0 12px;
+        }
+        
+        .prospect-card.expanded .prospect-card-body {
+            max-height: 2000px;
+            padding: 0 12px 12px 12px;
+        }
+        
+        .expand-icon {
+            transition: transform 0.3s ease;
+            font-size: 18px;
+        }
+        
+        .prospect-card.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+        
+        .editable-field {
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .editable-field:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .update-warning {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 28px;
+            height: 28px;
+            background: #ff5252;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
+            cursor: pointer;
+            z-index: 10;
+            font-size: 14px;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            border: 2px solid rgba(79, 209, 197, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        #qrcode {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            display: inline-block;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body class="text-white">
+    <!-- Auth Loading Overlay -->
+    <div id="authOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #071423, #0a1a2b); z-index: 10000; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+        <div style="text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 20px;">🔒</div>
+            <div style="font-size: 24px; font-weight: bold; margin-bottom: 10px;">Verifying Access...</div>
+            <div id="authStatus" style="font-size: 14px; color: #4fd1c5;"></div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-4 shadow-lg sticky top-0 z-10">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="text-center md:text-left">
+                <h1 class="text-2xl font-bold">📊 My Recruiting Pipeline</h1>
+                <p class="text-sm opacity-90">
+                    Recruiter: <span id="userEmail" class="font-semibold">—</span>
+                </p>
+            </div>
+            <div class="flex gap-4 items-center flex-wrap justify-center">
+                <div class="text-center bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
+                    <div class="text-xs opacity-75">My Referral Link</div>
+                    <div class="font-mono font-bold text-sm" id="myReferralUrl">—</div>
+                    <div class="flex gap-2 justify-center mt-2">
+                        <button onclick="copyReferralLink()" class="text-xs bg-white/10 px-3 py-1 rounded hover:bg-white/20 transition">
+                            📋 Copy Link
+                        </button>
+                        <button onclick="showQRCode()" class="text-xs bg-gradient-to-r from-cyan-500 to-blue-500 px-3 py-1 rounded hover:from-cyan-600 hover:to-blue-600 transition font-semibold">
+                            📱 Show QR
+                        </button>
+                    </div>
+                </div>
+                <button onclick="refreshPipeline()" class="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg hover:bg-white/20 transition">
+                    🔄 Refresh
+                </button>
+                <button onclick="goHome()" class="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg hover:bg-white/20 transition">
+                    🏠 Home
+                </button>
+                <button onclick="logout()" class="bg-red-500/20 backdrop-blur-sm px-4 py-2 rounded-lg hover:bg-red-500/30 transition">
+                    🚪 Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Stats Bar -->
+    <div class="bg-white/5 border-b border-white/10 shadow-sm">
+        <div class="container mx-auto p-4">
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div class="text-center p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                    <div class="text-2xl font-bold text-blue-400" id="countProspects">0</div>
+                    <div class="text-xs text-gray-300 font-medium">Prospects</div>
+                </div>
+                <div class="text-center p-3 bg-purple-500/10 rounded-lg border border-purple-500/20">
+                    <div class="text-2xl font-bold text-purple-400" id="countInCourse">0</div>
+                    <div class="text-xs text-gray-300 font-medium">In Course</div>
+                </div>
+                <div class="text-center p-3 bg-orange-500/10 rounded-lg border border-orange-500/20">
+                    <div class="text-2xl font-bold text-orange-400" id="countTesting">0</div>
+                    <div class="text-xs text-gray-300 font-medium">Testing</div>
+                </div>
+                <div class="text-center p-3 bg-green-500/10 rounded-lg border border-green-500/20">
+                    <div class="text-2xl font-bold text-green-400" id="countLicensed">0</div>
+                    <div class="text-xs text-gray-300 font-medium">Licensed</div>
+                </div>
+                <div class="text-center p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+                    <div class="text-2xl font-bold text-red-400" id="countNeedingUpdate">0</div>
+                    <div class="text-xs text-gray-300 font-medium">Need Update</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pipeline Board -->
+    <div class="container mx-auto p-6">
+        <div id="loadingMessage" class="text-center py-12">
+            <div class="text-xl font-semibold text-gray-300">Loading your pipeline...</div>
+        </div>
+        <div id="pipelineBoard" class="hidden flex gap-4 overflow-x-auto pb-4">
+            <!-- Columns will be populated here -->
+        </div>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div id="qrModal" class="modal" onclick="closeQRCode(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h2 class="text-2xl font-bold mb-2 bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                📱 Your Referral QR Code
+            </h2>
+            <p class="text-sm text-gray-400 mb-4">
+                People can scan this to apply instantly!
+            </p>
+            
+            <div id="qrcode" class="text-center"></div>
+            
+            <div class="bg-white/10 rounded-lg p-3 mb-4">
+                <p class="text-xs text-gray-400 mb-1">Referral Link:</p>
+                <p class="font-mono text-sm text-cyan-400 break-all" id="qrUrlDisplay"></p>
+            </div>
+            
+            <div class="flex gap-3 justify-center">
+                <button onclick="downloadQRCode()" class="bg-gradient-to-r from-green-500 to-emerald-500 px-6 py-2 rounded-lg hover:from-green-600 hover:to-emerald-600 transition font-semibold">
+                    💾 Download QR
+                </button>
+                <button onclick="closeQRCode()" class="bg-white/10 px-6 py-2 rounded-lg hover:bg-white/20 transition">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Modal -->
+    <div id="updateModal" class="modal">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold mb-2 bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">
+                ⚠️ Log Update
+            </h2>
+            <p class="text-sm text-gray-400 mb-4">
+                This recruit needs a status update (48+ hours since last update)
+            </p>
+            
+            <div class="bg-white/10 rounded-lg p-4 mb-4">
+                <p class="font-semibold text-lg" id="updateProspectName"></p>
+                <p class="text-sm text-gray-400">Current Status: <span id="updateProspectStatus" class="text-cyan-400"></span></p>
+                <p class="text-xs text-gray-500 mt-1">Last Update: <span id="updateLastUpdate"></span></p>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-2">Update Comment:</label>
+                <textarea id="updateComment" rows="4" 
+                    class="w-full bg-white/10 border border-white/20 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    placeholder="What's the latest with this recruit? (e.g., 'Called - left voicemail', 'Completed Module 2', 'Scheduled exam for next Tuesday')"></textarea>
+            </div>
+            
+            <div class="flex gap-3 justify-center">
+                <button onclick="submitUpdate()" class="bg-gradient-to-r from-green-500 to-emerald-500 px-6 py-2 rounded-lg hover:from-green-600 hover:to-emerald-600 transition font-semibold">
+                    ✅ Submit Update
+                </button>
+                <button onclick="closeUpdateModal()" class="bg-white/10 px-6 py-2 rounded-lg hover:bg-white/20 transition">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+    <script>
+        // ⚠️ UPDATE THIS WITH YOUR GOOGLE APPS SCRIPT URL ⚠️
+        const RECRUITING_API_URL = APPDB;
+        
+        // Checklist labels (edit these anytime!)
+        const CHECKLIST_LABELS = [
+            'Completed Pre-Licensing Course',
+            'Passed State Exam',
+            'Submitted Background Check',
+            'Received License',
+            'Completed Onboarding Training'
+        ];
+        
+        const $ = (id) => document.getElementById(id);
+        
+        let currentUser = null;
+        let recruiterRef = null;
+        let allProspects = [];
+        let qrCodeInstance = null;
+        let currentUpdateProspect = null;
+
+        /**********************
+         * ══════════════════════════════════════════════════════════════
+         * AUTH HELPERS
+         * ══════════════════════════════════════════════════════════════
+         **********************/
+        
+
+        
+
+        function goHome(){
+            window.location.href = "home.html";
+        }
+
+        async function logout(){
+            const token = getToken();
+            try{
+                if (token) { await api("logout", { token }).catch(()=>{}); }
+            } finally {
+                logoutLocal();
+                goLogin();
+            }
+        }
+        /**********************
+         * ══════════════════════════════════════════════════════════════
+         * INITIALIZATION
+         * ══════════════════════════════════════════════════════════════
+         **********************/
+        window.addEventListener('DOMContentLoaded', async () => {
+            updateAuthStatus('Checking authentication...');
+            
+            const token = getToken();
+
+            if (!token){
+                updateAuthStatus('No session found. Redirecting to login...');
+                setTimeout(() => goLogin(), 1000);
+                return;
+            }
+
+            try{
+                updateAuthStatus('Verifying session with server...');
+                
+                const me = await api("me", { token });
+                currentUser = me;
+                
+                updateAuthStatus('Session verified! Loading your pipeline...');
+                
+                $("userEmail").textContent = me.loginEmail || "—";
+                
+                recruiterRef = me.loginEmail.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
+                
+                const referralUrl = window.location.origin + '/apply?ref=' + recruiterRef;
+                $("myReferralUrl").textContent = referralUrl;
+                
+                hideAuthOverlay();
+                
+                await loadPipeline();
+                
+            } catch (e){
+                updateAuthStatus('Session expired: ' + e.message);
+                
+                setTimeout(() => {
+                    logoutLocal();
+                    alert("Session expired. Please log in again.");
+                    goLogin();
+                }, 1500);
+            }
+        });
+
+        /**********************
+         * ══════════════════════════════════════════════════════════════
+         * PIPELINE LOADING
+         * ══════════════════════════════════════════════════════════════
+         **********************/
+        async function loadPipeline() {
+            if (!recruiterRef) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(RECRUITING_API_URL + '?action=getProspects&recruiterRef=' + recruiterRef);
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    allProspects = data.prospects || [];
+                    $("loadingMessage").style.display = 'none';
+                    $("pipelineBoard").classList.remove('hidden');
+                    renderPipeline();
+                    updateStats();
+                } else {
+                    $("loadingMessage").innerHTML = 
+                        '<div class="text-orange-400">No prospects found yet. Share your referral link to get started!</div>';
+                    $("pipelineBoard").classList.remove('hidden');
+                    renderPipeline();
+                }
+            } catch (error) {
+                console.error('Error loading pipeline:', error);
+                $("loadingMessage").innerHTML = 
+                    '<div class="text-red-400">Error loading prospects. Make sure your Google Apps Script is deployed correctly.</div>' +
+                    '<div class="text-sm text-gray-400 mt-2">Error: ' + error.message + '</div>';
+            }
+        }
+
+        async function refreshPipeline() {
+            $("loadingMessage").style.display = 'block';
+            $("loadingMessage").innerHTML = 
+                '<div class="text-xl font-semibold text-gray-300">Refreshing...</div>';
+            $("pipelineBoard").classList.add('hidden');
+            await loadPipeline();
+        }
+
+        /**********************
+         * ══════════════════════════════════════════════════════════════
+         * PIPELINE RENDERING
+         * ══════════════════════════════════════════════════════════════
+         **********************/
+        function needsUpdate(prospect) {
+            if (prospect.status === 'Licensed') return false;
+            
+            const now = new Date();
+            const lastUpdate = new Date(prospect.lastUpdate);
+            const hoursDiff = (now - lastUpdate) / (1000 * 60 * 60);
+            
+            return hoursDiff >= 48;
+        }
+
+        function renderPipeline() {
+            const stages = [
+                { id: 'Prospect', name: 'Prospects', color: 'blue' },
+                { id: 'In Course', name: 'In Course', color: 'purple' },
+                { id: 'Testing', name: 'Testing', color: 'orange' },
+                { id: 'Licensed', name: 'Licensed', color: 'green' }
+            ];
+            
+            const board = $("pipelineBoard");
+            board.innerHTML = '';
+            
+            stages.forEach(stage => {
+                const prospects = allProspects.filter(p => p.status === stage.id);
+                board.appendChild(createStageColumn(stage, prospects));
+            });
+        }
+
+        function createStageColumn(stage, prospects) {
+            const column = document.createElement('div');
+            column.className = 'stage-column bg-white/5 rounded-lg p-4 border border-white/10';
+            
+            const prospectCards = prospects.length > 0 
+                ? prospects.map(prospect => createProspectCard(prospect, stage.color)).join('') 
+                : '<div class="text-center text-gray-400 text-sm py-8">No prospects yet<br><small class="text-xs">Share your referral link!</small></div>';
+            
+            column.innerHTML = `
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold uppercase text-sm text-gray-300">${stage.name}</h3>
+                    <span class="bg-${stage.color}-500 text-white text-xs px-2 py-1 rounded-full font-bold">${prospects.length}</span>
+                </div>
+                <div class="space-y-3">
+                    ${prospectCards}
+                </div>
+            `;
+            
+            return column;
+        }
+
+        function createProspectCard(prospect, color) {
+            const formattedDate = new Date(prospect.datetime).toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                year: 'numeric'
+            });
+            
+            // Calculate age in days
+            const ageInDays = Math.floor((new Date() - new Date(prospect.datetime)) / (1000 * 60 * 60 * 24));
+            
+            // Format dates for display
+            const lastContact = prospect.lastContact ? new Date(prospect.lastContact).toLocaleDateString('en-US', {month: 'short', day: 'numeric'}) : 'Not set';
+            const lastUpdate = prospect.lastUpdate ? new Date(prospect.lastUpdate).toLocaleDateString('en-US', {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'}) : 'Never';
+            const nextFollowup = prospect.nextFollowup ? new Date(prospect.nextFollowup).toLocaleDateString('en-US', {month: 'short', day: 'numeric'}) : 'Not set';
+            
+            const showWarning = needsUpdate(prospect);
+            
+            // Build checklist HTML
+            const checklistHTML = CHECKLIST_LABELS.map((label, idx) => {
+                const checkNum = idx + 1;
+                const isChecked = prospect['check' + checkNum];
+                return `
+                    <label class="flex items-center gap-2 text-sm cursor-pointer hover:bg-white/5 p-1 rounded" onclick="event.stopPropagation();">
+                        <input type="checkbox" 
+                               ${isChecked ? 'checked' : ''} 
+                               onchange="updateCheckbox(${prospect.row}, ${checkNum}, this.checked)"
+                               class="w-4 h-4 cursor-pointer">
+                        <span class="text-gray-300">${label}</span>
+                    </label>
+                `;
+            }).join('');
+            
+            return `
+                <div class="prospect-card bg-white/10 rounded-lg shadow-sm border-l-4 border-${color}-500" id="card-${prospect.row}" onclick="toggleCard(${prospect.row})">
+                    ${showWarning ? `<div class="update-warning" onclick="openUpdateModalByRow(${prospect.row}); event.stopPropagation();" title="Needs update! Click to log update">⚠️</div>` : ''}
+                    
+                    <!-- Collapsed Header -->
+                    <div class="prospect-card-header">
+                        <div class="flex-1">
+                            <div class="font-semibold text-white">${prospect.name}</div>
+                            <div class="text-xs text-gray-400 mt-1">📞 ${prospect.phone}</div>
+                        </div>
+                        <div class="expand-icon text-gray-400">▼</div>
+                    </div>
+                    
+                    <!-- Expanded Body -->
+                    <div class="prospect-card-body">
+                        <!-- Name (editable) -->
+                        <div class="mb-3">
+                            <label class="text-xs text-gray-400 font-medium">Name:</label>
+                            <div class="font-semibold text-white mt-1 editable-field" 
+                                 onclick="event.stopPropagation(); editField(${prospect.row}, 'name', '${prospect.name.replace(/'/g, "\\'")}', this)">
+                                ${prospect.name}
+                            </div>
+                        </div>
+                        
+                        <!-- Phone (editable with tel link) -->
+                        <div class="mb-3">
+                            <label class="text-xs text-gray-400 font-medium">Phone:</label>
+                            <div class="text-sm text-gray-300 mt-1">
+                                <a href="tel:${prospect.phone}" onclick="event.stopPropagation();" class="hover:text-cyan-400">${prospect.phone}</a>
+                                <span class="text-xs text-gray-500 cursor-pointer ml-2" 
+                                      onclick="event.stopPropagation(); editField(${prospect.row}, 'phone', '${prospect.phone}', this.previousElementSibling)">
+                                    ✏️
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Age Badge -->
+                        <div class="text-xs text-gray-400 mb-3">
+                            Added: ${formattedDate} <span class="bg-white/10 px-2 py-0.5 rounded ml-2">${ageInDays} days old</span>
+                        </div>
+                        
+                        <!-- Last Update Info -->
+                        <div class="text-xs mb-3 ${showWarning ? 'text-red-400' : 'text-gray-400'}">
+                            🕒 Last Update: ${lastUpdate}
+                        </div>
+                        
+                        <!-- Status Dropdown -->
+                        <div class="mb-3">
+                            <label class="text-xs text-gray-400 font-medium">Status:</label>
+                            <select onchange="updateProspectStatus(${prospect.row}, this.value); event.stopPropagation();" 
+                                    onclick="event.stopPropagation();"
+                                    class="w-full mt-1 text-sm bg-white/10 border border-white/20 text-white rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-${color}-500">
+                                <option value="Prospect" ${prospect.status === 'Prospect' ? 'selected' : ''}>Prospect</option>
+                                <option value="In Course" ${prospect.status === 'In Course' ? 'selected' : ''}>In Course</option>
+                                <option value="Testing" ${prospect.status === 'Testing' ? 'selected' : ''}>Testing</option>
+                                <option value="Licensed" ${prospect.status === 'Licensed' ? 'selected' : ''}>Licensed</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Notes (editable) -->
+                        <div class="mb-3">
+                            <label class="text-xs text-gray-400 font-medium">Notes:</label>
+                            <div class="text-sm text-gray-300 bg-white/5 rounded p-2 mt-1 min-h-[60px] cursor-pointer hover:bg-white/10"
+                                 onclick="event.stopPropagation(); editNotes(${prospect.row}, '${(prospect.notes || '').replace(/'/g, "\\'")}', this)">
+                                ${prospect.notes || '<span class="text-gray-500 italic">Click to add notes...</span>'}
+                            </div>
+                        </div>
+                        
+                        <!-- Date Fields -->
+                        <div class="grid grid-cols-2 gap-2 mb-3">
+                            <div>
+                                <label class="text-xs text-gray-400 font-medium">Last Contact:</label>
+                                <input type="date" 
+                                       value="${prospect.lastContact || ''}"
+                                       onchange="updateField(${prospect.row}, 'lastContact', this.value); event.stopPropagation();"
+                                       onclick="event.stopPropagation();"
+                                       class="w-full mt-1 text-xs bg-white/10 border border-white/20 text-white rounded px-2 py-1">
+                                <div class="text-xs text-gray-400 mt-1">${lastContact}</div>
+                            </div>
+                            <div>
+                                <label class="text-xs text-gray-400 font-medium">Next Follow-up:</label>
+                                <input type="date" 
+                                       value="${prospect.nextFollowup || ''}"
+                                       onchange="updateField(${prospect.row}, 'nextFollowup', this.value); event.stopPropagation();"
+                                       onclick="event.stopPropagation();"
+                                       class="w-full mt-1 text-xs bg-white/10 border border-white/20 text-white rounded px-2 py-1">
+                                <div class="text-xs text-gray-400 mt-1">${nextFollowup}</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Checklist -->
+                        <div class="border-t border-white/10 pt-3 mb-3">
+                            <label class="text-xs text-gray-400 font-medium mb-2 block">Progress Checklist:</label>
+                            <div class="space-y-1">
+                                ${checklistHTML}
+                            </div>
+                        </div>
+                        
+                        <!-- Log Update Button -->
+                        <div class="pt-3 border-t border-white/10">
+                            <button onclick="openUpdateModalByRow(${prospect.row}); event.stopPropagation();" 
+                                    class="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 px-3 py-2 rounded text-sm font-semibold transition">
+                                📝 Log Update
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function toggleCard(row) {
+            const card = document.getElementById(`card-${row}`);
+            if (card) {
+                card.classList.toggle('expanded');
+            }
+        }
+
+        /**********************
+         * ══════════════════════════════════════════════════════════════
+         * PROSPECT UPDATES
+         * ══════════════════════════════════════════════════════════════
+         **********************/
+        async function updateProspectStatus(row, newStatus) {
+            try {
+                const response = await fetch(RECRUITING_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({
+                        action: 'updateStatus',
+                        recruiterRef: recruiterRef,
+                        row: row,
+                        status: newStatus
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    await loadPipeline();
+                    showToast('✓ Status updated!', 'success');
+                } else {
+                    showToast('Error: ' + data.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error updating status:', error);
+                showToast('Failed to update status', 'error');
+            }
+        }
+
+        async function updateField(row, field, value) {
+            try {
+                const payload = {
+                    action: 'updateProspect',
+                    recruiterRef: recruiterRef,
+                    row: row
+                };
+                payload[field] = value;
+                
+                const response = await fetch(RECRUITING_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast('✓ Updated!', 'success');
+                } else {
+                    showToast('Error: ' + data.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error updating field:', error);
+                showToast('Failed to update', 'error');
+            }
+        }
+
+        async function updateCheckbox(row, checkNum, isChecked) {
+            await updateField(row, 'check' + checkNum, isChecked);
+        }
+
+        function editField(row, field, currentValue, element) {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = currentValue;
+            input.className = 'w-full bg-white/20 text-white px-2 py-1 rounded border border-cyan-500 focus:outline-none';
+            
+            element.innerHTML = '';
+            element.appendChild(input);
+            input.focus();
+            
+            const saveEdit = async () => {
+                const newValue = input.value.trim();
+                if (newValue && newValue !== currentValue) {
+                    await updateField(row, field, newValue);
+                    await loadPipeline();
+                } else {
+                    element.textContent = currentValue;
+                }
+            };
+            
+            input.addEventListener('blur', saveEdit);
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    saveEdit();
+                }
+            });
+        }
+
+        function editNotes(row, currentNotes, element) {
+            const textarea = document.createElement('textarea');
+            textarea.value = currentNotes;
+            textarea.className = 'w-full bg-white/20 text-white px-2 py-1 rounded border border-cyan-500 focus:outline-none min-h-[80px]';
+            
+            element.innerHTML = '';
+            element.appendChild(textarea);
+            textarea.focus();
+            
+            const saveNotes = async () => {
+                const newNotes = textarea.value.trim();
+                if (newNotes !== currentNotes) {
+                    await updateField(row, 'notes', newNotes);
+                    await loadPipeline();
+                } else {
+                    element.innerHTML = currentNotes || '<span class="text-gray-500 italic">Click to add notes...</span>';
+                }
+            };
+            
+            textarea.addEventListener('blur', saveNotes);
+        }
+
+        /**********************
+         * ══════════════════════════════════════════════════════════════
+         * STATS
+         * ══════════════════════════════════════════════════════════════
+         **********************/
+        function updateStats() {
+            $("countProspects").textContent = 
+                allProspects.filter(p => p.status === 'Prospect').length;
+            $("countInCourse").textContent = 
+                allProspects.filter(p => p.status === 'In Course').length;
+            $("countTesting").textContent = 
+                allProspects.filter(p => p.status === 'Testing').length;
+            $("countLicensed").textContent = 
+                allProspects.filter(p => p.status === 'Licensed').length;
+            $("countNeedingUpdate").textContent = 
+                allProspects.filter(p => needsUpdate(p)).length;
+        }
+
+        /**********************
+         * ══════════════════════════════════════════════════════════════
+         * QR CODE FUNCTIONS
+         * ══════════════════════════════════════════════════════════════
+         **********************/
+        function copyReferralLink() {
+            const url = $("myReferralUrl").textContent;
+            navigator.clipboard.writeText(url).then(() => {
+                showToast('✓ Link copied to clipboard!', 'success');
+            }).catch(err => {
+                console.error('Error copying:', err);
+                alert('Link: ' + url);
+            });
+        }
+
+        function showQRCode() {
+            const url = $("myReferralUrl").textContent;
+            const modal = $("qrModal");
+            const qrContainer = $("qrcode");
+            
+            qrContainer.innerHTML = '';
+            
+            qrCodeInstance = new QRCode(qrContainer, {
+                text: url,
+                width: 280,
+                height: 280,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            
+            $("qrUrlDisplay").textContent = url;
+            
+            modal.classList.add('active');
+        }
+
+        function closeQRCode(event) {
+            if (!event || event.target.id === 'qrModal') {
+                $("qrModal").classList.remove('active');
+            }
+        }
+
+        function downloadQRCode() {
+            const canvas = document.querySelector('#qrcode canvas');
+            if (!canvas) {
+                showToast('Error generating QR code', 'error');
+                return;
+            }
+            
+            const url = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = `referral-qr-${recruiterRef}.png`;
+            link.href = url;
+            link.click();
+            
+            showToast('✓ QR code downloaded!', 'success');
+        }
+
+        /**********************
+         * ══════════════════════════════════════════════════════════════
+         * UPDATE MODAL FUNCTIONS
+         * ══════════════════════════════════════════════════════════════
+         **********************/
+        function openUpdateModalByRow(row) {
+            const prospect = allProspects.find(p => p.row === row);
+            if (prospect) {
+                openUpdateModal(prospect);
+            }
+        }
+
+        function openUpdateModal(prospect) {
+            currentUpdateProspect = prospect;
+            
+            $("updateProspectName").textContent = prospect.name;
+            $("updateProspectStatus").textContent = prospect.status;
+            $("updateLastUpdate").textContent = new Date(prospect.lastUpdate).toLocaleString();
+            $("updateComment").value = '';
+            
+            $("updateModal").classList.add('active');
+        }
+
+        function closeUpdateModal() {
+            $("updateModal").classList.remove('active');
+            currentUpdateProspect = null;
+        }
+
+        async function submitUpdate() {
+            const comment = $("updateComment").value.trim();
+            
+            if (!comment) {
+                showToast('Please enter an update comment', 'error');
+                return;
+            }
+            
+            if (!currentUpdateProspect) {
+                showToast('Error: No prospect selected', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(RECRUITING_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({
+                        action: 'addUpdate',
+                        recruiterRef: recruiterRef,
+                        prospectName: currentUpdateProspect.name,
+                        currentStatus: currentUpdateProspect.status,
+                        updateText: comment,
+                        prospectRow: currentUpdateProspect.row
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast('✓ Update saved successfully!', 'success');
+                    closeUpdateModal();
+                    await loadPipeline();
+                } else {
+                    showToast('Error: ' + data.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error submitting update:', error);
+                showToast('Failed to save update', 'error');
+            }
+        }
+
+        /**********************
+         * ══════════════════════════════════════════════════════════════
+         * TOAST NOTIFICATIONS
+         * ══════════════════════════════════════════════════════════════
+         **********************/
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-20 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ' + 
+                (type === 'success' ? 'bg-green-500' : 'bg-red-500') + ' text-white';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        }
+    </script>
+</body>
+</html>

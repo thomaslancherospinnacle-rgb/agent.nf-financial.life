@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recruiting API Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-left: 4px solid #4285f4;
+            border-radius: 4px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        input {
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            padding: 10px 20px;
+        }
+        button:hover {
+            background: #357abd;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .warning {
+            background: #fff3e0;
+            color: #e65100;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .info {
+            background: #e3f2fd;
+            color: #1565c0;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Recruiting API Tester</h1>
+        
+        <div class="warning">
+            <strong>⚠️ BEFORE TESTING:</strong><br>
+            1. Deploy recruiting-script.gs as a Web app<br>
+            2. Set "Who has access" to "Anyone"<br>
+            3. Copy the Web app URL below
+        </div>
+
+        <div class="test-section">
+            <h3>Step 1: Enter Your API URL</h3>
+            <input type="text" id="apiUrl" placeholder="https://script.google.com/macros/s/AKfycby.../exec">
+            <div class="info">
+                <small>This should be the Web app URL from your Apps Script deployment, ending in /exec</small>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>Step 2: Test - Get All Recruiters</h3>
+            <p>This tests if your API is working and can read from the sheet.</p>
+            <button onclick="testGetRecruiters()">🔍 Test Get Recruiters</button>
+            <div id="getResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Step 3: Test - Create Test Recruiter</h3>
+            <p>This tests if your API can write to the sheet.</p>
+            <input type="text" id="testName" placeholder="test recruiter" value="test recruiter">
+            <input type="email" id="testEmail" placeholder="test@example.com" value="test@example.com">
+            <button onclick="testCreateRecruiter()">➕ Create Test Recruiter</button>
+            <div id="createResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Step 4: Raw API Test</h3>
+            <p>Send a raw request to verify CORS and basic connectivity.</p>
+            <button onclick="testRawAPI()">🌐 Test Raw Connection</button>
+            <div id="rawResult"></div>
+        </div>
+    </div>
+
+    <script>
+        function getApiUrl() {
+            const url = document.getElementById('apiUrl').value.trim();
+            if (!url) {
+                alert('Please enter your API URL first!');
+                throw new Error('No API URL provided');
+            }
+            return url;
+        }
+
+        async function testGetRecruiters() {
+            const resultDiv = document.getElementById('getResult');
+            resultDiv.innerHTML = '<div class="result">⏳ Testing...</div>';
+            
+            try {
+                const apiUrl = getApiUrl();
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'getAllRecruiters'
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            ✅ SUCCESS!
+                            
+                            Recruiters Found: ${data.recruiters.length}
+                            
+                            Full Response:
+                            ${JSON.stringify(data, null, 2)}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            ❌ API returned error:
+                            ${data.message}
+                            
+                            Full Response:
+                            ${JSON.stringify(data, null, 2)}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        ❌ NETWORK ERROR: ${error.message}
+                        
+                        This usually means:
+                        1. Wrong URL (check it ends with /exec)
+                        2. CORS not configured (deploy as Web app with "Anyone" access)
+                        3. Script not deployed yet
+                        
+                        Full Error:
+                        ${error.toString()}
+                    </div>
+                `;
+            }
+        }
+
+        async function testCreateRecruiter() {
+            const resultDiv = document.getElementById('createResult');
+            resultDiv.innerHTML = '<div class="result">⏳ Creating...</div>';
+            
+            try {
+                const apiUrl = getApiUrl();
+                const name = document.getElementById('testName').value.trim();
+                const email = document.getElementById('testEmail').value.trim();
+                
+                if (!name) {
+                    alert('Please enter a test name');
+                    return;
+                }
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'promoteToRecruiter',
+                        fullName: name,
+                        email: email
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            ✅ RECRUITER CREATED!
+                            
+                            Name: ${data.fullName}
+                            Tab: ${data.tabName}
+                            URL: ${data.recruiterUrl}
+                            
+                            Full Response:
+                            ${JSON.stringify(data, null, 2)}
+                            
+                            📝 Check your Google Sheet for the new "${data.tabName}" tab!
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            ❌ FAILED: ${data.message}
+                            
+                            Full Response:
+                            ${JSON.stringify(data, null, 2)}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        ❌ ERROR: ${error.message}
+                        
+                        Full Error:
+                        ${error.toString()}
+                    </div>
+                `;
+            }
+        }
+
+        async function testRawAPI() {
+            const resultDiv = document.getElementById('rawResult');
+            resultDiv.innerHTML = '<div class="result">⏳ Testing raw connection...</div>';
+            
+            try {
+                const apiUrl = getApiUrl();
+                
+                console.log('Testing URL:', apiUrl);
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'getAllRecruiters'
+                    })
+                });
+
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                const text = await response.text();
+                console.log('Response text:', text);
+                
+                try {
+                    const json = JSON.parse(text);
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            ✅ CONNECTION SUCCESSFUL!
+                            
+                            Status: ${response.status}
+                            Content-Type: ${response.headers.get('content-type')}
+                            
+                            Response:
+                            ${JSON.stringify(json, null, 2)}
+                        </div>
+                    `;
+                } catch (e) {
+                    resultDiv.innerHTML = `
+                        <div class="result error">
+                            ⚠️ Got response but not valid JSON
+                            
+                            Status: ${response.status}
+                            
+                            Raw Response:
+                            ${text}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        ❌ CONNECTION FAILED: ${error.message}
+                        
+                        Common causes:
+                        1. URL is incorrect (must end with /exec)
+                        2. Script not deployed as Web app
+                        3. "Who has access" not set to "Anyone"
+                        4. CORS headers not set in script
+                        
+                        Full Error:
+                        ${error.toString()}
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
