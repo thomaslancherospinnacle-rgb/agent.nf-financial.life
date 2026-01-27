@@ -68,6 +68,7 @@
         <input type="text" id="username" placeholder="Thomas Lancheros" value="Thomas Lancheros">
         <input type="password" id="password" placeholder="Your password">
         <button onclick="testLogin()">Test Login</button>
+        <button onclick="quickTest()">Quick Debug Test</button>
         <div id="loginStatus"></div>
     </div>
 
@@ -148,11 +149,33 @@
 
         async function testLogin() {
             const statusEl = document.getElementById('loginStatus');
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
+            const usernameEl = document.getElementById('username');
+            const passwordEl = document.getElementById('password');
             
-            if (!username || !password) {
-                showResult('loginStatus', 'fail', 'Missing username or password!');
+            // Debug: show what we're getting
+            console.log('Username element:', usernameEl);
+            console.log('Password element:', passwordEl);
+            console.log('Username value:', usernameEl?.value);
+            console.log('Password value:', passwordEl?.value);
+            console.log('Password length:', passwordEl?.value?.length);
+            
+            const username = usernameEl.value.trim();
+            const password = passwordEl.value;
+            
+            if (!username) {
+                showResult('loginStatus', 'fail', 'Missing username!', {
+                    "Username": username || "(empty)",
+                    "Username Length": username.length
+                });
+                return;
+            }
+            
+            if (!password) {
+                showResult('loginStatus', 'fail', 'Missing password!', {
+                    "Password": "(hidden)",
+                    "Password Length": password.length,
+                    "Debug": "Password field is empty or not reading correctly"
+                });
                 return;
             }
             
@@ -169,6 +192,8 @@
             } catch (e) {
                 showResult('loginStatus', 'fail', 'LOGIN FAILED: ' + e.message, {
                     "Error": e.message,
+                    "Username Sent": username,
+                    "Password Length Sent": password.length,
                     "Possible Reasons": [
                         "1. Wrong password",
                         "2. User doesn't exist",
@@ -228,6 +253,29 @@
                 document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
             });
             showResult('logoutStatus', 'pass', 'All storage cleared!');
+        }
+
+        function quickTest() {
+            const usernameEl = document.getElementById('username');
+            const passwordEl = document.getElementById('password');
+            
+            showResult('loginStatus', 'info', 'Quick Debug', {
+                "Username Element Exists": !!usernameEl,
+                "Password Element Exists": !!passwordEl,
+                "Username Value": usernameEl.value,
+                "Username Length": usernameEl.value.length,
+                "Password Value": "(hidden for security)",
+                "Password Length": passwordEl.value.length,
+                "Password Empty?": passwordEl.value === "",
+                "Password Falsy?": !passwordEl.value,
+                "Auth Object Exists": typeof Auth !== 'undefined',
+                "Auth.login Exists": typeof Auth.login === 'function'
+            });
+            
+            console.log('=== QUICK TEST DEBUG ===');
+            console.log('Username:', usernameEl.value);
+            console.log('Password length:', passwordEl.value.length);
+            console.log('Password empty?:', passwordEl.value === '');
         }
 
         // Auto-check session on load
