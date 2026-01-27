@@ -396,7 +396,7 @@
                 
                 recruiterRef = me.loginEmail.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
                 
-                const referralUrl = window.location.origin + '/apply?ref=' + recruiterRef;
+                const referralUrl = 'https://www.nf-financial.life' + '/apply?ref=' + recruiterRef;
                 $("myReferralUrl").textContent = referralUrl;
                 
                 hideAuthOverlay();
