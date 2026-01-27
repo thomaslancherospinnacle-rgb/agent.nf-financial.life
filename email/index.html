@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Send Email - American Income Life</title>
+  <link rel="icon" type="image/x-icon" href="../favicon.ico">
+  <script src="../config.js"></script>
+  <script src="../auth.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+    
+    .user-email {
+      font-size: 14px;
+      opacity: 0.9;
+      font-weight: 500;
+    }
+    
+    .form-container {
+      padding: 40px;
+    }
+    
+    .template-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+    
+    .template-btn {
+      padding: 16px;
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    
+    .template-btn:hover {
+      border-color: #3b82f6;
+      background: #eff6ff;
+      transform: translateY(-2px);
+    }
+    
+    .template-btn.active {
+      border-color: #3b82f6;
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    
+    .form-group {
+      margin-bottom: 24px;
+    }
+    
+    label {
+      display: block;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    
+    input[type="email"],
+    input[type="text"],
+    textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 15px;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    
+    input:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    textarea {
+      min-height: 250px;
+      resize: vertical;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding: 12px;
+      background: #f9fafb;
+      border-radius: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .toolbar button {
+      padding: 8px 14px;
+      border: 1px solid #d1d5db;
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    
+    .toolbar button:hover {
+      background: #f3f4f6;
+      border-color: #9ca3af;
+    }
+    
+    .send-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .send-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+    }
+    
+    .send-btn:active {
+      transform: translateY(0);
+    }
+    
+    .send-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .status {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 8px;
+      display: none;
+      font-weight: 500;
+      animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .status.success {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+      display: block;
+    }
+    
+    .status.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+      display: block;
+    }
+    
+    .help-text {
+      font-size: 13px;
+      color: #6b7280;
+      margin-top: 6px;
+    }
+    
+    .preview-btn {
+      margin-left: auto;
+      background: #10b981 !important;
+      color: white !important;
+      border-color: #10b981 !important;
+    }
+    
+    .preview-btn:hover {
+      background: #059669 !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📧 Send Email</h1>
+      <div class="user-email">Sending from: <span id="userEmail">Loading...</span></div>
+    </div>
+    
+    <div class="form-container">
+      <div class="template-selector">
+        <button class="template-btn active" onclick="loadTemplate('blank')">
+          ✏️ Blank
+        </button>
+        <button class="template-btn" onclick="loadTemplate('welcome')">
+          👋 Welcome
+        </button>
+        <button class="template-btn" onclick="loadTemplate('training')">
+          📚 Training
+        </button>
+        <button class="template-btn" onclick="loadTemplate('reminder')">
+          ⏰ Reminder
+        </button>
+        <button class="template-btn" onclick="loadTemplate('followup')">
+          💼 Follow-up
+        </button>
+      </div>
+      
+      <form id="emailForm">
+        <div class="form-group">
+          <label for="to">To:</label>
+          <input type="email" id="to" required placeholder="recipient@example.com">
+          <div class="help-text">Enter recipient's email address</div>
+        </div>
+        
+        <div class="form-group">
+          <label for="subject">Subject:</label>
+          <input type="text" id="subject" required placeholder="Email subject">
+        </div>
+        
+        <div class="form-group">
+          <label for="body">Message:</label>
+          <div class="toolbar">
+            <button type="button" onclick="insertTag('h1')"><b>H1</b></button>
+            <button type="button" onclick="insertTag('h2')"><b>H2</b></button>
+            <button type="button" onclick="insertTag('p')">¶ Para</button>
+            <button type="button" onclick="insertTag('strong')"><b>Bold</b></button>
+            <button type="button" onclick="insertTag('em')"><i>Italic</i></button>
+            <button type="button" onclick="insertLink()">🔗 Link</button>
+            <button type="button" onclick="insertButton()">🔘 Button</button>
+            <button type="button" onclick="insertList()">📝 List</button>
+            <button type="button" class="preview-btn" onclick="previewEmail()">👁️ Preview</button>
+          </div>
+          <textarea id="body" required placeholder="Write your message in HTML..."></textarea>
+          <div class="help-text">Use HTML tags for formatting. Templates are pre-formatted.</div>
+        </div>
+        
+        <button type="submit" class="send-btn" id="sendBtn">
+          Send Email
+        </button>
+        
+        <div id="status" class="status"></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Check authentication
+    (async function() {
+      if (!Auth.isSessionValid()) {
+        window.location.href = '../login.html';
+        return;
+      }
+      
+      const userData = Auth.getUserData();
+      if (userData) {
+        // Convert @nf-financial.life to @americanincome.life
+        const username = userData.username || userData.email.split('@')[0];
+        const ailEmail = username.toLowerCase().replace(/\s+/g, '') + '@americanincome.life';
+        document.getElementById('userEmail').textContent = ailEmail;
+      }
+    })();
+
+    // Email templates
+    const templates = {
+      blank: {
+        subject: '',
+        body: '<p>Write your message here...</p>'
+      },
+      welcome: {
+        subject: 'Welcome to American Income Life!',
+        body: `<h1>Welcome to the Team! 🎉</h1>
+
+<p>Hi [Name],</p>
+
+<p>We're thrilled to have you join American Income Life! You're now part of a team dedicated to protecting families and building financial security.</p>
+
+<h2>Your Next Steps:</h2>
+<ul>
+  <li>✅ Complete your licensing requirements</li>
+  <li>✅ Set up your dialer access at agent.nf-financial.life</li>
+  <li>✅ Join our weekly training sessions</li>
+  <li>✅ Review your onboarding materials</li>
+</ul>
+
+<p>Your dedicated email is now active: <strong>[email]@americanincome.life</strong></p>
+
+<p>If you have any questions, don't hesitate to reach out!</p>
+
+<p>Let's build something great together,<br>
+Thomas Lancheros<br>
+American Income Life</p>`
+      },
+      training: {
+        subject: 'Training Reminder - The Closing Coalition',
+        body: `<h1>📚 Training Update</h1>
+
+<p>Hi there,</p>
+
+<p>Just a friendly reminder that you have pending training modules in The Closing Coalition platform:</p>
+
+<h2>Your Progress:</h2>
+<ul>
+  <li><strong>Module:</strong> [Module Name]</li>
+  <li><strong>Deadline:</strong> [Date]</li>
+  <li><strong>Current Progress:</strong> [X]% complete</li>
+</ul>
+
+<p>Complete your training to unlock your full earning potential and get access to our advanced tools!</p>
+
+<a href="https://agent.nf-financial.life" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0;">Continue Training →</a>
+
+<p>Questions? Just reply to this email.</p>
+
+<p>Best,<br>Thomas</p>`
+      },
+      reminder: {
+        subject: 'Quick Reminder',
+        body: `<h1>⏰ Friendly Reminder</h1>
+
+<p>Hi [Name],</p>
+
+<p>This is a quick reminder about [topic/event]:</p>
+
+<ul>
+  <li><strong>What:</strong> [Description]</li>
+  <li><strong>When:</strong> [Date/Time]</li>
+  <li><strong>Where:</strong> [Location/Link]</li>
+</ul>
+
+<p>Looking forward to seeing you there!</p>
+
+<p>Best regards,<br>
+Thomas Lancheros</p>`
+      },
+      followup: {
+        subject: 'Following Up',
+        body: `<h1>💼 Following Up</h1>
+
+<p>Hi [Name],</p>
+
+<p>I wanted to follow up on [previous conversation/topic].</p>
+
+<p>Have you had a chance to [action item]? I'm here to help if you need any support or have questions.</p>
+
+<h2>Resources Available:</h2>
+<ul>
+  <li>📞 One-on-one coaching sessions</li>
+  <li>📚 Training materials and guides</li>
+  <li>💬 Team support channel</li>
+</ul>
+
+<p>Let me know how I can help you succeed!</p>
+
+<p>Best,<br>
+Thomas Lancheros<br>
+American Income Life</p>`
+      }
+    };
+
+    // Load template
+    function loadTemplate(templateName) {
+      const template = templates[templateName];
+      if (!template) return;
+      
+      document.getElementById('subject').value = template.subject;
+      document.getElementById('body').value = template.body;
+      
+      // Update active button
+      document.querySelectorAll('.template-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+    }
+
+    // HTML formatting helpers
+    function insertTag(tag) {
+      const textarea = document.getElementById('body');
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const selectedText = textarea.value.substring(start, end);
+      const before = textarea.value.substring(0, start);
+      const after = textarea.value.substring(end);
+      
+      const newText = `<${tag}>${selectedText || 'Text here'}</${tag}>`;
+      textarea.value = before + newText + after;
+      
+      // Set cursor position
+      const newPos = start + newText.length;
+      textarea.setSelectionRange(newPos, newPos);
+      textarea.focus();
+    }
+
+    function insertLink() {
+      const url = prompt('Enter URL:', 'https://');
+      if (!url) return;
+      
+      const textarea = document.getElementById('body');
+      const start = textarea.selectionStart;
+      const selectedText = textarea.value.substring(start, textarea.selectionEnd);
+      const linkText = selectedText || 'Link text';
+      
+      const link = `<a href="${url}">${linkText}</a>`;
+      const before = textarea.value.substring(0, start);
+      const after = textarea.value.substring(textarea.selectionEnd);
+      
+      textarea.value = before + link + after;
+      textarea.focus();
+    }
+
+    function insertButton() {
+      const url = prompt('Button URL:', 'https://agent.nf-financial.life');
+      const text = prompt('Button text:', 'Click Here');
+      if (!url || !text) return;
+      
+      const textarea = document.getElementById('body');
+      const button = `<a href="${url}" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 10px 0;">${text}</a>`;
+      
+      textarea.value += '\n' + button + '\n';
+      textarea.focus();
+    }
+
+    function insertList() {
+      const textarea = document.getElementById('body');
+      const list = `<ul>
+  <li>Item 1</li>
+  <li>Item 2</li>
+  <li>Item 3</li>
+</ul>`;
+      
+      textarea.value += '\n' + list + '\n';
+      textarea.focus();
+    }
+
+    function previewEmail() {
+      const body = document.getElementById('body').value;
+      const subject = document.getElementById('subject').value;
+      
+      const preview = window.open('', 'preview', 'width=600,height=800');
+      preview.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>${subject}</title>
+          <style>
+            body { 
+              font-family: Arial, sans-serif; 
+              line-height: 1.6;
+              color: #333;
+              max-width: 600px;
+              margin: 20px auto;
+              padding: 20px;
+              background: #f5f5f5;
+            }
+            .email-preview {
+              background: white;
+              padding: 30px;
+              border-radius: 8px;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+          </style>
+        </head>
+        <body>
+          <div class="email-preview">
+            ${body}
+          </div>
+        </body>
+        </html>
+      `);
+    }
+
+    // Handle form submission
+    document.getElementById('emailForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const sendBtn = document.getElementById('sendBtn');
+      const status = document.getElementById('status');
+      
+      // Disable button
+      sendBtn.disabled = true;
+      sendBtn.textContent = 'Sending...';
+      status.style.display = 'none';
+      
+      try {
+        const userData = Auth.getUserData();
+        const username = userData.username || userData.email.split('@')[0];
+        const fromEmail = username.toLowerCase().replace(/\s+/g, '') + '@americanincome.life';
+        
+        const response = await fetch(CFWORKER + '/email/send', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            to: document.getElementById('to').value,
+            subject: document.getElementById('subject').value,
+            body: document.getElementById('body').value,
+            from: fromEmail,
+            fromName: 'Thomas Lancheros - American Income Life',
+            html: true
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.ok) {
+          status.className = 'status success';
+          status.textContent = '✅ Email sent successfully!';
+          
+          // Clear form after 2 seconds
+          setTimeout(() => {
+            document.getElementById('emailForm').reset();
+            loadTemplate('blank');
+            status.style.display = 'none';
+          }, 2000);
+        } else {
+          throw new Error(data.error || 'Failed to send email');
+        }
+        
+      } catch (error) {
+        status.className = 'status error';
+        status.textContent = '❌ Error: ' + error.message;
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'Send Email';
+      }
+    });
+  </script>
+</body>
+</html>
