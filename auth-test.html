@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Auth.js Diagnostic Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #0f0;
+        }
+        .test { margin: 10px 0; padding: 10px; border-left: 3px solid #333; }
+        .pass { border-color: #0f0; background: #002200; }
+        .fail { border-color: #f00; background: #220000; color: #f00; }
+        .info { border-color: #0ff; background: #002222; color: #0ff; }
+        button {
+            background: #0f0;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background: #0ff; }
+        pre { background: #000; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Auth.js Diagnostic Test</h1>
+    <div id="results"></div>
+    <hr>
+    <h2>Manual Tests</h2>
+    <button onclick="testLogin()">Test Login Flow</button>
+    <button onclick="testSession()">Test Session</button>
+    <button onclick="clearAll()">Clear All Storage</button>
+    <div id="manualResults"></div>
+
+    <!-- Load scripts -->
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+
+    <script>
+        const results = document.getElementById('results');
+        const manualResults = document.getElementById('manualResults');
+
+        function addResult(type, message, details = '') {
+            const div = document.createElement('div');
+            div.className = `test ${type}`;
+            div.innerHTML = `<strong>${type.toUpperCase()}:</strong> ${message}`;
+            if (details) {
+                div.innerHTML += `<pre>${details}</pre>`;
+            }
+            results.appendChild(div);
+        }
+
+        function addManual(type, message) {
+            const div = document.createElement('div');
+            div.className = `test ${type}`;
+            div.innerHTML = `<strong>${type.toUpperCase()}:</strong> ${message}`;
+            manualResults.appendChild(div);
+        }
+
+        // Run automatic tests
+        (function runTests() {
+            addResult('info', 'Starting diagnostic tests...');
+
+            // Test 1: Check if config.js loaded
+            try {
+                if (typeof CFWORKER !== 'undefined') {
+                    addResult('pass', 'config.js loaded successfully', `CFWORKER = ${CFWORKER}`);
+                } else {
+                    addResult('fail', 'config.js NOT loaded - CFWORKER is undefined');
+                }
+            } catch (e) {
+                addResult('fail', 'Error checking config.js', e.message);
+            }
+
+            // Test 2: Check if auth.js loaded
+            try {
+                if (typeof Auth !== 'undefined') {
+                    addResult('pass', 'auth.js loaded successfully', `Auth object exists`);
+                } else {
+                    addResult('fail', 'auth.js NOT loaded - Auth is undefined');
+                }
+            } catch (e) {
+                addResult('fail', 'Error checking auth.js', e.message);
+            }
+
+            // Test 3: Check Auth functions
+            if (typeof Auth !== 'undefined') {
+                const requiredFunctions = [
+                    'login', 'logout', 'signup', 'verify',
+                    'getToken', 'setSession', 'requireAuth',
+                    'apiCall', 'isSessionValid', 'getUserData'
+                ];
+                
+                let missing = [];
+                requiredFunctions.forEach(fn => {
+                    if (typeof Auth[fn] !== 'function') {
+                        missing.push(fn);
+                    }
+                });
+
+                if (missing.length === 0) {
+                    addResult('pass', 'All Auth functions available', requiredFunctions.join(', '));
+                } else {
+                    addResult('fail', 'Missing Auth functions', missing.join(', '));
+                }
+            }
+
+            // Test 4: Check current session
+            try {
+                const token = Auth.getToken();
+                if (token) {
+                    addResult('info', 'Session token found', `Token: ${token.substring(0, 20)}...`);
+                    
+                    const userData = Auth.getUserData();
+                    if (userData) {
+                        addResult('info', 'User data found', JSON.stringify(userData, null, 2));
+                    } else {
+                        addResult('info', 'No user data in session');
+                    }
+                } else {
+                    addResult('info', 'No session token found - user not logged in');
+                }
+            } catch (e) {
+                addResult('fail', 'Error checking session', e.message);
+            }
+
+            // Test 5: Check localStorage/cookies
+            try {
+                const keys = ['nf_auth_token', 'nf_auth_expires', 'nf_user_data', 'cc_token', 'cc_expires_at'];
+                let found = [];
+                keys.forEach(key => {
+                    const value = localStorage.getItem(key);
+                    if (value) {
+                        found.push(key);
+                    }
+                });
+                
+                if (found.length > 0) {
+                    addResult('info', 'Storage keys found', found.join(', '));
+                } else {
+                    addResult('info', 'No auth keys in localStorage');
+                }
+            } catch (e) {
+                addResult('fail', 'Error checking localStorage', e.message);
+            }
+
+            addResult('info', 'Diagnostic tests complete');
+        })();
+
+        // Manual test functions
+        async function testLogin() {
+            manualResults.innerHTML = '';
+            addManual('info', 'Testing login flow...');
+            
+            try {
+                const result = await Auth.login('Test User', 'password123');
+                addManual('pass', 'Login API call succeeded', JSON.stringify(result, null, 2));
+            } catch (e) {
+                addManual('fail', 'Login failed (expected if test user does not exist)', e.message);
+            }
+        }
+
+        async function testSession() {
+            manualResults.innerHTML = '';
+            addManual('info', 'Testing session validation...');
+            
+            try {
+                const isValid = await Auth.validateSession();
+                if (isValid) {
+                    addManual('pass', 'Session is valid');
+                    const userData = Auth.getUserData();
+                    addManual('info', 'User data', JSON.stringify(userData, null, 2));
+                } else {
+                    addManual('info', 'No valid session (not logged in)');
+                }
+            } catch (e) {
+                addManual('fail', 'Session validation failed', e.message);
+            }
+        }
+
+        function clearAll() {
+            manualResults.innerHTML = '';
+            Auth.clearSession();
+            addManual('pass', 'All storage cleared');
+        }
+    </script>
+</body>
+</html>

@@ -296,6 +296,7 @@
   </div>
 
   <script src="config.js"></script>
+  <script src="auth.js"></script>
   <script>
     /**********************
      * CONFIG
@@ -330,78 +331,13 @@
     const btnVerify = document.getElementById('btnVerify');
     const btnResend = document.getElementById('btnResend');
 
-    const LS_TOKEN = "cc_token";
-    const LS_EXPIRES = "cc_expires_at";
-
     let currentUsername = "";
     let currentEmail = "";
     let currentPassword = "";
 
     /**********************
-     * UTILITIES
+     * UTILITIES (using Auth.js)
      **********************/
-    function setCookie(name, value, hours) {
-      const expires = new Date();
-      expires.setTime(expires.getTime() + hours * 60 * 60 * 1000);
-      document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
-    }
-
-    function getCookie(name) {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop().split(';').shift();
-      return null;
-    }
-
-    function deleteCookie(name) {
-      document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
-    }
-
-    function setSession(token, expiresAt) {
-      if (!token) {
-        deleteCookie(LS_TOKEN);
-        deleteCookie(LS_EXPIRES);
-        try {
-          localStorage.removeItem(LS_TOKEN);
-          localStorage.removeItem(LS_EXPIRES);
-        } catch (e) {}
-        return;
-      }
-      
-      setCookie(LS_TOKEN, token, 12);
-      if (expiresAt) setCookie(LS_EXPIRES, expiresAt, 12);
-      
-      try {
-        localStorage.setItem(LS_TOKEN, token);
-        if (expiresAt) localStorage.setItem(LS_EXPIRES, expiresAt);
-      } catch (e) {}
-    }
-
-    function getToken() {
-      const cookieToken = getCookie(LS_TOKEN);
-      if (cookieToken) return cookieToken;
-      
-      try {
-        const localToken = localStorage.getItem(LS_TOKEN);
-        if (localToken) {
-          setCookie(LS_TOKEN, localToken, 12);
-          return localToken;
-        }
-      } catch (e) {}
-      return "";
-    }
-
-    function normalizeName(raw) {
-      return String(raw || "").trim().replace(/\s+/g, " ");
-    }
-
-    function derivedEmailFromName(name) {
-      const clean = normalizeName(name)
-        .toLowerCase()
-        .replace(/[^a-z\s]/g, "")
-        .replace(/\s+/g, "");
-      return clean ? `${clean}.ail@gmail.com` : "";
-    }
 
     function showMessage(el, type, text) {
       el.className = "message show " + (type === "success" ? "success" : "error");
@@ -432,39 +368,12 @@
     }
 
     /**********************
-     * API
-     **********************/
-    async function api(action, payload) {
-      const res = await fetch(`${API_URL}/${action}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-
-      const text = await res.text();
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch {
-        throw new Error(text || "Invalid response");
-      }
-
-      if (!data || data.ok !== true) {
-        const err = (data && (data.error || data.detail)) ? 
-          (data.error + (data.detail ? ` — ${data.detail}` : "")) : 
-          "Request failed";
-        throw new Error(err);
-      }
-      return data;
-    }
-
-    /**********************
      * EVENT HANDLERS
      **********************/
     
     // Update derived email as user types
     loginName.addEventListener('input', () => {
-      const email = derivedEmailFromName(loginName.value);
+      const email = Auth.derivedEmailFromName(loginName.value);
       loginDerived.textContent = email || "—";
     });
 
@@ -472,9 +381,9 @@
     btnLogin.addEventListener('click', async () => {
       clearMessage(loginMsg);
 
-      const username = normalizeName(loginName.value);
+      const username = Auth.normalizeName(loginName.value);
       const password = String(loginPassword.value || "");
-      const email = derivedEmailFromName(loginName.value);
+      const email = Auth.derivedEmailFromName(loginName.value);
 
       if (!username) {
         showMessage(loginMsg, 'error', 'Please enter your full name.');
@@ -490,8 +399,7 @@
 
       setLoading(btnLogin, true);
       try {
-        const out = await api("login", { username, password, email });
-        setSession(out.token, out.expires_at);
+        const result = await Auth.login(username, password);
         showMessage(loginMsg, 'success', 'Login successful. Redirecting...');
         
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -526,7 +434,7 @@
     btnSignup.addEventListener('click', async () => {
       clearMessage(firstMsg);
 
-      const username = normalizeName(firstName.value);
+      const username = Auth.normalizeName(firstName.value);
       const password = String(firstPassword.value || "");
       const email = firstDerived.textContent;
 
@@ -545,7 +453,7 @@
 
       setLoading(btnSignup, true);
       try {
-        await api("signup", { username, password, email });
+        await Auth.signup(username, password);
         
         // Move to verify section
         verifyName.value = username;
@@ -573,11 +481,7 @@
 
       setLoading(btnResend, true);
       try {
-        await api("signup", { 
-          username: currentUsername, 
-          password: currentPassword, 
-          email: currentEmail 
-        });
+        await Auth.signup(currentUsername, currentPassword);
         showMessage(verifyMsg, 'success', 'Verification code resent.');
       } catch (e) {
         showMessage(verifyMsg, 'error', e.message || "Resend failed.");
@@ -605,7 +509,7 @@
 
       setLoading(btnVerify, true);
       try {
-        await api("verify", { username, code, email });
+        await Auth.verify(username, code);
         showMessage(verifyMsg, 'success', 'Account verified! Redirecting to login...');
         
         await new Promise(resolve => setTimeout(resolve, 1500));
@@ -628,13 +532,12 @@
 
     // Check if already logged in
     (async () => {
-      const token = getToken();
-      if (token) {
+      if (Auth.isSessionValid()) {
         try {
-          await api("me", { token });
+          await Auth.validateSession();
           window.location.href = "home.html";
         } catch (e) {
-          setSession("", "");
+          Auth.clearSession();
         }
       }
     })();
