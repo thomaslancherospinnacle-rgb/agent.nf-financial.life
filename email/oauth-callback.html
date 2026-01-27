@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gmail Authorization - American Income Life</title>
+  <title>Email - American Income Life</title>
+  <link rel="icon" type="image/x-icon" href="../favicon.ico">
   <script src="../config.js"></script>
+  <script src="../auth.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     
@@ -12,172 +14,761 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       padding: 20px;
     }
     
     .container {
+      max-width: 1400px;
+      margin: 0 auto;
       background: white;
       border-radius: 12px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      padding: 40px;
-      max-width: 500px;
-      text-align: center;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 40px);
     }
     
-    .spinner {
-      width: 50px;
-      height: 50px;
-      border: 4px solid #e5e7eb;
-      border-top-color: #3b82f6;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 20px;
+    .header {
+      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+      color: white;
+      padding: 20px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    
-    h1 {
+    .header h1 {
       font-size: 24px;
+    }
+    
+    .header-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    .user-email {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    
+    .gmail-status {
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 2px solid rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.1);
+      transition: all 0.2s;
+    }
+    
+    .gmail-status:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    
+    .gmail-status.connected {
+      background: #10b981;
+      border-color: #059669;
+    }
+    
+    .compose-btn {
+      padding: 10px 20px;
+      background: white;
+      color: #1e3a8a;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    
+    .compose-btn:hover {
+      transform: translateY(-2px);
+    }
+    
+    .main-content {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+    
+    .sidebar {
+      width: 200px;
+      background: #f9fafb;
+      border-right: 1px solid #e5e7eb;
+      padding: 20px;
+    }
+    
+    .nav-item {
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .nav-item:hover {
+      background: #e5e7eb;
+    }
+    
+    .nav-item.active {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    
+    .email-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    
+    .email-item {
+      padding: 16px;
+      border-bottom: 1px solid #e5e7eb;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .email-item:hover {
+      background: #f9fafb;
+    }
+    
+    .email-item.unread {
+      background: #eff6ff;
+      font-weight: 600;
+    }
+    
+    .email-from {
+      font-weight: 600;
       color: #1f2937;
-      margin-bottom: 12px;
+      margin-bottom: 4px;
     }
     
-    p {
+    .email-subject {
+      color: #374151;
+      margin-bottom: 4px;
+    }
+    
+    .email-snippet {
+      font-size: 13px;
       color: #6b7280;
-      line-height: 1.6;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     
-    .success {
-      color: #10b981;
-      font-size: 48px;
+    .email-date {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #6b7280;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #6b7280;
+    }
+    
+    .empty-state h3 {
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+    
+    .compose-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .compose-modal.active {
+      display: flex;
+    }
+    
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 700px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+    }
+    
+    .modal-header {
+      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+      color: white;
+      padding: 20px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .modal-header h2 {
+      font-size: 20px;
+    }
+    
+    .close-modal {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 28px;
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+    
+    .close-modal:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    
+    .modal-body {
+      padding: 30px;
+    }
+    
+    .form-group {
       margin-bottom: 20px;
     }
     
-    .error {
-      color: #ef4444;
-      font-size: 48px;
-      margin-bottom: 20px;
+    label {
+      display: block;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 8px;
+      font-size: 14px;
     }
     
-    .error-details {
+    input[type="email"],
+    input[type="text"],
+    textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 15px;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    
+    input:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    textarea {
+      min-height: 200px;
+      resize: vertical;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .send-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    
+    .send-btn:hover {
+      transform: translateY(-2px);
+    }
+    
+    .send-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .status {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 6px;
+      display: none;
+      font-size: 14px;
+    }
+    
+    .status.success {
+      background: #d1fae5;
+      color: #065f46;
+      display: block;
+    }
+    
+    .status.error {
       background: #fee2e2;
       color: #991b1b;
-      padding: 16px;
-      border-radius: 8px;
-      margin-top: 16px;
-      font-size: 14px;
-      text-align: left;
+      display: block;
+    }
+    
+    .refresh-btn {
+      padding: 8px 16px;
+      background: white;
+      color: #1e3a8a;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+    
+    .refresh-btn:hover {
+      background: rgba(255,255,255,0.9);
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    
+    .toolbar button {
+      padding: 8px 14px;
+      border: 1px solid #d1d5db;
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    
+    .toolbar button:hover {
+      background: #f3f4f6;
+      border-color: #9ca3af;
     }
   </style>
 </head>
 <body>
-  <div class="container" id="container">
-    <div class="spinner"></div>
-    <h1>Connecting Gmail...</h1>
-    <p>Please wait while we complete the authorization process.</p>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1>📧 Email</h1>
+        <div class="user-email" id="userEmail">Loading...</div>
+      </div>
+      <div class="header-actions">
+        <button class="gmail-status" id="gmailStatus" onclick="connectGmail()">
+          Connect Gmail
+        </button>
+        <button class="refresh-btn" onclick="refreshEmails()">
+          ↻ Refresh
+        </button>
+        <button class="compose-btn" onclick="openCompose()">
+          ✏️ Compose
+        </button>
+      </div>
+    </div>
+    
+    <div class="main-content">
+      <div class="sidebar">
+        <div class="nav-item active" onclick="switchView('inbox')" id="navInbox">
+          📥 Inbox
+        </div>
+        <div class="nav-item" onclick="switchView('sent')" id="navSent">
+          📤 Sent
+        </div>
+      </div>
+      
+      <div class="email-list" id="emailList">
+        <div class="loading">
+          Loading emails...
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Compose Modal -->
+  <div class="compose-modal" id="composeModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>✏️ Compose Email</h2>
+        <button class="close-modal" onclick="closeCompose()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="composeForm">
+          <div class="form-group">
+            <label for="to">To:</label>
+            <input type="email" id="to" required placeholder="recipient@example.com">
+          </div>
+          
+          <div class="form-group">
+            <label for="subject">Subject:</label>
+            <input type="text" id="subject" required placeholder="Email subject">
+          </div>
+          
+          <div class="form-group">
+            <label for="body">Message:</label>
+            <div class="toolbar">
+              <button type="button" onclick="insertTag('h1')"><b>H1</b></button>
+              <button type="button" onclick="insertTag('h2')"><b>H2</b></button>
+              <button type="button" onclick="insertTag('p')">¶ Para</button>
+              <button type="button" onclick="insertTag('strong')"><b>Bold</b></button>
+              <button type="button" onclick="insertTag('em')"><i>Italic</i></button>
+              <button type="button" onclick="insertLink()">🔗 Link</button>
+            </div>
+            <textarea id="body" required placeholder="Write your message..."></textarea>
+          </div>
+          
+          <button type="submit" class="send-btn" id="sendBtn">
+            Send Email
+          </button>
+          
+          <div id="composeStatus" class="status"></div>
+        </form>
+      </div>
+    </div>
   </div>
 
   <script>
+    let currentUser = null;
+    let currentView = 'inbox';
+    let gmailConnected = false;
+
+    // Initialize on page load
     (async function() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const code = urlParams.get('code');
-      const state = urlParams.get('state'); // This contains the username
-      const error = urlParams.get('error');
-      
-      const container = document.getElementById('container');
-      
-      // Check for OAuth errors
-      if (error) {
-        container.innerHTML = `
-          <div class="error">❌</div>
-          <h1>Authorization Failed</h1>
-          <p>Gmail authorization was cancelled or failed.</p>
-          <div class="error-details">
-            Error: ${error}
-          </div>
-        `;
-        
-        setTimeout(() => {
-          window.close();
-        }, 3000);
+      if (!Auth.isSessionValid()) {
+        window.location.href = '../login.html';
         return;
       }
       
-      // Check if we have the authorization code
-      if (!code) {
-        container.innerHTML = `
-          <div class="error">❌</div>
-          <h1>Missing Authorization Code</h1>
-          <p>The authorization process did not complete correctly.</p>
-        `;
-        
-        setTimeout(() => {
-          window.close();
-        }, 3000);
+      const userData = Auth.getUserData();
+      if (!userData) {
+        window.location.href = '../login.html';
+        return;
+      }
+      
+      currentUser = userData;
+      const username = userData.username || userData.email.split('@')[0];
+      const ailEmail = username.toLowerCase().replace(/\s+/g, '') + '@americanincome.life';
+      
+      document.getElementById('userEmail').textContent = ailEmail;
+      
+      // Check Gmail connection status
+      await checkGmailStatus();
+      
+      // Load initial view
+      await loadEmails();
+    })();
+
+    // Check if Gmail is connected
+    async function checkGmailStatus() {
+      // In a real implementation, you'd check if tokens exist in the backend
+      // For now, we'll just set a flag based on localStorage
+      gmailConnected = localStorage.getItem('gmail_connected') === 'true';
+      updateGmailButton();
+    }
+
+    function updateGmailButton() {
+      const btn = document.getElementById('gmailStatus');
+      if (gmailConnected) {
+        btn.textContent = '✓ Gmail Connected';
+        btn.classList.add('connected');
+      } else {
+        btn.textContent = 'Connect Gmail';
+        btn.classList.remove('connected');
+      }
+    }
+
+    // Connect Gmail OAuth
+    async function connectGmail() {
+      if (gmailConnected) {
+        alert('Gmail is already connected!');
         return;
       }
       
       try {
-        // Exchange code for tokens
-        const response = await fetch(CFWORKER + '/gmail/callback', {
+        const username = currentUser.username || currentUser.email.split('@')[0];
+        
+        const response = await fetch(CFWORKER + '/gmail/auth?username=' + encodeURIComponent(username));
+        const data = await response.json();
+        
+        if (data.ok && data.authUrl) {
+          // Open OAuth popup
+          const width = 600;
+          const height = 700;
+          const left = (screen.width - width) / 2;
+          const top = (screen.height - height) / 2;
+          
+          const popup = window.open(
+            data.authUrl,
+            'gmail_oauth',
+            `width=${width},height=${height},left=${left},top=${top}`
+          );
+          
+          // Listen for OAuth completion
+          window.addEventListener('message', function(event) {
+            if (event.data.type === 'gmail_oauth_success') {
+              gmailConnected = true;
+              localStorage.setItem('gmail_connected', 'true');
+              updateGmailButton();
+              alert('Gmail connected successfully!');
+              loadEmails();
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Failed to start Gmail OAuth:', error);
+        alert('Failed to connect Gmail. Please try again.');
+      }
+    }
+
+    // Switch between inbox and sent views
+    function switchView(view) {
+      currentView = view;
+      
+      // Update nav items
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      document.getElementById('nav' + view.charAt(0).toUpperCase() + view.slice(1)).classList.add('active');
+      
+      loadEmails();
+    }
+
+    // Refresh emails
+    async function refreshEmails() {
+      await loadEmails();
+    }
+
+    // Load emails based on current view
+    async function loadEmails() {
+      const listEl = document.getElementById('emailList');
+      listEl.innerHTML = '<div class="loading">Loading emails...</div>';
+      
+      try {
+        const username = currentUser.username || currentUser.email.split('@')[0];
+        
+        let endpoint, body;
+        
+        if (currentView === 'inbox') {
+          if (!gmailConnected) {
+            listEl.innerHTML = `
+              <div class="empty-state">
+                <h3>📭 Connect Gmail to view your inbox</h3>
+                <p>Click "Connect Gmail" above to get started</p>
+              </div>
+            `;
+            return;
+          }
+          
+          endpoint = '/gmail/inbox';
+          body = { username, maxResults: 50 };
+        } else {
+          endpoint = '/gmail/sent';
+          body = { username };
+        }
+        
+        const response = await fetch(CFWORKER + endpoint, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        
+        const data = await response.json();
+        
+        if (!data.ok) {
+          if (data.needsReauth) {
+            gmailConnected = false;
+            localStorage.removeItem('gmail_connected');
+            updateGmailButton();
+            listEl.innerHTML = `
+              <div class="empty-state">
+                <h3>🔄 Please reconnect Gmail</h3>
+                <p>${data.error || 'Your Gmail connection needs to be refreshed'}</p>
+              </div>
+            `;
+            return;
+          }
+          
+          throw new Error(data.error || 'Failed to load emails');
+        }
+        
+        if (!data.emails || data.emails.length === 0) {
+          listEl.innerHTML = `
+            <div class="empty-state">
+              <h3>📭 No emails yet</h3>
+              <p>${currentView === 'sent' ? 'Send your first email!' : 'Your inbox is empty'}</p>
+            </div>
+          `;
+          return;
+        }
+        
+        // Render emails
+        listEl.innerHTML = '';
+        data.emails.forEach(email => {
+          const item = document.createElement('div');
+          item.className = 'email-item' + (email.unread ? ' unread' : '');
+          
+          if (currentView === 'inbox') {
+            item.innerHTML = `
+              <div class="email-from">${escapeHtml(email.from)}</div>
+              <div class="email-subject">${escapeHtml(email.subject)}</div>
+              <div class="email-snippet">${escapeHtml(email.snippet)}</div>
+              <div class="email-date">${email.date}</div>
+            `;
+          } else {
+            item.innerHTML = `
+              <div class="email-from">To: ${escapeHtml(email.to)}</div>
+              <div class="email-subject">${escapeHtml(email.subject)}</div>
+              <div class="email-date">${new Date(email.timestamp).toLocaleString()}</div>
+            `;
+          }
+          
+          listEl.appendChild(item);
+        });
+        
+      } catch (error) {
+        console.error('Failed to load emails:', error);
+        listEl.innerHTML = `
+          <div class="empty-state">
+            <h3>❌ Error loading emails</h3>
+            <p>${error.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    // Open compose modal
+    function openCompose() {
+      document.getElementById('composeModal').classList.add('active');
+      document.getElementById('composeForm').reset();
+      document.getElementById('composeStatus').style.display = 'none';
+    }
+
+    // Close compose modal
+    function closeCompose() {
+      document.getElementById('composeModal').classList.remove('active');
+    }
+
+    // HTML formatting helpers
+    function insertTag(tag) {
+      const textarea = document.getElementById('body');
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const selectedText = textarea.value.substring(start, end);
+      const before = textarea.value.substring(0, start);
+      const after = textarea.value.substring(end);
+      
+      const newText = `<${tag}>${selectedText || 'Text here'}</${tag}>`;
+      textarea.value = before + newText + after;
+      
+      const newPos = start + newText.length;
+      textarea.setSelectionRange(newPos, newPos);
+      textarea.focus();
+    }
+
+    function insertLink() {
+      const url = prompt('Enter URL:', 'https://');
+      if (!url) return;
+      
+      const textarea = document.getElementById('body');
+      const start = textarea.selectionStart;
+      const selectedText = textarea.value.substring(start, textarea.selectionEnd);
+      const linkText = selectedText || 'Link text';
+      
+      const link = `<a href="${url}">${linkText}</a>`;
+      const before = textarea.value.substring(0, start);
+      const after = textarea.value.substring(textarea.selectionEnd);
+      
+      textarea.value = before + link + after;
+      textarea.focus();
+    }
+
+    // Handle compose form submission
+    document.getElementById('composeForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const sendBtn = document.getElementById('sendBtn');
+      const status = document.getElementById('composeStatus');
+      
+      sendBtn.disabled = true;
+      sendBtn.textContent = 'Sending...';
+      status.style.display = 'none';
+      
+      try {
+        const userData = currentUser;
+        const username = userData.username || userData.email.split('@')[0];
+        
+        const response = await fetch(CFWORKER + '/email/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            code: code,
-            username: state || 'unknown'
+            username: username,
+            to: document.getElementById('to').value,
+            subject: document.getElementById('subject').value,
+            html: document.getElementById('body').value,
           })
         });
         
         const data = await response.json();
         
         if (data.ok) {
-          container.innerHTML = `
-            <div class="success">✓</div>
-            <h1>Gmail Connected!</h1>
-            <p>Your Gmail account has been successfully connected. You can now view your inbox.</p>
-          `;
+          status.className = 'status success';
+          status.textContent = '✅ Email sent successfully!';
           
-          // Notify parent window
-          if (window.opener) {
-            window.opener.postMessage({ 
-              type: 'gmail_oauth_success',
-              username: state 
-            }, '*');
-          }
-          
-          // Close popup after 2 seconds
           setTimeout(() => {
-            window.close();
-          }, 2000);
-          
+            closeCompose();
+            if (currentView === 'sent') {
+              loadEmails();
+            }
+          }, 1500);
         } else {
-          throw new Error(data.error || 'Failed to save Gmail tokens');
+          throw new Error(data.error || 'Failed to send email');
         }
         
       } catch (error) {
-        console.error('OAuth callback error:', error);
-        
-        container.innerHTML = `
-          <div class="error">❌</div>
-          <h1>Connection Failed</h1>
-          <p>We couldn't complete the Gmail connection.</p>
-          <div class="error-details">
-            ${error.message}
-          </div>
-        `;
-        
-        setTimeout(() => {
-          window.close();
-        }, 5000);
+        status.className = 'status error';
+        status.textContent = '❌ Error: ' + error.message;
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'Send Email';
       }
-    })();
+    });
+
+    // Utility: Escape HTML
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text || '';
+      return div.innerHTML;
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('composeModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeCompose();
+      }
+    });
   </script>
 </body>
 </html>
