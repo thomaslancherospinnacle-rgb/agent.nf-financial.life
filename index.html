@@ -1,0 +1,611 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Non-Forfeiture Financial — Login</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <style>
+    :root{
+      --bg1:#071423;
+      --bg2:#0a1a2b;
+      --card: rgba(255,255,255,.06);
+      --card2: rgba(255,255,255,.08);
+      --line: rgba(255,255,255,.10);
+      --text:#eaf2ff;
+      --muted: rgba(234,242,255,.72);
+      --muted2: rgba(234,242,255,.52);
+      --accent:#4fd1c5;
+      --accent2:#2dd4bf;
+      --danger:#ff5a7a;
+      --ok:#22c55e;
+      --shadow: 0 18px 60px rgba(0,0,0,.55);
+      --r:18px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 20% 20%, rgba(79,209,197,.22), transparent 55%),
+        radial-gradient(1200px 700px at 80% 15%, rgba(45,212,191,.18), transparent 55%),
+        radial-gradient(900px 600px at 70% 80%, rgba(99,102,241,.16), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+    }
+    .wrap{width:min(980px, 100%); display:grid; grid-template-columns: 1fr; gap:18px;}
+
+    .card{
+      background: linear-gradient(180deg, var(--card2), var(--card));
+      border:1px solid var(--line);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .head{
+      padding:18px 18px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      border-bottom:1px solid var(--line);
+    }
+    .brand{
+      display:flex; gap:12px; align-items:center;
+    }
+    .logo{
+      width:60px;
+      height:60px;
+      object-fit:contain;
+    }
+    .title{font-weight:800; letter-spacing:.2px; line-height:1.05}
+    .sub{font-size:12px; color:var(--muted2); margin-top:2px}
+
+    .tabs{
+      display:flex;
+      gap:10px;
+      padding:12px 18px 0;
+    }
+    .tab{
+      flex:1;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.18);
+      color: var(--muted);
+      padding:10px 12px;
+      border-radius: 14px;
+      font-weight:700;
+      cursor:pointer;
+      user-select:none;
+      text-align:center;
+      transition: all .15s ease;
+    }
+    .tab.active{
+      background: linear-gradient(180deg, rgba(79,209,197,.26), rgba(0,0,0,.20));
+      color: var(--text);
+      border-color: rgba(79,209,197,.35);
+    }
+
+    .body{padding:16px 18px 18px}
+    .grid{display:grid; grid-template-columns:1fr; gap:12px}
+    .row2{display:grid; grid-template-columns:1fr; gap:12px}
+    @media (min-width: 520px){ .row2{grid-template-columns: 1fr 1fr;} }
+
+    label{display:block; font-size:12px; color:var(--muted2); margin:0 0 6px}
+    input{
+      width:100%;
+      padding:12px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      outline:none;
+      font-size:14px;
+    }
+    input:focus{border-color: rgba(79,209,197,.45); box-shadow:0 0 0 4px rgba(79,209,197,.10)}
+    .pill{
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.12);
+      color: var(--text);
+      overflow:hidden;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+    }
+
+    .actions{display:flex; gap:10px; margin-top:6px; flex-wrap:wrap}
+    button{
+      border:none;
+      cursor:pointer;
+      padding:12px 14px;
+      border-radius: 14px;
+      font-weight:800;
+      color: var(--text);
+      background: linear-gradient(180deg, rgba(79,209,197,.35), rgba(0,0,0,.18));
+      border:1px solid rgba(79,209,197,.28);
+      transition: transform .05s ease, filter .15s ease;
+      min-width: 160px;
+    }
+    button:active{transform: translateY(1px)}
+    button.secondary{
+      background: rgba(0,0,0,.18);
+      border:1px solid var(--line);
+      color: var(--muted);
+      min-width: 120px;
+    }
+    button:disabled{
+      opacity:.55;
+      cursor:not-allowed;
+    }
+
+    .msg{
+      margin-top:12px;
+      padding:12px;
+      border-radius: 14px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.14);
+      color: var(--muted);
+      display:none;
+    }
+    .msg.show{display:block}
+    .msg.ok{border-color: rgba(34,197,94,.35); color: rgba(220,255,233,.92)}
+    .msg.err{border-color: rgba(255,90,122,.35); color: rgba(255,220,228,.92)}
+    .hint{
+      margin-top:10px;
+      font-size:12px;
+      color: var(--muted2);
+      line-height:1.35;
+    }
+
+    .side{
+      padding:18px;
+    }
+    .side h3{margin:0 0 10px; font-size:16px}
+    .side p{margin:0; color: var(--muted); font-size:13px; line-height:1.55}
+    .divider{height:1px; background: var(--line); margin:14px 0}
+    .statusRow{
+      display:flex; justify-content:space-between; align-items:center;
+      gap:12px;
+      padding:10px 12px;
+      border:1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(0,0,0,.12);
+      font-size:13px;
+      color: var(--muted);
+    }
+    .badge{
+      font-size:12px;
+      font-weight:800;
+      padding:6px 10px;
+      border-radius: 999px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.18);
+      color: var(--muted);
+    }
+    .badge.ok{border-color: rgba(34,197,94,.35); color: rgba(220,255,233,.92)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- MAIN -->
+    <div class="card">
+      <div class="head">
+        <div class="brand">
+          <img src="logo.png" alt="Non-Forfeiture Financial Logo" class="logo">
+          <div>
+            <div class="title">Non-Forfeiture Financial</div>
+            <div class="sub">Login / Signup (verification-first)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <div class="tab" data-tab="login">Login</div>
+        <div class="tab active" data-tab="first">First-time</div>
+        <div class="tab" data-tab="verify">Verify</div>
+      </div>
+
+      <div class="body">
+        <div class="grid">
+
+          <div class="row2">
+            <div>
+              <label for="name">Name (First Last)</label>
+              <input id="name" autocomplete="name" placeholder="First Last" />
+            </div>
+
+            <div>
+              <label>Derived login email</label>
+              <div id="derived" class="pill">—</div>
+            </div>
+          </div>
+
+          <div id="loginBlock" style="display:none">
+            <label for="loginPass">Password</label>
+            <input id="loginPass" type="password" autocomplete="current-password" placeholder="Enter password" />
+            <div class="actions">
+              <button id="btnLogin">Login</button>
+              <button id="btnLogout" class="secondary" style="display:none">Logout</button>
+            </div>
+          </div>
+
+          <div id="firstBlock">
+            <label for="firstPass">Create password</label>
+            <input id="firstPass" type="password" autocomplete="new-password" placeholder="Create a password" />
+            <div class="actions">
+              <button id="btnSignup">Send verification code</button>
+            </div>
+            <div class="hint">
+              The verification code is sent to your derived inbox: <span style="font-family:var(--mono); color:rgba(234,242,255,.85)">firstname.ail@gmail.com</span>
+            </div>
+          </div>
+
+          <div id="verifyBlock" style="display:none">
+            <label for="code">Verification code</label>
+            <input id="code" inputmode="numeric" autocomplete="one-time-code" placeholder="6-digit code" />
+            <div class="actions">
+              <button id="btnVerify">Verify code</button>
+              <button id="btnResend" class="secondary">Resend</button>
+            </div>
+          </div>
+
+          <div id="msg" class="msg"></div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+<script src="config.js"></script>
+<script>
+  /**********************
+   * CONFIG
+   **********************/
+  const API_URL = typeof CFWORKER !== 'undefined' ? CFWORKER : '';// <-- YOUR WORKER URL
+
+  /**********************
+   * UI
+   **********************/
+  const $ = (id) => document.getElementById(id);
+
+  const tabs = Array.from(document.querySelectorAll(".tab"));
+  const nameEl = $("name");
+  const derivedEl = $("derived");
+
+  const loginBlock = $("loginBlock");
+  const firstBlock = $("firstBlock");
+  const verifyBlock = $("verifyBlock");
+
+  const loginPass = $("loginPass");
+  const firstPass = $("firstPass");
+  const codeEl = $("code");
+
+  const btnLogin = $("btnLogin");
+  const btnLogout = $("btnLogout");
+  const btnSignup = $("btnSignup");
+  const btnVerify = $("btnVerify");
+  const btnResend = $("btnResend");
+
+  const msg = $("msg");
+  const sessBadge = $("sessBadge");
+
+  const LS_TOKEN = "cc_token";
+  const LS_EXPIRES = "cc_expires_at";
+
+  // ============================================
+  // iOS-COMPATIBLE AUTH (Cookies + localStorage)
+  // ============================================
+  function setCookie(name, value, hours) {
+    const expires = new Date();
+    expires.setTime(expires.getTime() + hours * 60 * 60 * 1000);
+    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
+  }
+
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+  }
+
+  function deleteCookie(name) {
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+  }
+
+  function setMsg(type, text){
+    msg.className = "msg show " + (type === "ok" ? "ok" : type === "err" ? "err" : "");
+    msg.textContent = text || "";
+  }
+  function clearMsg(){
+    msg.className = "msg";
+    msg.textContent = "";
+  }
+
+  function normalizeName(raw){
+    return String(raw || "").trim().replace(/\s+/g, " ");
+  }
+
+  function derivedEmailFromName(name){
+    // letters/spaces only, remove spaces, lowercase
+    const clean = normalizeName(name)
+      .toLowerCase()
+      .replace(/[^a-z\s]/g, "")
+      .replace(/\s+/g, "");
+    return clean ? `${clean}.ail@gmail.com` : "";
+  }
+
+  function setLoading(btn, loading){
+    btn.disabled = !!loading;
+    btn.dataset._old = btn.dataset._old || btn.textContent;
+    btn.textContent = loading ? "Working..." : btn.dataset._old;
+  }
+
+  function setTab(tab){
+    tabs.forEach(t => t.classList.toggle("active", t.dataset.tab === tab));
+    clearMsg();
+
+    loginBlock.style.display = (tab === "login") ? "" : "none";
+    firstBlock.style.display = (tab === "first") ? "" : "none";
+    verifyBlock.style.display = (tab === "verify") ? "" : "none";
+  }
+
+  tabs.forEach(t => t.addEventListener("click", () => setTab(t.dataset.tab)));
+
+  function getToken(){
+    // Check cookie first (iOS-compatible)
+    const cookieToken = getCookie(LS_TOKEN);
+    if (cookieToken) return cookieToken;
+    
+    // Fallback to localStorage
+    try {
+      const localToken = localStorage.getItem(LS_TOKEN);
+      if (localToken) {
+        // Migrate to cookie for iOS compatibility
+        setCookie(LS_TOKEN, localToken, 12);
+        return localToken;
+      }
+    } catch (e) {
+      // localStorage blocked on iOS
+    }
+    return "";
+  }
+  function setSession(token, expiresAt){
+    if (!token){
+      // Clear both cookie and localStorage
+      deleteCookie(LS_TOKEN);
+      deleteCookie(LS_EXPIRES);
+      try {
+        localStorage.removeItem(LS_TOKEN);
+        localStorage.removeItem(LS_EXPIRES);
+      } catch (e) {}
+      return;
+    }
+    
+    // Save to COOKIE first (iOS-compatible)
+    setCookie(LS_TOKEN, token, 12);
+    if (expiresAt) setCookie(LS_EXPIRES, expiresAt, 12);
+    
+    // Also save to localStorage (backwards compatibility)
+    try {
+      localStorage.setItem(LS_TOKEN, token);
+      if (expiresAt) localStorage.setItem(LS_EXPIRES, expiresAt);
+    } catch (e) {
+      // iOS Private Mode - cookie still works!
+    }
+  }
+
+  function updateSessionUI(){
+    const token = getToken();
+    if (token && sessBadge){
+      sessBadge.textContent = "Logged in";
+      sessBadge.classList.add("ok");
+      btnLogout.style.display = "";
+    } else if (sessBadge) {
+      sessBadge.textContent = "Not logged in";
+      sessBadge.classList.remove("ok");
+      btnLogout.style.display = "none";
+    }
+  }
+
+  function updateDerived(){
+    const email = derivedEmailFromName(nameEl.value);
+    derivedEl.textContent = email || "—";
+  }
+
+  nameEl.addEventListener("input", updateDerived);
+  updateDerived();
+  updateSessionUI();
+
+  /**********************
+   * API - FIXED VERSION
+   **********************/
+  async function api(action, payload){
+    console.log('API Request:', { action, payload }); // Debug log
+    
+    // FIXED: Add action to URL path
+    const res = await fetch(`${API_URL}/${action}`, {
+      method: "POST",
+      headers: { "Content-Type":"application/json" },
+      body: JSON.stringify(payload) // Don't include action in body
+    });
+
+    const text = await res.text();
+    console.log('API Response:', text); // Debug log
+    
+    let data;
+    try { data = JSON.parse(text); }
+    catch { throw new Error(text || "Invalid response"); }
+
+    if (!data || data.ok !== true){
+      const err = (data && (data.error || data.detail)) ? (data.error + (data.detail ? ` — ${data.detail}` : "")) : "Request failed";
+      throw new Error(err);
+    }
+    return data;
+  }
+
+  /**********************
+   * ACTIONS
+   **********************/
+  btnSignup.addEventListener("click", async () => {
+    clearMsg();
+
+    const username = normalizeName(nameEl.value);
+    const password = String(firstPass.value || "");
+    const email = derivedEmailFromName(nameEl.value); // Add derived email
+
+    if (!username){
+      setMsg("err", "Enter your name (First Last).");
+      return;
+    }
+    if (password.length < 6){
+      setMsg("err", "Password must be at least 6 characters.");
+      return;
+    }
+
+    setLoading(btnSignup, true);
+    try{
+      await api("signup", { username, password, email });
+      setMsg("ok", "Verification code sent. Go to Verify.");
+      setTab("verify");
+      codeEl.focus();
+    } catch(e){
+      setMsg("err", e.message || "Signup failed.");
+    } finally {
+      setLoading(btnSignup, false);
+    }
+  });
+
+  btnResend.addEventListener("click", async () => {
+    clearMsg();
+
+    const username = normalizeName(nameEl.value);
+    const password = String(firstPass.value || "");
+    const email = derivedEmailFromName(nameEl.value); // Add derived email
+
+    if (!username){
+      setMsg("err", "Enter your name (First Last).");
+      return;
+    }
+    if (password.length < 6){
+      setMsg("err", "Enter your password (same one you created).");
+      return;
+    }
+
+    setLoading(btnResend, true);
+    try{
+      await api("signup", { username, password, email });
+      setMsg("ok", "Verification code re-sent.");
+    } catch(e){
+      setMsg("err", e.message || "Resend failed.");
+    } finally {
+      setLoading(btnResend, false);
+    }
+  });
+
+  btnVerify.addEventListener("click", async () => {
+    clearMsg();
+
+    const username = normalizeName(nameEl.value);
+    const code = String(codeEl.value || "").trim();
+    const email = derivedEmailFromName(nameEl.value); // Add derived email
+
+    if (!username){
+      setMsg("err", "Enter your name (First Last).");
+      return;
+    }
+    if (!/^\d{6}$/.test(code)){
+      setMsg("err", "Enter the 6-digit code.");
+      return;
+    }
+
+    setLoading(btnVerify, true);
+    try{
+      await api("verify", { username, code, email });
+      setMsg("ok", "Verified. You can now login.");
+      setTab("login");
+      loginPass.focus();
+    } catch(e){
+      setMsg("err", e.message || "Verification failed.");
+    } finally {
+      setLoading(btnVerify, false);
+    }
+  });
+
+  btnLogin.addEventListener("click", async () => {
+    clearMsg();
+
+    const username = normalizeName(nameEl.value);
+    const password = String(loginPass.value || "");
+    const email = derivedEmailFromName(nameEl.value); // Add derived email
+
+    if (!username){
+      setMsg("err", "Enter your name (First Last).");
+      return;
+    }
+    if (!password){
+      setMsg("err", "Enter your password.");
+      return;
+    }
+
+    setLoading(btnLogin, true);
+    try{
+      // Send both username and email to backend
+      const out = await api("login", { username, password, email });
+      setSession(out.token, out.expires_at);
+      updateSessionUI();
+      setMsg("ok", "Logged in successfully!");
+      
+      // Give session time to save before redirect
+      await new Promise(resolve => setTimeout(resolve, 500));
+      window.location.href = "home.html";
+
+    } catch(e){
+      setMsg("err", e.message || "Login failed.");
+    } finally {
+      setLoading(btnLogin, false);
+    }
+  });
+
+  btnLogout.addEventListener("click", async () => {
+    clearMsg();
+    const token = getToken();
+    setLoading(btnLogout, true);
+    try{
+      if (token){
+        // best-effort
+        await api("logout", { token }).catch(()=>{});
+      }
+      setSession("", "");
+      updateSessionUI();
+      setMsg("ok", "Logged out.");
+    } finally {
+      setLoading(btnLogout, false);
+    }
+  });
+
+  // On load, validate token silently (best effort)
+  (async () => {
+    const token = getToken();
+    if (token){
+      try {
+        await api("me", { token });
+        updateSessionUI();
+      } catch(e) {
+        // Token invalid, clear it
+        setSession("", "");
+        updateSessionUI();
+      }
+    }
+  })();
+</script>
+</body>
+</html>
