@@ -288,6 +288,76 @@
       align-items: center;
     }
     
+    .email-input-container {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 12px 0;
+      align-items: center;
+    }
+    
+    .email-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #dbeafe;
+      color: #1e40af;
+      padding: 4px 8px 4px 12px;
+      border-radius: 16px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .email-chip-remove {
+      cursor: pointer;
+      background: rgba(30, 64, 175, 0.2);
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      transition: background 0.2s;
+    }
+    
+    .email-chip-remove:hover {
+      background: rgba(30, 64, 175, 0.4);
+    }
+    
+    .email-input {
+      border: none;
+      padding: 4px;
+      font-size: 15px;
+      font-family: inherit;
+      flex: 1;
+      min-width: 200px;
+      outline: none;
+    }
+    
+    .cc-toggle {
+      color: #6b7280;
+      font-size: 14px;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+    
+    .cc-toggle:hover {
+      background: #f3f4f6;
+      color: #1f2937;
+    }
+    
+    .cc-row {
+      display: none;
+    }
+    
+    .cc-row.active {
+      display: flex;
+    }
+    
     /* Rich Text Editor */
     .editor-toolbar {
       padding: 12px 30px;
@@ -366,6 +436,11 @@
     #bodyEditor:empty:before {
       content: 'Write your message here...';
       color: #9ca3af;
+      pointer-events: none;
+    }
+    
+    #bodyEditor:focus:empty:before {
+      content: '';
     }
     
     .signature-preview {
@@ -576,8 +651,20 @@
         <form id="composeForm">
           <div class="form-group">
             <div class="input-row">
-              <label for="to">To:</label>
-              <input type="email" id="to" required placeholder="recipient@example.com">
+              <label>To:</label>
+              <div class="email-input-container" id="toContainer">
+                <input type="email" class="email-input" id="toInput" placeholder="recipient@example.com">
+              </div>
+              <span class="cc-toggle" onclick="toggleCC()">Cc</span>
+            </div>
+          </div>
+          
+          <div class="form-group cc-row" id="ccRow">
+            <div class="input-row">
+              <label>Cc:</label>
+              <div class="email-input-container" id="ccContainer">
+                <input type="email" class="email-input" id="ccInput" placeholder="cc@example.com">
+              </div>
             </div>
           </div>
           
@@ -708,6 +795,99 @@
     let currentView = 'inbox';
     let gmailConnected = false;
     let currentColorType = 'text';
+    let toEmails = [];
+    let ccEmails = [];
+
+    // Email chip management
+    function addEmailChip(email, container, emailArray) {
+      // Validate email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        alert('Please enter a valid email address');
+        return false;
+      }
+      
+      // Check for duplicates
+      if (emailArray.includes(email)) {
+        alert('This email is already added');
+        return false;
+      }
+      
+      // Add to array
+      emailArray.push(email);
+      
+      // Create chip element
+      const chip = document.createElement('div');
+      chip.className = 'email-chip';
+      chip.innerHTML = `
+        ${email}
+        <span class="email-chip-remove" onclick="removeEmailChip('${email}', '${container}', ${container === 'toContainer' ? 'toEmails' : 'ccEmails'}')">×</span>
+      `;
+      
+      // Insert before input
+      const containerEl = document.getElementById(container);
+      const input = containerEl.querySelector('.email-input');
+      containerEl.insertBefore(chip, input);
+      
+      return true;
+    }
+    
+    function removeEmailChip(email, containerId, arrayName) {
+      // Remove from array
+      const emailArray = arrayName === 'toEmails' ? toEmails : ccEmails;
+      const index = emailArray.indexOf(email);
+      if (index > -1) {
+        emailArray.splice(index, 1);
+      }
+      
+      // Remove chip from DOM
+      const container = document.getElementById(containerId);
+      const chips = container.querySelectorAll('.email-chip');
+      chips.forEach(chip => {
+        if (chip.textContent.includes(email)) {
+          chip.remove();
+        }
+      });
+    }
+    
+    function setupEmailInput(inputId, containerId, emailArray) {
+      const input = document.getElementById(inputId);
+      
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ',' || e.key === ' ') {
+          e.preventDefault();
+          const email = input.value.trim().replace(/,/g, '');
+          
+          if (email) {
+            if (addEmailChip(email, containerId, emailArray)) {
+              input.value = '';
+            }
+          }
+        } else if (e.key === 'Backspace' && input.value === '' && emailArray.length > 0) {
+          // Remove last chip on backspace if input is empty
+          const lastEmail = emailArray[emailArray.length - 1];
+          removeEmailChip(lastEmail, containerId, emailArray === toEmails ? 'toEmails' : 'ccEmails');
+        }
+      });
+      
+      // Also handle blur (when clicking away)
+      input.addEventListener('blur', function() {
+        const email = input.value.trim().replace(/,/g, '');
+        if (email) {
+          if (addEmailChip(email, containerId, emailArray)) {
+            input.value = '';
+          }
+        }
+      });
+    }
+    
+    function toggleCC() {
+      const ccRow = document.getElementById('ccRow');
+      ccRow.classList.toggle('active');
+      if (ccRow.classList.contains('active')) {
+        document.getElementById('ccInput').focus();
+      }
+    }
 
     // Generate email signature based on user
     function generateSignature(userData) {
@@ -805,6 +985,8 @@
       document.getElementById('userEmail').textContent = ailEmail;
       
       initColorPicker();
+      setupEmailInput('toInput', 'toContainer', toEmails);
+      setupEmailInput('ccInput', 'ccContainer', ccEmails);
       await checkGmailStatus();
       await loadEmails();
     })();
@@ -984,9 +1166,18 @@
     // Open compose modal
     function openCompose() {
       document.getElementById('composeModal').classList.add('active');
-      document.getElementById('to').value = '';
+      
+      // Reset email chips
+      toEmails = [];
+      ccEmails = [];
+      document.getElementById('toContainer').querySelectorAll('.email-chip').forEach(chip => chip.remove());
+      document.getElementById('ccContainer').querySelectorAll('.email-chip').forEach(chip => chip.remove());
+      document.getElementById('toInput').value = '';
+      document.getElementById('ccInput').value = '';
+      document.getElementById('ccRow').classList.remove('active');
+      
       document.getElementById('subject').value = '';
-      document.getElementById('bodyEditor').innerHTML = '<p>Write your message here...</p>';
+      document.getElementById('bodyEditor').innerHTML = ''; // Empty - placeholder shows via CSS
       document.getElementById('composeStatus').style.display = 'none';
       
       // Show signature preview
@@ -1069,7 +1260,7 @@
       const content = `
 <p>Hi there,</p>
 
-<p>Here is the Virtual Child Safe Kit, thank you for protecting your child</p>
+<p>I wanted to share an important resource with you - the <strong>Child Safe Kit</strong> app. This free app provides crucial safety information and tools to help protect your family.</p>
 
 <p><strong>Download the Child Safe Kit app:</strong></p>
 
@@ -1132,14 +1323,30 @@
     async function sendEmail() {
       const sendBtn = document.getElementById('sendBtn');
       const status = document.getElementById('composeStatus');
-      const to = document.getElementById('to').value;
       const subject = document.getElementById('subject').value;
       const bodyContent = document.getElementById('bodyEditor').innerHTML;
       const signature = document.getElementById('signaturePreview').innerHTML;
       
-      if (!to || !subject || !bodyContent.trim()) {
+      // Get email from input if not added as chip
+      const toInputValue = document.getElementById('toInput').value.trim();
+      if (toInputValue) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (emailRegex.test(toInputValue)) {
+          toEmails.push(toInputValue);
+        }
+      }
+      
+      const ccInputValue = document.getElementById('ccInput').value.trim();
+      if (ccInputValue) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (emailRegex.test(ccInputValue)) {
+          ccEmails.push(ccInputValue);
+        }
+      }
+      
+      if (toEmails.length === 0 || !subject || !bodyContent.trim()) {
         status.className = 'status error';
-        status.textContent = '❌ Please fill in all fields';
+        status.textContent = '❌ Please add at least one recipient and fill in all fields';
         return;
       }
       
@@ -1154,32 +1361,40 @@
         // Combine body + signature
         const fullHtml = bodyContent + signature;
         
-        const response = await fetch(CFWORKER + '/email/send', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            username: username,
-            to: to,
-            subject: subject,
-            html: fullHtml,
-          })
-        });
+        // Send to all recipients (for now, we'll send individual emails)
+        // In production, you'd want to batch this better
+        const allRecipients = [...toEmails];
         
-        const data = await response.json();
-        
-        if (data.ok) {
-          status.className = 'status success';
-          status.textContent = '✅ Email sent successfully!';
+        for (const recipient of allRecipients) {
+          const response = await fetch(CFWORKER + '/email/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              username: username,
+              to: recipient,
+              cc: ccEmails.join(', '), // Include CC info in metadata
+              subject: subject,
+              html: fullHtml,
+            })
+          });
           
-          setTimeout(() => {
-            closeCompose();
-            if (currentView === 'sent') {
-              loadEmails();
-            }
-          }, 1500);
-        } else {
-          throw new Error(data.error || 'Failed to send email');
+          const data = await response.json();
+          
+          if (!data.ok) {
+            throw new Error(data.error || 'Failed to send email to ' + recipient);
+          }
         }
+        
+        status.className = 'status success';
+        const recipientCount = allRecipients.length;
+        status.textContent = `✅ Email sent successfully to ${recipientCount} recipient${recipientCount > 1 ? 's' : ''}!`;
+        
+        setTimeout(() => {
+          closeCompose();
+          if (currentView === 'sent') {
+            loadEmails();
+          }
+        }, 2000);
         
       } catch (error) {
         status.className = 'status error';
