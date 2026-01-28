@@ -28,61 +28,61 @@ function evaluateApplication(data) {
   
   // Age check
   if (data.age > 80) {
-    return buildResult('DECLINE', ['Age exceeds maximum (80 years old)'], product);
+    return createResult('DECLINE', ['Age exceeds maximum (80 years old)'], product);
   }
   
   // Current status
   if (data.currentlyHospitalized) {
-    return buildResult('DECLINE', ['Currently hospitalized'], product);
+    return createResult('DECLINE', ['Currently hospitalized'], product);
   }
   if (data.currentlyJailed) {
-    return buildResult('DECLINE', ['Currently in jail'], product);
+    return createResult('DECLINE', ['Currently in jail'], product);
   }
   if (!data.legallyResiding) {
-    return buildResult('DECLINE', ['Not legally residing in the US'], product);
+    return createResult('DECLINE', ['Not legally residing in the US'], product);
   }
   
   // Major auto-declines
   if (data.hasHIV) {
-    return buildResult('DECLINE', ['HIV/AIDS - positive HIV test'], product);
+    return createResult('DECLINE', ['HIV/AIDS - positive HIV test'], product);
   }
   if (data.onKidneyDialysis) {
-    return buildResult('DECLINE', ['Currently on kidney dialysis'], product);
+    return createResult('DECLINE', ['Currently on kidney dialysis'], product);
   }
   if (data.hasAlzheimers) {
-    return buildResult('DECLINE', ['Alzheimer\'s disease'], product);
+    return createResult('DECLINE', ['Alzheimer\'s disease'], product);
   }
   if (data.hasCysticFibrosis) {
-    return buildResult('DECLINE', ['Cystic fibrosis'], product);
+    return createResult('DECLINE', ['Cystic fibrosis'], product);
   }
   if (data.hasDefibrillator) {
-    return buildResult('DECLINE', ['Defibrillator implant'], product);
+    return createResult('DECLINE', ['Defibrillator implant'], product);
   }
   
   // Build/Weight check
-  const buildResult = checkBuild(data.heightInches, data.weight);
-  if (buildResult.decision === 'DECLINE') {
-    return buildResult('DECLINE', [buildResult.reason], product);
+  const buildCheck = checkBuild(data.heightInches, data.weight);
+  if (buildCheck.decision === 'DECLINE') {
+    return createResult('DECLINE', [buildCheck.reason], product);
   }
-  if (buildResult.rating) {
-    tableRating = buildResult.rating;
-    reasons.push(`Overweight: ${buildResult.reason}`);
+  if (buildCheck.rating) {
+    tableRating = buildCheck.rating;
+    reasons.push(`Overweight: ${buildCheck.reason}`);
   }
   
   // Cancer
   if (data.hasCancer) {
     const yearsSince = data.cancerYearsSinceTreatment || 0;
     if (data.cancerType === 'lung' && (yearsSince < 5 || data.currentSmoker)) {
-      return buildResult('DECLINE', ['Lung cancer < 5 years or currently smokes'], product);
+      return createResult('DECLINE', ['Lung cancer < 5 years or currently smokes'], product);
     }
     if (data.cancerType === 'pancreatic' && yearsSince < 5) {
-      return buildResult('DECLINE', ['Pancreatic cancer < 5 years'], product);
+      return createResult('DECLINE', ['Pancreatic cancer < 5 years'], product);
     }
     if (data.cancerMetastatic && yearsSince < 10) {
-      return buildResult('DECLINE', ['Metastatic cancer < 10 years'], product);
+      return createResult('DECLINE', ['Metastatic cancer < 10 years'], product);
     }
     if (yearsSince < 2 && data.cancerType !== 'skin') {
-      return buildResult('DECLINE', ['Internal cancer < 2 years'], product);
+      return createResult('DECLINE', ['Internal cancer < 2 years'], product);
     }
     if (yearsSince >= 2 && yearsSince < 5) {
       decision = 'AUTO_TRIAL';
@@ -94,18 +94,18 @@ function evaluateApplication(data) {
   if (data.hasDiabetes) {
     if (data.usesInsulin) {
       if (data.hasStroke || data.hasTIA || data.hasHeartAttack || data.hasPAD) {
-        return buildResult('DECLINE', ['Insulin diabetes with cardiovascular complications'], product);
+        return createResult('DECLINE', ['Insulin diabetes with cardiovascular complications'], product);
       }
       if (data.diabetesLastVisit >= 2) {
-        return buildResult('DECLINE', ['Insulin diabetes - not seen doctor in 2+ years'], product);
+        return createResult('DECLINE', ['Insulin diabetes - not seen doctor in 2+ years'], product);
       }
       if (tableRating && parseInt(tableRating.replace('T','')) >= 6) {
-        return buildResult('DECLINE', ['Insulin diabetes with overweight T6+'], product);
+        return createResult('DECLINE', ['Insulin diabetes with overweight T6+'], product);
       }
     }
     
     if (data.diabetesKidneyDisease) {
-      return buildResult('DECLINE', ['Diabetes with kidney disease'], product);
+      return createResult('DECLINE', ['Diabetes with kidney disease'], product);
     }
     
     if (data.diabetesMeds >= 1000) {
@@ -122,10 +122,10 @@ function evaluateApplication(data) {
   // Heart conditions
   if (data.hasHeartAttack) {
     if (data.monthsSinceHeart < 6) {
-      return buildResult('DECLINE', ['Heart attack within 6 months'], product);
+      return createResult('DECLINE', ['Heart attack within 6 months'], product);
     }
     if (data.ageAtHeart < 40) {
-      return buildResult('DECLINE', ['Heart attack before age 40'], product);
+      return createResult('DECLINE', ['Heart attack before age 40'], product);
     }
     decision = 'AUTO_TRIAL';
     reasons.push('Heart attack - all cases must be trialed (10-20% insurance advised, no ADB)');
@@ -133,16 +133,16 @@ function evaluateApplication(data) {
   
   if (data.hasCoronaryBypass || data.hasAngioplasty || data.hasAngina) {
     if (data.monthsSinceHeart < 6) {
-      return buildResult('DECLINE', ['Heart surgery/angina within 6 months'], product);
+      return createResult('DECLINE', ['Heart surgery/angina within 6 months'], product);
     }
   }
   
   if (data.hasStroke || data.hasTIA) {
     if (data.monthsSinceHeart < 6) {
-      return buildResult('DECLINE', ['Stroke within 6 months'], product);
+      return createResult('DECLINE', ['Stroke within 6 months'], product);
     }
     if (data.numberOfHeartEvents > 1) {
-      return buildResult('DECLINE', ['Multiple strokes'], product);
+      return createResult('DECLINE', ['Multiple strokes'], product);
     }
     if (data.monthsSinceHeart < 36) {
       decision = 'AUTO_TRIAL';
@@ -155,12 +155,12 @@ function evaluateApplication(data) {
   const hasCVD = data.hasStroke || data.hasTIA;
   const cardiovascularCount = [hasCAD, hasCVD, data.hasPAD].filter(Boolean).length;
   if (cardiovascularCount >= 2) {
-    return buildResult('DECLINE', ['Multiple cardiovascular diseases (CAD + CVD + PAD combination)'], product);
+    return createResult('DECLINE', ['Multiple cardiovascular diseases (CAD + CVD + PAD combination)'], product);
   }
   
   if (data.hasHBP) {
     if (data.hbpHospitalized) {
-      return buildResult('DECLINE', ['High blood pressure with hospitalization within 2 years'], product);
+      return createResult('DECLINE', ['High blood pressure with hospitalization within 2 years'], product);
     }
     if (data.hbpMeds >= 3) {
       decision = 'AUTO_TRIAL';
@@ -173,13 +173,13 @@ function evaluateApplication(data) {
   }
   
   if (data.hasCHF && data.monthsSinceHeart < 12) {
-    return buildResult('DECLINE', ['Congestive heart failure within 1 year'], product);
+    return createResult('DECLINE', ['Congestive heart failure within 1 year'], product);
   }
   
   // Respiratory
   if (data.hasAsthma) {
     if (data.asthmaICU) {
-      return buildResult('DECLINE', ['Asthma - ICU within 5 years'], product);
+      return createResult('DECLINE', ['Asthma - ICU within 5 years'], product);
     }
     if (data.asthmaHospitalizations >= 2) {
       decision = 'AUTO_TRIAL';
@@ -188,7 +188,7 @@ function evaluateApplication(data) {
   }
   
   if ((data.hasCOPD || data.hasEmphysema) && data.usesOxygen && data.hasCHF) {
-    return buildResult('DECLINE', ['COPD/Emphysema on home oxygen with heart failure'], product);
+    return createResult('DECLINE', ['COPD/Emphysema on home oxygen with heart failure'], product);
   }
   
   // Mental health
@@ -200,18 +200,18 @@ function evaluateApplication(data) {
   }
   
   if (data.hasSeizures && data.seizureDiagnosis < 6) {
-    return buildResult('DECLINE', ['Seizures - newly diagnosed within 6 months'], product);
+    return createResult('DECLINE', ['Seizures - newly diagnosed within 6 months'], product);
   }
   
   // Substance use
   if (data.alcoholTreatment) {
     if (data.stillDrinks || data.yearsDry < 1) {
-      return buildResult('DECLINE', ['Alcohol treatment and still drinks or dry < 1 year'], product);
+      return createResult('DECLINE', ['Alcohol treatment and still drinks or dry < 1 year'], product);
     }
   }
   
   if (data.hardDrugUse && data.yearsSinceDrugs < 2) {
-    return buildResult('DECLINE', ['Drug use within 2 years'], product);
+    return createResult('DECLINE', ['Drug use within 2 years'], product);
   }
   
   if (data.usesMarijuana) {
@@ -221,10 +221,10 @@ function evaluateApplication(data) {
   
   if (data.numberOfDWIs >= 2) {
     if (data.numberOfDWIs === 2 && data.yearsSinceDWI < 2) {
-      return buildResult('DECLINE', ['2 DWIs and last within 2 years'], product);
+      return createResult('DECLINE', ['2 DWIs and last within 2 years'], product);
     }
     if (data.numberOfDWIs >= 3 && data.stillDrinks) {
-      return buildResult('DECLINE', ['3+ DWIs and still drinking'], product);
+      return createResult('DECLINE', ['3+ DWIs and still drinking'], product);
     }
     decision = 'AUTO_TRIAL';
     reasons.push('Multiple DWIs');
@@ -233,17 +233,17 @@ function evaluateApplication(data) {
   // Arrests
   if (data.felonyArrest || data.drugArrest) {
     if (data.yearsSinceProbation < 5 && data.onProbation) {
-      return buildResult('DECLINE', ['Felony/drug arrest with probation within 5 years'], product);
+      return createResult('DECLINE', ['Felony/drug arrest with probation within 5 years'], product);
     }
   }
   
   if (data.totalArrests >= 2 && data.yearsSinceArrest < 5) {
-    return buildResult('DECLINE', ['2+ arrests and last within 5 years'], product);
+    return createResult('DECLINE', ['2+ arrests and last within 5 years'], product);
   }
   
   // Medications
   if (data.takesOpiates && data.takesBenzos) {
-    return buildResult('DECLINE', ['Combination of opiates and benzodiazepines'], product);
+    return createResult('DECLINE', ['Combination of opiates and benzodiazepines'], product);
   }
   
   if (data.medications) {
@@ -335,7 +335,7 @@ function checkBuild(heightInches, weight) {
   return { decision: 'NEEDS_REVIEW', reason: `Weight in gap zone: ${weight} lbs` };
 }
 
-function buildResult(decision, reasons, product) {
+function createResult(decision, reasons, product) {
   return {
     decision,
     product,
