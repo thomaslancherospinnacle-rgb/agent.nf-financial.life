@@ -62,7 +62,27 @@
 
   <meta charset="UTF-8" />
   <title>Life Insurance Key Terms Glossary</title>
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="/icon/ios/32.png">
+  
+  <!-- iOS Home Screen Icons -->
+  <link rel="apple-touch-icon" href="/icon/ios/180.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/icon/ios/152.png">
+  <link rel="apple-touch-icon" sizes="167x167" href="/icon/ios/167.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icon/ios/180.png">
+  
+  <!-- Android/Chrome Home Screen -->
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon/android/android-launchericon-192-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/icon/android/android-launchericon-512-512.png">
+  <link rel="manifest" href="/manifest.json">
+  
+  <!-- PWA Settings -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Closing Coalition">
+  <meta name="theme-color" content="#1e3a8a">
+  
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     :root {
@@ -104,6 +124,7 @@
     .header {
       text-align: center;
       margin-bottom: 24px;
+      position: relative;
     }
 
     .badge {
@@ -206,6 +227,8 @@
       color: var(--text-muted);
       margin-bottom: 16px;
       padding-inline: 4px;
+      flex-wrap: wrap;
+      gap: 12px;
     }
 
     .meta-row span strong {
@@ -324,6 +347,196 @@
       font-size: 13px;
       margin-top: 24px;
     }
+
+    /* ========== MOBILE MENU STYLES ========== */
+    
+    .nav-controls {
+      position: absolute;
+      top: 0;
+      right: 0;
+      display: flex;
+      gap: 8px;
+    }
+    
+    .nav-btn {
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      color: var(--text-main);
+      font-size: 14px;
+      padding: 8px 16px;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+      font-weight: 600;
+    }
+    
+    .nav-btn:hover {
+      background: rgba(15, 23, 42, 1);
+      border-color: rgba(56, 189, 248, 0.5);
+    }
+    
+    .hamburger {
+      display: none;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      color: var(--text-main);
+      font-size: 20px;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s ease;
+      padding: 0;
+      line-height: 1;
+    }
+    
+    .hamburger:hover {
+      background: rgba(15, 23, 42, 1);
+      border-color: rgba(56, 189, 248, 0.5);
+    }
+    
+    .mobile-menu-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      z-index: 999;
+    }
+    
+    .mobile-menu-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .mobile-menu {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 300px;
+      max-width: 85vw;
+      height: 100%;
+      background: linear-gradient(180deg, #0f172a, #020617);
+      border-left: 1px solid rgba(148, 163, 184, 0.2);
+      box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      z-index: 1000;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .mobile-menu.open {
+      transform: translateX(0);
+    }
+    
+    .mobile-menu-header {
+      padding: 20px 18px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(0, 0, 0, 0.2);
+    }
+    
+    .mobile-menu-header .title {
+      font-weight: 900;
+      font-size: 16px;
+      color: var(--text-main);
+    }
+    
+    .close-menu {
+      background: rgba(255, 90, 122, 0.2);
+      border: 1px solid rgba(255, 90, 122, 0.3);
+      color: var(--text-main);
+      font-size: 28px;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s ease;
+      padding: 0;
+      line-height: 1;
+    }
+    
+    .close-menu:hover {
+      background: rgba(255, 90, 122, 0.3);
+    }
+    
+    .mobile-menu-items {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .mobile-menu-items a,
+    .mobile-menu-items button {
+      text-decoration: none;
+      color: var(--text-main);
+      font-weight: 700;
+      font-size: 15px;
+      padding: 16px 18px;
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      background: rgba(15, 23, 42, 0.5);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: background 0.15s ease, transform 0.05s ease;
+      width: 100%;
+      text-align: left;
+    }
+    
+    .mobile-menu-items a:hover,
+    .mobile-menu-items button:hover {
+      background: rgba(15, 23, 42, 0.8);
+    }
+    
+    .mobile-menu-items button.logout {
+      background: rgba(255, 90, 122, 0.2);
+      border-color: rgba(255, 90, 122, 0.3);
+      margin-top: 8px;
+    }
+    
+    .mobile-menu-items a:active,
+    .mobile-menu-items button:active {
+      transform: translateY(1px);
+    }
+    
+    @media (max-width: 767px) {
+      .hamburger {
+        display: flex;
+      }
+      
+      .nav-btn {
+        display: none;
+      }
+      
+      .pill-hint {
+        display: none;
+      }
+      
+      .meta-row > div:last-child {
+        display: none;
+      }
+    }
+    
+    body.menu-open {
+      overflow: hidden;
+    }
   </style>
 </head>
 <body>
@@ -353,9 +566,38 @@
   })();
 </script>
 
+  <!-- Mobile Menu Overlay -->
+  <div class="mobile-menu-overlay" id="menuOverlay"></div>
+
+  <!-- Mobile Menu Panel -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-header">
+      <div class="title">Menu</div>
+      <button class="close-menu" id="closeMenuBtn" aria-label="Close menu">×</button>
+    </div>
+    <div class="mobile-menu-items">
+      <a href="index.html">🏠 Home</a>
+      <a href="exam.html">🎓 Exam</a>
+      <a href="dictionary.html">📚 Dictionary</a>
+      <a href="caller/leadbase.html">📞 Caller</a>
+      <a href="refferal.html">📝 Referral</a>
+      <a href="pipeline.html">📋 Pipeline</a>
+      <a href="fcr.html">📋 Register Number</a>
+      <a href="email/index.html">📧 Email</a>
+      <a href="underwriting/index.html">🔍 Underwriting</a>
+      <button onclick="logout()" class="logout">🚪 Logout</button>
+    </div>
+  </div>
 
   <div class="app">
     <header class="header">
+      <!-- Navigation Controls -->
+      <div class="nav-controls">
+        <button class="nav-btn" onclick="window.location.href='index.html'">🏠 Home</button>
+        <button class="nav-btn" onclick="logout()">🚪 Logout</button>
+        <button class="hamburger" id="hamburgerBtn" aria-label="Menu">☰</button>
+      </div>
+
       <div class="badge">
         <span class="badge-dot"></span>
         LIFE INSURANCE LICENSING GLOSSARY
@@ -405,8 +647,45 @@
   <script src="dictionary.js"></script>
 
   <script>
-    // TERMS loaded from dictionary.js
+    /**********************
+     * MOBILE MENU FUNCTIONALITY
+     **********************/
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const menuOverlay = document.getElementById('menuOverlay');
+    const closeMenuBtn = document.getElementById('closeMenuBtn');
+    const body = document.body;
 
+    function openMenu() {
+      mobileMenu.classList.add('open');
+      menuOverlay.classList.add('show');
+      body.classList.add('menu-open');
+    }
+
+    function closeMenu() {
+      mobileMenu.classList.remove('open');
+      menuOverlay.classList.remove('show');
+      body.classList.remove('menu-open');
+    }
+
+    hamburgerBtn.addEventListener('click', openMenu);
+    closeMenuBtn.addEventListener('click', closeMenu);
+    menuOverlay.addEventListener('click', closeMenu);
+
+    const menuLinks = mobileMenu.querySelectorAll('a');
+    menuLinks.forEach(link => {
+      link.addEventListener('click', closeMenu);
+    });
+
+    function logout() {
+      closeMenu();
+      logoutLocal();
+      goLogin();
+    }
+
+    /**********************
+     * DICTIONARY FUNCTIONALITY
+     **********************/
     const cardsContainer = document.getElementById("cardsContainer");
     const searchInput = document.getElementById("searchInput");
     const termCount = document.getElementById("termCount");
