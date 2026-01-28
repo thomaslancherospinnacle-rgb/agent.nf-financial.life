@@ -799,8 +799,11 @@
     let ccEmails = [];
 
     // Email chip management
-    function addEmailChip(email, container, emailArray) {
-      console.log('addEmailChip called:', { email, container, arrayLength: emailArray.length });
+    function addEmailChip(email, container) {
+      console.log('addEmailChip called:', { email, container });
+      
+      // Determine which array to use based on container
+      const emailArray = container === 'toContainer' ? toEmails : ccEmails;
       
       // Validate email
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -817,15 +820,14 @@
       
       // Add to array
       emailArray.push(email);
-      console.log('Email added to array. New length:', emailArray.length, 'Array:', emailArray);
-      console.log('toEmails global:', toEmails, 'ccEmails global:', ccEmails);
+      console.log('Email added. toEmails:', toEmails, 'ccEmails:', ccEmails);
       
       // Create chip element
       const chip = document.createElement('div');
       chip.className = 'email-chip';
       chip.innerHTML = `
         ${email}
-        <span class="email-chip-remove" onclick="removeEmailChip('${email}', '${container}', '${container === 'toContainer' ? 'toEmails' : 'ccEmails'}')">×</span>
+        <span class="email-chip-remove" onclick="removeEmailChip('${email}', '${container}')">×</span>
       `;
       
       // Insert before input
@@ -836,13 +838,17 @@
       return true;
     }
     
-    function removeEmailChip(email, containerId, arrayName) {
+    function removeEmailChip(email, containerId) {
+      // Determine which array based on container
+      const emailArray = containerId === 'toContainer' ? toEmails : ccEmails;
+      
       // Remove from array
-      const emailArray = arrayName === 'toEmails' ? toEmails : ccEmails;
       const index = emailArray.indexOf(email);
       if (index > -1) {
         emailArray.splice(index, 1);
       }
+      
+      console.log('Email removed. toEmails:', toEmails, 'ccEmails:', ccEmails);
       
       // Remove chip from DOM
       const container = document.getElementById(containerId);
@@ -854,8 +860,9 @@
       });
     }
     
-    function setupEmailInput(inputId, containerId, emailArray) {
+    function setupEmailInput(inputId, containerId) {
       const input = document.getElementById(inputId);
+      const emailArray = containerId === 'toContainer' ? toEmails : ccEmails;
       
       input.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' || e.key === ',' || e.key === ' ') {
@@ -863,14 +870,14 @@
           const email = input.value.trim().replace(/,/g, '');
           
           if (email) {
-            if (addEmailChip(email, containerId, emailArray)) {
+            if (addEmailChip(email, containerId)) {
               input.value = '';
             }
           }
         } else if (e.key === 'Backspace' && input.value === '' && emailArray.length > 0) {
           // Remove last chip on backspace if input is empty
           const lastEmail = emailArray[emailArray.length - 1];
-          removeEmailChip(lastEmail, containerId, emailArray === toEmails ? 'toEmails' : 'ccEmails');
+          removeEmailChip(lastEmail, containerId);
         }
       });
       
@@ -878,7 +885,7 @@
       input.addEventListener('blur', function() {
         const email = input.value.trim().replace(/,/g, '');
         if (email) {
-          if (addEmailChip(email, containerId, emailArray)) {
+          if (addEmailChip(email, containerId)) {
             input.value = '';
           }
         }
@@ -989,8 +996,8 @@
       document.getElementById('userEmail').textContent = ailEmail;
       
       initColorPicker();
-      setupEmailInput('toInput', 'toContainer', toEmails);
-      setupEmailInput('ccInput', 'ccContainer', ccEmails);
+      setupEmailInput('toInput', 'toContainer');
+      setupEmailInput('ccInput', 'ccContainer');
       await checkGmailStatus();
       await loadEmails();
     })();
