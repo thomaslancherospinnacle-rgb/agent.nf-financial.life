@@ -1329,20 +1329,19 @@
       const bodyContent = document.getElementById('bodyEditor').innerHTML;
       const signature = document.getElementById('signaturePreview').innerHTML;
       
-      console.log('Current state:', {
-        toEmails: toEmails,
-        ccEmails: ccEmails,
-        subject: subject,
-        bodyLength: bodyContent.length
-      });
-      
-      // Get email from input if not added as chip
+      // IMPORTANT: Get emails from input fields FIRST (before validation)
       const toInputValue = document.getElementById('toInput').value.trim();
       if (toInputValue) {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (emailRegex.test(toInputValue)) {
-          toEmails.push(toInputValue);
-          console.log('Added email from input:', toInputValue);
+          if (!toEmails.includes(toInputValue)) {
+            toEmails.push(toInputValue);
+            console.log('Added email from To input:', toInputValue);
+          }
+        } else {
+          status.className = 'status error';
+          status.textContent = '❌ Invalid email address in To field: ' + toInputValue;
+          return;
         }
       }
       
@@ -1350,15 +1349,41 @@
       if (ccInputValue) {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (emailRegex.test(ccInputValue)) {
-          ccEmails.push(ccInputValue);
-          console.log('Added CC from input:', ccInputValue);
+          if (!ccEmails.includes(ccInputValue)) {
+            ccEmails.push(ccInputValue);
+            console.log('Added email from CC input:', ccInputValue);
+          }
+        } else {
+          status.className = 'status error';
+          status.textContent = '❌ Invalid email address in CC field: ' + ccInputValue;
+          return;
         }
       }
       
-      if (toEmails.length === 0 || !subject || !bodyContent.trim()) {
+      console.log('Current state:', {
+        toEmails: toEmails,
+        ccEmails: ccEmails,
+        subject: subject,
+        bodyLength: bodyContent.length
+      });
+      
+      // NOW validate
+      if (toEmails.length === 0 || !subject) {
         status.className = 'status error';
-        status.textContent = '❌ Please add at least one recipient and fill in all fields';
-        console.error('Validation failed:', { toEmails, subject, bodyContent: bodyContent.substring(0, 50) });
+        status.textContent = '❌ Please add at least one recipient and a subject';
+        console.error('Validation failed:', { toEmails, subject });
+        return;
+      }
+      
+      // Check if body has actual text content (not just HTML tags)
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = bodyContent;
+      const textContent = tempDiv.textContent || tempDiv.innerText || '';
+      
+      if (!textContent.trim()) {
+        status.className = 'status error';
+        status.textContent = '❌ Please write a message';
+        console.error('Validation failed: empty body');
         return;
       }
       
