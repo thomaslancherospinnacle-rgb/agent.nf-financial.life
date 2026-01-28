@@ -800,6 +800,8 @@
 
     // Email chip management
     function addEmailChip(email, container, emailArray) {
+      console.log('addEmailChip called:', { email, container, arrayLength: emailArray.length });
+      
       // Validate email
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
@@ -815,13 +817,15 @@
       
       // Add to array
       emailArray.push(email);
+      console.log('Email added to array. New length:', emailArray.length, 'Array:', emailArray);
+      console.log('toEmails global:', toEmails, 'ccEmails global:', ccEmails);
       
       // Create chip element
       const chip = document.createElement('div');
       chip.className = 'email-chip';
       chip.innerHTML = `
         ${email}
-        <span class="email-chip-remove" onclick="removeEmailChip('${email}', '${container}', ${container === 'toContainer' ? 'toEmails' : 'ccEmails'}')">×</span>
+        <span class="email-chip-remove" onclick="removeEmailChip('${email}', '${container}', '${container === 'toContainer' ? 'toEmails' : 'ccEmails'}')">×</span>
       `;
       
       // Insert before input
