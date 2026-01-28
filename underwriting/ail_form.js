@@ -1,4 +1,4 @@
-// AIL Form Handler
+// AIL Form Handler - FULLY SAFE VERSION
 
 document.addEventListener('DOMContentLoaded', function() {
     setupFormInteractions();
@@ -70,113 +70,130 @@ function setupFormSubmission() {
 }
 
 function gatherFormData() {
-    const heightFeet = parseInt(document.getElementById('heightFeet').value) || 0;
-    const heightInches = parseInt(document.getElementById('heightInches').value) || 0;
+    // Helper to safely get value
+    const safeValue = (id, defaultVal = '') => {
+        const el = document.getElementById(id);
+        return el ? el.value : defaultVal;
+    };
+    
+    // Helper to safely get checked
+    const safeChecked = (id) => {
+        const el = document.getElementById(id);
+        return el ? el.checked : false;
+    };
+    
+    // Helper to safely get number
+    const safeNumber = (id, defaultVal = 0) => {
+        const el = document.getElementById(id);
+        return el && el.value ? parseFloat(el.value) : defaultVal;
+    };
+    
+    const heightFeet = safeNumber('heightFeet', 0);
+    const heightInches = safeNumber('heightInches', 0);
     
     return {
-        age: parseInt(document.getElementById('age').value),
-        heightInches: (heightFeet * 12) + heightInches,
-        weight: parseInt(document.getElementById('weight').value),
-        isMale: document.getElementById('gender').value === 'male',
-        state: document.getElementById('state').value,
-        faceAmount: parseInt(document.getElementById('faceAmount').value) || 0,
-        nonSmokerPlan: document.getElementById('nonSmokerPlan').value === 'yes',
+        age: parseInt(safeValue('age', '0')),
+        heightInches: (parseInt(heightFeet) * 12) + parseInt(heightInches),
+        weight: parseInt(safeValue('weight', '0')),
+        isMale: safeValue('gender') === 'male',
+        state: safeValue('state'),
+        faceAmount: parseInt(safeValue('faceAmount', '0')),
+        nonSmokerPlan: safeValue('nonSmokerPlan') === 'yes',
         
-        currentlyHospitalized: document.getElementById('currentlyHospitalized').checked,
-        currentlyJailed: document.getElementById('currentlyJailed').checked,
-        legallyResiding: document.getElementById('legallyResiding').checked,
+        currentlyHospitalized: safeChecked('currentlyHospitalized'),
+        currentlyJailed: safeChecked('currentlyJailed'),
+        legallyResiding: safeChecked('legallyResiding'),
         
-        usesTobacco: document.getElementById('usesTobacco').checked,
-        yearsSinceQuitTobacco: parseFloat(document.getElementById('yearsSinceQuitTobacco')?.value) || 0,
-        currentSmoker: document.getElementById('usesTobacco').checked && 
-                      (parseFloat(document.getElementById('yearsSinceQuitTobacco')?.value) || 0) === 0,
+        usesTobacco: safeChecked('usesTobacco'),
+        yearsSinceQuitTobacco: safeNumber('yearsSinceQuitTobacco'),
+        currentSmoker: safeChecked('usesTobacco') && safeNumber('yearsSinceQuitTobacco') === 0,
         
-        hasHIV: document.getElementById('hasHIV').checked,
-        onKidneyDialysis: document.getElementById('onKidneyDialysis').checked,
-        hasAlzheimers: document.getElementById('hasAlzheimers').checked,
-        hasCysticFibrosis: document.getElementById('hasCysticFibrosis').checked,
-        hasDefibrillator: document.getElementById('hasDefibrillator').checked,
+        hasHIV: safeChecked('hasHIV'),
+        onKidneyDialysis: safeChecked('onKidneyDialysis'),
+        hasAlzheimers: safeChecked('hasAlzheimers'),
+        hasCysticFibrosis: safeChecked('hasCysticFibrosis'),
+        hasDefibrillator: safeChecked('hasDefibrillator'),
         
-        hasCancer: document.getElementById('hasCancer').checked,
-        cancerType: document.getElementById('cancerType')?.value,
-        cancerYearsSinceTreatment: parseFloat(document.getElementById('cancerYearsSinceTreatment')?.value) || 0,
-        cancerMetastatic: document.getElementById('cancerMetastatic')?.checked || false,
+        hasCancer: safeChecked('hasCancer'),
+        cancerType: safeValue('cancerType'),
+        cancerYearsSinceTreatment: safeNumber('cancerYearsSinceTreatment'),
+        cancerMetastatic: safeChecked('cancerMetastatic'),
         
-        hasDiabetes: document.getElementById('hasDiabetes').checked,
-        usesInsulin: document.getElementById('usesInsulin')?.checked || false,
-        diabetesAge: parseInt(document.getElementById('diabetesAge')?.value) || 0,
-        diabetesLastVisit: parseFloat(document.getElementById('diabetesLastVisit')?.value) || 0,
-        diabetesMeds: parseInt(document.getElementById('diabetesMeds')?.value) || 0,
-        diabetesControlled: document.getElementById('diabetesControlled')?.checked || false,
-        diabetesKidneyDisease: document.getElementById('diabetesKidneyDisease')?.checked || false,
+        hasDiabetes: safeChecked('hasDiabetes'),
+        usesInsulin: safeChecked('usesInsulin'),
+        diabetesAge: safeNumber('diabetesAge'),
+        diabetesLastVisit: safeNumber('diabetesLastVisit'),
+        diabetesMeds: safeNumber('diabetesMeds'),
+        diabetesControlled: safeChecked('diabetesControlled'),
+        diabetesKidneyDisease: safeChecked('diabetesKidneyDisease'),
         
-        hasHBP: document.getElementById('hasHBP').checked,
-        hasAngina: document.getElementById('hasAngina').checked,
-        hasHeartAttack: document.getElementById('hasHeartAttack').checked,
-        hasCoronaryBypass: document.getElementById('hasCoronaryBypass').checked,
-        hasAngioplasty: document.getElementById('hasAngioplasty').checked,
-        hasStroke: document.getElementById('hasStroke').checked,
-        hasTIA: document.getElementById('hasTIA').checked,
-        hasCHF: document.getElementById('hasCHF').checked,
-        hasValveReplacement: document.getElementById('hasValveReplacement').checked,
-        hasPAD: document.getElementById('hasPAD').checked,
+        hasHBP: safeChecked('hasHBP'),
+        hasAngina: safeChecked('hasAngina'),
+        hasHeartAttack: safeChecked('hasHeartAttack'),
+        hasCoronaryBypass: safeChecked('hasCoronaryBypass'),
+        hasAngioplasty: safeChecked('hasAngioplasty'),
+        hasStroke: safeChecked('hasStroke'),
+        hasTIA: safeChecked('hasTIA'),
+        hasCHF: safeChecked('hasCHF'),
+        hasValveReplacement: safeChecked('hasValveReplacement'),
+        hasPAD: safeChecked('hasPAD'),
         
-        monthsSinceHeart: parseInt(document.getElementById('monthsSinceHeart')?.value) || 999,
-        ageAtHeart: parseInt(document.getElementById('ageAtHeart')?.value) || 999,
-        numberOfHeartEvents: parseInt(document.getElementById('numberOfHeartEvents')?.value) || 0,
-        hbpMeds: parseInt(document.getElementById('hbpMeds')?.value) || 0,
-        hbpHospitalized: document.getElementById('hbpHospitalized')?.checked || false,
+        monthsSinceHeart: safeNumber('monthsSinceHeart', 999),
+        ageAtHeart: safeNumber('ageAtHeart', 999),
+        numberOfHeartEvents: safeNumber('numberOfHeartEvents'),
+        hbpMeds: safeNumber('hbpMeds'),
+        hbpHospitalized: safeChecked('hbpHospitalized'),
         
-        hasAsthma: document.getElementById('hasAsthma').checked,
-        hasCOPD: document.getElementById('hasCOPD').checked,
-        hasEmphysema: document.getElementById('hasEmphysema').checked,
-        hasSleepApnea: document.getElementById('hasSleepApnea').checked,
-        asthmaSeverity: document.getElementById('asthmaSeverity')?.value,
-        asthmaHospitalizations: parseInt(document.getElementById('asthmaHospitalizations')?.value) || 0,
-        asthmaICU: document.getElementById('asthmaICU')?.checked || false,
-        usesOxygen: document.getElementById('usesOxygen')?.checked || false,
+        hasAsthma: safeChecked('hasAsthma'),
+        hasCOPD: safeChecked('hasCOPD'),
+        hasEmphysema: safeChecked('hasEmphysema'),
+        hasSleepApnea: safeChecked('hasSleepApnea'),
+        asthmaSeverity: safeValue('asthmaSeverity'),
+        asthmaHospitalizations: safeNumber('asthmaHospitalizations'),
+        asthmaICU: safeChecked('asthmaICU'),
+        usesOxygen: safeChecked('usesOxygen'),
         
-        hasDepression: document.getElementById('hasDepression').checked,
-        hasAnxiety: document.getElementById('hasAnxiety').checked,
-        hasBipolar: document.getElementById('hasBipolar').checked,
-        hasSchizophrenia: document.getElementById('hasSchizophrenia').checked,
-        hasSeizures: document.getElementById('hasSeizures').checked,
-        hasMS: document.getElementById('hasMS').checked,
-        mentalSeverity: document.getElementById('mentalSeverity')?.value,
-        mentalControlled: document.getElementById('mentalControlled')?.checked || false,
-        mentalHospitalized: document.getElementById('mentalHospitalized')?.checked || false,
-        seesTherapist: document.getElementById('seesTherapist')?.checked || false,
-        seizureDiagnosis: parseInt(document.getElementById('seizureDiagnosis')?.value) || 999,
-        lastSeizure: parseFloat(document.getElementById('lastSeizure')?.value) || 0,
+        hasDepression: safeChecked('hasDepression'),
+        hasAnxiety: safeChecked('hasAnxiety'),
+        hasBipolar: safeChecked('hasBipolar'),
+        hasSchizophrenia: safeChecked('hasSchizophrenia'),
+        hasSeizures: safeChecked('hasSeizures'),
+        hasMS: safeChecked('hasMS'),
+        mentalSeverity: safeValue('mentalSeverity'),
+        mentalControlled: safeChecked('mentalControlled'),
+        mentalHospitalized: safeChecked('mentalHospitalized'),
+        seesTherapist: safeChecked('seesTherapist'),
+        seizureDiagnosis: safeNumber('seizureDiagnosis', 999),
+        lastSeizure: safeNumber('lastSeizure'),
         
-        alcoholTreatment: document.getElementById('alcoholTreatment').checked,
-        stillDrinks: document.getElementById('stillDrinks')?.checked || false,
-        yearsDry: parseFloat(document.getElementById('yearsDry')?.value) || 0,
-        hardDrugUse: document.getElementById('hardDrugUse').checked,
-        yearsSinceDrugs: parseFloat(document.getElementById('yearsSinceDrugs')?.value) || 0,
-        usesMarijuana: document.getElementById('usesMarijuana').checked,
-        hasDWI: document.getElementById('hasDWI').checked,
-        numberOfDWIs: parseInt(document.getElementById('numberOfDWIs')?.value) || 0,
-        yearsSinceDWI: parseFloat(document.getElementById('yearsSinceDWI')?.value) || 0,
+        alcoholTreatment: safeChecked('alcoholTreatment'),
+        stillDrinks: safeChecked('stillDrinks'),
+        yearsDry: safeNumber('yearsDry'),
+        hardDrugUse: safeChecked('hardDrugUse'),
+        yearsSinceDrugs: safeNumber('yearsSinceDrugs'),
+        usesMarijuana: safeChecked('usesMarijuana'),
+        hasDWI: safeChecked('hasDWI'),
+        numberOfDWIs: safeNumber('numberOfDWIs'),
+        yearsSinceDWI: safeNumber('yearsSinceDWI'),
         
-        hasArrests: document.getElementById('hasArrests').checked,
-        felonyArrest: document.getElementById('felonyArrest')?.checked || false,
-        drugArrest: document.getElementById('drugArrest')?.checked || false,
-        totalArrests: parseInt(document.getElementById('totalArrests')?.value) || 0,
-        yearsSinceArrest: parseFloat(document.getElementById('yearsSinceArrest')?.value) || 0,
-        onProbation: document.getElementById('onProbation')?.checked || false,
-        yearsSinceProbation: parseFloat(document.getElementById('yearsSinceProbation')?.value) || 0,
+        hasArrests: safeChecked('hasArrests'),
+        felonyArrest: safeChecked('felonyArrest'),
+        drugArrest: safeChecked('drugArrest'),
+        totalArrests: safeNumber('totalArrests'),
+        yearsSinceArrest: safeNumber('yearsSinceArrest'),
+        onProbation: safeChecked('onProbation'),
+        yearsSinceProbation: safeNumber('yearsSinceProbation'),
         
-        medications: document.getElementById('medications').value,
-        takesOpiates: document.getElementById('takesOpiates').checked,
-        takesBenzos: document.getElementById('takesBenzos').checked,
-        notTakingMeds: document.getElementById('notTakingMeds').checked,
+        medications: safeValue('medications'),
+        takesOpiates: safeChecked('takesOpiates'),
+        takesBenzos: safeChecked('takesBenzos'),
+        notTakingMeds: safeChecked('notTakingMeds'),
         
-        otherConditions: document.getElementById('otherConditions').value,
-        recentHospital: document.getElementById('recentHospital').checked,
-        monthsSinceHospital: parseInt(document.getElementById('monthsSinceHospital')?.value) || 0,
-        daysHospitalized: parseInt(document.getElementById('daysHospitalized')?.value) || 0,
-        currentlyDisabled: document.getElementById('currentlyDisabled').checked
+        otherConditions: safeValue('otherConditions'),
+        recentHospital: safeChecked('recentHospital'),
+        monthsSinceHospital: safeNumber('monthsSinceHospital'),
+        daysHospitalized: safeNumber('daysHospitalized'),
+        currentlyDisabled: safeChecked('currentlyDisabled')
     };
 }
 
