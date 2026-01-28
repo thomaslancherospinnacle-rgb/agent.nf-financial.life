@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIL Fast-Track Underwriting Tool</title>
+    <link rel="stylesheet" href="ail_styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>AMERICAN INCOME LIFE INSURANCE COMPANY</h1>
+            <div class="subtitle">Fast-Track Underwriting Pre-Screening Tool</div>
+            
+            <div class="disclaimer-box">
+                <strong>⚠️ CRITICAL DISCLAIMER - READ BEFORE USE</strong><br><br>
+                This is a SCREENING TOOL ONLY - NOT final underwriting. Final decisions are made by AIL Underwriting Department. 
+                Do NOT guarantee coverage to applicants based on this tool. Results are guidance for determining if application 
+                should be submitted. Actual underwriting decisions may vary based on complete medical records, APS results, 
+                exam findings, and factors not captured here. For agent use only - not for distribution to applicants.
+            </div>
+        </div>
+
+        <!-- Form Body -->
+        <div class="form-body">
+            <form id="uwForm">
+                
+                <!-- SECTION A: BASIC INFORMATION -->
+                <div class="section">
+                    <div class="section-header">SECTION A - BASIC APPLICANT INFORMATION</div>
+                    <div class="section-content">
+                        
+                        <div class="input-group">
+                            <div>
+                                <label class="input-label">Age <span class="required">*</span></label>
+                                <input type="number" id="age" class="input-field" required min="0" max="120">
+                            </div>
+                            
+                            <div>
+                                <label class="input-label">Gender <span class="required">*</span></label>
+                                <select id="gender" class="input-field" required>
+                                    <option value="">Select...</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="input-label">State/Province</label>
+                                <input type="text" id="state" class="input-field" placeholder="e.g., MI">
+                            </div>
+                        </div>
+
+                        <div class="input-group" style="margin-top: 15px;">
+                            <div>
+                                <label class="input-label">Height (feet) <span class="required">*</span></label>
+                                <input type="number" id="heightFeet" class="input-field" required min="2" max="8">
+                            </div>
+                            
+                            <div>
+                                <label class="input-label">Height (inches)</label>
+                                <input type="number" id="heightInches" class="input-field" min="0" max="11" value="0">
+                            </div>
+                            
+                            <div>
+                                <label class="input-label">Weight (lbs) <span class="required">*</span></label>
+                                <input type="number" id="weight" class="input-field" required min="1" max="999">
+                            </div>
+                        </div>
+
+                        <div class="input-group" style="margin-top: 15px;">
+                            <div>
+                                <label class="input-label">Face Amount ($)</label>
+                                <input type="number" id="faceAmount" class="input-field" value="50000" step="1000">
+                            </div>
+                            
+                            <div>
+                                <label class="input-label">Non-Smoker Plan?</label>
+                                <select id="nonSmokerPlan" class="input-field">
+                                    <option value="no">No</option>
+                                    <option value="yes">Yes</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="question" style="margin-top: 15px;">
+                            <span class="question-number">1.</span>
+                            <span class="question-text">Currently hospitalized or in jail?</span>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="currentlyHospitalized">
+                                <label for="currentlyHospitalized">Hospitalized</label>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="currentlyJailed">
+                                <label for="currentlyJailed">In Jail</label>
+                            </div>
+                        </div>
+
+                        <div class="question">
+                            <span class="question-number">2.</span>
+                            <span class="question-text">Legally residing in the US?</span>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="legallyResiding" checked>
+                                <label for="legallyResiding">Yes</label>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- SECTION B: TOBACCO -->
+                <div class="section">
+                    <div class="section-header">SECTION B - TOBACCO & SMOKING</div>
+                    <div class="section-content">
+                        
+                        <div class="question">
+                            <span class="question-number">3.</span>
+                            <span class="question-text">Uses tobacco/nicotine in any form? (cigarettes, cigars, chew, vape, etc.)</span>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="usesTobacco">
+                                <label for="usesTobacco">Yes</label>
+                            </div>
+                        </div>
+
+                        <div id="tobaccoDetails" class="hidden sub-question">
+                            <div class="input-group">
+                                <div>
+                                    <label class="input-label">Years Since Quit (0 if current user)</label>
+                                    <input type="number" id="yearsSinceQuitTobacco" class="input-field" min="0" max="50" value="0">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- SECTION C: MAJOR CONDITIONS -->
+                <div class="section">
+                    <div class="section-header">SECTION C - MAJOR HEALTH CONDITIONS</div>
+                    <div class="section-content">
+                        
+                        <div class="question">
+                            <span class="question-number">4.</span>
+                            <span class="question-text">HIV/AIDS or positive HIV test?</span>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="hasHIV">
+                                <label for="hasHIV">Yes</label>
+                            </div>
+                        </div>
+
+                        <div class="question">
+                            <span class="question-number">5.</span>
+                            <span class="question-text">Currently on kidney dialysis?</span>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="onKidneyDialysis">
+                                <label for="onKidneyDialysis">Yes</label>
+                            </div>
+                        </div>
+
+                        <div class="question">
+                            <span class="question-number">6.</span>
+                            <span class="question-text">Check all that apply:</span>
+                        </div>
+                        
+                        <div style="margin-left: 30px;">
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="hasAlzheimers">
+                                <label for="hasAlzheimers">Alzheimer's disease</label>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="hasCysticFibrosis">
+                                <label for="hasCysticFibrosis">Cystic fibrosis</label>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="hasDefibrillator">
+                                <label for="hasDefibrillator">Defibrillator implant</label>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- SECTION D: CANCER -->
+                <div class="section">
+                    <div class="section-header">SECTION D - CANCER HISTORY</div>
+                    <div class="section-content">
+                        
+                        <div class="question">
+                            <span class="question-number">7.</span>
+                            <span class="question-text">Has or had cancer (any type)?</span>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="hasCancer">
+                                <label for="hasCancer">Yes</label>
+                            </div>
+                        </div>
+
+                        <div id="cancerDetails" class="hidden sub-question">
+                            <div class="input-group">
+                                <div>
+                                    <label class="input-label">Cancer Type</label>
+                                    <select id="cancerType" class="input-field">
+                                        <option value="">Select...</option>
+                                        <option value="breast">Breast</option>
+                                        <option value="colon">Colon</option>
+                                        <option value="lung">Lung</option>
+                                        <option value="pancreatic">Pancreatic</option>
+                                        <option value="prostate">Prostate</option>
+                                        <option value="skin">Skin (non-melanoma)</option>
+                                        <option value="melanoma">Melanoma</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="input-label">Years Since Last Treatment</label>
+                                    <input type="number" id="cancerYearsSinceTreatment" class="input-field" min="0" max="50">
+                                </div>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="cancerMetastatic">
+                                <label for="cancerMetastatic">Metastatic (spread to lymph nodes/other areas)</label>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- SECTION E: DIABETES -->
+                <div class="section">
+                    <div class="section-header">SECTION E - DIABETES</div>
+                    <div class="section-content">
+                        
+                        <div class="question">
+                            <span class="question-number">8.</span>
+                            <span class="question-text">Has diabetes?</span>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="hasDiabetes">
+                                <label for="hasDiabetes">Yes</label>
+                            </div>
+                        </div>
+
+                        <div id="diabetesDetails" class="hidden sub-question">
+                            <div class="question">
+                                <span class="question-text" style="margin-left: 0;"><strong>a.</strong> Uses insulin?</span>
+                                <div class="checkbox-container">
+                                    <input type="checkbox" id="usesInsulin">
+                                    <label for="usesInsulin">Yes</label>
+                                </div>
+                            </div>
+
+                            <div class="input-group">
+                                <div>
+                                    <label class="input-label">Age at Diagnosis</label>
+                                    <input type="number" id="diabetesAge" class="input-field" min="0" max="120">
+                                </div>
+                                <div>
+                                    <label class="input-label">Years Since Last Doctor Visit</label>
+                                    <input type="number" id="diabetesLastVisit" class="input-field" min="0" max="50">
+                                </div>
+                                <div>
+                                    <label class="input-label">Daily Medication (mg)</label>
+                                    <input type="number" id="diabetesMeds" class="input-field" min="0">
+                                </div>
+                            </div>
+
+                            <div class="question">
+                                <span class="question-text" style="margin-left: 0;"><strong>b.</strong> Well-controlled?</span>
+                                <div class="checkbox-container">
+                                    <input type="checkbox" id="diabetesControlled">
+                                    <label for="diabetesControlled">Yes</label>
+                                </div>
+                            </div>
+
+                            <div class="question">
+                                <span class="question-text" style="margin-left: 0;"><strong>c.</strong> Any complications?</span>
+                                <div class="checkbox-container">
+                                    <input type="checkbox" id="diabetesKidneyDisease">
+                                    <label for="diabetesKidneyDisease">Kidney disease</label>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- SECTION F: CARDIOVASCULAR -->
+                <div class="section">
+                    <div class="section-header">SECTION F - HEART & CARDIOVASCULAR</div>
+                    <div class="section-content">
+                        
+                        <div class="question">
+                            <span class="question-number">9.</span>
+                            <span class="question-text">Check all that apply:</span>
+                        </div>
+                        
+                        <div style="margin-left: 30px;">
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="hasHBP">
+                                <label for="hasHBP">High blood pressure</label>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="hasAngina">
+                                <label for="hasAngina">Angina/chest pain</label>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="hasHeartAttack">
+                                <label for="hasHeartAttack">Heart attack</label>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="hasCoronaryBypass">
+                                <label for="hasCoronaryBypass">Coronary bypass (CABG)</label>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="hasAngioplasty">
+                                <label for="hasAngioplasty">Angioplasty/stent</label>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="hasStroke">
+                                <label for="hasStroke">Stroke</label>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="hasTIA">
+                                <label for="hasTIA">TIA (mini-stroke)</label>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="hasCHF">
+                                <label for="hasCHF">Congestive heart failure</label>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="hasValveReplacement">
+                                <label for="hasValveReplacement">Heart valve replacement</label>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="hasPAD">
+                                <label for="hasPAD">Peripheral artery disease</label>
+                            </div>
+                        </div>
+
+                        <div id="heartDetails" class="hidden sub-question">
+                            <div class="input-group">
+                                <div>
+                                    <label class="input-label">Months Since Heart Event</label>
+                                    <input type="number" id="monthsSinceHeart" class="input-field" min="0">
+                                </div>
+                                <div>
+                                    <label class="input-label">Age at Heart Event</label>
+                                    <input type="number" id="ageAtHeart" class="input-field" min="0" max="120">
+                                </div>
+                                <div>
+                                    <label class="input-label">Number of Heart Attacks/Strokes</label>
+                                    <input type="number" id="numberOfHeartEvents" class="input-field" min="0" max="20">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="hbpDetails" class="hidden sub-question">
+                            <div class="input-group">
+                                <div>
+                                    <label class="input-label">Number of BP Medications</label>
+                                    <input type="number" id="hbpMeds" class="input-field" min="0">
+                                </div>
+                                <div class="checkbox-container">
+                                    <input type="checkbox" id="hbpHospitalized">
+                                    <label for="hbpHospitalized">Hospitalized for HBP in past 2 years</label>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- SECTION G: RESPIRATORY -->
+                <div class="section">
+                    <div class="section-header">SECTION G - RESPIRATORY</div>
+                    <div class="section-content">
+                        
+                        <div class="question">
+                            <span class="question-number">10.</span>
+                            <span class="question-text">Check all that apply:</span>
+                        </div>
+                        
+                        <div style="margin-left: 30px;">
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="hasAsthma">
+                                <label for="hasAsthma">Asthma</label>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="hasCOPD">
+                                <label for="hasCOPD">COPD/Emphysema</label>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="hasSleepApnea">
+                                <label for="hasSleepApnea">Sleep apnea</label>
+                            </div>
+                        </div>
+
+                        <div id="asthmaDetails" class="hidden sub-question">
+                            <div class="input-group">
+                                <div>
+                                    <label class="input-label">Asthma Severity</label>
+                                    <select id="asthmaSeverity" class="input-field">
+                                        <option value="">Select...</option>
+                                        <option value="mild">Mild</option>
+                                        <option value="moderate">Moderate</option>
+                                        <option value="severe">Severe</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="input-label">Hospitalizations (past 5 years)</label>
+                                    <input type="number" id="asthmaHospitalizations" class="input-field" min="0">
+                                </div>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="asthmaICU">
+                                <label for="asthmaICU">Ever in ICU for asthma (past 5 years)</label>
+                            </div>
+                        </div>
+
+                        <div id="copdDetails" class="hidden sub-question">
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="usesOxygen">
+                                <label for="usesOxygen">Uses home oxygen</label>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- SECTION H: MENTAL HEALTH -->
+                <div class="section">
+                    <div class="section-header">SECTION H - MENTAL HEALTH</div>
+                    <div class="section-content">
+                        
+                        <div class="question">
+                            <span class="question-number">11.</span>
+                            <span class="question-text">Check all that apply:</span>
+                        </div>
+                        
+                        <div style="margin-left: 30px;">
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="hasDepression">
+                                <label for="hasDepression">Depression</label>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="hasAnxiety">
+                                <label for="hasAnxiety">Anxiety</label>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="hasBipolar">
+                                <label for="hasBipolar">Bipolar disorder</label>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="hasSchizophrenia">
+                                <label for="hasSchizophrenia">Schizophrenia</label>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="hasSeizures">
+                                <label for="hasSeizures">Seizures/Epilepsy</label>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="hasMS">
+                                <label for="hasMS">Multiple sclerosis</label>
+                            </div>
+                        </div>
+
+                        <div id="mentalHealthDetails" class="hidden sub-question">
+                            <div class="input-group">
+                                <div>
+                                    <label class="input-label">Severity</label>
+                                    <select id="mentalSeverity" class="input-field">
+                                        <option value="">Select...</option>
+                                        <option value="minor">Minor</option>
+                                        <option value="moderate">Moderate</option>
+                                        <option value="major">Major/Severe</option>
+                                    </select>
+                                </div>
+                                <div class="checkbox-container">
+                                    <input type="checkbox" id="mentalControlled">
+                                    <label for="mentalControlled">Well-controlled</label>
+                                </div>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="mentalHospitalized">
+                                <label for="mentalHospitalized">Ever hospitalized for mental health</label>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="seesTherapist">
+                                <label for="seesTherapist">Currently seeing therapist/psychiatrist</label>
+                            </div>
+                        </div>
+
+                        <div id="seizureDetails" class="hidden sub-question">
+                            <div class="input-group">
+                                <div>
+                                    <label class="input-label">Months Since Diagnosis</label>
+                                    <input type="number" id="seizureDiagnosis" class="input-field" min="0">
+                                </div>
+                                <div>
+                                    <label class="input-label">Years Since Last Seizure</label>
+                                    <input type="number" id="lastSeizure" class="input-field" min="0">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- SECTION I: SUBSTANCE USE -->
+                <div class="section">
+                    <div class="section-header">SECTION I - ALCOHOL & DRUGS</div>
+                    <div class="section-content">
+                        
+                        <div class="question">
+                            <span class="question-number">12.</span>
+                            <span class="question-text">Had alcohol treatment or advised to reduce drinking?</span>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="alcoholTreatment">
+                                <label for="alcoholTreatment">Yes</label>
+                            </div>
+                        </div>
+
+                        <div id="alcoholDetails" class="hidden sub-question">
+                            <div class="question">
+                                <span class="question-text" style="margin-left: 0;">Still drinks alcohol?</span>
+                                <div class="checkbox-container">
+                                    <input type="checkbox" id="stillDrinks">
+                                    <label for="stillDrinks">Yes</label>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <div>
+                                    <label class="input-label">Years Dry (if quit)</label>
+                                    <input type="number" id="yearsDry" class="input-field" min="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="question">
+                            <span class="question-number">13.</span>
+                            <span class="question-text">Used drugs not prescribed (cocaine, heroin, etc.)?</span>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="hardDrugUse">
+                                <label for="hardDrugUse">Yes</label>
+                            </div>
+                        </div>
+
+                        <div id="drugDetails" class="hidden sub-question">
+                            <div class="input-group">
+                                <div>
+                                    <label class="input-label">Years Since Last Use</label>
+                                    <input type="number" id="yearsSinceDrugs" class="input-field" min="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="question">
+                            <span class="question-number">14.</span>
+                            <span class="question-text">Uses marijuana?</span>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="usesMarijuana">
+                                <label for="usesMarijuana">Yes</label>
+                            </div>
+                        </div>
+
+                        <div class="question">
+                            <span class="question-number">15.</span>
+                            <span class="question-text">DWI/DUI history?</span>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="hasDWI">
+                                <label for="hasDWI">Yes</label>
+                            </div>
+                        </div>
+
+                        <div id="dwiDetails" class="hidden sub-question">
+                            <div class="input-group">
+                                <div>
+                                    <label class="input-label">Number of DWIs</label>
+                                    <input type="number" id="numberOfDWIs" class="input-field" min="0">
+                                </div>
+                                <div>
+                                    <label class="input-label">Years Since Last DWI</label>
+                                    <input type="number" id="yearsSinceDWI" class="input-field" min="0">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- SECTION J: ARRESTS -->
+                <div class="section">
+                    <div class="section-header">SECTION J - ARREST HISTORY</div>
+                    <div class="section-content">
+                        
+                        <div class="question">
+                            <span class="question-number">16.</span>
+                            <span class="question-text">Any arrests (felony, drug, misdemeanor)?</span>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="hasArrests">
+                                <label for="hasArrests">Yes</label>
+                            </div>
+                        </div>
+
+                        <div id="arrestDetails" class="hidden sub-question">
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="felonyArrest">
+                                <label for="felonyArrest">Felony</label>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="drugArrest">
+                                <label for="drugArrest">Drug-related</label>
+                            </div>
+
+                            <div class="input-group">
+                                <div>
+                                    <label class="input-label">Total Arrests</label>
+                                    <input type="number" id="totalArrests" class="input-field" min="0">
+                                </div>
+                                <div>
+                                    <label class="input-label">Years Since Last Arrest</label>
+                                    <input type="number" id="yearsSinceArrest" class="input-field" min="0">
+                                </div>
+                            </div>
+
+                            <div class="question">
+                                <span class="question-text" style="margin-left: 0;">Currently on probation?</span>
+                                <div class="checkbox-container">
+                                    <input type="checkbox" id="onProbation">
+                                    <label for="onProbation">Yes</label>
+                                </div>
+                            </div>
+
+                            <div id="probationDetails" class="hidden">
+                                <div class="input-group">
+                                    <div>
+                                        <label class="input-label">Years Since Probation Started</label>
+                                        <input type="number" id="yearsSinceProbation" class="input-field" min="0">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- SECTION K: MEDICATIONS -->
+                <div class="section">
+                    <div class="section-header">SECTION K - MEDICATIONS</div>
+                    <div class="section-content">
+                        
+                        <div class="question">
+                            <span class="question-number">17.</span>
+                            <span class="question-text">List all current medications (comma-separated):</span>
+                        </div>
+                        <textarea id="medications" class="input-field" rows="3" placeholder="e.g., Lisinopril, Metformin, Aspirin"></textarea>
+
+                        <div class="question" style="margin-top: 15px;">
+                            <span class="question-number">18.</span>
+                            <span class="question-text">Currently taking:</span>
+                        </div>
+                        <div style="margin-left: 30px;">
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="takesOpiates">
+                                <label for="takesOpiates">Opiates (OxyContin, Percocet, etc.)</label>
+                            </div>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="takesBenzos">
+                                <label for="takesBenzos">Benzodiazepines (Xanax, Valium, etc.)</label>
+                            </div>
+                        </div>
+
+                        <div class="question">
+                            <span class="question-number">19.</span>
+                            <span class="question-text">NOT taking prescribed medication (without doctor's knowledge)?</span>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="notTakingMeds">
+                                <label for="notTakingMeds">Yes</label>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- SECTION L: OTHER -->
+                <div class="section">
+                    <div class="section-header">SECTION L - OTHER CONDITIONS</div>
+                    <div class="section-content">
+                        
+                        <div class="question">
+                            <span class="question-number">20.</span>
+                            <span class="question-text">Any other medical conditions not listed?</span>
+                        </div>
+                        <textarea id="otherConditions" class="input-field" rows="2" placeholder="List any other conditions..."></textarea>
+
+                        <div class="question" style="margin-top: 15px;">
+                            <span class="question-number">21.</span>
+                            <span class="question-text">Hospitalized in past 2 years?</span>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="recentHospital">
+                                <label for="recentHospital">Yes</label>
+                            </div>
+                        </div>
+
+                        <div id="hospitalDetails" class="hidden sub-question">
+                            <div class="input-group">
+                                <div>
+                                    <label class="input-label">Months Since Hospitalization</label>
+                                    <input type="number" id="monthsSinceHospital" class="input-field" min="0">
+                                </div>
+                                <div>
+                                    <label class="input-label">Days Hospitalized</label>
+                                    <input type="number" id="daysHospitalized" class="input-field" min="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="question">
+                            <span class="question-number">22.</span>
+                            <span class="question-text">Currently disabled?</span>
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="currentlyDisabled">
+                                <label for="currentlyDisabled">Yes</label>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="button-container">
+                    <button type="submit" class="btn-evaluate">EVALUATE APPLICATION</button>
+                    <button type="reset" class="btn-reset">CLEAR FORM</button>
+                    <button type="button" class="btn-print" onclick="window.print()">PRINT</button>
+                </div>
+
+            </form>
+
+            <!-- Results Display -->
+            <div id="results" class="results">
+                <div class="results-header" id="resultsHeader"></div>
+                <div class="results-content" id="resultsContent"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="ail_engine.js"></script>
+    <script src="ail_form.js"></script>
+</body>
+</html>
