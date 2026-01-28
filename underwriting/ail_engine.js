@@ -30,7 +30,19 @@ function evaluateApplication(data) {
   if (data.age > 80) {
     return createResult('DECLINE', ['Age exceeds maximum (80 years old)'], product);
   }
-  
+  // RULE: Decline if age 60+ and current smoker
+  if (
+    data.age >= 60 &&
+    (data.currentSmoker || (data.usesTobacco && data.yearsSinceQuitTobacco === 0))
+  ) {
+    return createResult(
+      'DECLINE',
+      ['Age 60+ and current tobacco user'],
+      product
+    );
+  }
+
+
   // Current status
   if (data.currentlyHospitalized) {
     return createResult('DECLINE', ['Currently hospitalized'], product);
