@@ -425,8 +425,10 @@
         window.location.href = "home.html";
 
       } catch (e) {
-        // If login fails, assume first-time user
-        if (e.message.includes("not found") || e.message.includes("Invalid")) {
+        console.error('Login error:', e.message);
+        
+        // Check if it's a "user not found" error (truly first-time user)
+        if (e.message.includes("not found") || e.message.includes("does not exist")) {
           // Move to first-time registration
           firstName.value = username;
           firstDerived.textContent = email;
@@ -434,8 +436,23 @@
           
           showSection(firstTimeSection);
           firstPassword.focus();
-        } else {
-          showMessage(loginMsg, 'error', e.message || "Login failed.");
+        } 
+        // Check if it's an "unverified" error
+        else if (e.message.includes("not verified") || e.message.includes("verify")) {
+          showMessage(loginMsg, 'error', 'Account not verified. Please check your email for verification code.');
+          
+          // Optionally move to verify section
+          verifyName.value = username;
+          verifyEmailHint.textContent = email;
+          currentPassword = password;
+          
+          showSection(verifySection);
+          showMessage(verifyMsg, 'error', 'Please verify your account. Check your email for the code.');
+          verifyCode.focus();
+        }
+        // All other errors (wrong password, etc)
+        else {
+          showMessage(loginMsg, 'error', e.message || "Login failed. Please check your password.");
         }
       } finally {
         setLoading(btnLogin, false);
@@ -509,13 +526,16 @@
       }
     });
 
-    // VERIFY
+    // VERIFY - AUTO-LOGIN AFTER VERIFICATION
     btnVerify.addEventListener('click', async () => {
       clearMessage(verifyMsg);
 
       const username = currentUsername;
       const code = String(verifyCode.value || "").trim();
       const email = currentEmail;
+      const password = currentPassword;
+
+      console.log('Verify attempt:', { username, email, hasPassword: !!password });
 
       if (!username) {
         showMessage(verifyMsg, 'error', 'Session expired. Please start over.');
@@ -529,20 +549,37 @@
       setLoading(btnVerify, true);
       try {
         await Auth.verify(username, code);
-        showMessage(verifyMsg, 'success', 'Account verified! Redirecting to login...');
+        showMessage(verifyMsg, 'success', 'Account verified! Logging you in...');
         
+        // Wait for backend to process verification
         await new Promise(resolve => setTimeout(resolve, 1500));
         
-        // Return to login with pre-filled name
+        // Auto-login after successful verification
+        if (password) {
+          try {
+            console.log('Attempting auto-login...');
+            await Auth.login(username, password);
+            showMessage(verifyMsg, 'success', 'Login successful! Redirecting...');
+            
+            await new Promise(resolve => setTimeout(resolve, 500));
+            window.location.href = "home.html";
+            return;
+          } catch (loginError) {
+            console.error('Auto-login after verification failed:', loginError);
+          }
+        }
+        
+        // Fallback: return to login with pre-filled name
         loginName.value = username;
         loginDerived.textContent = email;
         loginPassword.value = '';
         
         showSection(loginSection);
-        showMessage(loginMsg, 'success', 'Account verified! Please login.');
+        showMessage(loginMsg, 'success', 'Account verified! Please login with your password.');
         loginPassword.focus();
 
       } catch (e) {
+        console.error('Verification error:', e);
         showMessage(verifyMsg, 'error', e.message || "Verification failed.");
       } finally {
         setLoading(btnVerify, false);
