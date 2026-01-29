@@ -196,6 +196,9 @@ function evaluateApplication(data) {
     // =====================================================
     
     const tobaccoResult = evaluateTobacco(data);
+    if (tobaccoResult.decline) {
+        return createDecline(tobaccoResult.reason);
+    }
     if (tobaccoResult.warning) {
         warnings.push(tobaccoResult.warning);
     }
@@ -868,10 +871,19 @@ function calculateBuildRating(heightInches, weight) {
 // =====================================================
 
 function evaluateTobacco(data) {
-    const result = { warning: '', reason: '' };
+    const result = { decline: false, warning: '', reason: '' };
     
     if (data.usesTobacco) {
         if (data.yearsSinceQuitTobacco === 0) {
+            // Current smoker
+            
+            // Age 60+ current smokers are declined
+            if (data.age >= 60) {
+                result.decline = true;
+                result.reason = 'Current tobacco user age 60 or older - Auto Decline';
+                return result;
+            }
+            
             result.reason = 'Current tobacco user - smoker rates apply';
             result.warning = 'Current tobacco use - affects rates and some conditions (e.g., lung cancer + smoking = auto decline)';
         } else if (data.yearsSinceQuitTobacco < 1) {
