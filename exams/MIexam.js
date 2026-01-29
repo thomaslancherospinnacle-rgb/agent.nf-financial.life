@@ -1,4 +1,4 @@
- window.MI_EXAM_QUESTIONS = [
+window.MI_EXAM_QUESTIONS = [
   {
     "question": "The automatic premium loan provision can be accurately described as a:",
     "correct": "Provision that provides a policy loan to pay any premiums by the end of the grace period",
@@ -35,7 +35,7 @@
   {
     "question": "What happens to a life insurance policy when the policy loan balance exceeds the cash value?",
     "correct": "Policy will no longer be in force",
-    "explanation": "If the outstanding policy loan balance (including interest) exceeds the policy’s cash value, the policy will lapse and no longer remain in force.",
+    "explanation": "If the outstanding policy loan balance (including interest) exceeds the policyâ€™s cash value, the policy will lapse and no longer remain in force.",
     "difficulty": "medium",
     "wrongs": [
       "Policy becomes paid-up",
@@ -68,7 +68,7 @@
   {
     "question": "An annuitant dies during the distribution period. What kind of annuity will return to a beneficiary the difference between the annuity value and the income payments already made?",
     "correct": "Refund annuity",
-    "explanation": "A refund annuity guarantees that if the annuitant dies during the distribution period, the beneficiary will receive the difference between the annuity’s value and the income payments already made.",
+    "explanation": "A refund annuity guarantees that if the annuitant dies during the distribution period, the beneficiary will receive the difference between the annuityâ€™s value and the income payments already made.",
     "difficulty": "medium",
     "wrongs": [
       "Rebate annuity",
@@ -266,7 +266,7 @@
   {
     "question": "According to the Taft-Hartley Act, group insurance premium payments made by an employer MUST be paid to the",
     "correct": "trust",
-    "explanation": "Employers’ contributions must be held in trust under the terms of the Taft-Hartley Act.",
+    "explanation": "Employersâ€™ contributions must be held in trust under the terms of the Taft-Hartley Act.",
     "difficulty": "medium",
     "wrongs": [
       "state",
@@ -893,7 +893,7 @@
   {
     "question": "A single premium cash value policy can be described as",
     "correct": "a policy that is paid up after only one payment",
-    "explanation": "A single premium life insurance policy is funded with one lump-sum premium, which pays the policy in full for the insured’s lifetime.",
+    "explanation": "A single premium life insurance policy is funded with one lump-sum premium, which pays the policy in full for the insuredâ€™s lifetime.",
     "difficulty": "easy",
     "wrongs": [
       "a policy that only requires an annual payment",
@@ -937,7 +937,7 @@
   {
     "question": "What are an applicant's statements concerning occupation, hobbies, and personal health history regarded as?",
     "correct": "representation",
-    "explanation": "Statements made by an applicant regarding their health history, family health history, occupation and hobbies are considered representations — answers believed to be true to the best of the applicant's knowledge.",
+    "explanation": "Statements made by an applicant regarding their health history, family health history, occupation and hobbies are considered representations â€” answers believed to be true to the best of the applicant's knowledge.",
     "difficulty": "medium",
     "wrongs": [
       "collateral",
@@ -948,7 +948,7 @@
   {
     "question": "Donald is the primary insured of a life insurance policy and adds a children's term rider. What is the advantage of adding this rider?",
     "correct": "Can be converted to permanent coverage without evidence of insurability",
-    "explanation": "A children's term rider allows a child’s term coverage to be converted to permanent life insurance when they reach a certain age without the need to prove insurability.",
+    "explanation": "A children's term rider allows a childâ€™s term coverage to be converted to permanent life insurance when they reach a certain age without the need to prove insurability.",
     "difficulty": "medium",
     "wrongs": [
       "Premiums on this rider are not required until the limiting age is reached",
@@ -1123,22 +1123,22 @@
   },
   {
     "question": "_____ is NOT an element of a valid contract.",
-    "correct": "Competent parties",
+    "correct": "Countersignature",
     "explanation": "A countersignature is not an element of a valid contract.",
     "difficulty": "easy",
     "wrongs": [
       "Legal",
-      "Countersignature",
+      "Competent parties",
       "Consideration"
     ]
   },
   {
     "question": "Shirley has a $500,000 10-year non-renewable level term life policy. If she dies 15 years after the policy's inception date, how much will her beneficiary receive?",
-    "correct": "$100,000",
+    "correct": "Nothing",
     "explanation": "Her beneficiary will receive nothing because the policy is valid for only 10 years.",
     "difficulty": "hard",
     "wrongs": [
-      "Nothing",
+      "$100,000",
       "$500,000",
       "$250,000"
     ]
@@ -1167,13 +1167,13 @@
   },
   {
     "question": "Bob and Tom start a business. Since each partner contributes an important element to the success of the business, they decide to take life insurance policies out on each other, and name each other as beneficiaries. Eventually, they retire and dissolve the business. Bob dies 12 months later. The policies continue in force with no change. Both partners are still married at the time of Bob's death. In this situation, who will receive Bob's policy proceeds?",
-    "correct": "Bob's spouse",
+    "correct": "Tom",
     "explanation": "Insurable interest only has to exist at the time of the application, not at the time of the claim. Being there was no change in beneficiary prior to Bob's death, Tom will still receive the policy proceeds.",
     "difficulty": "hard",
     "wrongs": [
       "Tom's spouse",
       "Bob's estate",
-      "Tom"
+      "Bob's spouse"
     ]
   },
   {
@@ -1189,46 +1189,46 @@
   },
   {
     "question": "Ambiguities in an insurance policy are always resolved in favor of the",
-    "correct": "insurer",
+    "correct": "insured",
     "explanation": "Ambiguities in an insurance policy are always resolved in favor of the insured.",
     "difficulty": "easy",
     "wrongs": [
-      "insured",
+      "insurer",
       "underwriter",
       "producer"
     ]
   },
   {
     "question": "In order for a contract to be valid, it must",
-    "correct": "be signed and witnessed by an attorney",
+    "correct": "contain an offer and acceptance",
     "explanation": "For a contract to be valid it MUST include an offer and an acceptance.",
     "difficulty": "easy",
     "wrongs": [
       "be in writing",
-      "contain an offer and acceptance",
+      "be signed and witnessed by an attorney",
       "be filed with the state"
     ]
   },
   {
     "question": "A life insurance policy which contains cash values that vary according to its investment performance of stocks is called",
-    "correct": "Increasing Term Life",
+    "correct": "Variable Whole Life",
     "explanation": "A Variable Whole Life policy has cash values that vary according to the investment performance of common stocks.",
     "difficulty": "medium",
     "wrongs": [
       "Adjustable Whole Life",
-      "Variable Whole Life",
+      "Increasing Term Life",
       "Modified Whole Life"
     ]
   },
   {
     "question": "Which of the following policies does NOT build cash value?",
-    "correct": "Straight Life",
+    "correct": "Term",
     "explanation": "Term life insurance does not build cash value.",
     "difficulty": "easy",
     "wrongs": [
       "Endowment",
       "Variable Life",
-      "Term"
+      "Straight Life"
     ]
   },
   {
@@ -1244,11 +1244,11 @@
   },
   {
     "question": "Insurable interest does NOT occur in which of the following relationships?",
-    "correct": "Business partners",
+    "correct": "Business owner and business client",
     "explanation": "There would not be insurable interest between a business owner and its customer.",
     "difficulty": "easy",
     "wrongs": [
-      "Business owner and business client",
+      "Business partners",
       "Parent and children",
       "Sister and brother"
     ]
@@ -1486,11 +1486,11 @@
   },
   {
     "question": "How is Social Security (OASDI) funded?",
-    "correct": "Federal grants",
+    "correct": "Payroll taxes",
     "explanation": "OASDI is supported by a payroll tax, paid by employees, employers, and self-employed individuals.",
     "difficulty": "easy",
     "wrongs": [
-      "Payroll taxes",
+      "Federal grants",
       "Sales taxes",
       "Treasury Bonds"
     ]
@@ -1839,7 +1839,7 @@
   {
     "question": "An example of a tax-qualified retirement plan would be a(n)",
     "correct": "defined contribution plan",
-    "explanation": "A defined contribution plan is a tax‑qualified employer-sponsored retirement plan that meets Internal Revenue Code requirements.",
+    "explanation": "A defined contribution plan is a taxâ€‘qualified employer-sponsored retirement plan that meets Internal Revenue Code requirements.",
     "difficulty": "easy",
     "wrongs": [
       "1035 exchange plan",
@@ -1882,11 +1882,11 @@
   },
   {
     "question": "How are contributions made to a Roth IRA handled for tax purposes?",
-    "correct": "Partially tax deductible",
+    "correct": "Not tax deductible",
     "explanation": "Contributions made to a Roth IRA are not tax deductible.",
     "difficulty": "easy",
     "wrongs": [
-      "Not tax deductible",
+      "Partially tax deductible",
       "Fully tax deductible",
       "Conditionally tax deductible"
     ]
@@ -2092,7 +2092,7 @@
   {
     "question": "Who were Keogh plans designed to provide pension benefits for?",
     "correct": "The self-employed",
-    "explanation": "Keogh (HR‑10) plans are retirement plans designed for self‑employed individuals and unincorporated businesses.",
+    "explanation": "Keogh (HRâ€‘10) plans are retirement plans designed for selfâ€‘employed individuals and unincorporated businesses.",
     "difficulty": "easy",
     "wrongs": [
       "Public school employees",
