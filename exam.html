@@ -338,7 +338,7 @@
             "
           >
           <div>
-            <div class="title"> Coalition — Exam</div>
+            <div class="title">Coalition — Exam</div>
             <div class="sub">Select exam • select question count • click answers • instant explanation • uploads best result</div>
           </div>
         </div>
@@ -675,13 +675,34 @@ async function api(action, payload){
 
 let loginEmail = "";
 
+function updateAuthStatus(msg) {
+  const statusEl = document.getElementById("authStatus");
+  if (statusEl) {
+    statusEl.textContent = msg;
+  }
+}
+
+function hideAuthOverlay() {
+  const overlay = document.getElementById("authOverlay");
+  if (overlay) {
+    overlay.style.opacity = "0";
+    overlay.style.transition = "opacity 0.3s ease";
+    setTimeout(() => {
+      overlay.style.display = "none";
+    }, 300);
+  }
+}
+
 async function requireLogin(){
   const token = getToken();
   console.log('requireLogin: token =', token ? 'exists' : 'missing');
   
   if (!token){
     console.log('No token found, redirecting to login');
-    window.location.href = "/login.html";
+    updateAuthStatus("No session found, redirecting...");
+    setTimeout(() => {
+      window.location.href = "/login.html";
+    }, 500);
     return;
   }
 
@@ -693,9 +714,14 @@ async function requireLogin(){
 
     loginEmail = me.loginEmail || "";
     setBadge("ok", loginEmail ? `Logged in: ${loginEmail}` : "Logged in");
+    logoutBtn.style.display = "";
+    
+    updateAuthStatus("Session verified ✓");
+    setTimeout(hideAuthOverlay, 300);
   } catch (e) {
     // token invalid or expired - clear both cookie and localStorage
     console.error('Session verification failed:', e.message);
+    updateAuthStatus("Session expired, redirecting...");
     document.cookie = `${LS_TOKEN}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
     document.cookie = `${LS_EXPIRES}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
     try {
@@ -703,9 +729,33 @@ async function requireLogin(){
       localStorage.removeItem(LS_EXPIRES);
     } catch (e) {}
     console.log('Redirecting to login...');
-    window.location.href = "/login.html";
+    setTimeout(() => {
+      window.location.href = "/login.html";
+    }, 500);
   }
 }
+
+// Logout handler
+logoutBtn.addEventListener("click", async () => {
+  const token = getToken();
+  if (token) {
+    try {
+      await api("logout", { token });
+    } catch (e) {
+      console.error("Logout API failed:", e);
+    }
+  }
+  
+  // Clear both cookie and localStorage
+  document.cookie = `${LS_TOKEN}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+  document.cookie = `${LS_EXPIRES}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+  try {
+    localStorage.removeItem(LS_TOKEN);
+    localStorage.removeItem(LS_EXPIRES);
+  } catch (e) {}
+  
+  window.location.href = "/login.html";
+});
 
 
 /**********************
@@ -827,7 +877,6 @@ function loadScript(src){
 async function loadExamBank(){
   const code = examSelect.value; // "MI" or "TN"
   const src = "./exams/" + code + "exam.js"; // MIexam.js / TNexam.js
-  // NOTE: your file names are MIexam.js and TNexam.js. This matches.
   
   console.log("Loading exam bank from:", src);
 
