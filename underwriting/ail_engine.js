@@ -8,6 +8,9 @@ function evaluateApplication(data) {
     let product = 'H34000 (Life)';
     let tableRating = null;
     
+    // Build detailed applicant profile for output
+    const profile = buildApplicantProfile(data);
+    
     // =====================================================
     // IMMEDIATE AUTO-DECLINES (Check these first)
     // =====================================================
@@ -39,6 +42,13 @@ function evaluateApplication(data) {
     // Kidney Dialysis
     if (data.onKidneyDialysis) {
         return createDecline('Currently on kidney dialysis - Auto Decline (Flash Sheet page 5)');
+    }
+    
+    // Chronic Kidney Disease (General)
+    if (data.hasKidneyDisease) {
+        // If they have both diabetes and kidney disease, it will be caught in diabetes evaluation
+        // General kidney disease alone requires review
+        warnings.push('Chronic kidney disease - requires underwriter review and APS (Manual page 54)');
     }
     
     // Alzheimer's Disease
@@ -233,7 +243,10 @@ function evaluateApplication(data) {
         product: product,
         tableRating: tableRating,
         reasons: reasons,
-        warnings: warnings
+        warnings: warnings,
+        profile: profile,
+        riskFactors: identifyRiskFactors(data),
+        additionalInfoNeeded: determineAdditionalInfo(data, decision, tableRating)
     };
 }
 
@@ -311,7 +324,8 @@ function evaluateDiabetes(data) {
     const result = { decline: false, rating: null, reason: '', warning: '' };
     
     // Diabetes + Kidney Disease = Auto Decline
-    if (data.diabetesKidneyDisease) {
+    // Check both the diabetes-specific kidney checkbox AND the general kidney disease checkbox
+    if (data.diabetesKidneyDisease || data.hasKidneyDisease) {
         result.decline = true;
         result.reason = 'Diabetes and Kidney Disease - Auto Decline for all products (Flash Sheet page 5)';
         return result;
@@ -908,6 +922,465 @@ function createDecline(reason) {
         reasons: [reason],
         warnings: ['DO NOT SUBMIT APPLICATION - Consult with underwriting if questions']
     };
+}
+
+// =====================================================
+// APPLICANT PROFILE BUILDER
+// =====================================================
+
+function buildApplicantProfile(data) {
+    const profile = [];
+    
+    // Age and Gender
+    const age = data.age;
+    const gender = data.isMale ? 'male' : 'female';
+    profile.push(`${age}-year-old ${gender}`);
+    
+    // Height and Weight
+    const feet = Math.floor(data.heightInches / 12);
+    const inches = data.heightInches % 12;
+    profile.push(`${feet}'${inches}", ${data.weight} lbs`);
+    
+    // Build status
+    const buildRating = calculateBuildRating(data.heightInches, data.weight);
+    if (buildRating === 0) {
+        profile.push('normal weight');
+    } else if (buildRating > 0 && buildRating <= 4) {
+        profile.push('overweight');
+    } else if (buildRating > 4) {
+        profile.push('significantly overweight');
+    }
+    
+    // Health conditions
+    const conditions = [];
+    
+    if (data.hasHBP) {
+        if (data.hbpMeds > 2 || data.hbpHospitalized) {
+            conditions.push('poorly controlled high blood pressure');
+        } else if (data.hbpMeds >= 1) {
+            conditions.push('controlled high blood pressure');
+        } else {
+            conditions.push('high blood pressure');
+        }
+    }
+    
+    if (data.hasDiabetes) {
+        if (data.usesInsulin) {
+            conditions.push('insulin-dependent diabetes');
+        } else if (data.diabetesControlled) {
+            conditions.push('well-controlled diabetes');
+        } else {
+            conditions.push('diabetes');
+        }
+    }
+    
+    if (data.hasHeartAttack) {
+        const monthsSince = data.monthsSinceHeart;
+        if (monthsSince < 12) {
+            conditions.push(`recent heart attack (${monthsSince} months ago)`);
+        } else {
+            const years = Math.floor(monthsSince / 12);
+            conditions.push(`heart attack (${years} year${years > 1 ? 's' : ''} ago)`);
+        }
+    }
+    
+    if (data.hasCoronaryBypass) {
+        conditions.push('coronary bypass surgery');
+    }
+    
+    if (data.hasAngioplasty) {
+        conditions.push('angioplasty/stent');
+    }
+    
+    if (data.hasAngina) {
+        conditions.push('angina');
+    }
+    
+    if (data.hasStroke) {
+        conditions.push('stroke history');
+    }
+    
+    if (data.hasCancer) {
+        const cancerType = data.cancerType || 'unspecified';
+        const yearsSince = data.cancerYearsSinceTreatment;
+        if (data.cancerMetastatic) {
+            conditions.push(`metastatic ${cancerType} cancer (${yearsSince} years post-treatment)`);
+        } else {
+            conditions.push(`${cancerType} cancer (${yearsSince} years post-treatment)`);
+        }
+    }
+    
+    if (data.hasAsthma) {
+        if (data.asthmaSeverity === 'severe') {
+            conditions.push('severe asthma');
+        } else if (data.asthmaSeverity === 'moderate') {
+            conditions.push('moderate asthma');
+        } else {
+            conditions.push('mild asthma');
+        }
+    }
+    
+    if (data.hasCOPD || data.hasEmphysema) {
+        conditions.push('COPD/emphysema');
+    }
+    
+    if (data.hasDepression) {
+        if (data.mentalSeverity === 'major') {
+            conditions.push('major depression');
+        } else {
+            conditions.push('depression');
+        }
+    }
+    
+    if (data.hasAnxiety && !data.hasDepression) {
+        conditions.push('anxiety');
+    }
+    
+    if (data.hasBipolar) {
+        conditions.push('bipolar disorder');
+    }
+    
+    if (data.hasSeizures) {
+        conditions.push('seizure disorder');
+    }
+    
+    if (conditions.length > 0) {
+        profile.push(conditions.join('; '));
+    }
+    
+    // Tobacco status
+    if (data.usesTobacco && data.yearsSinceQuitTobacco === 0) {
+        profile.push('current smoker');
+    } else if (data.usesTobacco && data.yearsSinceQuitTobacco > 0) {
+        profile.push(`former smoker (quit ${data.yearsSinceQuitTobacco} year${data.yearsSinceQuitTobacco > 1 ? 's' : ''} ago)`);
+    } else {
+        profile.push('non-smoker');
+    }
+    
+    // Lifestyle factors
+    const lifestyle = [];
+    
+    if (data.alcoholTreatment) {
+        if (data.yearsDry >= 5) {
+            lifestyle.push(`recovering alcoholic (${data.yearsDry} years sober)`);
+        } else if (data.yearsDry >= 1) {
+            lifestyle.push(`recovering alcoholic (${data.yearsDry} year${data.yearsDry > 1 ? 's' : ''} sober)`);
+        } else if (data.stillDrinks) {
+            lifestyle.push('alcohol treatment but still drinking');
+        }
+    }
+    
+    if (data.hardDrugUse && data.yearsSinceDrugs >= 2) {
+        lifestyle.push(`previous drug use (${data.yearsSinceDrugs} years clean)`);
+    }
+    
+    if (data.hasDWI) {
+        if (data.numberOfDWIs > 1) {
+            lifestyle.push(`${data.numberOfDWIs} DWIs`);
+        } else {
+            lifestyle.push('DWI history');
+        }
+    }
+    
+    if (lifestyle.length > 0) {
+        profile.push(lifestyle.join('; '));
+    }
+    
+    // Add a note about exercise/activity if we had that data
+    // For now, we'll add it as a placeholder in the output
+    
+    return profile.join('. ') + '.';
+}
+
+// =====================================================
+// RISK FACTOR IDENTIFIER
+// =====================================================
+
+function identifyRiskFactors(data) {
+    const riskFactors = [];
+    
+    // Combination risks
+    const buildRating = calculateBuildRating(data.heightInches, data.weight);
+    const isOverweight = buildRating >= 2;
+    
+    if (isOverweight && data.hasHBP) {
+        const hbpControlled = data.hbpMeds >= 1 && !data.hbpHospitalized;
+        if (!hbpControlled) {
+            riskFactors.push({
+                combination: 'Overweight + Uncontrolled Hypertension',
+                severity: 'HIGH',
+                note: 'This combination significantly increases cardiovascular risk'
+            });
+        } else {
+            riskFactors.push({
+                combination: 'Overweight + Controlled Hypertension',
+                severity: 'MODERATE',
+                note: 'Risk can be managed with continued treatment compliance'
+            });
+        }
+    }
+    
+    if (isOverweight && data.hasDiabetes) {
+        riskFactors.push({
+            combination: 'Overweight + Diabetes',
+            severity: 'HIGH',
+            note: 'Weight management is critical for diabetes control'
+        });
+    }
+    
+    if (data.hasDiabetes && data.hasHBP) {
+        riskFactors.push({
+            combination: 'Diabetes + Hypertension',
+            severity: 'HIGH',
+            note: 'Dual metabolic/cardiovascular risk factors'
+        });
+    }
+    
+    if (data.currentSmoker && (data.hasHeartAttack || data.hasCoronaryBypass || data.hasAngina)) {
+        riskFactors.push({
+            combination: 'Smoking + Coronary Artery Disease',
+            severity: 'CRITICAL',
+            note: 'Continued smoking with heart disease dramatically increases mortality risk'
+        });
+    }
+    
+    if (data.currentSmoker && data.hasDiabetes) {
+        riskFactors.push({
+            combination: 'Smoking + Diabetes',
+            severity: 'HIGH',
+            note: 'Smoking accelerates diabetic complications'
+        });
+    }
+    
+    if (data.alcoholTreatment && data.hardDrugUse) {
+        riskFactors.push({
+            combination: 'Alcohol + Drug Abuse History',
+            severity: 'HIGH',
+            note: 'Dual substance abuse history increases relapse risk'
+        });
+    }
+    
+    // Multiple medications
+    if (data.takesOpiates || data.takesBenzos) {
+        riskFactors.push({
+            combination: 'High-Risk Medications',
+            severity: 'MODERATE',
+            note: 'Opiates and/or benzodiazepines require careful monitoring'
+        });
+    }
+    
+    // Age-related risks
+    if (data.age >= 60 && isOverweight) {
+        riskFactors.push({
+            combination: 'Age 60+ with Overweight',
+            severity: 'MODERATE',
+            note: 'Age compounds weight-related health risks'
+        });
+    }
+    
+    return riskFactors;
+}
+
+// =====================================================
+// ADDITIONAL INFORMATION DETERMINER
+// =====================================================
+
+function determineAdditionalInfo(data, decision, tableRating) {
+    const additionalInfo = [];
+    
+    // Always need these for certain conditions
+    if (data.hasCancer) {
+        additionalInfo.push({
+            required: true,
+            item: 'Attending Physician Statement (APS) with pathology report',
+            reason: 'Required for all cancer cases to determine type, stage, and grade'
+        });
+    }
+    
+    if (data.hasDiabetes) {
+        additionalInfo.push({
+            required: true,
+            item: 'Diabetes Questionnaire',
+            reason: 'Needed to assess control, complications, and medications'
+        });
+        
+        if (data.usesInsulin || !data.diabetesControlled) {
+            additionalInfo.push({
+                required: true,
+                item: 'APS with recent HbA1c results',
+                reason: 'Required for insulin-dependent or poorly controlled diabetes'
+            });
+        }
+    }
+    
+    if (data.hasHeartAttack || data.hasCoronaryBypass || data.hasAngioplasty || data.hasAngina) {
+        additionalInfo.push({
+            required: true,
+            item: 'Heart/Circulatory Questionnaire',
+            reason: 'Required for all coronary artery disease cases'
+        });
+        
+        additionalInfo.push({
+            required: true,
+            item: 'APS with cardiac catheterization report and current EKG',
+            reason: 'Needed to assess extent of disease and current cardiac function'
+        });
+    }
+    
+    if (data.hasStroke || data.hasTIA) {
+        additionalInfo.push({
+            required: true,
+            item: 'APS with imaging reports (CT/MRI)',
+            reason: 'Required to assess stroke severity and residual impairment'
+        });
+    }
+    
+    if (data.hasAsthma && (data.asthmaSeverity === 'moderate' || data.asthmaSeverity === 'severe')) {
+        additionalInfo.push({
+            required: true,
+            item: 'Respiratory Questionnaire',
+            reason: 'Needed to assess severity and hospitalization history'
+        });
+        
+        if (data.asthmaHospitalizations > 0) {
+            additionalInfo.push({
+                required: true,
+                item: 'APS with pulmonary function test results',
+                reason: 'Required for cases with hospitalization history'
+            });
+        }
+    }
+    
+    if (data.hasCOPD || data.hasEmphysema) {
+        additionalInfo.push({
+            required: true,
+            item: 'Respiratory Questionnaire and APS',
+            reason: 'Required for COPD/emphysema evaluation'
+        });
+    }
+    
+    if (data.hasDepression || data.hasAnxiety || data.hasBipolar) {
+        additionalInfo.push({
+            required: true,
+            item: 'Depression/Mental Health Questionnaire',
+            reason: 'Needed to assess severity, treatment, and effective control'
+        });
+        
+        if (data.mentalSeverity === 'major' || data.mentalHospitalized) {
+            additionalInfo.push({
+                required: true,
+                item: 'APS from treating psychiatrist/psychologist',
+                reason: 'Required for major depression or hospitalization history'
+            });
+        }
+    }
+    
+    if (data.hasSeizures) {
+        additionalInfo.push({
+            required: true,
+            item: 'Seizure Questionnaire',
+            reason: 'Required to assess type, frequency, and control'
+        });
+    }
+    
+    if (data.alcoholTreatment) {
+        additionalInfo.push({
+            required: true,
+            item: 'Alcohol Use Questionnaire',
+            reason: 'Required for all applicants with alcohol treatment history'
+        });
+        
+        additionalInfo.push({
+            required: true,
+            item: 'Motor Vehicle Report (MVR)',
+            reason: 'Required to check for DWIs and driving record'
+        });
+    }
+    
+    if (data.hardDrugUse) {
+        additionalInfo.push({
+            required: true,
+            item: 'Drug Use Questionnaire',
+            reason: 'Required for applicants with drug use history'
+        });
+    }
+    
+    if (data.hasDWI) {
+        additionalInfo.push({
+            required: true,
+            item: 'Motor Vehicle Report (MVR)',
+            reason: 'Required for all DWI cases'
+        });
+        
+        additionalInfo.push({
+            required: true,
+            item: 'Alcohol Use Questionnaire',
+            reason: 'Required to assess current drinking habits'
+        });
+    }
+    
+    if (data.hasArrests) {
+        additionalInfo.push({
+            required: true,
+            item: 'Arrest Questionnaire with complete details',
+            reason: 'Required for all arrest history'
+        });
+    }
+    
+    // Age and amount based requirements
+    if (data.age >= 70) {
+        additionalInfo.push({
+            required: true,
+            item: 'APS',
+            reason: 'Required for all applicants age 70 and up'
+        });
+    }
+    
+    if (data.faceAmount >= 500000) {
+        additionalInfo.push({
+            required: true,
+            item: 'Inspection Report',
+            reason: 'Required for face amounts of $500,000 and up'
+        });
+    }
+    
+    if (data.faceAmount >= 100000 && data.age >= 16 && data.age <= 29 && data.isMale) {
+        additionalInfo.push({
+            required: false,
+            item: 'Motor Vehicle Report (MVR)',
+            reason: 'Automatically requested for male applicants ages 16-29 with $100,000+'
+        });
+    }
+    
+    // Build/weight related
+    const buildRating = calculateBuildRating(data.heightInches, data.weight);
+    if (buildRating >= 5) {
+        additionalInfo.push({
+            required: false,
+            item: 'Medical Exam with Blood Profile',
+            reason: 'May be required for significant overweight to assess related conditions'
+        });
+    }
+    
+    // Combination risks requiring additional review
+    if (buildRating >= 2 && data.hasHBP && (!data.hbpMeds || data.hbpMeds === 0)) {
+        additionalInfo.push({
+            required: true,
+            item: 'Blood Pressure Questionnaire and recent BP readings',
+            reason: 'Uncontrolled hypertension with overweight requires additional documentation'
+        });
+    }
+    
+    // Trial application guidance
+    if (decision === 'NEEDS_REVIEW' || decision === 'AUTO_TRIAL') {
+        additionalInfo.push({
+            required: true,
+            item: 'Mark application as TRIAL',
+            reason: 'This case requires underwriter review before approval'
+        });
+    }
+    
+    return additionalInfo;
 }
 
 function combineRatings(rating1, rating2) {
