@@ -1255,12 +1255,12 @@
   },
   {
     "question": "Which of these is NOT subject to income taxation under a Modified Endowment Contract (MEC)?",
-    "correct": "Policy dividend",
+    "correct": "Death benefit",
     "explanation": "The death benefit would NOT be subject to income tax under a Modified Endowment Contract (MEC).",
     "difficulty": "medium",
     "wrongs": [
       "Loan against the cash value",
-      "Death benefit",
+      "Policy dividend",
       "Policy withdrawal"
     ]
   },
@@ -1376,13 +1376,13 @@
   },
   {
     "question": "The deeds and actions of a producer indicate what kind of authority?",
-    "correct": "Conditional",
+    "correct": "Apparent",
     "explanation": "Apparent authority is the appearance or assumption of authority based on the actions, words, or deeds of the producer.",
     "difficulty": "easy",
     "wrongs": [
       "Implied",
       "Express",
-      "Apparent"
+      "Conditional"
     ]
   },
   {
