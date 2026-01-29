@@ -110,6 +110,7 @@ function gatherFormData() {
         
         hasHIV: safeChecked('hasHIV'),
         onKidneyDialysis: safeChecked('onKidneyDialysis'),
+        hasKidneyDisease: safeChecked('hasKidneyDisease'),
         hasAlzheimers: safeChecked('hasAlzheimers'),
         hasCysticFibrosis: safeChecked('hasCysticFibrosis'),
         hasDefibrillator: safeChecked('hasDefibrillator'),
@@ -216,7 +217,18 @@ function displayResults(result) {
     
     resultsHeader.textContent = titles[result.decision];
     
-    let html = '<div class="result-section">';
+    let html = '';
+    
+    // Applicant Profile Section
+    if (result.profile) {
+        html += '<div class="result-section profile-section">';
+        html += '<div class="result-label">📋 Applicant Profile:</div>';
+        html += `<div class="result-value profile-text">${result.profile}</div>`;
+        html += '</div>';
+    }
+    
+    // Product and Rating
+    html += '<div class="result-section">';
     html += '<div class="result-label">Product:</div>';
     html += `<div class="result-value">${result.product}</div>`;
     html += '</div>';
@@ -228,6 +240,24 @@ function displayResults(result) {
         html += '</div>';
     }
     
+    // Risk Factors Section
+    if (result.riskFactors && result.riskFactors.length > 0) {
+        html += '<div class="result-section risk-factors-section">';
+        html += '<div class="result-label">⚠️ Risk Factor Combinations:</div>';
+        html += '<div class="risk-factors-list">';
+        result.riskFactors.forEach(rf => {
+            const severityClass = rf.severity.toLowerCase();
+            html += `<div class="risk-factor risk-${severityClass}">`;
+            html += `<strong>${rf.combination}</strong> `;
+            html += `<span class="severity-badge severity-${severityClass}">${rf.severity}</span><br>`;
+            html += `<span class="risk-note">${rf.note}</span>`;
+            html += '</div>';
+        });
+        html += '</div>';
+        html += '</div>';
+    }
+    
+    // Reasons Section
     html += '<div class="result-section">';
     html += '<div class="result-label">Reason(s):</div>';
     html += '<ul class="result-list">';
@@ -237,6 +267,7 @@ function displayResults(result) {
     html += '</ul>';
     html += '</div>';
     
+    // Warnings
     if (result.warnings && result.warnings.length > 0) {
         html += '<div class="warning-box">';
         html += '<strong>⚠️ Warnings:</strong><ul>';
@@ -246,42 +277,85 @@ function displayResults(result) {
         html += '</ul></div>';
     }
     
+    // Additional Information Needed Section
+    if (result.additionalInfoNeeded && result.additionalInfoNeeded.length > 0) {
+        html += '<div class="result-section additional-info-section">';
+        html += '<div class="result-label">📄 Additional Information Required:</div>';
+        
+        const required = result.additionalInfoNeeded.filter(info => info.required);
+        const optional = result.additionalInfoNeeded.filter(info => !info.required);
+        
+        if (required.length > 0) {
+            html += '<div class="info-required">';
+            html += '<strong>Required:</strong>';
+            html += '<ul class="additional-info-list">';
+            required.forEach(info => {
+                html += `<li><strong>${info.item}</strong><br>`;
+                html += `<span class="info-reason">${info.reason}</span></li>`;
+            });
+            html += '</ul>';
+            html += '</div>';
+        }
+        
+        if (optional.length > 0) {
+            html += '<div class="info-optional">';
+            html += '<strong>May Be Requested:</strong>';
+            html += '<ul class="additional-info-list">';
+            optional.forEach(info => {
+                html += `<li><strong>${info.item}</strong><br>`;
+                html += `<span class="info-reason">${info.reason}</span></li>`;
+            });
+            html += '</ul>';
+            html += '</div>';
+        }
+        
+        html += '</div>';
+    }
+    
+    // Next Steps
     html += '<div class="result-section">';
     html += '<div class="result-label">📋 Next Steps:</div>';
     html += '<ul class="result-list">';
     
     if (result.decision === 'STANDARD') {
-        html += '<li>Proceed with full application</li>';
-        html += '<li>Collect required forms and signatures</li>';
+        html += '<li>Collect all required questionnaires and forms</li>';
+        html += '<li>Obtain required signatures</li>';
         html += '<li>Submit for standard underwriting</li>';
+        if (result.additionalInfoNeeded && result.additionalInfoNeeded.length > 0) {
+            html += '<li>Ensure all additional documentation listed above is included</li>';
+        }
     } else if (result.decision === 'RATED') {
-        html += '<li>Discuss rating with applicant</li>';
-        html += '<li>Obtain consent for rated policy</li>';
-        html += '<li>Submit with full medical history</li>';
-    } else if (result.decision === 'AUTO_TRIAL') {
-        html += '<li><strong>Mark application as TRIAL</strong></li>';
-        html += '<li>Collect all required questionnaires</li>';
-        html += '<li>Submit with full disclosure</li>';
-        html += '<li>Set expectations about trial process</li>';
+        html += '<li>Discuss table rating with applicant</li>';
+        html += '<li>Explain premium increase and obtain consent</li>';
+        html += '<li>Collect all required questionnaires (see above)</li>';
+        html += '<li>Submit with complete medical history and documentation</li>';
+    } else if (result.decision === 'AUTO_TRIAL' || result.decision === 'NEEDS_REVIEW') {
+        html += '<li><strong>MARK APPLICATION AS TRIAL</strong></li>';
+        html += '<li>Collect ALL required questionnaires and documentation</li>';
+        html += '<li>Include detailed explanation of all health conditions</li>';
+        html += '<li>Submit with full disclosure - do not guarantee approval</li>';
+        html += '<li>Set expectations with applicant about trial/review process</li>';
+        html += '<li>Underwriting will review and may request additional information</li>';
     } else if (result.decision === 'DECLINE') {
-        html += '<li><strong>DO NOT submit application</strong></li>';
-        html += '<li>Consult with underwriting if questions</li>';
-        html += '<li>Consider alternatives (simplified issue, etc.)</li>';
+        html += '<li><strong>DO NOT SUBMIT APPLICATION</strong></li>';
+        html += '<li>Explain to applicant that coverage is not available at this time</li>';
+        html += '<li>If questions, consult with underwriting department</li>';
+        html += '<li>Consider alternative products (simplified issue, guaranteed issue)</li>';
     } else if (result.decision === 'POSTPONE') {
         html += '<li>Wait for postpone period to end</li>';
-        html += '<li>Gather required medical documentation</li>';
-        html += '<li>Reapply after waiting period</li>';
-    } else if (result.decision === 'NEEDS_REVIEW') {
-        html += '<li>Contact underwriting for guidance</li>';
-        html += '<li>Gather additional information</li>';
-        html += '<li>May require trial submission</li>';
+        html += '<li>Gather all required medical documentation during waiting period</li>';
+        html += '<li>Follow up with applicant when eligible to reapply</li>';
     }
     
     html += '</ul></div>';
     
+    // Disclaimer
     html += '<div class="disclaimer-box" style="margin-top: 20px;">';
     html += '<strong>⚠️ REMEMBER:</strong> This is a screening tool only. Final decisions are made by AIL Underwriting. ';
-    html += 'Do NOT guarantee coverage based on this result.';
+    html += 'Do NOT guarantee coverage based on this result. ';
+    if (result.decision === 'NEEDS_REVIEW' || result.decision === 'AUTO_TRIAL') {
+        html += '<strong>Trial applications may be approved, rated, or declined after underwriter review.</strong>';
+    }
     html += '</div>';
     
     resultsContent.innerHTML = html;
