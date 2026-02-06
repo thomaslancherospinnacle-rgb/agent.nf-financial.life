@@ -1646,10 +1646,9 @@
                 for (const callerName in callerPermissions) {
                     for (const perm of callerPermissions[callerName]) {
                         permissions.push({
-                            callerName: callerName,
+                            caller: callerName,  // FIXED: Changed from callerName to caller to match LEADDB
                             sourceType: perm.sourceType,
-                            sourceName: perm.sourceName,
-                            hasAccess: 'YES'
+                            sourceName: perm.sourceName
                         });
                     }
                 }
