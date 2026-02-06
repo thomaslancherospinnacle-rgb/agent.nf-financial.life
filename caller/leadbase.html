@@ -614,40 +614,35 @@ function showAppointmentAssignmentPopup() {
 
 async function loadUsersForAppointment() {
   try {
-    // Use the same endpoint as admin.html - gets all users from AUTH
-    const response = await fetch(CFWORKER + '/getUsers', {
+    // Use the same endpoint as admin.html - getAllUsersForDropdown
+    const response = await fetch(CFWORKER + '/getAllUsersForDropdown', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'getUsers' })
+      body: JSON.stringify({})
     });
     
     const data = await response.json();
     
-    if (data && data.success && Array.isArray(data.users)) {
-      // Convert to expected format and construct Calendly URLs
-      allAvailableUsers = data.users
-        .filter(user => user.verified) // Only verified users
-        .map(user => {
-          const username = user.username || user.name || user.login_email;
-          const email = user.login_email || user.email;
-          
-          // Construct Calendly URL: https://calendly.com/fnamelname-ail/30min
-          // Extract first name and last name from email (before @)
-          const emailPrefix = email.split('@')[0]; // e.g., "thomaslancheros.ail"
-          const calendlyUsername = emailPrefix.replace('.ail', '-ail'); // e.g., "thomaslancheros-ail"
-          const calendlyUrl = `https://calendly.com/${calendlyUsername}/30min`;
-          
-          return {
-            username: username,
-            email: email,
-            calendlyUrl: calendlyUrl
-          };
-        });
+    if (data.success && Array.isArray(data.users)) {
+      // Construct Calendly URLs from username
+      allAvailableUsers = data.users.map(user => {
+        const username = user.username || user.name;
+        
+        // Convert "Thomas Lancheros" -> "thomaslancheros-ail"
+        const calendlyUsername = username.toLowerCase().replace(/\s+/g, '') + '-ail';
+        const calendlyUrl = `https://calendly.com/${calendlyUsername}/30min`;
+        
+        return {
+          username: username,
+          email: user.email || '',
+          calendlyUrl: calendlyUrl
+        };
+      });
       
       if (allAvailableUsers.length > 0) {
         renderApptUserList(allAvailableUsers);
       } else {
-        document.getElementById('userListContainer').innerHTML = '<div style="padding: 24px; text-align: center; color: #ff5a7a;">No verified users found</div>';
+        document.getElementById('userListContainer').innerHTML = '<div style="padding: 24px; text-align: center; color: #ff5a7a;">No users found</div>';
       }
     } else {
       document.getElementById('userListContainer').innerHTML = '<div style="padding: 24px; text-align: center; color: #ff5a7a;">Failed to load users</div>';
