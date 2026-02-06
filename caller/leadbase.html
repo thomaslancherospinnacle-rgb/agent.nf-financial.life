@@ -614,10 +614,10 @@ function showAppointmentAssignmentPopup() {
 
 async function loadUsersForAppointment() {
   try {
-    const response = await fetch(AUTH, {
+    const response = await fetch(CFWORKER, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'getAllUsersForDropdown' })
+      body: JSON.stringify({ action: 'getAllUsersForDropdown', token: getToken() })
     });
     
     const data = await response.json();
