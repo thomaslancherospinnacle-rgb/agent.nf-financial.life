@@ -826,6 +826,51 @@ function showListView() {
 }
 
 // ============================================================
+// RENDER LEAD LIST
+// ============================================================
+function renderLeadList() {
+  const listContainer = document.getElementById('leadList');
+  const headerContainer = document.getElementById('listHeader');
+  
+  if (leads.length === 0) {
+    listContainer.innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted)">No leads found</div>';
+    headerContainer.innerHTML = '';
+    return;
+  }
+  
+  // Set up header with fixed columns
+  headerContainer.style.gridTemplateColumns = '1fr 150px 120px 50px';
+  headerContainer.innerHTML = `
+    <div>Name</div>
+    <div>Phone</div>
+    <div>Status</div>
+    <div></div>
+  `;
+  
+  // Render lead rows
+  listContainer.innerHTML = leads.map((lead, index) => {
+    const phoneFormatted = formatPhone(lead.phone);
+    const statusClass = lead.outcome === 'Appointment Set' ? 'color:var(--good);font-weight:600' : 
+                       lead.outcome === 'RESOLVE' ? 'color:var(--muted)' : '';
+    
+    return `
+      <div class="lead-row" style="grid-template-columns:1fr 150px 120px 50px">
+        <div>
+          <span class="name-link" onclick="openLead(${index})">${lead.name || 'Unknown'}</span>
+        </div>
+        <div>${phoneFormatted.pretty}</div>
+        <div style="${statusClass}">${lead.outcome || 'Not Contacted'}</div>
+        <div class="icons">
+          <a class="icon-btn" href="${phoneFormatted.tel}" title="Call">📞</a>
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  console.log('[UI] Rendered', leads.length, 'leads');
+}
+
+// ============================================================
 // LEAD DETAIL
 // ============================================================
 function openLead(index) {
