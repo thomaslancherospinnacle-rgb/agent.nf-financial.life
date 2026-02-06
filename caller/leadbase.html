@@ -614,19 +614,26 @@ function showAppointmentAssignmentPopup() {
 
 async function loadUsersForAppointment() {
   try {
-    const response = await fetch(CFWORKER, {
+    // Fetch callers from LEADDB (which has name, email, calendlyUrl)
+    const response = await fetch(LEADSDB, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'getAllUsersForDropdown', token: getToken() })
+      body: JSON.stringify({ action: 'getCallers' })
     });
     
-    const data = await response.json();
+    const callers = await response.json();
     
-    if (data.success && data.users) {
-      allAvailableUsers = data.users;
+    if (Array.isArray(callers) && callers.length > 0) {
+      // Convert to expected format (name -> username)
+      allAvailableUsers = callers.map(caller => ({
+        username: caller.name,
+        email: caller.email,
+        calendlyUrl: caller.calendlyUrl
+      })).filter(user => user.calendlyUrl); // Only show users with Calendly URLs
+      
       renderApptUserList(allAvailableUsers);
     } else {
-      document.getElementById('userListContainer').innerHTML = '<div style="padding: 24px; text-align: center; color: #ff5a7a;">Failed to load users</div>';
+      document.getElementById('userListContainer').innerHTML = '<div style="padding: 24px; text-align: center; color: #ff5a7a;">No users with Calendly links found</div>';
     }
   } catch (err) {
     console.error('Error loading users:', err);
