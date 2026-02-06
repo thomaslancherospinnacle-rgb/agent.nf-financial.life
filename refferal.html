@@ -948,18 +948,39 @@
         return;
       }
 
-      const sponsorsFromColumn = [...new Set(referralData.map(r => r.sponsorName).filter(Boolean))];
-      const rootSponsors = referralData
+      // FIXED: Normalize data to handle various column name formats
+      const normalized = referralData.map(r => ({
+        ...r,
+        refName: r.refName || r['REF NAME'] || r['Ref Name'] || r.name || '',
+        refNumber: r.refNumber || r['REF NUMBER'] || r['Ref Number'] || r.phone || '',
+        refRelation: r.refRelation || r['REF RELATION'] || r['Ref Relation'] || r.relation || '',
+        sponsorName: r.sponsorName || r['SPONSOR NAME'] || r['Sponsor Name'] || r.sponsor || '',
+        sponsorNumber: r.sponsorNumber || r['SPONSOR NUMBER'] || r['Sponsor Number'] || '',
+        leadType: r.leadType || r['LEAD TYPE'] || r['Lead Type'] || r.type || 'Referral',
+        sponsorPos: r.sponsorPos || r['SPONSOR POS'] || r['Sponsor Pos'] || 'NO',
+        extension: r.extension || r.Extension || r.why || '',
+        outcome: r.outcome || r.Outcome || 'Not Contacted'
+      }));
+      
+      // Replace referralData with normalized version
+      referralData = normalized;
+
+      console.log('[TREE] Normalized data sample:', normalized[0]);
+
+      const sponsorsFromColumn = [...new Set(normalized.map(r => r.sponsorName).filter(Boolean))];
+      const rootSponsors = normalized
         .filter(r => !r.sponsorName || String(r.sponsorName).trim() === "")
         .map(r => r.refName)
         .filter(Boolean);
 
       const allSponsors = [...new Set([...sponsorsFromColumn, ...rootSponsors])];
+      
+      console.log('[TREE] Found sponsors:', allSponsors);
 
       let html = "";
       allSponsors.forEach(sponsorName => {
-        const referrals = referralData.filter(r => r.sponsorName === sponsorName);
-        const sponsorInfo = referralData.find(r => r.refName === sponsorName);
+        const referrals = normalized.filter(r => r.sponsorName === sponsorName);
+        const sponsorInfo = normalized.find(r => r.refName === sponsorName);
         html += buildSponsorGroupHTML(sponsorName, sponsorInfo, referrals);
       });
 
@@ -1060,8 +1081,15 @@
 
       select.innerHTML = '<option value="">Choose a sponsor...</option>';
 
-      const sponsorsFromColumn = [...new Set(referralData.map(r => r.sponsorName).filter(Boolean))];
-      const rootSponsors = referralData
+      // Normalize column names
+      const normalized = referralData.map(r => ({
+        refName: r.refName || r['REF NAME'] || r['Ref Name'] || r.name || '',
+        refNumber: r.refNumber || r['REF NUMBER'] || r['Ref Number'] || r.phone || '',
+        sponsorName: r.sponsorName || r['SPONSOR NAME'] || r['Sponsor Name'] || r.sponsor || ''
+      }));
+
+      const sponsorsFromColumn = [...new Set(normalized.map(r => r.sponsorName).filter(Boolean))];
+      const rootSponsors = normalized
         .filter(r => !r.sponsorName || String(r.sponsorName).trim() === "")
         .map(r => r.refName)
         .filter(Boolean);
@@ -1069,7 +1097,7 @@
       const allSponsors = [...new Set([...sponsorsFromColumn, ...rootSponsors])].sort();
 
       allSponsors.forEach(sponsorName => {
-        const sponsorData = referralData.find(r => r.refName === sponsorName);
+        const sponsorData = normalized.find(r => r.refName === sponsorName);
         const phone = sponsorData ? safePhone(sponsorData.refNumber) : "";
         const option = document.createElement("option");
         option.value = sponsorName;
@@ -1086,8 +1114,15 @@
       if (!statsBar) return;
 
       const totalReferrals = referralData.length;
-      const uniqueSponsors = [...new Set(referralData.map(r => r.sponsorName).filter(Boolean))].length;
-      const hardcards = referralData.filter(r => r.leadType === "Hardcard").length;
+      
+      // Normalize for sponsor counting
+      const normalized = referralData.map(r => ({
+        sponsorName: r.sponsorName || r['SPONSOR NAME'] || r['Sponsor Name'] || r.sponsor || '',
+        leadType: r.leadType || r['LEAD TYPE'] || r['Lead Type'] || r.type || ''
+      }));
+      
+      const uniqueSponsors = [...new Set(normalized.map(r => r.sponsorName).filter(Boolean))].length;
+      const hardcards = normalized.filter(r => r.leadType === "Hardcard").length;
 
       setText("totalReferrals", String(totalReferrals));
       setText("totalSponsors", String(uniqueSponsors));
