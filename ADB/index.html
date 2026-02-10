@@ -61,11 +61,6 @@
 
     <div class="row">
       <input id="agentName" placeholder="Agent Name (autofill from /me)" />
-      <input id="agencyName" placeholder="Agency (defaults to Darcy Schrieber)" />
-    </div>
-
-    <div class="row">
-      <input id="agencyPhone" placeholder="Agency Phone" />
       <button id="loadMeBtn">Autofill from /me</button>
     </div>
 
@@ -106,20 +101,11 @@ const ME_API_URL  = `${WORKER_BASE}/me`;
 const PDF_URL = "/ADB/ADB.pdf"; // <-- place ADB.pdf in agent site at /ADB/ADB.pdf (or change path)
 
 /* =========================
-   PREFILL FROM CERTIFICATE
-========================= */
-const DEFAULTS = {
-  sponsorName: "American Income Life",
-  sponsorSignatureName: "Darcy Schrieber",
-  agencyPhone: "(844) 832-2412",
-  agencyName: "Darcy Schrieber",
-};
-
-/* =========================
    EASY COORDS (CHANGE HERE)
    NOTE: PDF origin is bottom-left
 ========================= */
-const FIELD_CORDS = {  // Main form
+const FIELD_CORDS = {
+  // Top main form
   NAME_CORDS:           { x: 58,  y: 455, size: 13 },
   DOB_CORDS:            { x: 340, y: 455, size: 12 },
   PHONE_CORDS:          { x: 464, y: 457, size: 12 },
@@ -132,15 +118,12 @@ const FIELD_CORDS = {  // Main form
   BENEFICIARY_CORDS:    { x: 56,  y: 386, size: 12 },
   REL_CORDS:            { x: 318, y: 386, size: 12 },
 
-  // Sponsor area
-  AGENCY_NAME_CORDS:    { x: 90,  y: 240, size: 12 },
-  AGENCY_PHONE_CORDS:   { x: 365, y: 240, size: 12 },
-
-  // Tear-off
+  // Tear-off (sponsor info is pre-printed on PDF)
   INSURED_NAME_2:       { x: 56,  y: 88, size: 12 },
   INSURED_DOB_2:        { x: 317, y: 90, size: 12 },
   AGENT_NAME_2:         { x: 317, y: 52, size: 12 },
 };
+
 function tokenGen(len=22){
   const chars="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
   let out="";
@@ -195,12 +178,6 @@ async function buildFilledPdf(data){
   drawText(FIELD_CORDS.BENEFICIARY_CORDS, data.beneficiary);
   drawText(FIELD_CORDS.REL_CORDS, data.relationship);
 
-  // Sponsor/autofill based on cert
-  drawText(FIELD_CORDS.SPONSOR_NAME_CORDS, data.sponsorName);
-  drawText(FIELD_CORDS.SPONSOR_SIGNAME_CORDS, data.sponsorSignatureName);
-  drawText(FIELD_CORDS.AGENCY_NAME_CORDS, data.agencyName);
-  drawText(FIELD_CORDS.AGENCY_PHONE_CORDS, data.agencyPhone);
-
   // Tear-off
   drawText(FIELD_CORDS.INSURED_NAME_2, data.clientName);
   drawText(FIELD_CORDS.INSURED_DOB_2, data.dob);
@@ -227,20 +204,10 @@ function getFormData(){
     relationship: relationship.value.trim(),
     clientEmail: clientEmail.value.trim(),
 
-    // sponsor defaults from cert
-    sponsorName: DEFAULTS.sponsorName,
-    sponsorSignatureName: DEFAULTS.sponsorSignatureName,
-
     // agent-side
     agentName: agentName.value.trim(),
-    agencyName: (agencyName.value.trim() || DEFAULTS.agencyName),
-    agencyPhone: (agencyPhone.value.trim() || DEFAULTS.agencyPhone),
   };
 }
-
-/* Default UI values */
-agencyName.value  = DEFAULTS.agencyName;
-agencyPhone.value = DEFAULTS.agencyPhone;
 
 /* Autofill agent from /me (best-effort) */
 loadMeBtn.addEventListener("click", async ()=>{
