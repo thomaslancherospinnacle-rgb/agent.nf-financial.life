@@ -6,6 +6,8 @@
   <title>ADB - Agent Create Client Link</title>
 
   <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script src="/config.js"></script>
+  <script src="/auth.js"></script>
 
   <style>
     body{font-family:system-ui,Arial;margin:0;background:#0b0f1a;color:#fff}
@@ -53,9 +55,8 @@
 
     <hr style="border:0;border-top:1px solid #22314f;margin:14px 0">
 
-    <div class="row">
-      <input id="agentName" placeholder="Agent Name (autofill from /me)" />
-      <button id="loadMeBtn">Autofill from /me</button>
+    <div class="small" style="margin-bottom:10px">
+      <b>Agent:</b> <span id="agentNameDisplay">Loading...</span>
     </div>
 
     <div class="row">
@@ -85,9 +86,45 @@
 </div>
 
 <script>
-const WORKER_BASE = "https://closing-coalition-api.thomaslancheros06.workers.dev";
+// Check authentication on page load
+(async function() {
+  try {
+    // Require authentication - redirect to login if not authenticated
+    const isAuthenticated = await Auth.requireAuth('/login.html');
+    if (!isAuthenticated) return;
+
+    // Get user data from session
+    const userData = Auth.getUserData();
+    if (userData && userData.username) {
+      agentNameDisplay.textContent = userData.username;
+      AGENT_NAME = userData.username;
+    } else {
+      // Fallback: fetch from /me endpoint
+      const token = Auth.getToken();
+      if (token) {
+        try {
+          const meData = await Auth.apiCall('me', { token });
+          const user = meData.user || meData.profile || meData.data || meData;
+          AGENT_NAME = user.name || user.fullName || user.username || 'Unknown Agent';
+          agentNameDisplay.textContent = AGENT_NAME;
+        } catch (err) {
+          console.error('Failed to load agent info:', err);
+          agentNameDisplay.textContent = 'Unknown Agent';
+          AGENT_NAME = 'Unknown Agent';
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Auth check failed:', err);
+    window.location.href = '/login.html';
+  }
+})();
+
+// Global agent name (populated on load)
+let AGENT_NAME = 'Unknown Agent';
+
+const WORKER_BASE = typeof CFWORKER !== 'undefined' ? CFWORKER : 'https://closing-coalition-api.thomaslancheros06.workers.dev';
 const ADB_API_URL = `${WORKER_BASE}/adb`;
-const ME_API_URL  = `${WORKER_BASE}/me`;
 const PDF_URL = "/ADB/ADB.pdf";
 
 const FIELD_CORDS = {
@@ -179,28 +216,9 @@ function getFormData(){
     beneficiary: beneficiary.value.trim(),
     relationship: relationship.value.trim(),
     clientEmail: clientEmail.value.trim(),
-    agentName: agentName.value.trim(),
+    agentName: AGENT_NAME,
   };
 }
-
-loadMeBtn.addEventListener("click", async ()=>{
-  try{
-    status.textContent = "Loading /me…";
-    const token = localStorage.getItem("token") || localStorage.getItem("sessionToken") || "";
-    const res = await fetch(ME_API_URL, {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ token })
-    });
-    const json = await res.json().catch(()=>({}));
-    if(!json.ok) throw new Error(json.error || "Failed /me");
-    const u = json.user || json.profile || json.data || json;
-    agentName.value = u.name || u.fullName || u.username || agentName.value;
-    status.textContent = "✅ Autofilled agent name.";
-  } catch(err){
-    status.textContent = "❌ Autofill failed: " + err.message;
-  }
-});
 
 previewBtn.addEventListener("click", async ()=>{
   try{
