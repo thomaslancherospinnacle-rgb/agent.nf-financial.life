@@ -1,6 +1,8 @@
 /**
  * AUTH.JS - Centralized Authentication Module
  * Handles all authentication logic for the application
+ * 
+ * ENHANCED VERSION with smart error detection for seamless new user flow
  */
 
 // Import configuration
@@ -273,34 +275,28 @@ const Auth = (function() {
         try {
             return JSON.parse(data);
         } catch (e) {
-            console.warn('Failed to parse user data:', e);
             return null;
         }
     }
 
     /**
-     * Check if user session is valid
-     * @returns {boolean} True if session is valid
+     * Check if session is still valid (client-side check only)
+     * @returns {boolean} True if session exists and hasn't expired
      */
     function isSessionValid() {
         const token = getToken();
-        if (!token) return false;
-
         const expiresAt = getExpiration();
-        if (expiresAt) {
-            const expiryTime = new Date(expiresAt).getTime();
-            const now = new Date().getTime();
-            if (now >= expiryTime) {
-                clearAllStorage();
-                return false;
-            }
-        }
 
-        return true;
+        if (!token || !expiresAt) return false;
+
+        const now = Date.now();
+        const expiry = parseInt(expiresAt, 10);
+
+        return now < expiry;
     }
 
     /**
-     * Clear user session
+     * Clear current session
      */
     function clearSession() {
         clearAllStorage();
@@ -315,6 +311,7 @@ const Auth = (function() {
      * @param {string} username - User's full name
      * @param {string} password - User's password
      * @returns {Promise<object>} {success: boolean, token: string, userData: object}
+     * @throws {Error} Special error codes: 'USER_NOT_FOUND', 'USER_NOT_VERIFIED', or specific error message
      */
     async function login(username, password) {
         const normalizedName = normalizeName(username);
@@ -327,24 +324,59 @@ const Auth = (function() {
             throw new Error('Please enter your password');
         }
 
-        const response = await apiCall('login', {
-            username: normalizedName,
-            password: password,
-            email: email
-        });
-
-        if (response.token) {
-            setSession(response.token, response.expires_at, {
+        try {
+            const response = await apiCall('login', {
                 username: normalizedName,
+                password: password,
                 email: email
             });
-        }
 
-        return {
-            success: true,
-            token: response.token,
-            userData: { username: normalizedName, email: email }
-        };
+            if (response.token) {
+                setSession(response.token, response.expires_at, {
+                    username: normalizedName,
+                    email: email
+                });
+            }
+
+            return {
+                success: true,
+                token: response.token,
+                userData: { username: normalizedName, email: email }
+            };
+            
+        } catch (error) {
+            // Enhanced error detection for better UX routing
+            const errorMsg = error.message.toLowerCase();
+            
+            // Check for "user not found" variations
+            if (errorMsg.includes('user not found') || 
+                errorMsg.includes('does not exist') ||
+                errorMsg.includes('user does not exist') ||
+                errorMsg.includes('no user found') ||
+                errorMsg.includes('invalid username') ||
+                errorMsg.includes('invalid login')) {
+                throw new Error('USER_NOT_FOUND'); // Special error code for routing to registration
+            }
+            
+            // Check for "not verified" variations
+            if (errorMsg.includes('not verified') || 
+                errorMsg.includes('unverified') ||
+                errorMsg.includes('verify your account') ||
+                errorMsg.includes('email verification required') ||
+                errorMsg.includes('please verify')) {
+                throw new Error('USER_NOT_VERIFIED'); // Special error code for routing to verification
+            }
+            
+            // Check for wrong password
+            if (errorMsg.includes('invalid password') ||
+                errorMsg.includes('incorrect password') ||
+                errorMsg.includes('wrong password')) {
+                throw new Error('Invalid password. Please try again.');
+            }
+            
+            // Re-throw original error for all other cases
+            throw error;
+        }
     }
 
     /**
