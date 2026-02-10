@@ -300,7 +300,16 @@ const Auth = (function() {
         }
 
         const now = Date.now();
-        const expiry = parseInt(expiresAt, 10);
+        let expiry;
+        
+        // Handle both Unix timestamp and ISO date string
+        if (expiresAt.includes('T') || expiresAt.includes('-')) {
+            // ISO date string format (e.g., "2026-02-11T09:36:19.936Z")
+            expiry = new Date(expiresAt).getTime();
+        } else {
+            // Unix timestamp format
+            expiry = parseInt(expiresAt, 10);
+        }
         
         const isValid = now < expiry;
         console.log('isSessionValid:', {
@@ -351,7 +360,8 @@ const Auth = (function() {
 
             if (response.token) {
                 // Handle both expires_at and expiresAt (backend inconsistency)
-                const expiresAt = response.expires_at || response.expiresAt;
+                // Backend returns ISO date string like "2026-02-11T09:36:19.936Z"
+                const expiresAt = response.expires_at || response.expiresAt || response.expiresDate;
                 
                 setSession(response.token, expiresAt, {
                     username: normalizedName,
@@ -361,7 +371,8 @@ const Auth = (function() {
                 console.log('Session saved:', {
                     token: response.token.substring(0, 20) + '...',
                     expiresAt: expiresAt,
-                    expiresDate: expiresAt ? new Date(parseInt(expiresAt)).toLocaleString() : 'N/A'
+                    expiresDate: expiresAt ? new Date(expiresAt).toLocaleString() : 'N/A',
+                    isISO: expiresAt && (expiresAt.includes('T') || expiresAt.includes('-'))
                 });
             }
 
