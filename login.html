@@ -100,7 +100,8 @@
     }
     
     input[type="text"],
-    input[type="password"] {
+    input[type="password"],
+    input[type="email"] {
       width: 100%;
       padding: 10px 12px;
       border: 1px solid #ccc;
@@ -113,6 +114,11 @@
     input:focus {
       outline: none;
       border-color: #003d82;
+    }
+    
+    input:read-only {
+      background: #f9f9f9;
+      color: #666;
     }
     
     .derived-email {
@@ -191,11 +197,21 @@
       color: #991b1b;
     }
     
+    .message.info {
+      background: #eff6ff;
+      border-color: #3b82f6;
+      color: #1e40af;
+    }
+    
     .hint {
       margin-top: 12px;
       font-size: 12px;
       color: #666;
       line-height: 1.5;
+    }
+    
+    .hint strong {
+      color: #003d82;
     }
     
     .form-section.hidden {
@@ -252,40 +268,42 @@
       <div id="loginMsg" class="message"></div>
     </div>
 
-    <!-- FIRST-TIME SECTION -->
+    <!-- FIRST-TIME REGISTRATION SECTION -->
     <div id="firstTimeSection" class="form-section hidden">
-      <h2>First-Time Registration</h2>
+      <h2>Create New Account</h2>
       
       <div class="form-group">
-        <label for="firstName">Full Name</label>
-        <input type="text" id="firstName" placeholder="First Last" autocomplete="name" readonly>
+        <label for="regName">Full Name</label>
+        <input type="text" id="regName" placeholder="First Last" autocomplete="name" readonly>
       </div>
 
       <div class="form-group">
-        <label>Derived Email Address</label>
-        <div id="firstDerived" class="derived-email">—</div>
+        <label>Personal Email Address</label>
+        <div id="regDerivedEmail" class="derived-email">—</div>
+        <div class="hint">This email will be used for verification codes and password resets.</div>
       </div>
 
       <div class="form-group">
-        <label for="firstPassword">Create Password</label>
-        <input type="password" id="firstPassword" placeholder="Create a password (minimum 6 characters)" autocomplete="new-password">
+        <label for="regPassword">Create Password</label>
+        <input type="password" id="regPassword" placeholder="Minimum 6 characters" autocomplete="new-password">
       </div>
 
-      <div class="hint">
-        A verification code will be sent to your derived email address: <strong id="firstEmailHint" style="font-family: monospace;">—</strong>
+      <div class="form-group">
+        <label for="regConfirmPassword">Confirm Password</label>
+        <input type="password" id="regConfirmPassword" placeholder="Re-enter password" autocomplete="new-password">
       </div>
 
       <div class="button-group">
-        <button type="button" id="btnSignup" class="btn-primary">Send Verification Code</button>
+        <button type="button" id="btnCreateAccount" class="btn-primary">Create Account</button>
         <button type="button" id="btnBackToLogin" class="btn-secondary">Back to Login</button>
       </div>
 
-      <div id="firstMsg" class="message"></div>
+      <div id="regMsg" class="message"></div>
     </div>
 
-    <!-- VERIFY SECTION -->
+    <!-- EMAIL VERIFICATION SECTION -->
     <div id="verifySection" class="form-section hidden">
-      <h2>Verify Your Account</h2>
+      <h2>Verify Your Email</h2>
       
       <div class="form-group">
         <label for="verifyName">Full Name</label>
@@ -298,12 +316,14 @@
       </div>
 
       <div class="hint">
-        Check your email at <strong id="verifyEmailHint" style="font-family: monospace;">—</strong> for the verification code.
+        A 6-digit verification code has been sent to <strong id="verifyEmailHint" style="font-family: monospace;">—</strong>
+        <br><br>
+        Please check your inbox (and spam folder) for the verification code.
       </div>
 
       <div class="button-group">
-        <button type="button" id="btnVerify" class="btn-primary">Verify Code</button>
-        <button type="button" id="btnResend" class="btn-secondary">Resend Code</button>
+        <button type="button" id="btnVerify" class="btn-primary">Verify & Login</button>
+        <button type="button" id="btnResendCode" class="btn-secondary">Resend Code</button>
       </div>
 
       <div id="verifyMsg" class="message"></div>
@@ -323,43 +343,49 @@
     const API_URL = typeof CFWORKER !== 'undefined' ? CFWORKER : '';
 
     /**********************
-     * ELEMENTS
+     * DOM ELEMENTS
      **********************/
+    
+    // Sections
     const loginSection = document.getElementById('loginSection');
     const firstTimeSection = document.getElementById('firstTimeSection');
     const verifySection = document.getElementById('verifySection');
 
+    // Login elements
     const loginName = document.getElementById('loginName');
     const loginPassword = document.getElementById('loginPassword');
     const loginDerived = document.getElementById('loginDerived');
     const loginMsg = document.getElementById('loginMsg');
     const btnLogin = document.getElementById('btnLogin');
 
-    const firstName = document.getElementById('firstName');
-    const firstPassword = document.getElementById('firstPassword');
-    const firstDerived = document.getElementById('firstDerived');
-    const firstEmailHint = document.getElementById('firstEmailHint');
-    const firstMsg = document.getElementById('firstMsg');
-    const btnSignup = document.getElementById('btnSignup');
+    // Registration elements
+    const regName = document.getElementById('regName');
+    const regDerivedEmail = document.getElementById('regDerivedEmail');
+    const regPassword = document.getElementById('regPassword');
+    const regConfirmPassword = document.getElementById('regConfirmPassword');
+    const regMsg = document.getElementById('regMsg');
+    const btnCreateAccount = document.getElementById('btnCreateAccount');
     const btnBackToLogin = document.getElementById('btnBackToLogin');
 
+    // Verification elements
     const verifyName = document.getElementById('verifyName');
     const verifyCode = document.getElementById('verifyCode');
     const verifyEmailHint = document.getElementById('verifyEmailHint');
     const verifyMsg = document.getElementById('verifyMsg');
     const btnVerify = document.getElementById('btnVerify');
-    const btnResend = document.getElementById('btnResend');
+    const btnResendCode = document.getElementById('btnResendCode');
 
+    // Session variables
     let currentUsername = "";
     let currentEmail = "";
     let currentPassword = "";
 
     /**********************
-     * UTILITIES (using Auth.js)
+     * UTILITY FUNCTIONS
      **********************/
 
     function showMessage(el, type, text) {
-      el.className = "message show " + (type === "success" ? "success" : "error");
+      el.className = `message show ${type}`;
       el.textContent = text || "";
     }
 
@@ -370,8 +396,10 @@
 
     function setLoading(btn, loading) {
       btn.disabled = !!loading;
-      btn.dataset._old = btn.dataset._old || btn.textContent;
-      btn.textContent = loading ? "Please wait..." : btn.dataset._old;
+      if (!btn.dataset.originalText) {
+        btn.dataset.originalText = btn.textContent;
+      }
+      btn.textContent = loading ? "Please wait..." : btn.dataset.originalText;
     }
 
     function showSection(section) {
@@ -382,7 +410,7 @@
       section.classList.remove('hidden');
       
       clearMessage(loginMsg);
-      clearMessage(firstMsg);
+      clearMessage(regMsg);
       clearMessage(verifyMsg);
     }
 
@@ -390,13 +418,13 @@
      * EVENT HANDLERS
      **********************/
     
-    // Update derived email as user types
+    // Update derived email as user types in login
     loginName.addEventListener('input', () => {
       const email = Auth.derivedEmailFromName(loginName.value);
       loginDerived.textContent = email || "—";
     });
 
-    // LOGIN
+    // LOGIN BUTTON
     btnLogin.addEventListener('click', async () => {
       clearMessage(loginMsg);
 
@@ -406,80 +434,12 @@
 
       if (!username) {
         showMessage(loginMsg, 'error', 'Please enter your full name.');
+        loginName.focus();
         return;
       }
       if (!password) {
         showMessage(loginMsg, 'error', 'Please enter your password.');
-        return;
-      }
-
-      currentUsername = username;
-      currentEmail = email;
-
-      setLoading(btnLogin, true);
-      try {
-        const result = await Auth.login(username, password);
-        showMessage(loginMsg, 'success', 'Login successful. Redirecting...');
-        
-        await new Promise(resolve => setTimeout(resolve, 500));
-        window.location.href = "home.html";
-
-      } catch (e) {
-        console.error('Login error:', e.message);
-        
-        // Check if it's a "user not found" error (truly first-time user)
-        if (e.message.includes("not found") || e.message.includes("does not exist")) {
-          // Move to first-time registration
-          firstName.value = username;
-          firstDerived.textContent = email;
-          firstEmailHint.textContent = email;
-          
-          showSection(firstTimeSection);
-          firstPassword.focus();
-        } 
-        // Check if it's an "unverified" error
-        else if (e.message.includes("not verified") || e.message.includes("verify")) {
-          showMessage(loginMsg, 'error', 'Account not verified. Please check your email for verification code.');
-          
-          // Optionally move to verify section
-          verifyName.value = username;
-          verifyEmailHint.textContent = email;
-          currentPassword = password;
-          
-          showSection(verifySection);
-          showMessage(verifyMsg, 'error', 'Please verify your account. Check your email for the code.');
-          verifyCode.focus();
-        }
-        // All other errors (wrong password, etc)
-        else {
-          showMessage(loginMsg, 'error', e.message || "Login failed. Please check your password.");
-        }
-      } finally {
-        setLoading(btnLogin, false);
-      }
-    });
-
-    // BACK TO LOGIN
-    btnBackToLogin.addEventListener('click', () => {
-      showSection(loginSection);
-      loginPassword.value = '';
-      loginName.focus();
-    });
-
-    // SIGNUP
-    btnSignup.addEventListener('click', async () => {
-      clearMessage(firstMsg);
-
-      const username = Auth.normalizeName(firstName.value);
-      const password = String(firstPassword.value || "");
-      const email = firstDerived.textContent;
-
-      if (!username) {
-        showMessage(firstMsg, 'error', 'Please enter your full name.');
-        return;
-      }
-      if (password.length < 6) {
-        showMessage(firstMsg, 'error', 'Password must be at least 6 characters.');
+        loginPassword.focus();
         return;
       }
 
@@ -487,105 +447,223 @@
       currentEmail = email;
       currentPassword = password;
 
-      setLoading(btnSignup, true);
+      setLoading(btnLogin, true);
+      
       try {
-        await Auth.signup(username, password);
+        const result = await Auth.login(username, password);
         
-        // Move to verify section
-        verifyName.value = username;
-        verifyEmailHint.textContent = email;
-        
-        showSection(verifySection);
-        showMessage(verifyMsg, 'success', 'Verification code sent to your email.');
-        verifyCode.focus();
+        showMessage(loginMsg, 'success', 'Login successful! Redirecting...');
+        await new Promise(resolve => setTimeout(resolve, 800));
+        window.location.href = "home.html";
 
       } catch (e) {
-        showMessage(firstMsg, 'error', e.message || "Registration failed.");
+        console.error('Login error:', e);
+        
+        const errorMsg = e.message;
+        
+        // Handle "user not found" - new user needs to create account
+        if (errorMsg === 'USER_NOT_FOUND') {
+          console.log('New user detected, showing registration form');
+          
+          // Pre-fill registration form
+          regName.value = username;
+          regDerivedEmail.textContent = email;
+          regPassword.value = '';
+          regConfirmPassword.value = '';
+          
+          showSection(firstTimeSection);
+          showMessage(regMsg, 'info', 'Welcome! Please create a password to set up your account.');
+          regPassword.focus();
+        }
+        // Handle "not verified" - user exists but hasn't verified email
+        else if (errorMsg === 'USER_NOT_VERIFIED') {
+          console.log('Unverified user detected, showing verification form');
+          
+          verifyName.value = username;
+          verifyEmailHint.textContent = email;
+          verifyCode.value = '';
+          
+          showSection(verifySection);
+          showMessage(verifyMsg, 'info', 'Please verify your email address. Check your inbox for the verification code.');
+          verifyCode.focus();
+        }
+        // Handle all other errors (wrong password, etc.)
+        else {
+          showMessage(loginMsg, 'error', errorMsg || "Login failed. Please check your credentials.");
+        }
+        
       } finally {
-        setLoading(btnSignup, false);
+        setLoading(btnLogin, false);
       }
     });
 
-    // RESEND CODE
-    btnResend.addEventListener('click', async () => {
-      clearMessage(verifyMsg);
+    // BACK TO LOGIN
+    btnBackToLogin.addEventListener('click', () => {
+      loginPassword.value = '';
+      showSection(loginSection);
+      loginName.focus();
+    });
 
-      if (!currentUsername || !currentPassword || !currentEmail) {
-        showMessage(verifyMsg, 'error', 'Session expired. Please start over.');
+    // CREATE ACCOUNT BUTTON
+    btnCreateAccount.addEventListener('click', async () => {
+      clearMessage(regMsg);
+
+      const username = Auth.normalizeName(regName.value);
+      const password = String(regPassword.value || "");
+      const confirmPassword = String(regConfirmPassword.value || "");
+      const email = regDerivedEmail.textContent;
+
+      // Validation
+      if (!username) {
+        showMessage(regMsg, 'error', 'Please enter your full name.');
+        return;
+      }
+      if (password.length < 6) {
+        showMessage(regMsg, 'error', 'Password must be at least 6 characters.');
+        regPassword.focus();
+        return;
+      }
+      if (password !== confirmPassword) {
+        showMessage(regMsg, 'error', 'Passwords do not match.');
+        regConfirmPassword.focus();
         return;
       }
 
-      setLoading(btnResend, true);
+      currentUsername = username;
+      currentEmail = email;
+      currentPassword = password;
+
+      setLoading(btnCreateAccount, true);
+      
       try {
-        await Auth.signup(currentUsername, currentPassword);
-        showMessage(verifyMsg, 'success', 'Verification code resent.');
+        await Auth.signup(username, password);
+        
+        console.log('Account created, showing verification form');
+        
+        // Move to verification
+        verifyName.value = username;
+        verifyEmailHint.textContent = email;
+        verifyCode.value = '';
+        
+        showSection(verifySection);
+        showMessage(verifyMsg, 'success', 'Account created! Please check your email for the verification code.');
+        verifyCode.focus();
+
       } catch (e) {
-        showMessage(verifyMsg, 'error', e.message || "Resend failed.");
+        console.error('Signup error:', e);
+        showMessage(regMsg, 'error', e.message || "Registration failed. Please try again.");
       } finally {
-        setLoading(btnResend, false);
+        setLoading(btnCreateAccount, false);
       }
     });
 
-    // VERIFY - AUTO-LOGIN AFTER VERIFICATION
+    // RESEND VERIFICATION CODE
+    btnResendCode.addEventListener('click', async () => {
+      clearMessage(verifyMsg);
+
+      if (!currentUsername || !currentPassword) {
+        showMessage(verifyMsg, 'error', 'Session expired. Please start over.');
+        setTimeout(() => {
+          showSection(loginSection);
+        }, 2000);
+        return;
+      }
+
+      setLoading(btnResendCode, true);
+      
+      try {
+        await Auth.signup(currentUsername, currentPassword);
+        showMessage(verifyMsg, 'success', 'Verification code resent! Please check your email.');
+      } catch (e) {
+        console.error('Resend error:', e);
+        showMessage(verifyMsg, 'error', e.message || "Failed to resend code.");
+      } finally {
+        setLoading(btnResendCode, false);
+      }
+    });
+
+    // VERIFY CODE & AUTO-LOGIN
     btnVerify.addEventListener('click', async () => {
       clearMessage(verifyMsg);
 
       const username = currentUsername;
       const code = String(verifyCode.value || "").trim();
-      const email = currentEmail;
       const password = currentPassword;
-
-      console.log('Verify attempt:', { username, email, hasPassword: !!password });
 
       if (!username) {
         showMessage(verifyMsg, 'error', 'Session expired. Please start over.');
+        setTimeout(() => {
+          showSection(loginSection);
+        }, 2000);
         return;
       }
+      
       if (!/^\d{6}$/.test(code)) {
         showMessage(verifyMsg, 'error', 'Please enter a valid 6-digit code.');
+        verifyCode.focus();
         return;
       }
 
       setLoading(btnVerify, true);
+      
       try {
+        // Verify the code
         await Auth.verify(username, code);
-        showMessage(verifyMsg, 'success', 'Account verified! Logging you in...');
+        showMessage(verifyMsg, 'success', 'Email verified! Logging you in...');
         
-        // Wait for backend to process verification
+        // Wait a moment for backend to update
         await new Promise(resolve => setTimeout(resolve, 1500));
         
-        // Auto-login after successful verification
+        // Auto-login after verification
         if (password) {
           try {
-            console.log('Attempting auto-login...');
             await Auth.login(username, password);
-            showMessage(verifyMsg, 'success', 'Login successful! Redirecting...');
+            showMessage(verifyMsg, 'success', 'Success! Redirecting...');
             
             await new Promise(resolve => setTimeout(resolve, 500));
             window.location.href = "home.html";
             return;
+            
           } catch (loginError) {
-            console.error('Auto-login after verification failed:', loginError);
+            console.error('Auto-login failed:', loginError);
+            // Fall through to manual login prompt
           }
         }
         
-        // Fallback: return to login with pre-filled name
+        // Fallback: show login screen with success message
         loginName.value = username;
-        loginDerived.textContent = email;
+        loginDerived.textContent = currentEmail;
         loginPassword.value = '';
         
         showSection(loginSection);
-        showMessage(loginMsg, 'success', 'Account verified! Please login with your password.');
+        showMessage(loginMsg, 'success', 'Email verified! Please login with your password.');
         loginPassword.focus();
 
       } catch (e) {
         console.error('Verification error:', e);
-        showMessage(verifyMsg, 'error', e.message || "Verification failed.");
+        showMessage(verifyMsg, 'error', e.message || "Verification failed. Please check your code.");
       } finally {
         setLoading(btnVerify, false);
       }
     });
 
+    // Allow Enter key to submit forms
+    loginPassword.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') btnLogin.click();
+    });
+    
+    regConfirmPassword.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') btnCreateAccount.click();
+    });
+    
+    verifyCode.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') btnVerify.click();
+    });
+
+    /**********************
+     * INITIALIZATION
+     **********************/
+    
     // Check if already logged in
     (async () => {
       if (Auth.isSessionValid()) {
@@ -597,6 +675,9 @@
         }
       }
     })();
+    
+    // Focus on first input
+    loginName.focus();
   </script>
 </body>
 </html>
