@@ -92,22 +92,21 @@ const WORKER_BASE = "https://closing-coalition-api.thomaslancheros06.workers.dev
 const ADB_API_URL = `${WORKER_BASE}/adb`;
 
 const FIELD_CORDS = {
-  NAME_CORDS:           { x: 58,  y: 455, size: 13 },
-  DOB_CORDS:            { x: 340, y: 455, size: 12 },
-  PHONE_CORDS:          { x: 464, y: 457, size: 12 },
-  ADDRESS_CORDS:        { x: 57,  y: 421, size: 12 },
-  CITY_CORDS:           { x: 276, y: 420, size: 12 },
-  STATE_CORDS:          { x: 451, y: 421, size: 12 },
-  ZIP_CORDS:            { x: 491, y: 421, size: 12 },
-  BENEFICIARY_CORDS:    { x: 56,  y: 386, size: 12 },
-  REL_CORDS:            { x: 318, y: 386, size: 12 },
-  INSURED_NAME_2:       { x: 56,  y: 88, size: 12 },
-  INSURED_DOB_2:        { x: 317, y: 90, size: 12 },
-  AGENT_NAME_2:         { x: 317, y: 52, size: 12 },
+  NAME_CORDS:           { x: 58,  y: 441, size: 13 },
+  DOB_CORDS:            { x: 340, y: 441, size: 12 },
+  PHONE_CORDS:          { x: 464, y: 441, size: 12 },
+  ADDRESS_CORDS:        { x: 57,  y: 408, size: 12 },
+  CITY_CORDS:           { x: 276, y: 408, size: 12 },
+  STATE_CORDS:          { x: 437, y: 408, size: 12 },
+  ZIP_CORDS:            { x: 491, y: 408, size: 12 },
+  BENEFICIARY_CORDS:    { x: 56,  y: 374, size: 12 },
+  REL_CORDS:            { x: 318, y: 374, size: 12 },
+  INSURED_NAME_2:       { x: 53,  y: 83, size: 12 },
+  INSURED_DOB_2:        { x: 313, y: 83, size: 12 },
+  AGENT_NAME_2:         { x: 311, y: 48, size: 12 },
   
-  // New agent signature and date fields
-  AGENT_SIG_BOX:        { x: 412, y: 287, w: 150, h: 40 }, // Agent signature
-  DATE_CORDS:           { x: 318, y: 320, size: 12 }, // Current date
+  AGENT_SIG_BOX:        { x: 388, y: 269, w: 75, h: 20 },
+  DATE_CORDS:           { x: 318, y: 310, size: 12 }
 };
 
 const token = new URLSearchParams(location.search).get("adb") || "";
