@@ -7,7 +7,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
   <script src="/config.js"></script>
-  <script src="/auth.js"></script>
 
   <style>
     body{font-family:system-ui,Arial;margin:0;background:#0b0f1a;color:#fff}
@@ -89,33 +88,50 @@
 // Check authentication on page load
 (async function() {
   try {
-    // Require authentication - redirect to login if not authenticated
-    const isAuthenticated = await Auth.requireAuth('/login.html');
-    if (!isAuthenticated) return;
+    // Get token directly from storage
+    const token = localStorage.getItem('cc_token') || 
+                  localStorage.getItem('token') || 
+                  localStorage.getItem('sessionToken');
+    
+    if (!token) {
+      window.location.href = '/login.html';
+      return;
+    }
 
-    // Get user data from session
-    const userData = Auth.getUserData();
-    if (userData && userData.username) {
-      agentNameDisplay.textContent = userData.username;
-      AGENT_NAME = userData.username;
-    } else {
-      // Fallback: fetch from /me endpoint
-      const token = Auth.getToken();
-      if (token) {
-        try {
-          const meData = await Auth.apiCall('me', { token });
-          const user = meData.user || meData.profile || meData.data || meData;
-          AGENT_NAME = user.name || user.fullName || user.username || 'Unknown Agent';
-          agentNameDisplay.textContent = AGENT_NAME;
-        } catch (err) {
-          console.error('Failed to load agent info:', err);
-          agentNameDisplay.textContent = 'Unknown Agent';
-          AGENT_NAME = 'Unknown Agent';
-        }
+    // Verify token is still valid
+    try {
+      const res = await fetch(ME_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token })
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok || !data.ok) {
+        // Token invalid, redirect to login
+        localStorage.removeItem('cc_token');
+        localStorage.removeItem('token');
+        localStorage.removeItem('sessionToken');
+        window.location.href = '/login.html';
+        return;
       }
+
+      // Token valid, get user info
+      const user = data.user || data.profile || data.data || data;
+      AGENT_NAME = user.username || user.name || user.adminEmail || '';
+      
+      if (AGENT_NAME) {
+        agentNameDisplay.textContent = AGENT_NAME;
+      }
+
+    } catch (err) {
+      console.error('Auth check failed:', err);
+      window.location.href = '/login.html';
+      return;
     }
   } catch (err) {
-    console.error('Auth check failed:', err);
+    console.error('Page load error:', err);
     window.location.href = '/login.html';
   }
 })();
@@ -128,20 +144,20 @@ const ADB_API_URL = `${WORKER_BASE}/adb`;
 const PDF_URL = "/ADB/ADB.pdf";
 
 const FIELD_CORDS = {
-  NAME_CORDS:           { x: 58,  y: 441, size: 13 },
-  DOB_CORDS:            { x: 340, y: 441, size: 12 },
-  PHONE_CORDS:          { x: 464, y: 441, size: 12 },
-  ADDRESS_CORDS:        { x: 57,  y: 408, size: 12 },
-  CITY_CORDS:           { x: 276, y: 408, size: 12 },
-  STATE_CORDS:          { x: 437, y: 408, size: 12 },
-  ZIP_CORDS:            { x: 491, y: 408, size: 12 },
-  BENEFICIARY_CORDS:    { x: 56,  y: 374, size: 12 },
-  REL_CORDS:            { x: 318, y: 374, size: 12 },
-  INSURED_NAME_2:       { x: 53,  y: 83, size: 12 },
-  INSURED_DOB_2:        { x: 313, y: 83, size: 12 },
-  AGENT_NAME_2:         { x: 311, y: 48, size: 12 },
+  NAME_CORDS:           { x: 58,  y: 455, size: 13 },
+  DOB_CORDS:            { x: 340, y: 455, size: 12 },
+  PHONE_CORDS:          { x: 464, y: 457, size: 12 },
+  ADDRESS_CORDS:        { x: 57,  y: 421, size: 12 },
+  CITY_CORDS:           { x: 276, y: 420, size: 12 },
+  STATE_CORDS:          { x: 451, y: 421, size: 12 },
+  ZIP_CORDS:            { x: 491, y: 421, size: 12 },
+  BENEFICIARY_CORDS:    { x: 56,  y: 386, size: 12 },
+  REL_CORDS:            { x: 318, y: 386, size: 12 },
+  INSURED_NAME_2:       { x: 56,  y: 88, size: 12 },
+  INSURED_DOB_2:        { x: 317, y: 90, size: 12 },
+  AGENT_NAME_2:         { x: 317, y: 52, size: 12 },
 };
-  
+
 function tokenGen(len=22){
   const chars="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
   let out="";
