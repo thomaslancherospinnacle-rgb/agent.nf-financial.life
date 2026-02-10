@@ -85,54 +85,50 @@
 </div>
 
 <script>
-// Check authentication on page load
+// Check authentication on page load (optional - won't force login)
 (async function() {
   try {
-    // Get token directly from storage
+    // Try to get token from storage
     const token = localStorage.getItem('cc_token') || 
                   localStorage.getItem('token') || 
                   localStorage.getItem('sessionToken');
     
-    if (!token) {
-      window.location.href = '/login.html';
-      return;
-    }
-
-    // Verify token is still valid
-    try {
-      const res = await fetch(ME_API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token })
-      });
-      
-      const data = await res.json();
-      
-      if (!res.ok || !data.ok) {
-        // Token invalid, redirect to login
-        localStorage.removeItem('cc_token');
-        localStorage.removeItem('token');
-        localStorage.removeItem('sessionToken');
-        window.location.href = '/login.html';
-        return;
+    if (token) {
+      // Token exists, try to verify and get username
+      try {
+        const res = await fetch(ME_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token })
+        });
+        
+        const data = await res.json();
+        
+        if (res.ok && data.ok) {
+          // Token valid, get user info
+          const user = data.user || data.profile || data.data || data;
+          AGENT_NAME = user.username || user.name || user.adminEmail || '';
+          
+          if (AGENT_NAME) {
+            agentNameDisplay.textContent = AGENT_NAME;
+          }
+        } else {
+          // Token invalid, clear it but don't redirect
+          localStorage.removeItem('cc_token');
+          localStorage.removeItem('token');
+          localStorage.removeItem('sessionToken');
+          agentNameDisplay.textContent = 'Not logged in';
+        }
+      } catch (err) {
+        console.error('Auth check failed:', err);
+        agentNameDisplay.textContent = 'Not logged in';
       }
-
-      // Token valid, get user info
-      const user = data.user || data.profile || data.data || data;
-      AGENT_NAME = user.username || user.name || user.adminEmail || '';
-      
-      if (AGENT_NAME) {
-        agentNameDisplay.textContent = AGENT_NAME;
-      }
-
-    } catch (err) {
-      console.error('Auth check failed:', err);
-      window.location.href = '/login.html';
-      return;
+    } else {
+      // No token, that's fine - just show not logged in
+      agentNameDisplay.textContent = 'Not logged in';
     }
   } catch (err) {
     console.error('Page load error:', err);
-    window.location.href = '/login.html';
   }
 })();
 
@@ -267,6 +263,13 @@ previewBtn.addEventListener("click", async ()=>{
 
 createBtn.addEventListener("click", async ()=>{
   try{
+    // Check if logged in
+    if (!AGENT_NAME || AGENT_NAME === 'Unknown Agent' || AGENT_NAME === 'Not logged in') {
+      alert('Please log in first to create certificates.');
+      window.location.href = '/login.html';
+      return;
+    }
+
     const data = getFormData();
     if(!data.clientName) throw new Error("Client Name required.");
 
