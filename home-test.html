@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Non-Forfeiture Financial</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: #003d82;
+            color: white;
+            padding: 20px;
+            margin: -40px -40px 30px -40px;
+        }
+        .welcome {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .session-info {
+            background: #f0f9ff;
+            border-left: 3px solid #0284c7;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        button {
+            background: #003d82;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #002a5c;
+        }
+        .logout {
+            background: #dc2626;
+        }
+        .logout:hover {
+            background: #991b1b;
+        }
+        pre {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Non-Forfeiture Financial</h1>
+            <p>Secure Dashboard</p>
+        </div>
+
+        <div class="welcome">
+            Welcome, <span id="username">Loading...</span>!
+        </div>
+
+        <div class="session-info">
+            <strong>Session Status:</strong> <span id="sessionStatus">Checking...</span><br>
+            <strong>Token:</strong> <span id="tokenInfo">...</span><br>
+            <strong>Expires:</strong> <span id="expiresInfo">...</span>
+        </div>
+
+        <div>
+            <button onclick="window.location.href='session-debug.html'">Debug Session</button>
+            <button onclick="handleLogout()" class="logout">Logout</button>
+        </div>
+
+        <h3>Session Details (for debugging):</h3>
+        <pre id="debugInfo">Loading...</pre>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        async function checkAuth() {
+            console.log('Home page: Checking authentication...');
+            
+            // Check if session is valid
+            if (!Auth.isSessionValid()) {
+                console.log('Home page: No valid session, redirecting to login');
+                window.location.replace('login.html');
+                return;
+            }
+
+            console.log('Home page: Session appears valid, verifying with server...');
+
+            // Validate with server
+            try {
+                const isValid = await Auth.validateSession();
+                
+                if (!isValid) {
+                    console.log('Home page: Server validation failed, redirecting to login');
+                    Auth.clearSession();
+                    window.location.replace('login.html');
+                    return;
+                }
+
+                console.log('Home page: Authentication successful!');
+                loadUserData();
+                
+            } catch (error) {
+                console.error('Home page: Validation error:', error);
+                Auth.clearSession();
+                window.location.replace('login.html');
+            }
+        }
+
+        function loadUserData() {
+            const userData = Auth.getUserData();
+            const token = Auth.getToken();
+            const expiration = Auth.getExpiration();
+
+            // Update UI
+            document.getElementById('username').textContent = 
+                userData && userData.username ? userData.username : 'User';
+            
+            document.getElementById('sessionStatus').textContent = 
+                Auth.isSessionValid() ? '✓ Valid' : '✗ Invalid';
+            
+            document.getElementById('tokenInfo').textContent = 
+                token ? token.substring(0, 20) + '...' : 'No token';
+            
+            document.getElementById('expiresInfo').textContent = 
+                expiration ? new Date(parseInt(expiration)).toLocaleString() : 'Not set';
+
+            // Debug info
+            document.getElementById('debugInfo').textContent = JSON.stringify({
+                token: token ? token.substring(0, 30) + '...' : null,
+                expiration: expiration,
+                expirationDate: expiration ? new Date(parseInt(expiration)).toLocaleString() : null,
+                userData: userData,
+                isValid: Auth.isSessionValid()
+            }, null, 2);
+        }
+
+        function handleLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                console.log('Logging out...');
+                Auth.logout();
+                window.location.replace('login.html');
+            }
+        }
+
+        // Check auth on page load
+        checkAuth();
+    </script>
+</body>
+</html>

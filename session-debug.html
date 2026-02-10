@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Debug</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .status {
+            background: #252526;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 3px solid #007acc;
+        }
+        .good { border-color: #4ec9b0; }
+        .bad { border-color: #f48771; }
+        pre {
+            background: #1e1e1e;
+            padding: 10px;
+            overflow-x: auto;
+        }
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #005a9e;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Session Debug Tool</h1>
+    
+    <div class="status">
+        <h3>Session Status</h3>
+        <div id="sessionStatus">Checking...</div>
+    </div>
+
+    <div class="status">
+        <h3>Stored Data</h3>
+        <pre id="storedData">Loading...</pre>
+    </div>
+
+    <div class="status">
+        <h3>Server Validation</h3>
+        <div id="serverValidation">Not checked yet</div>
+    </div>
+
+    <div>
+        <button onclick="checkSession()">Refresh Check</button>
+        <button onclick="clearSessionData()">Clear Session</button>
+        <button onclick="testValidation()">Test Server Validation</button>
+        <button onclick="window.location.href='home.html'">Go to Home</button>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        function getCookieValue(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        function getLocalStorageValue(key) {
+            try {
+                return localStorage.getItem(key);
+            } catch (e) {
+                return 'Error: ' + e.message;
+            }
+        }
+
+        function checkSession() {
+            const statusDiv = document.getElementById('sessionStatus');
+            const dataDiv = document.getElementById('storedData');
+
+            // Check Auth.js methods
+            const isValid = Auth.isSessionValid();
+            const token = Auth.getToken();
+            const expiration = Auth.getExpiration();
+            const userData = Auth.getUserData();
+
+            // Check raw storage
+            const cookieToken = getCookieValue('cc_token');
+            const cookieExpires = getCookieValue('cc_expires_at');
+            const localToken = getLocalStorageValue('cc_token');
+            const localExpires = getLocalStorageValue('cc_expires_at');
+            const localUserData = getLocalStorageValue('nf_user_data');
+
+            // Display status
+            statusDiv.innerHTML = `
+                <p><strong>Auth.isSessionValid():</strong> <span style="color: ${isValid ? '#4ec9b0' : '#f48771'}">${isValid}</span></p>
+                <p><strong>Auth.getToken():</strong> ${token ? '✓ ' + token.substring(0, 20) + '...' : '✗ null'}</p>
+                <p><strong>Expiration:</strong> ${expiration ? new Date(parseInt(expiration)).toLocaleString() : 'null'}</p>
+                <p><strong>User Data:</strong> ${userData ? JSON.stringify(userData) : 'null'}</p>
+            `;
+
+            // Display raw data
+            dataDiv.innerHTML = `
+<strong>Cookies:</strong>
+  cc_token: ${cookieToken ? cookieToken.substring(0, 50) + '...' : 'NOT SET'}
+  cc_expires_at: ${cookieExpires || 'NOT SET'}
+
+<strong>localStorage:</strong>
+  cc_token: ${localToken ? localToken.substring(0, 50) + '...' : 'NOT SET'}
+  cc_expires_at: ${localExpires || 'NOT SET'}
+  nf_user_data: ${localUserData || 'NOT SET'}
+
+<strong>Document.cookie:</strong>
+${document.cookie || 'No cookies found'}
+            `;
+        }
+
+        function clearSessionData() {
+            Auth.clearSession();
+            alert('Session cleared!');
+            checkSession();
+        }
+
+        async function testValidation() {
+            const validationDiv = document.getElementById('serverValidation');
+            validationDiv.innerHTML = 'Testing...';
+
+            const token = Auth.getToken();
+            
+            if (!token) {
+                validationDiv.innerHTML = '<span style="color: #f48771">✗ No token found</span>';
+                return;
+            }
+
+            try {
+                const isValid = await Auth.validateSession();
+                validationDiv.innerHTML = `
+                    <span style="color: #4ec9b0">✓ Server validation successful!</span>
+                    <p>Response: ${isValid}</p>
+                `;
+            } catch (error) {
+                validationDiv.innerHTML = `
+                    <span style="color: #f48771">✗ Server validation failed</span>
+                    <p style="color: #f48771">Error: ${error.message}</p>
+                `;
+            }
+        }
+
+        // Run check on load
+        checkSession();
+
+        // Auto-refresh every 2 seconds
+        setInterval(checkSession, 2000);
+    </script>
+</body>
+</html>
