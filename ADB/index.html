@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>ADB Link Generator</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+body{font-family:Arial;background:#0b0f1a;color:#fff;padding:20px}
+.card{background:#141b2d;padding:20px;border-radius:12px;max-width:600px}
+input,button{padding:12px;border-radius:8px;border:0;margin:6px 0;width:100%}
+button{background:#2b6cff;color:#fff;font-weight:bold;cursor:pointer}
+.link{background:#0e1524;padding:12px;border-radius:8px;word-break:break-all}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>Create ADB Signing Link</h2>
+
+<input id="agentName" placeholder="Agent Name" />
+<input id="agencyName" placeholder="Agency Name" />
+<input id="agencyPhone" placeholder="Agency Phone" />
+
+<button id="createBtn">Generate Link</button>
+
+<div id="out" class="link" style="display:none"></div>
+<button id="copyBtn" style="display:none">Copy Link</button>
+</div>
+
+<script>
+/* =========================
+   CONFIG
+========================= */
+
+const ADB_GAS_URL =
+"https://script.google.com/macros/s/AKfycbxjxi9kdnGm46-MBzcXHHvHTZYk7TtPOsH6hiEwA93Xe68SWuDnlB5wtvHHnN826BlS/exec";
+
+/* =========================
+   HELPERS
+========================= */
+
+function tokenGen(len=22){
+  const chars="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+  let out="";
+  crypto.getRandomValues(new Uint8Array(len)).forEach(n=>{
+    out+=chars[n%chars.length];
+  });
+  return out;
+}
+
+/* =========================
+   MAIN
+========================= */
+
+document.getElementById("createBtn").onclick = async ()=>{
+
+  const token = tokenGen();
+
+  await fetch(ADB_GAS_URL,{
+    method:"POST",
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      action:"createToken",
+      token,
+      agentName:agentName.value,
+      agencyName:agencyName.value,
+      agencyPhone:agencyPhone.value
+    })
+  });
+
+  const link = `https://www.nf-financial.life/ADB/?adb=${token}`;
+
+  out.textContent = link;
+  out.style.display="block";
+  copyBtn.style.display="block";
+
+  copyBtn.onclick = ()=>navigator.clipboard.writeText(link);
+};
+</script>
+</body>
+</html>
