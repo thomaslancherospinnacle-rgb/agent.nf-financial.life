@@ -1,0 +1,350 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>ADB - Agent Review & Sign</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+
+  <style>
+    body{font-family:system-ui,Arial;margin:0;background:#0b0f1a;color:#fff}
+    .wrap{max-width:900px;margin:0 auto;padding:16px}
+    .card{background:#121a2a;border:1px solid #22314f;border-radius:14px;padding:14px;margin:12px 0}
+    button,input{font-size:18px;padding:14px;border-radius:12px;border:1px solid #2a3b60;background:#0e1524;color:#fff;width:100%}
+    button{border:none;cursor:pointer}
+    button.primary{background:#2b6cff;font-weight:900}
+    button.secondary{background:#1a2640}
+    button:disabled{opacity:.5;cursor:not-allowed}
+    .pdfBox{height:520px;overflow:auto;border-radius:12px;border:1px solid #2a3b60;background:#0a1020}
+    .sticky{position:sticky;top:0;padding:10px;background:rgba(18,26,42,.92);backdrop-filter:blur(8px);border-bottom:1px solid #22314f;z-index:2}
+    canvas{width:100%;height:240px;background:#fff;border-radius:12px;touch-action:none}
+    .small{font-size:13px;opacity:.8;line-height:1.35}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    .row > *{flex:1;min-width:220px}
+    iframe{width:100%;height:720px;border:1px solid #2a3b60;border-radius:12px;background:#fff}
+    .info-grid{display:grid;grid-template-columns:120px 1fr;gap:8px;margin:10px 0}
+    .info-label{font-weight:bold;color:#6ba3ff}
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="card">
+    <h2 style="margin:0 0 10px 0">Agent Review & Sign</h2>
+    <div class="small"><b>Token:</b> <span id="tokenTxt">…</span></div>
+    <div id="status" class="small" style="margin-top:10px"></div>
+  </div>
+
+  <div class="card">
+    <div class="small"><b>Certificate Details</b></div>
+    <div class="info-grid" id="infoGrid"></div>
+  </div>
+
+  <div class="card">
+    <div class="small"><b>Step 1:</b> Review the client-signed certificate</div>
+    <div class="pdfBox" id="pdfBox" style="margin-top:10px">
+      <div class="sticky" id="scrollMsg">⬇️ Scroll to review certificate…</div>
+      <iframe id="pdfFrame" title="Certificate Preview"></iframe>
+      <div id="bottomMarker" style="height:40px"></div>
+    </div>
+
+    <div class="row" style="margin-top:12px">
+      <button id="emailMeBtn" class="secondary">📧 Email PDF to Me</button>
+      <button id="enableSignBtn" class="primary" disabled>✅ VERIFY & SIGN</button>
+    </div>
+  </div>
+
+  <div class="card" id="sigCard" style="display:none">
+    <div class="small"><b>Step 2:</b> Agent Signature (verify all info is correct before signing)</div>
+    <canvas id="sigCanvas" width="1400" height="320"></canvas>
+
+    <div class="row" style="margin-top:10px">
+      <button id="clearBtn">Clear Signature</button>
+      <button id="submitBtn" class="primary">SUBMIT FINAL SIGNATURE</button>
+    </div>
+
+    <div id="doneWrap" style="display:none;margin-top:10px">
+      <div class="small" style="color:#6ba3ff;margin-bottom:10px">
+        ✅ Certificate complete! PDF saved and emailed.
+      </div>
+      <button id="dlPdfBtn">Download PDF</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const WORKER_BASE = "https://closing-coalition-api.thomaslancheros06.workers.dev";
+const ADB_API_URL = `${WORKER_BASE}/adb`;
+const ME_API_URL = `${WORKER_BASE}/me`;
+
+const FIELD_CORDS = {
+  NAME_CORDS:           { x: 58,  y: 455, size: 13 },
+  DOB_CORDS:            { x: 340, y: 455, size: 12 },
+  PHONE_CORDS:          { x: 464, y: 457, size: 12 },
+  ADDRESS_CORDS:        { x: 57,  y: 421, size: 12 },
+  CITY_CORDS:           { x: 276, y: 420, size: 12 },
+  STATE_CORDS:          { x: 451, y: 421, size: 12 },
+  ZIP_CORDS:            { x: 491, y: 421, size: 12 },
+  BENEFICIARY_CORDS:    { x: 56,  y: 386, size: 12 },
+  REL_CORDS:            { x: 318, y: 386, size: 12 },
+  INSURED_NAME_2:       { x: 56,  y: 88, size: 12 },
+  INSURED_DOB_2:        { x: 317, y: 90, size: 12 },
+  AGENT_NAME_2:         { x: 317, y: 52, size: 12 },
+  
+  // New agent signature and date fields
+  AGENT_SIG_BOX:        { x: 412, y: 287, w: 150, h: 40 }, // Agent signature
+  DATE_CORDS:           { x: 318, y: 320, size: 12 }, // Current date
+};
+
+const token = new URLSearchParams(location.search).get("adb") || "";
+tokenTxt.textContent = token || "(missing)";
+
+let RECORD = null;
+let AGENT_EMAIL = null;
+let CLIENT_SIGNED_PDF_BYTES = null;
+let FINAL_PDF_BYTES = null;
+
+async function getRecord(){
+  const url = `${ADB_API_URL}?action=getByToken&token=${encodeURIComponent(token)}`;
+  const res = await fetch(url);
+  const json = await res.json().catch(()=>({}));
+  if (!res.ok || json.ok === false) throw new Error(json.error || "Failed to load token record");
+  return json.record;
+}
+
+async function getAgentEmail(){
+  try {
+    const authToken = localStorage.getItem("token") || localStorage.getItem("sessionToken") || "";
+    const res = await fetch(ME_API_URL, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ token: authToken })
+    });
+    const json = await res.json().catch(()=>({}));
+    if(json.ok) {
+      const u = json.user || json.profile || json.data || json;
+      return u.email || u.adminEmail || null;
+    }
+  } catch(e) {
+    console.error('Failed to get agent email:', e);
+  }
+  return null;
+}
+
+function blobUrl(bytes){
+  return URL.createObjectURL(new Blob([bytes], {type:"application/pdf"}));
+}
+
+function toBase64(bytes){
+  let bin="", chunk=0x8000;
+  for(let i=0;i<bytes.length;i+=chunk) bin += String.fromCharCode(...bytes.subarray(i,i+chunk));
+  return btoa(bin);
+}
+
+async function postJSON(url, payload){
+  const res = await fetch(url, {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify(payload)
+  });
+  const json = await res.json().catch(()=>({}));
+  if(!res.ok || json.ok===false) throw new Error(json.error || `Request failed (${res.status})`);
+  return json;
+}
+
+(async ()=>{
+  try{
+    if(!token) throw new Error("Missing token");
+    status.textContent = "Loading certificate…";
+    
+    RECORD = await getRecord();
+    AGENT_EMAIL = await getAgentEmail();
+    
+    // Display info
+    infoGrid.innerHTML = `
+      <div class="info-label">Client:</div><div>${RECORD.clientName || 'N/A'}</div>
+      <div class="info-label">DOB:</div><div>${RECORD.dob || 'N/A'}</div>
+      <div class="info-label">Address:</div><div>${RECORD.address || 'N/A'}</div>
+      <div class="info-label">City/State:</div><div>${RECORD.city || 'N/A'}, ${RECORD.state || 'N/A'} ${RECORD.zip || ''}</div>
+      <div class="info-label">Phone:</div><div>${RECORD.phone || 'N/A'}</div>
+      <div class="info-label">Beneficiary:</div><div>${RECORD.beneficiary || 'N/A'} (${RECORD.relationship || 'N/A'})</div>
+      <div class="info-label">Agent:</div><div>${RECORD.agentName || 'N/A'}</div>
+      <div class="info-label">Status:</div><div>${RECORD.status || 'N/A'}</div>
+    `;
+    
+    // Check if client has signed
+    if (!RECORD.clientSignedPdfBase64) {
+      throw new Error("Client has not signed yet. Send them the signing link first.");
+    }
+    
+    // Decode client-signed PDF
+    const base64 = RECORD.clientSignedPdfBase64;
+    const binaryString = atob(base64);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    CLIENT_SIGNED_PDF_BYTES = bytes;
+    
+    pdfFrame.src = blobUrl(CLIENT_SIGNED_PDF_BYTES);
+    status.textContent = "✅ Loaded. Review certificate and scroll to bottom.";
+    
+  } catch(err){
+    status.textContent = "❌ Error: " + err.message;
+    console.error(err);
+  }
+})();
+
+// Scroll gate
+const io = new IntersectionObserver((entries)=>{
+  if(entries.some(e=>e.isIntersecting)){
+    enableSignBtn.disabled = false;
+    scrollMsg.textContent = "✅ Scroll complete. Ready to sign.";
+  }
+},{ root: pdfBox, threshold: 0.8 });
+io.observe(bottomMarker);
+
+// Email PDF to agent
+emailMeBtn.addEventListener("click", async ()=>{
+  try {
+    if (!AGENT_EMAIL) {
+      alert("Could not determine your email. Make sure you're logged in.");
+      return;
+    }
+    
+    emailMeBtn.disabled = true;
+    emailMeBtn.textContent = "Sending...";
+    
+    await postJSON(`${WORKER_BASE}/email/send`, {
+      to: AGENT_EMAIL,
+      subject: `ADB Certificate - ${RECORD.clientName} (Review)`,
+      html: `
+        <p>Review the attached certificate for client: <strong>${RECORD.clientName}</strong></p>
+        <p>This is the client-signed version. Complete your signature at:<br>
+        <a href="https://agent.nf-financial.life/sign/?adb=${token}">Complete Signing</a></p>
+      `,
+      username: RECORD.agentName || 'Agent'
+    });
+    
+    emailMeBtn.textContent = "✅ Sent!";
+    setTimeout(() => {
+      emailMeBtn.textContent = "📧 Email PDF to Me";
+      emailMeBtn.disabled = false;
+    }, 2000);
+    
+  } catch(err) {
+    alert("Failed to send email: " + err.message);
+    emailMeBtn.textContent = "📧 Email PDF to Me";
+    emailMeBtn.disabled = false;
+  }
+});
+
+enableSignBtn.onclick = ()=>{
+  if (!confirm("Have you verified all information is correct?")) return;
+  sigCard.style.display = "block";
+  sigCard.scrollIntoView({behavior:"smooth"});
+};
+
+// Signature canvas
+const canvas = sigCanvas;
+const ctx = canvas.getContext("2d");
+ctx.lineWidth = 6;
+ctx.lineCap = "round";
+ctx.strokeStyle = "#000";
+let drawing=false, last=null;
+
+function pos(evt){
+  const r=canvas.getBoundingClientRect();
+  return {
+    x:(evt.clientX-r.left)*(canvas.width/r.width),
+    y:(evt.clientY-r.top)*(canvas.height/r.height)
+  };
+}
+canvas.addEventListener("pointerdown", e=>{canvas.setPointerCapture(e.pointerId); drawing=true; last=pos(e);});
+canvas.addEventListener("pointermove", e=>{
+  if(!drawing) return;
+  const p=pos(e);
+  ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(p.x,p.y); ctx.stroke();
+  last=p;
+});
+canvas.addEventListener("pointerup", ()=>{drawing=false; last=null;});
+canvas.addEventListener("pointercancel", ()=>{drawing=false; last=null;});
+
+clearBtn.onclick = ()=>ctx.clearRect(0,0,canvas.width,canvas.height);
+
+function canvasSigDataUrl(){ return canvas.toDataURL("image/png"); }
+
+// Submit agent signature
+submitBtn.onclick = async ()=>{
+  try{
+    submitBtn.disabled = true;
+    if(!CLIENT_SIGNED_PDF_BYTES) throw new Error("Client PDF not loaded");
+
+    const { PDFDocument, StandardFonts, rgb } = PDFLib;
+    const pdfDoc = await PDFDocument.load(CLIENT_SIGNED_PDF_BYTES);
+    const page = pdfDoc.getPages()[0];
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+    // Add current date
+    const today = new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+    page.drawText(today, {
+      x: FIELD_CORDS.DATE_CORDS.x,
+      y: FIELD_CORDS.DATE_CORDS.y,
+      size: FIELD_CORDS.DATE_CORDS.size,
+      font,
+      color: rgb(0,0,0)
+    });
+
+    // Add agent signature
+    const sigUrl = canvasSigDataUrl();
+    const pngBytes = await fetch(sigUrl).then(r=>r.arrayBuffer());
+    const png = await pdfDoc.embedPng(pngBytes);
+
+    page.drawImage(png, {
+      x: FIELD_CORDS.AGENT_SIG_BOX.x,
+      y: FIELD_CORDS.AGENT_SIG_BOX.y,
+      width: FIELD_CORDS.AGENT_SIG_BOX.w,
+      height: FIELD_CORDS.AGENT_SIG_BOX.h
+    });
+
+    const finalPdfBytes = await pdfDoc.save();
+    FINAL_PDF_BYTES = finalPdfBytes;
+    
+    const finalPdfBase64 = toBase64(new Uint8Array(finalPdfBytes));
+    const agentSigPngBase64 = sigUrl.split(",")[1];
+
+    status.textContent = "Saving final certificate…";
+
+    await postJSON(ADB_API_URL, {
+      action: "saveAgentSignature",
+      token,
+      finalPdfBase64,
+      agentSigPngBase64,
+      signedDate: today,
+      agentEmail: AGENT_EMAIL
+    });
+
+    status.textContent = "✅ Certificate complete!";
+    doneWrap.style.display = "block";
+    submitBtn.style.display = "none";
+    clearBtn.style.display = "none";
+
+    dlPdfBtn.onclick = ()=>{
+      const a=document.createElement("a");
+      a.href = blobUrl(FINAL_PDF_BYTES);
+      a.download = `${RECORD.clientName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+      a.click();
+    };
+
+  } catch(err){
+    status.textContent = "❌ Error: " + err.message;
+    console.error(err);
+  } finally {
+    submitBtn.disabled = false;
+  }
+};
+</script>
+</body>
+</html>
