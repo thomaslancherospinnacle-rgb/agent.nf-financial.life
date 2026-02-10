@@ -323,9 +323,14 @@ submitBtn.onclick = async ()=>{
     const page = pdfDoc.getPages()[0];
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-    // Add current date
-    const today = new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
-    page.drawText(today, {
+    // Add current date (YYYY-MM-DD format only)
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const dateString = `${year}-${month}-${day}`;
+    
+    page.drawText(dateString, {
       x: FIELD_CORDS.DATE_CORDS.x,
       y: FIELD_CORDS.DATE_CORDS.y,
       size: FIELD_CORDS.DATE_CORDS.size,
@@ -358,7 +363,7 @@ submitBtn.onclick = async ()=>{
       token,
       finalPdfBase64,
       agentSigPngBase64,
-      signedDate: today,
+      signedDate: dateString,
       agentEmail: AGENT_EMAIL
     });
 
