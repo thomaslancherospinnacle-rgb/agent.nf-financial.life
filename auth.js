@@ -287,12 +287,30 @@ const Auth = (function() {
         const token = getToken();
         const expiresAt = getExpiration();
 
-        if (!token || !expiresAt) return false;
+        // If no token, definitely invalid
+        if (!token) {
+            console.log('isSessionValid: No token found');
+            return false;
+        }
+
+        // If we have a token but no expiration, assume valid (let server validate)
+        if (!expiresAt) {
+            console.log('isSessionValid: Token exists but no expiration, assuming valid');
+            return true;
+        }
 
         const now = Date.now();
         const expiry = parseInt(expiresAt, 10);
+        
+        const isValid = now < expiry;
+        console.log('isSessionValid:', {
+            hasToken: !!token,
+            now: new Date(now).toLocaleString(),
+            expiry: new Date(expiry).toLocaleString(),
+            isValid: isValid
+        });
 
-        return now < expiry;
+        return isValid;
     }
 
     /**
@@ -332,9 +350,18 @@ const Auth = (function() {
             });
 
             if (response.token) {
-                setSession(response.token, response.expires_at, {
+                // Handle both expires_at and expiresAt (backend inconsistency)
+                const expiresAt = response.expires_at || response.expiresAt;
+                
+                setSession(response.token, expiresAt, {
                     username: normalizedName,
                     email: email
+                });
+                
+                console.log('Session saved:', {
+                    token: response.token.substring(0, 20) + '...',
+                    expiresAt: expiresAt,
+                    expiresDate: expiresAt ? new Date(parseInt(expiresAt)).toLocaleString() : 'N/A'
                 });
             }
 
