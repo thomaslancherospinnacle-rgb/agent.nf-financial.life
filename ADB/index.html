@@ -119,32 +119,28 @@ const DEFAULTS = {
    EASY COORDS (CHANGE HERE)
    NOTE: PDF origin is bottom-left
 ========================= */
-const FIELD_CORDS = {
-  // Top main form
-  NAME_CORDS:           { x: 90,  y: 430, size: 12 },
-  DOB_CORDS:            { x: 340, y: 430, size: 12 },
-  PHONE_CORDS:          { x: 520, y: 430, size: 12 },
+const FIELD_CORDS = {  // Main form
+  NAME_CORDS:           { x: 58,  y: 455, size: 13 },
+  DOB_CORDS:            { x: 340, y: 455, size: 12 },
+  PHONE_CORDS:          { x: 464, y: 457, size: 12 },
 
-  ADDRESS_CORDS:        { x: 90,  y: 402, size: 12 },
-  CITY_CORDS:           { x: 290, y: 402, size: 12 },
-  STATE_CORDS:          { x: 500, y: 402, size: 12 },
-  ZIP_CORDS:            { x: 585, y: 402, size: 12 },
+  ADDRESS_CORDS:        { x: 57,  y: 421, size: 12 },
+  CITY_CORDS:           { x: 276, y: 420, size: 12 },
+  STATE_CORDS:          { x: 451, y: 421, size: 12 },
+  ZIP_CORDS:            { x: 491, y: 421, size: 12 },
 
-  BENEFICIARY_CORDS:    { x: 90,  y: 373, size: 12 },
-  REL_CORDS:            { x: 350, y: 373, size: 12 },
+  BENEFICIARY_CORDS:    { x: 56,  y: 386, size: 12 },
+  REL_CORDS:            { x: 318, y: 386, size: 12 },
 
-  // Sponsor area (based on your certificate)
-  SPONSOR_NAME_CORDS:   { x: 90,  y: 328, size: 12 }, // Sponsor's Name line
-  SPONSOR_SIGNAME_CORDS:{ x: 90,  y: 270, size: 12 }, // "Signature of Sponsor" printed name
+  // Sponsor area
   AGENCY_NAME_CORDS:    { x: 90,  y: 240, size: 12 },
   AGENCY_PHONE_CORDS:   { x: 365, y: 240, size: 12 },
 
   // Tear-off
-  INSURED_NAME_2:       { x: 90,  y: 120, size: 12 },
-  INSURED_DOB_2:        { x: 430, y: 120, size: 12 },
-  AGENT_NAME_2:         { x: 430, y: 70,  size: 12 },
+  INSURED_NAME_2:       { x: 56,  y: 88, size: 12 },
+  INSURED_DOB_2:        { x: 317, y: 90, size: 12 },
+  AGENT_NAME_2:         { x: 317, y: 52, size: 12 },
 };
-
 function tokenGen(len=22){
   const chars="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
   let out="";
