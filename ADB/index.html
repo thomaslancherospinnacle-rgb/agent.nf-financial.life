@@ -296,11 +296,11 @@ createBtn.addEventListener("click", async ()=>{
     if(!data.clientName) throw new Error("Client Name required.");
 
     status.textContent = "Saving token to database…";
+    createBtn.disabled = true;
 
     const token = tokenGen();
 
-    // Save EVERYTHING with token so client doesn't retype (requires your small GAS change)
-    await postJSON(ADB_API_URL, {
+    const payload = {
       action: "createToken",
       token,
       agentName: data.agentName,
@@ -317,7 +317,15 @@ createBtn.addEventListener("click", async ()=>{
       beneficiary: data.beneficiary,
       relationship: data.relationship,
       clientEmail: data.clientEmail
-    });
+    };
+
+    console.log('Sending payload:', payload);
+    console.log('To URL:', ADB_API_URL);
+
+    // Save EVERYTHING with token so client doesn't retype
+    const response = await postJSON(ADB_API_URL, payload);
+    
+    console.log('Server response:', response);
 
     const link = `https://www.nf-financial.life/ADB/?adb=${encodeURIComponent(token)}`;
 
@@ -330,10 +338,13 @@ createBtn.addEventListener("click", async ()=>{
     };
     openBtn.onclick = ()=> window.open(link, "_blank");
 
-    status.textContent = "Token saved. Send link to client.";
+    status.textContent = "✅ Token saved. Send link to client.";
 
   } catch(err){
-    status.textContent = "Error: " + err.message;
+    console.error('Error details:', err);
+    status.textContent = "❌ Error: " + err.message;
+  } finally {
+    createBtn.disabled = false;
   }
 });
 </script>
