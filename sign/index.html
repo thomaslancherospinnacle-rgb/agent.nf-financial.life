@@ -157,6 +157,7 @@ async function loadAndCheckStatus() {
     
     console.log('Record status:', RECORD.status);
     console.log('Agent email:', AGENT_EMAIL);
+    console.log('Record fields:', Object.keys(RECORD));
     
     // Check if client has signed
     if (RECORD.status !== "CLIENT_SIGNED" && RECORD.status !== "COMPLETED") {
@@ -183,13 +184,25 @@ async function loadAndCheckStatus() {
       <div class="info-label">Status:</div><div>${RECORD.status || 'N/A'}</div>
     `;
     
-    // Check if client has signed
-    if (!RECORD.clientSignedPdfBase64) {
+    // Check for PDF - try both old and new field names
+    let base64 = RECORD.clientSignedPdfBase64 || "";
+    
+    if (!base64 && RECORD.clientPdfUrl) {
+      // New structure - PDF is in Drive, GAS should have returned base64
+      console.log('PDF URL:', RECORD.clientPdfUrl);
+      if (!RECORD.clientSignedPdfBase64) {
+        throw new Error("PDF data not loaded from Drive. Please refresh the page.");
+      }
+      base64 = RECORD.clientSignedPdfBase64;
+    }
+    
+    if (!base64) {
       throw new Error("Client signature data missing. Please contact support.");
     }
     
+    console.log('PDF base64 length:', base64.length);
+    
     // Decode client-signed PDF
-    const base64 = RECORD.clientSignedPdfBase64;
     const binaryString = atob(base64);
     const bytes = new Uint8Array(binaryString.length);
     for (let i = 0; i < binaryString.length; i++) {
