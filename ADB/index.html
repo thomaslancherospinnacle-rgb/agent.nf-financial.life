@@ -128,18 +128,18 @@ const ADB_API_URL = `${WORKER_BASE}/adb`;
 const PDF_URL = "/ADB/ADB.pdf";
 
 const FIELD_CORDS = {
-  NAME_CORDS:           { x: 58,  y: 441, size: 13 },
-  DOB_CORDS:            { x: 340, y: 441, size: 12 },
-  PHONE_CORDS:          { x: 464, y: 441, size: 12 },
-  ADDRESS_CORDS:        { x: 57,  y: 408, size: 12 },
-  CITY_CORDS:           { x: 276, y: 408, size: 12 },
-  STATE_CORDS:          { x: 437, y: 408, size: 12 },
-  ZIP_CORDS:            { x: 491, y: 408, size: 12 },
-  BENEFICIARY_CORDS:    { x: 56,  y: 374, size: 12 },
-  REL_CORDS:            { x: 318, y: 374, size: 12 },
-  INSURED_NAME_2:       { x: 53,  y: 83, size: 12 },
-  INSURED_DOB_2:        { x: 313, y: 83, size: 12 },
-  AGENT_NAME_2:         { x: 311, y: 48, size: 12 },
+  NAME_CORDS:           { x: 58,  y: 455, size: 13 },
+  DOB_CORDS:            { x: 340, y: 455, size: 12 },
+  PHONE_CORDS:          { x: 464, y: 457, size: 12 },
+  ADDRESS_CORDS:        { x: 57,  y: 421, size: 12 },
+  CITY_CORDS:           { x: 276, y: 420, size: 12 },
+  STATE_CORDS:          { x: 451, y: 421, size: 12 },
+  ZIP_CORDS:            { x: 491, y: 421, size: 12 },
+  BENEFICIARY_CORDS:    { x: 56,  y: 386, size: 12 },
+  REL_CORDS:            { x: 318, y: 386, size: 12 },
+  INSURED_NAME_2:       { x: 56,  y: 88, size: 12 },
+  INSURED_DOB_2:        { x: 317, y: 90, size: 12 },
+  AGENT_NAME_2:         { x: 317, y: 52, size: 12 },
 };
 
 function tokenGen(len=22){
@@ -173,6 +173,22 @@ async function buildFilledPdf(data){
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const page = pdfDoc.getPages()[0];
 
+  // Format date helper - converts any date to MM/DD/YYYY
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    // If already in MM/DD/YYYY format, return as-is
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) return dateStr;
+    
+    // Parse ISO timestamp or other formats
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr; // Invalid date, return original
+    
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${month}/${day}/${year}`;
+  };
+
   const drawText = (cords, text) => {
     if(!text) return;
     page.drawText(String(text), {
@@ -184,7 +200,7 @@ async function buildFilledPdf(data){
   };
 
   drawText(FIELD_CORDS.NAME_CORDS, data.clientName);
-  drawText(FIELD_CORDS.DOB_CORDS, data.dob);
+  drawText(FIELD_CORDS.DOB_CORDS, formatDate(data.dob));
   drawText(FIELD_CORDS.PHONE_CORDS, data.phone);
   drawText(FIELD_CORDS.ADDRESS_CORDS, data.address);
   drawText(FIELD_CORDS.CITY_CORDS, data.city);
@@ -193,7 +209,7 @@ async function buildFilledPdf(data){
   drawText(FIELD_CORDS.BENEFICIARY_CORDS, data.beneficiary);
   drawText(FIELD_CORDS.REL_CORDS, data.relationship);
   drawText(FIELD_CORDS.INSURED_NAME_2, data.clientName);
-  drawText(FIELD_CORDS.INSURED_DOB_2, data.dob);
+  drawText(FIELD_CORDS.INSURED_DOB_2, formatDate(data.dob));
   drawText(FIELD_CORDS.AGENT_NAME_2, data.agentName);
 
   return await pdfDoc.save();
