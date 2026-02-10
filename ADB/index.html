@@ -3,68 +3,152 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ADB Link Generator</title>
+  <title>ADB - Agent Fill & Link</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+
   <style>
     body{font-family:system-ui,Arial;margin:0;background:#0b0f1a;color:#fff}
-    .wrap{max-width:720px;margin:0 auto;padding:16px}
+    .wrap{max-width:1000px;margin:0 auto;padding:16px}
     .card{background:#121a2a;border:1px solid #22314f;border-radius:14px;padding:14px;margin:12px 0}
     input,button{font-size:16px;padding:12px;border-radius:12px;border:1px solid #2a3b60;background:#0e1524;color:#fff;width:100%}
     button{cursor:pointer;border:none}
-    button.primary{background:#2b6cff;font-weight:800}
+    button.primary{background:#2b6cff;font-weight:900}
+    button:disabled{opacity:.5;cursor:not-allowed}
     .row{display:flex;gap:10px;flex-wrap:wrap}
     .row > *{flex:1;min-width:220px}
+    .small{font-size:13px;opacity:.8;line-height:1.35}
     .mono{font-family:ui-monospace,Menlo,Consolas,monospace;word-break:break-all}
-    .small{font-size:13px;opacity:.8}
+    iframe{width:100%;height:720px;border:1px solid #2a3b60;border-radius:12px;background:#fff}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <h2 style="margin:0 0 10px 0">Create ADB Signing Link</h2>
+<div class="wrap">
 
-      <div class="small">These values get saved with the token so the signed record always ties back to you.</div>
+  <div class="card">
+    <div class="small">
+      Fix your error by setting <b>WORKER_BASE</b> to your real Cloudflare Worker domain.
+    </div>
+  </div>
 
-      <div class="row" style="margin-top:12px">
-        <input id="agentName" placeholder="Agent Name (Sponsor)" />
-        <input id="agencyName" placeholder="Agency Name" />
-      </div>
-      <div class="row">
-        <input id="agencyPhone" placeholder="Agency Phone" />
-        <button id="createBtn" class="primary">Generate Link</button>
-      </div>
+  <div class="card">
+    <h2 style="margin:0 0 10px 0">ADB Certificate - Agent Fill</h2>
 
-      <div id="status" class="small" style="margin-top:10px"></div>
+    <div class="row">
+      <input id="clientName" placeholder="Client Full Name (required)" />
+      <input id="dob" placeholder="Date of Birth (MM/DD/YYYY)" />
+    </div>
 
-      <div id="outWrap" style="display:none;margin-top:12px">
-        <div class="small">Send this link to the client:</div>
-        <div id="out" class="mono" style="background:#0e1524;border:1px solid #2a3b60;border-radius:12px;padding:12px;margin-top:8px"></div>
-        <div class="row" style="margin-top:10px">
-          <button id="copyBtn">Copy Link</button>
-          <button id="openBtn">Open Link</button>
-        </div>
+    <div class="row">
+      <input id="address" placeholder="Street Address" />
+      <input id="phone" placeholder="Phone" />
+    </div>
+
+    <div class="row">
+      <input id="city" placeholder="City" />
+      <input id="state" placeholder="State" />
+      <input id="zip" placeholder="ZIP" />
+    </div>
+
+    <div class="row">
+      <input id="beneficiary" placeholder="Beneficiary" />
+      <input id="relationship" placeholder="Relationship to Insured" />
+    </div>
+
+    <input id="clientEmail" placeholder="Client Email (so they receive PDF)" />
+
+    <hr style="border:0;border-top:1px solid #22314f;margin:14px 0">
+
+    <div class="row">
+      <input id="agentName" placeholder="Agent Name (autofill from /me)" />
+      <input id="agencyName" placeholder="Agency (defaults to Darcy Schrieber)" />
+    </div>
+
+    <div class="row">
+      <input id="agencyPhone" placeholder="Agency Phone" />
+      <button id="loadMeBtn">Autofill from /me</button>
+    </div>
+
+    <div class="row">
+      <button id="previewBtn">Preview Filled PDF</button>
+      <button id="createBtn" class="primary">Create Link + Save Token</button>
+    </div>
+
+    <div id="status" class="small" style="margin-top:10px"></div>
+
+    <div id="linkWrap" style="display:none;margin-top:10px">
+      <div class="small">Client signing link:</div>
+      <div id="linkOut" class="mono" style="background:#0e1524;border:1px solid #2a3b60;border-radius:12px;padding:12px;margin-top:8px"></div>
+      <div class="row" style="margin-top:10px">
+        <button id="copyBtn">Copy Link</button>
+        <button id="openBtn">Open Link</button>
       </div>
     </div>
   </div>
 
+  <div class="card">
+    <div class="small"><b>PDF Preview</b> (this is how it will look before the client signs)</div>
+    <div style="margin-top:10px">
+      <iframe id="pdfFrame" title="PDF Preview"></iframe>
+    </div>
+  </div>
+
+</div>
+
 <script>
 /* =========================
-   CONFIG
+   CONFIG (YOU MUST EDIT)
 ========================= */
-const WORKER_BASE = "https://closing-coalition-api.thomaslancheros06.workers.dev"; // <-- CHANGE THIS
+const WORKER_BASE = "https://closing-coalition-api.thomaslancheros06.workers.dev"; // <-- PUT YOUR REAL WORKER DOMAIN
 const ADB_API_URL = `${WORKER_BASE}/adb`;
+const ME_API_URL  = `${WORKER_BASE}/me`;
 
-// client public URL:
-const CLIENT_BASE = "https://www.nf-financial.life/ADB/?adb=";
+const PDF_URL = "/ADB/ADB.pdf"; // <-- place ADB.pdf in agent site at /ADB/ADB.pdf (or change path)
 
 /* =========================
-   HELPERS
+   PREFILL FROM CERTIFICATE
 ========================= */
+const DEFAULTS = {
+  sponsorName: "American Income Life",
+  sponsorSignatureName: "Darcy Schrieber",
+  agencyPhone: "(844) 832-2412",
+  agencyName: "Darcy Schrieber",
+};
+
+/* =========================
+   EASY COORDS (CHANGE HERE)
+   NOTE: PDF origin is bottom-left
+========================= */
+const FIELD_CORDS = {
+  // Top main form
+  NAME_CORDS:           { x: 90,  y: 430, size: 12 },
+  DOB_CORDS:            { x: 340, y: 430, size: 12 },
+  PHONE_CORDS:          { x: 520, y: 430, size: 12 },
+
+  ADDRESS_CORDS:        { x: 90,  y: 402, size: 12 },
+  CITY_CORDS:           { x: 290, y: 402, size: 12 },
+  STATE_CORDS:          { x: 500, y: 402, size: 12 },
+  ZIP_CORDS:            { x: 585, y: 402, size: 12 },
+
+  BENEFICIARY_CORDS:    { x: 90,  y: 373, size: 12 },
+  REL_CORDS:            { x: 350, y: 373, size: 12 },
+
+  // Sponsor area (based on your certificate)
+  SPONSOR_NAME_CORDS:   { x: 90,  y: 328, size: 12 }, // Sponsor's Name line
+  SPONSOR_SIGNAME_CORDS:{ x: 90,  y: 270, size: 12 }, // "Signature of Sponsor" printed name
+  AGENCY_NAME_CORDS:    { x: 90,  y: 240, size: 12 },
+  AGENCY_PHONE_CORDS:   { x: 365, y: 240, size: 12 },
+
+  // Tear-off
+  INSURED_NAME_2:       { x: 90,  y: 120, size: 12 },
+  INSURED_DOB_2:        { x: 430, y: 120, size: 12 },
+  AGENT_NAME_2:         { x: 430, y: 70,  size: 12 },
+};
+
 function tokenGen(len=22){
   const chars="ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
   let out="";
-  crypto.getRandomValues(new Uint8Array(len)).forEach(n=>{
-    out += chars[n % chars.length];
-  });
+  crypto.getRandomValues(new Uint8Array(len)).forEach(n=> out += chars[n % chars.length]);
   return out;
 }
 
@@ -75,59 +159,181 @@ async function postJSON(url, payload){
     body: JSON.stringify(payload)
   });
   const json = await res.json().catch(()=>({}));
-  if (!res.ok || json.ok === false) {
-    throw new Error(json.error || `Request failed (${res.status})`);
-  }
+  if (!res.ok || json.ok === false) throw new Error(json.error || `Request failed (${res.status})`);
   return json;
 }
 
-/* =========================
-   MAIN
-========================= */
-const agentNameEl = document.getElementById("agentName");
-const agencyNameEl = document.getElementById("agencyName");
-const agencyPhoneEl = document.getElementById("agencyPhone");
-const statusEl = document.getElementById("status");
+async function loadPdfBytes(url){
+  const res = await fetch(url, { cache:"no-store" });
+  if(!res.ok) throw new Error("Failed to load ADB.pdf (check PDF_URL path)");
+  return new Uint8Array(await res.arrayBuffer());
+}
 
-const outWrap = document.getElementById("outWrap");
-const outEl = document.getElementById("out");
-const copyBtn = document.getElementById("copyBtn");
-const openBtn = document.getElementById("openBtn");
+async function buildFilledPdf(data){
+  const { PDFDocument, StandardFonts, rgb } = PDFLib;
+  const bytes = await loadPdfBytes(PDF_URL);
+  const pdfDoc = await PDFDocument.load(bytes);
+  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const page = pdfDoc.getPages()[0];
 
-let currentLink = "";
+  const drawText = (cords, text) => {
+    if(!text) return;
+    page.drawText(String(text), {
+      x: cords.x, y: cords.y,
+      size: cords.size || 12,
+      font,
+      color: rgb(0,0,0)
+    });
+  };
 
-document.getElementById("createBtn").addEventListener("click", async ()=>{
+  // Client fields
+  drawText(FIELD_CORDS.NAME_CORDS, data.clientName);
+  drawText(FIELD_CORDS.DOB_CORDS, data.dob);
+  drawText(FIELD_CORDS.PHONE_CORDS, data.phone);
+
+  drawText(FIELD_CORDS.ADDRESS_CORDS, data.address);
+  drawText(FIELD_CORDS.CITY_CORDS, data.city);
+  drawText(FIELD_CORDS.STATE_CORDS, data.state);
+  drawText(FIELD_CORDS.ZIP_CORDS, data.zip);
+
+  drawText(FIELD_CORDS.BENEFICIARY_CORDS, data.beneficiary);
+  drawText(FIELD_CORDS.REL_CORDS, data.relationship);
+
+  // Sponsor/autofill based on cert
+  drawText(FIELD_CORDS.SPONSOR_NAME_CORDS, data.sponsorName);
+  drawText(FIELD_CORDS.SPONSOR_SIGNAME_CORDS, data.sponsorSignatureName);
+  drawText(FIELD_CORDS.AGENCY_NAME_CORDS, data.agencyName);
+  drawText(FIELD_CORDS.AGENCY_PHONE_CORDS, data.agencyPhone);
+
+  // Tear-off
+  drawText(FIELD_CORDS.INSURED_NAME_2, data.clientName);
+  drawText(FIELD_CORDS.INSURED_DOB_2, data.dob);
+  drawText(FIELD_CORDS.AGENT_NAME_2, data.agentName);
+
+  return await pdfDoc.save();
+}
+
+function blobUrlFromBytes(bytes){
+  const blob = new Blob([bytes], { type:"application/pdf" });
+  return URL.createObjectURL(blob);
+}
+
+function getFormData(){
+  return {
+    clientName: clientName.value.trim(),
+    dob: dob.value.trim(),
+    address: address.value.trim(),
+    phone: phone.value.trim(),
+    city: city.value.trim(),
+    state: state.value.trim(),
+    zip: zip.value.trim(),
+    beneficiary: beneficiary.value.trim(),
+    relationship: relationship.value.trim(),
+    clientEmail: clientEmail.value.trim(),
+
+    // sponsor defaults from cert
+    sponsorName: DEFAULTS.sponsorName,
+    sponsorSignatureName: DEFAULTS.sponsorSignatureName,
+
+    // agent-side
+    agentName: agentName.value.trim(),
+    agencyName: (agencyName.value.trim() || DEFAULTS.agencyName),
+    agencyPhone: (agencyPhone.value.trim() || DEFAULTS.agencyPhone),
+  };
+}
+
+/* Default UI values */
+agencyName.value  = DEFAULTS.agencyName;
+agencyPhone.value = DEFAULTS.agencyPhone;
+
+/* Autofill agent from /me (best-effort) */
+loadMeBtn.addEventListener("click", async ()=>{
   try{
-    statusEl.textContent = "Creating token…";
+    status.textContent = "Loading /me…";
 
-    const agentName = agentNameEl.value.trim();
-    if (!agentName) throw new Error("Agent Name required");
+    const token =
+      localStorage.getItem("token") ||
+      localStorage.getItem("sessionToken") ||
+      localStorage.getItem("authToken") ||
+      "";
+
+    const res = await fetch(ME_API_URL, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ token })
+    });
+    const json = await res.json().catch(()=>({}));
+    if(!json.ok) throw new Error(json.error || "Failed /me");
+
+    const u = json.user || json.profile || json.data || json;
+    // best guesses:
+    agentName.value = u.name || u.fullName || u.username || agentName.value;
+
+    status.textContent = "Autofilled agent name.";
+  } catch(err){
+    status.textContent = "Autofill failed: " + err.message;
+  }
+});
+
+/* Preview */
+previewBtn.addEventListener("click", async ()=>{
+  try{
+    const data = getFormData();
+    if(!data.clientName) throw new Error("Client Name required to preview.");
+    status.textContent = "Building preview PDF…";
+    const pdfBytes = await buildFilledPdf(data);
+    pdfFrame.src = blobUrlFromBytes(pdfBytes);
+    status.textContent = "Preview ready.";
+  } catch(err){
+    status.textContent = "Preview error: " + err.message;
+  }
+});
+
+/* Create token + link */
+createBtn.addEventListener("click", async ()=>{
+  try{
+    const data = getFormData();
+    if(!data.clientName) throw new Error("Client Name required.");
+
+    status.textContent = "Saving token to database…";
 
     const token = tokenGen();
 
+    // Save EVERYTHING with token so client doesn't retype (requires your small GAS change)
     await postJSON(ADB_API_URL, {
       action: "createToken",
       token,
-      agentName,
-      agencyName: agencyNameEl.value.trim(),
-      agencyPhone: agencyPhoneEl.value.trim()
+      agentName: data.agentName,
+      agencyName: data.agencyName,
+      agencyPhone: data.agencyPhone,
+
+      clientName: data.clientName,
+      dob: data.dob,
+      address: data.address,
+      phone: data.phone,
+      city: data.city,
+      state: data.state,
+      zip: data.zip,
+      beneficiary: data.beneficiary,
+      relationship: data.relationship,
+      clientEmail: data.clientEmail
     });
 
-    currentLink = CLIENT_BASE + encodeURIComponent(token);
+    const link = `https://www.nf-financial.life/ADB/?adb=${encodeURIComponent(token)}`;
 
-    outEl.textContent = currentLink;
-    outWrap.style.display = "block";
-    statusEl.textContent = "Saved. Send link to client.";
+    linkOut.textContent = link;
+    linkWrap.style.display = "block";
 
     copyBtn.onclick = async ()=> {
-      await navigator.clipboard.writeText(currentLink);
-      statusEl.textContent = "Copied.";
+      await navigator.clipboard.writeText(link);
+      status.textContent = "Copied link.";
     };
+    openBtn.onclick = ()=> window.open(link, "_blank");
 
-    openBtn.onclick = ()=> window.open(currentLink, "_blank");
+    status.textContent = "Token saved. Send link to client.";
 
   } catch(err){
-    statusEl.textContent = "Error: " + err.message;
+    status.textContent = "Error: " + err.message;
   }
 });
 </script>
