@@ -414,6 +414,17 @@
       clearMessage(verifyMsg);
     }
 
+    function doRedirect() {
+      console.log('Redirecting to home.html...');
+      console.log('Session check:', {
+        token: Auth.getToken(),
+        valid: Auth.isSessionValid()
+      });
+      
+      // Use replace instead of href to avoid back button issues
+      window.location.replace("home.html");
+    }
+
     /**********************
      * EVENT HANDLERS
      **********************/
@@ -450,11 +461,18 @@
       setLoading(btnLogin, true);
       
       try {
+        console.log('Attempting login...');
         const result = await Auth.login(username, password);
         
+        console.log('Login successful:', result);
+        console.log('Token saved:', Auth.getToken());
+        
         showMessage(loginMsg, 'success', 'Login successful! Redirecting...');
-        await new Promise(resolve => setTimeout(resolve, 800));
-        window.location.href = "home.html";
+        
+        // Small delay to show success message
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        doRedirect();
 
       } catch (e) {
         console.error('Login error:', e);
@@ -536,6 +554,7 @@
       setLoading(btnCreateAccount, true);
       
       try {
+        console.log('Creating account...');
         await Auth.signup(username, password);
         
         console.log('Account created, showing verification form');
@@ -607,21 +626,30 @@
       setLoading(btnVerify, true);
       
       try {
+        console.log('Verifying code...');
+        
         // Verify the code
         await Auth.verify(username, code);
+        console.log('Verification successful!');
+        
         showMessage(verifyMsg, 'success', 'Email verified! Logging you in...');
         
-        // Wait a moment for backend to update
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        // Wait for backend to process verification
+        await new Promise(resolve => setTimeout(resolve, 2000));
         
         // Auto-login after verification
         if (password) {
           try {
-            await Auth.login(username, password);
+            console.log('Attempting auto-login after verification...');
+            const result = await Auth.login(username, password);
+            
+            console.log('Auto-login successful:', result);
+            console.log('Token saved:', Auth.getToken());
+            
             showMessage(verifyMsg, 'success', 'Success! Redirecting...');
             
-            await new Promise(resolve => setTimeout(resolve, 500));
-            window.location.href = "home.html";
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            doRedirect();
             return;
             
           } catch (loginError) {
@@ -664,15 +692,30 @@
      * INITIALIZATION
      **********************/
     
-    // Check if already logged in
+    // Check if already logged in - DISABLED to prevent redirect loop
+    // Only redirect if we have a VALID session that can be verified
     (async () => {
+      console.log('Page load - checking session...');
+      
       if (Auth.isSessionValid()) {
+        console.log('Session appears valid, verifying with server...');
+        
         try {
-          await Auth.validateSession();
-          window.location.href = "home.html";
+          const isValid = await Auth.validateSession();
+          
+          if (isValid) {
+            console.log('Session verified! Redirecting to home...');
+            doRedirect();
+          } else {
+            console.log('Session validation failed, staying on login');
+            Auth.clearSession();
+          }
         } catch (e) {
+          console.log('Session validation error:', e);
           Auth.clearSession();
         }
+      } else {
+        console.log('No valid session found');
       }
     })();
     
