@@ -187,7 +187,11 @@
                 }
                 const token = getToken();
                 if (token) {
-                    const response = await fetch(`${API_URL}/me`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token }) });
+                    const response = await fetch(`${API_URL}/me`, { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'application/json' }, 
+                        body: JSON.stringify({ token }) 
+                    });
                     if (response.ok) {
                         const data = await response.json();
                         if (data.ok) {
