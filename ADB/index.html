@@ -87,6 +87,7 @@
 <script>
 // Global agent name (populated on load)
 let AGENT_NAME = 'Unknown Agent';
+let AGENT_EMAIL = '';
 
 // API URLs - defined FIRST so they're available
 const WORKER_BASE = typeof CFWORKER !== 'undefined' ? CFWORKER : 'https://closing-coalition-api.thomaslancheros06.workers.dev';
@@ -117,6 +118,7 @@ const PDF_URL = "/ADB/ADB.pdf";
           // Token valid, get user info
           const user = data.user || data.profile || data.data || data;
           AGENT_NAME = user.username || user.name || user.adminEmail || '';
+          AGENT_EMAIL = user.email || user.adminEmail || '';
           
           if (AGENT_NAME) {
             agentNameDisplay.textContent = AGENT_NAME;
@@ -284,6 +286,7 @@ createBtn.addEventListener("click", async ()=>{
       action: "createToken",
       token,
       agentName: data.agentName,
+      agentEmail: AGENT_EMAIL, // Real agent email from login
       clientName: data.clientName,
       dob: data.dob,
       address: data.address,
