@@ -154,10 +154,15 @@
                         🔮 FCR Auto-Fill
                     </a>
                 </div>
+                <div class="alert alert-warning" style="background: #e3f2fd; color: #01579b; border-color: #81d4fa;">
+                    <strong>📌 Don't see the bookmarks bar?</strong><br>
+                    Enable it with: <strong>Ctrl+Shift+B</strong> (Windows/Linux) or <strong>Cmd+Shift+B</strong> (Mac)<br>
+                    <em style="font-size: 13px;">The bookmarks bar appears as a horizontal strip below your address bar</em>
+                </div>
                 <h3>📋 How to Use:</h3>
                 <ol class="steps">
                     <li>Drag the button above to your bookmarks bar</li>
-                    <li>Go to: https://freecallerregistry.com/fcr/</li>
+                    <li>Go to: <a href="https://freecallerregistry.com/fcr/" target="_blank" style="color: #667eea; font-weight: 600; text-decoration: none;">https://freecallerregistry.com/fcr/</a></li>
                     <li>Click the bookmark on ANY step of the form</li>
                     <li>ALL fields on that page fill automatically!</li>
                 </ol>
@@ -173,6 +178,7 @@
     </div>
     <script>
         const API_URL = 'https://closing-coalition-api.thomaslancheros06.workers.dev';
+        
         async function loadUserData() {
             try {
                 const lsUsername = localStorage.getItem('cc_username');
@@ -191,8 +197,7 @@
                         method: 'POST', 
                         headers: { 'Content-Type': 'application/json' }, 
                         body: JSON.stringify({ token }) 
-                        }
-                    );
+                    });
                     if (response.ok) {
                         const data = await response.json();
                         if (data.ok) {
