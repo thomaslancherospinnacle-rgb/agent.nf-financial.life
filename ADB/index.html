@@ -118,7 +118,7 @@ const PDF_URL = "/ADB/ADB.pdf";
           // Token valid, get user info
           const user = data.user || data.profile || data.data || data;
           AGENT_NAME = user.username || user.name || user.adminEmail || '';
-          AGENT_EMAIL = user.email || user.adminEmail || '';
+          AGENT_EMAIL = user.loginEmail || user.email || user.adminEmail || '';
           
           if (AGENT_NAME) {
             agentNameDisplay.textContent = AGENT_NAME;
