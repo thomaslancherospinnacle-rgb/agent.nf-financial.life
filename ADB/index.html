@@ -317,7 +317,8 @@ createBtn.addEventListener("click", async ()=>{
       
     } catch (apiErr) {
       // Check if this is an OAuth authorization error
-      if (apiErr.message.includes('500') || apiErr.message.includes('Authorization required')) {
+      const errMsg = apiErr.message || apiErr.toString() || '';
+      if (errMsg.includes('500') || errMsg.includes('Authorization') || errMsg.includes('Proxy error')) {
         status.textContent = "🔐 Authorization needed...";
         
         // Open Google Apps Script in popup for OAuth
