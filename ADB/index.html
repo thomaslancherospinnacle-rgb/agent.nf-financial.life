@@ -316,20 +316,62 @@ createBtn.addEventListener("click", async ()=>{
       status.textContent = "✅ Link created! Send to client to sign.";
       
     } catch (apiErr) {
-      // Handle Google OAuth or permission errors
-      if (apiErr.message.includes('500') || apiErr.message.includes('403') || apiErr.message.includes('Authorization')) {
-        status.textContent = "❌ Authorization required";
-        alert(
-          '⚠️ Google Authorization Required\n\n' +
-          'This system needs permission to:\n' +
-          '• Send emails from your Gmail\n' +
-          '• Save files to Google Drive\n' +
-          '• Write to the spreadsheet\n\n' +
-          'The Google Apps Script will ask for permissions when you click OK.\n' +
-          'Please click "Allow" to grant access.\n\n' +
-          'If you previously denied permissions, contact your administrator.'
+      // Check if this is an OAuth authorization error
+      if (apiErr.message.includes('500') || apiErr.message.includes('Authorization required')) {
+        status.textContent = "🔐 Authorization needed...";
+        
+        // Open Google Apps Script in popup for OAuth
+        const gasUrl = ADB_API_URL.replace('/adb', ''); // Get worker base
+        const scriptUrl = `https://script.google.com/macros/s/AKfycbzj70JmOaj-hIjgifaR8zNIXdL_G5iTABrepyl0WASZ_uRSax7P7hbfnl4Bd9WI25CL/exec`;
+        
+        const authPopup = window.open(
+          scriptUrl + '?action=authorize',
+          'OAuth Authorization',
+          'width=600,height=700,left=100,top=100'
         );
+        
+        if (!authPopup) {
+          alert('Please allow popups for this site to authorize the application.');
+          throw apiErr;
+        }
+        
+        // Wait for popup to close (user completed auth)
+        const checkPopup = setInterval(async () => {
+          if (authPopup.closed) {
+            clearInterval(checkPopup);
+            status.textContent = "Retrying after authorization...";
+            
+            // Wait a second, then retry the request
+            setTimeout(async () => {
+              try {
+                const retryResponse = await postJSON(ADB_API_URL, payload);
+                console.log('Retry response:', retryResponse);
+                
+                const clientLink = `https://www.nf-financial.life/ADB/?adb=${encodeURIComponent(token)}`;
+                clientLinkOut.textContent = clientLink;
+                linkWrap.style.display = "block";
+                
+                copyClientBtn.onclick = async ()=> {
+                  await navigator.clipboard.writeText(clientLink);
+                  status.textContent = "✅ Copied client link.";
+                };
+                openClientBtn.onclick = ()=> window.open(clientLink, "_blank");
+                
+                status.textContent = "✅ Link created! Send to client to sign.";
+                createBtn.disabled = false;
+                
+              } catch (retryErr) {
+                status.textContent = "❌ Still failed. Please contact support.";
+                console.error('Retry failed:', retryErr);
+                createBtn.disabled = false;
+              }
+            }, 1000);
+          }
+        }, 500);
+        
+        return; // Don't throw, we're handling it
       }
+      
       throw apiErr;
     }
 
@@ -337,7 +379,9 @@ createBtn.addEventListener("click", async ()=>{
     console.error('Error details:', err);
     status.textContent = "❌ Error: " + err.message;
   } finally {
-    createBtn.disabled = false;
+    if (!status.textContent.includes('Authorization needed')) {
+      createBtn.disabled = false;
+    }
   }
 });
 </script>
