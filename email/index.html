@@ -1444,9 +1444,29 @@
       
       if (currentUser) {
         console.log('User authenticated:', currentUser);
+        
+        // Fetch full user data from /me endpoint
+        try {
+          const meResponse = await fetch(CFWORKER + '/me', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+          });
+          
+          if (meResponse.ok) {
+            const userData = await meResponse.json();
+            if (userData.ok && userData.user) {
+              // Merge /me data into currentUser
+              currentUser = { ...currentUser, ...userData.user };
+              console.log('User data loaded from /me:', currentUser);
+            }
+          }
+        } catch (error) {
+          console.error('Error loading user data from /me:', error);
+        }
+        
         document.getElementById('userEmail').textContent = currentUser.email || currentUser.username;
         
-        // Update signature
+        // Update signature with full user data
         updateSignature();
         
         // Load emails
@@ -1459,9 +1479,14 @@
 
     // Update signature with user info
     function updateSignature() {
-      const name = currentUser.fullName || currentUser.username || 'Agent';
+      if (!currentUser) {
+        console.error('updateSignature called but currentUser is null');
+        return;
+      }
+      
+      const name = currentUser.fullName || currentUser.firstName || currentUser.username || 'Agent';
       const email = currentUser.email || 'agent@americanincome.life';
-      const phone = currentUser.phone || '(555) 123-4567';
+      const phone = currentUser.phone || currentUser.phoneNumber || '(555) 123-4567';
       
       document.getElementById('signatureName').textContent = name;
       document.getElementById('signatureEmail').textContent = email;
@@ -1508,6 +1533,18 @@
     async function loadEmails() {
       const emailList = document.getElementById('emailList');
       emailList.innerHTML = '<div class="loading">Loading emails...</div>';
+      
+      // Safety check
+      if (!currentUser) {
+        console.error('loadEmails called but currentUser is null');
+        emailList.innerHTML = `
+          <div class="empty-state">
+            <h3>⚠️ Not authenticated</h3>
+            <p>Please log in to view your emails.</p>
+          </div>
+        `;
+        return;
+      }
       
       try {
         const response = await fetch(CFWORKER + '/email/list', {
@@ -1844,6 +1881,11 @@
 
     // Load drafts count
     async function loadDraftsCount() {
+      if (!currentUser) {
+        console.error('loadDraftsCount called but currentUser is null');
+        return;
+      }
+      
       try {
         const response = await fetch(CFWORKER + '/email/drafts/count', {
           method: 'POST',
@@ -2214,6 +2256,11 @@
 
     // Save draft
     async function saveDraft() {
+      if (!currentUser) {
+        showStatus('❌ Not authenticated. Please log in.', 'error');
+        return;
+      }
+      
       const subject = document.getElementById('subject').value;
       const bodyContent = document.getElementById('bodyEditor').innerHTML;
       
@@ -2304,6 +2351,11 @@
     // Send email
     async function sendEmail() {
       console.log('Send button clicked!');
+      
+      if (!currentUser) {
+        showStatus('❌ Not authenticated. Please log in.', 'error');
+        return;
+      }
       
       const sendBtn = document.getElementById('sendBtn');
       const subject = document.getElementById('subject').value;
