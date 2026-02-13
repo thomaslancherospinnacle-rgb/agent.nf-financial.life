@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>American Income Life - Meeting</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        /* Slideshow Container - Top 60% */
+        .slideshow-container {
+            position: fixed;
+            width: 100%;
+            height: 60%;
+            top: 0;
+            background: #000;
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+        }
+
+        .slide.active {
+            opacity: 1;
+        }
+
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Dark Blue Top Bar */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: #003d82;
+            padding: 1rem 2rem;
+            z-index: 20;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .top-bar img {
+            height: 50px;
+            width: auto;
+        }
+
+        /* White Bottom Section - 40% */
+        .bottom-section {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            background: white;
+            z-index: 10;
+        }
+
+        .bottom-content {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 2rem 3rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* Left Side - Meeting Info */
+        .meeting-info {
+            flex: 1;
+            padding-right: 2rem;
+        }
+
+        .meeting-info h1 {
+            font-size: 2.8rem;
+            font-weight: 300;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            font-style: italic;
+            color: #333;
+        }
+
+        .meeting-info h1 strong {
+            font-weight: 700;
+            display: block;
+            color: #003d82;
+        }
+
+        .meeting-info p {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+
+        .meeting-badge {
+            display: inline-block;
+            background: #2e7d32;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Center - Meeting Type Logo */
+        .center-logo {
+            position: absolute;
+            left: 50%;
+            top: -80px;
+            transform: translateX(-50%);
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            z-index: 15;
+        }
+
+        .center-logo img {
+            max-width: 300px;
+            max-height: 160px;
+            width: auto;
+            height: auto;
+            display: block;
+        }
+
+        /* Right Side - Countdown */
+        .countdown-section {
+            background: #003d82;
+            padding: 2rem 2.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            min-width: 300px;
+        }
+
+        .countdown-label {
+            color: white;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            opacity: 0.95;
+            font-weight: 500;
+        }
+
+        .countdown {
+            font-size: 4.5rem;
+            font-weight: 700;
+            color: #ffd700;
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            margin-bottom: 0.5rem;
+        }
+
+        .status-message {
+            color: white;
+            font-size: 0.95rem;
+            opacity: 0.85;
+        }
+
+        /* Loading Animation */
+        .loading-dots {
+            display: inline-block;
+            margin-left: 0.5rem;
+        }
+
+        .loading-dots span {
+            animation: blink 1.4s infinite;
+            animation-fill-mode: both;
+        }
+
+        .loading-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .loading-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes blink {
+            0%, 80%, 100% { opacity: 0; }
+            40% { opacity: 1; }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 968px) {
+            .bottom-content {
+                flex-direction: column;
+                padding: 2rem 1.5rem;
+                gap: 1rem;
+            }
+
+            .meeting-info {
+                padding-right: 0;
+                text-align: center;
+            }
+
+            .meeting-info h1 {
+                font-size: 2rem;
+            }
+
+            .meeting-info p {
+                font-size: 1rem;
+            }
+
+            .center-logo {
+                position: relative;
+                left: 0;
+                top: 0;
+                transform: none;
+                margin: 1rem auto;
+            }
+
+            .center-logo img {
+                max-width: 200px;
+                max-height: 100px;
+            }
+
+            .countdown-section {
+                min-width: auto;
+                width: 100%;
+                padding: 1.5rem;
+            }
+
+            .countdown {
+                font-size: 3.5rem;
+            }
+
+            .top-bar {
+                padding: 0.75rem 1rem;
+            }
+
+            .top-bar img {
+                height: 40px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .slideshow-container {
+                height: 50%;
+            }
+
+            .bottom-section {
+                height: 50%;
+            }
+
+            .meeting-info h1 {
+                font-size: 1.5rem;
+            }
+
+            .countdown {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Slideshow Background - Top 60% -->
+    <div class="slideshow-container" id="slideshow">
+        <div class="slide active">
+            <img src="slide1.png" alt="Slide 1">
+        </div>
+        <div class="slide">
+            <img src="slide2.png" alt="Slide 2">
+        </div>
+        <div class="slide">
+            <img src="slide3.png" alt="Slide 3">
+        </div>
+        <div class="slide">
+            <img src="slide4.png" alt="Slide 4">
+        </div>
+        <div class="slide">
+            <img src="slide5.png" alt="Slide 5">
+        </div>
+    </div>
+
+    <!-- Dark Blue Top Bar with AIL Logo -->
+    <div class="top-bar">
+        <img src="logo.png" alt="American Income Life">
+    </div>
+
+    <!-- White Bottom Section - 40% -->
+    <div class="bottom-section">
+        <!-- Center Meeting Type Logo -->
+        <div class="center-logo">
+            <img id="meeting-type-logo" src="" alt="Meeting Type">
+        </div>
+
+        <div class="bottom-content">
+            <!-- Left Side - Meeting Info -->
+            <div class="meeting-info">
+                <h1>
+                    <span id="meeting-title-line1">Life Insurance:</span>
+                    <strong id="meeting-title-line2">It's for them.</strong>
+                </h1>
+                <p id="meeting-message">Your representative will start the meeting soon</p>
+                <div class="meeting-badge">PLEASE WAIT</div>
+            </div>
+
+            <!-- Right Side - Countdown -->
+            <div class="countdown-section">
+                <div class="countdown-label">Meeting starts in</div>
+                <div class="countdown" id="countdown">00:00</div>
+                <div class="status-message">
+                    Preparing meeting room<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get URL parameters
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        const meetingId = getUrlParameter('meeting');
+        const meetingType = getUrlParameter('type') || 'standard';
+        const waitTime = parseInt(getUrlParameter('wait')) || 10;
+
+        // Meeting type configurations
+        const meetingTypes = {
+            csk: {
+                logo: 'csk.png',
+                titleLine1: 'Child Safe Kit:',
+                titleLine2: 'Protect What Matters Most.',
+                message: 'Your representative will start the presentation soon'
+            },
+            hardcard: {
+                logo: 'hardcard.png',
+                titleLine1: 'Union Benefits:',
+                titleLine2: 'Coverage You Deserve.',
+                message: 'Your union representative will be with you shortly'
+            },
+            ailplus: {
+                logo: 'ailplus.png',
+                titleLine1: 'AIL Plus:',
+                titleLine2: 'Enhanced Protection.',
+                message: 'Your benefits specialist will join shortly'
+            },
+            willkit: {
+                logo: 'willkit.png',
+                titleLine1: 'Estate Planning:',
+                titleLine2: 'Secure Your Legacy.',
+                message: 'Your estate planning advisor will be right with you'
+            },
+            referral: {
+                logo: 'referral.png',
+                titleLine1: 'Thank You:',
+                titleLine2: 'For Your Referral.',
+                message: 'Your agent will join shortly to discuss the referral program'
+            },
+            standard: {
+                logo: 'standard.png',
+                titleLine1: 'Life Insurance:',
+                titleLine2: "It's for them.",
+                message: 'Your representative will start the meeting soon'
+            }
+        };
+
+        // Get current meeting type config
+        const config = meetingTypes[meetingType] || meetingTypes.standard;
+
+        // Set meeting type logo and text
+        document.getElementById('meeting-type-logo').src = config.logo;
+        document.getElementById('meeting-title-line1').textContent = config.titleLine1;
+        document.getElementById('meeting-title-line2').textContent = config.titleLine2;
+        document.getElementById('meeting-message').textContent = config.message;
+
+        // Slideshow functionality
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+
+        function showNextSlide() {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.add('active');
+        }
+
+        // Change slide every 5 seconds
+        setInterval(showNextSlide, 5000);
+
+        // Countdown functionality
+        let timeLeft = waitTime;
+        const countdownEl = document.getElementById('countdown');
+
+        function updateCountdown() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            countdownEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            
+            if (timeLeft <= 0) {
+                // Redirect to Jitsi
+                if (meetingId) {
+                    const sanitizedId = meetingId.replace(/[^a-zA-Z0-9-_]/g, '');
+                    window.location.href = `https://meet.jit.si/AmericanIncome-${sanitizedId}`;
+                }
+            } else {
+                timeLeft--;
+            }
+        }
+
+        // Update countdown every second
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+
+        // If no meeting ID, show error
+        if (!meetingId) {
+            document.querySelector('.status-message').innerHTML = '<span style="color: #ffcccc;">⚠️ No meeting ID provided</span>';
+        }
+    </script>
+</body>
+</html>
