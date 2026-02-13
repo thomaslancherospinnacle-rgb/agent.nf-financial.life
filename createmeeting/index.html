@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Meeting Link - American Income Life</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .label-description {
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 400;
+            margin-bottom: 0.75rem;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #2a5298;
+        }
+
+        /* Meeting Type Grid */
+        .meeting-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .meeting-type-card {
+            border: 3px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .meeting-type-card:hover {
+            border-color: #2a5298;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(42, 82, 152, 0.2);
+        }
+
+        .meeting-type-card.selected {
+            border-color: #2a5298;
+            background: #f0f4ff;
+        }
+
+        .meeting-type-card img {
+            max-width: 150px;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 1rem;
+        }
+
+        .meeting-type-card h3 {
+            color: #1e3c72;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .meeting-type-card p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            background: #2a5298;
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background: #1e3c72;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Generated Link Section */
+        .generated-link {
+            background: #f0f4ff;
+            border: 2px solid #2a5298;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .generated-link.show {
+            display: block;
+        }
+
+        .generated-link h3 {
+            color: #1e3c72;
+            margin-bottom: 1rem;
+        }
+
+        .link-display {
+            background: white;
+            padding: 1rem;
+            border-radius: 6px;
+            font-family: monospace;
+            word-break: break-all;
+            margin-bottom: 1rem;
+            border: 1px solid #e0e0e0;
+        }
+
+        .link-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .link-actions button {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .meeting-types {
+                grid-template-columns: 1fr;
+            }
+
+            .link-actions {
+                flex-direction: column;
+            }
+
+            .link-actions button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎥 Create Meeting Link</h1>
+            <p>American Income Life Agent Portal</p>
+        </div>
+
+        <div class="card">
+            <form id="meeting-form">
+                <div class="form-group">
+                    <label>Meeting Type</label>
+                    <div class="label-description">Choose the type of meeting presentation</div>
+                    
+                    <div class="meeting-types">
+                        <div class="meeting-type-card" onclick="selectMeetingType('csk')">
+                            <img src="csk.png" alt="Child Safe Kit" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%2280%22%3E%3Crect fill=%22%23e0e0e0%22 width=%22150%22 height=%2280%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23666%22%3ECSK%3C/text%3E%3C/svg%3E'">
+                            <h3>Child Safe Kit</h3>
+                            <p>Professional corporate presentation</p>
+                        </div>
+
+                        <div class="meeting-type-card" onclick="selectMeetingType('hardcard')">
+                            <img src="hardcard.png" alt="Hard Card" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%2280%22%3E%3Crect fill=%22%23e0e0e0%22 width=%22150%22 height=%2280%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23666%22%3EHard Card%3C/text%3E%3C/svg%3E'">
+                            <h3>Hard Card</h3>
+                            <p>Union member benefits</p>
+                        </div>
+
+                        <div class="meeting-type-card" onclick="selectMeetingType('ailplus')">
+                            <img src="ailplus.png" alt="AIL Plus" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%2280%22%3E%3Crect fill=%22%23e0e0e0%22 width=%22150%22 height=%2280%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23666%22%3EAIL Plus%3C/text%3E%3C/svg%3E'">
+                            <h3>AIL Plus</h3>
+                            <p>Coverage review meeting</p>
+                        </div>
+
+                        <div class="meeting-type-card" onclick="selectMeetingType('willkit')">
+                            <img src="willkit.png" alt="Will Kit" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%2280%22%3E%3Crect fill=%22%23e0e0e0%22 width=%22150%22 height=%2280%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23666%22%3EWill Kit%3C/text%3E%3C/svg%3E'">
+                            <h3>Will Kit</h3>
+                            <p>Estate planning session</p>
+                        </div>
+
+                        <div class="meeting-type-card" onclick="selectMeetingType('referral')">
+                            <img src="referral.png" alt="Referral" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%2280%22%3E%3Crect fill=%22%23e0e0e0%22 width=%22150%22 height=%2280%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23666%22%3EReferral%3C/text%3E%3C/svg%3E'">
+                            <h3>Referral</h3>
+                            <p>Referral program discussion</p>
+                        </div>
+
+                        <div class="meeting-type-card selected" onclick="selectMeetingType('standard')">
+                            <img src="standard.png" alt="Standard" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%2280%22%3E%3Crect fill=%22%232a5298%22 width=%22150%22 height=%2280%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2216%22%3EAIL%3C/text%3E%3C/svg%3E'">
+                            <h3>Standard</h3>
+                            <p>General meeting</p>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="meeting-type" value="standard">
+                </div>
+
+                <div class="form-group">
+                    <label for="meeting-id">Meeting ID</label>
+                    <div class="label-description">Enter a unique name for this meeting (letters, numbers, hyphens, underscores only)</div>
+                    <input 
+                        type="text" 
+                        id="meeting-id" 
+                        placeholder="e.g., JohnSmith-CSK-Jan2024"
+                        required
+                        pattern="[a-zA-Z0-9-_]+"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="wait-time">Waiting Room Duration (seconds)</label>
+                    <div class="label-description">How long should the waiting room countdown before joining?</div>
+                    <input 
+                        type="number" 
+                        id="wait-time" 
+                        value="30"
+                        min="5"
+                        max="300"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="btn">Generate Meeting Link</button>
+            </form>
+
+            <div class="generated-link" id="generated-link">
+                <h3>✅ Your Meeting Link is Ready!</h3>
+                <div class="link-display" id="link-display"></div>
+                
+                <div class="link-actions">
+                    <button class="btn btn-success" onclick="copyLink()">📋 Copy Link</button>
+                    <button class="btn btn-secondary" onclick="openLink()">🔗 Open Link</button>
+                    <button class="btn" onclick="resetForm()">➕ Create Another</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedType = 'standard';
+        let generatedLink = '';
+
+        function selectMeetingType(type) {
+            selectedType = type;
+            document.getElementById('meeting-type').value = type;
+            
+            // Update UI
+            document.querySelectorAll('.meeting-type-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+        }
+
+        document.getElementById('meeting-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const meetingId = document.getElementById('meeting-id').value.trim();
+            const waitTime = document.getElementById('wait-time').value;
+            const meetingType = document.getElementById('meeting-type').value;
+            
+            // Sanitize meeting ID
+            const sanitizedId = meetingId.replace(/[^a-zA-Z0-9-_]/g, '');
+            
+            // Generate link
+            const baseUrl = window.location.origin;
+            generatedLink = `${baseUrl}/meeting.html?meeting=${sanitizedId}&type=${meetingType}&wait=${waitTime}`;
+            
+            // Display link
+            document.getElementById('link-display').textContent = generatedLink;
+            document.getElementById('generated-link').classList.add('show');
+            
+            // Scroll to link
+            document.getElementById('generated-link').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        function copyLink() {
+            navigator.clipboard.writeText(generatedLink).then(() => {
+                const btn = event.target;
+                btn.textContent = '✓ Copied!';
+                btn.style.background = '#28a745';
+                
+                setTimeout(() => {
+                    btn.textContent = '📋 Copy Link';
+                    btn.style.background = '';
+                }, 2000);
+            }).catch(() => {
+                alert('Failed to copy. Please copy manually:\n\n' + generatedLink);
+            });
+        }
+
+        function openLink() {
+            window.open(generatedLink, '_blank');
+        }
+
+        function resetForm() {
+            document.getElementById('meeting-form').reset();
+            document.getElementById('generated-link').classList.remove('show');
+            selectedType = 'standard';
+            
+            // Reset meeting type selection
+            document.querySelectorAll('.meeting-type-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.querySelector('.meeting-type-card:last-child').classList.add('selected');
+        }
+
+        // Auto-generate meeting ID suggestion
+        document.getElementById('meeting-id').addEventListener('focus', function() {
+            if (!this.value) {
+                const date = new Date();
+                const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
+                this.placeholder = `Meeting-${dateStr}-${Math.random().toString(36).substring(2, 6)}`;
+            }
+        });
+    </script>
+</body>
+</html>
