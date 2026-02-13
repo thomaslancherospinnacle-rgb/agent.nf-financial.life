@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insurance Sales Presentation - Memory Trainer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.4);
+        }
+
+        .btn-warning {
+            background: #ed8936;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #dd6b20;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(237, 137, 54, 0.4);
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 101, 101, 0.4);
+        }
+
+        .difficulty-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .difficulty-btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .difficulty-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .difficulty-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .game-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .column {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 400px;
+        }
+
+        .column h2 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.5em;
+        }
+
+        .items-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .draggable-item {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            cursor: move;
+            transition: all 0.3s;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            user-select: none;
+        }
+
+        .draggable-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+
+        .draggable-item.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+        }
+
+        .drop-zone {
+            background: white;
+            border: 2px dashed #cbd5e0;
+            border-radius: 8px;
+            padding: 15px;
+            min-height: 60px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #a0aec0;
+            font-style: italic;
+        }
+
+        .drop-zone.drag-over {
+            background: #edf2f7;
+            border-color: #667eea;
+            border-style: solid;
+        }
+
+        .drop-zone.filled {
+            border-style: solid;
+            border-color: #48bb78;
+            background: #f0fff4;
+        }
+
+        .drop-zone.incorrect {
+            border-color: #f56565;
+            background: #fff5f5;
+        }
+
+        .drop-zone .draggable-item {
+            width: 100%;
+            margin: 0;
+        }
+
+        .score-container {
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            color: white;
+        }
+
+        .score {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .timer {
+            font-size: 1.5em;
+            margin-top: 10px;
+        }
+
+        .feedback {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.2em;
+            display: none;
+        }
+
+        .feedback.success {
+            background: #c6f6d5;
+            color: #22543d;
+            display: block;
+        }
+
+        .feedback.error {
+            background: #fed7d7;
+            color: #742a2a;
+            display: block;
+        }
+
+        .item-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e2e8f0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #48bb78 0%, #38a169 100%);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .game-area {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        .complete-message {
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            border-radius: 12px;
+            color: white;
+            display: none;
+        }
+
+        .complete-message h2 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .complete-message p {
+            font-size: 1.3em;
+            margin: 10px 0;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.2);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Insurance Sales Presentation Trainer</h1>
+        <p class="subtitle">Drag and drop sections in the correct order to master your presentation!</p>
+
+        <div class="difficulty-selector">
+            <button class="difficulty-btn active" onclick="setDifficulty('easy')">Easy (16 Sections)</button>
+            <button class="difficulty-btn" onclick="setDifficulty('medium')">Medium (32 Parts)</button>
+            <button class="difficulty-btn" onclick="setDifficulty('hard')">Hard (64 Parts)</button>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="startGame()">🎮 New Game</button>
+            <button class="btn btn-success" onclick="checkAnswers()">✅ Check Answers</button>
+            <button class="btn btn-warning" onclick="showHint()">💡 Show Hint</button>
+            <button class="btn btn-danger" onclick="resetGame()">🔄 Reset</button>
+        </div>
+
+        <div class="score-container">
+            <div class="score">Score: <span id="score">0</span>/<span id="total">16</span></div>
+            <div class="timer">Time: <span id="timer">00:00</span></div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress" style="width: 0%">0%</div>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+
+        <div class="complete-message" id="completeMessage">
+            <h2>🎉 Congratulations!</h2>
+            <p>You've mastered the presentation order!</p>
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="finalTime">00:00</div>
+                    <div class="stat-label">Time</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="finalAttempts">0</div>
+                    <div class="stat-label">Attempts</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="finalAccuracy">100%</div>
+                    <div class="stat-label">Accuracy</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="startGame()" style="margin-top: 20px;">Play Again</button>
+        </div>
+
+        <div class="game-area" id="gameArea">
+            <div class="column">
+                <h2>📋 Scrambled Sections</h2>
+                <div class="items-container" id="sourceItems"></div>
+            </div>
+
+            <div class="column">
+                <h2>✨ Correct Order</h2>
+                <div class="items-container" id="dropZones"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const easyItems = [
+            "Introduction",
+            "Accidental Death & Dismemberment",
+            "Referrals",
+            "Child Safe Kits",
+            "AIL Plus",
+            "Family Info Guide",
+            "Living Will",
+            "Transition to Permanent Benefits",
+            "Transition - Needs Analysis",
+            "Hour Power",
+            "Funeral & Final Expenses",
+            "Income Protection",
+            "Mortgage Protection",
+            "Child Education",
+            "Child Rider",
+            "Close"
+        ];
+
+        const mediumItems = [
+            "Introduction - Have you met someone like me / little card / union background",
+            "Introduction - American Income company info / my job & your decision today",
+            "AD&D - $4,000 benefit explanation / dismemberment details",
+            "AD&D - NAIC unclaimed funds / 4 emergency contacts & making sure they know",
+            "Referrals - Members asking for family access / $20,000 to gift",
+            "Referrals - No cost to you or them / who's first, next, next?",
+            "Child Safe Kits - Protecting kids is important / QR code & app setup / 4 sections explained",
+            "Child Safe Kits - Lost child scenarios / 2 abduction cases / need your help for 50,000 families",
+            "AIL Plus - Helps everyone save money / health-related costs",
+            "AIL Plus - Up to 85% savings / separate email for app setup",
+            "Family Info Guide - Road map for family / what you want done",
+            "Family Info Guide - Walk through typical areas (veteran, spouse, will, life insurance, bank, burial)",
+            "Living Will - Most important benefit / everyone needs it / costs thousands with attorney",
+            "Living Will - Free will kit / protect assets & family / make copies / do ASAP",
+            "Transition to Permanent - Read mandatory letter / benefits are permanent for life",
+            "Transition to Permanent - Unlike group benefits that end 31 days after leaving / portable forever",
+            "Needs Analysis - Every family different / personalized survey / fill out family info",
+            "Needs Analysis - Three qualifications / preliminary medical questions",
+            "Hour Power - Hours per week / hour power principle / one hour of wages",
+            "Hour Power - Most waste money / one hour doesn't change lifestyle / 39 hours vs 1 hour",
+            "Funeral - Have you handled funeral finances? / $15,000 cost / insurance used to work different",
+            "Funeral - Freedom of Choice certificate / $30,000 limit / pre-arranged concept but better",
+            "Income Protection - If hurt 3 months, tough but manage / if killed, income stops forever",
+            "Income Protection - Monthly income continues 60 months tax-free / time to grieve & adjust / tie down",
+            "Mortgage - Biggest asset? / bank actually owns it / biggest liability",
+            "Mortgage - Can't make payments, lose house / pays off home / peace of mind / tie down",
+            "Child Education - Want kids to have better opportunities",
+            "Child Education - Up to $100,000 per child / college, trade school, business / still supporting dreams / tie down",
+            "Child Rider - All kids under 18 covered / $10,000 FOC until 21",
+            "Child Rider - Option to increase to $50,000 / no questions asked",
+            "Close - Payroll deduction monthly / stays with you when changing jobs / you take care when young & healthy",
+            "Close - Both die in car wreck, who gets money? / 1 hour or 2 hours? / qualify first / which works best?"
+        ];
+
+        const hardItems = [
+            "Intro 1 - Have you met someone like me / about your benefits / union meeting?",
+            "Intro 2 - Little card you filled out / get it every couple years / union can't give everything",
+            "Intro 3 - American Income / 70 years serving unions / 40,000 unions / UAW, Teamsters, etc. / OPEIU Local 277",
+            "Intro 4 - My job simple / pre-paid benefits / permanent plans / fill gaps / decision today / one family at a time",
+            "AD&D 1 - First benefit / $4,000 if die in accident",
+            "AD&D 2 - Dismemberment / half for one limb/eye / full for two / not getting rich / non-contributory",
+            "AD&D 3 - NAIC $2 billion unclaimed / how unions feel / military families upset",
+            "AD&D 4 - Minimize unclaimed 2 ways / 4 emergency contacts / make sure they know how to claim / get member's number / who's next?",
+            "Referrals 1 - All members LOVE this / been super excited",
+            "Referrals 2 - Members asking for family access / answer was always NO / just recently allowed",
+            "Referrals 3 - $20,000 benefits to gift / allowing close friends too",
+            "Referrals 4 - No cost to you or them / anything unused goes to waste / who's first, next, next?",
+            "Child Safe 1 - Benefit is outstanding / protecting kids most important / relationships with first responders",
+            "Child Safe 2 - QR code in email / download app / scan code / put kid's info in",
+            "Child Safe 3 - Section 1: personal info / Section 2: identifying marks / Section 3: DNA samples / Section 4: fingerprints",
+            "Child Safe 4 - Turn around, kid gone / 2 abductions solved (Chicago & Houston) / personal story / committed to 50,000 families / need your help",
+            "AIL Plus 1 - Next benefit helps EVERYONE save money",
+            "AIL Plus 2 - Health-related costs / doesn't affect current medical",
+            "AIL Plus 3 - Save up to 85% / glasses, dental, lab, vet bills, pet prescriptions",
+            "AIL Plus 4 - Separate email / set up app / go through it / determine what's best",
+            "Family Guide 1 - Extremely important / road map for family",
+            "Family Guide 2 - Tells everyone what you want done / walk through areas",
+            "Family Guide 3 - Veteran? / Spouse info / People to notify / Do you have a Will?",
+            "Family Guide 4 - Life insurance policies / Bank or credit union / Cremation or burial",
+            "Living Will 1 - MOST important benefit / Will Kit / EVERYONE needs it",
+            "Living Will 2 - Especially if minor children / no time or money / costs thousands with attorney",
+            "Living Will 3 - Professionally organized kit / no cost / protect assets & family",
+            "Living Will 4 - Notarize at bank / fill out completely / make copies / difficult to lose loved one / do ASAP",
+            "Permanent 1 - Next benefits most important / most popular with members",
+            "Permanent 2 - Read mandatory letter / show computer screen",
+            "Permanent 3 - Job is show benefits / explain / answer questions / enroll",
+            "Permanent 4 - Permanent for life / group benefits end 31 days after quit/leave/retire / portable / go with you ALWAYS / make sense?",
+            "Needs Analysis 1 - Why individual families / not everyone at same time",
+            "Needs Analysis 2 - Every family different needs/wants / examples: 18 living at home vs 64 retired",
+            "Needs Analysis 3 - Personalized needs analysis survey / tailor fit exclusively / begin filling family info",
+            "Needs Analysis 4 - Three stipulations to qualify / union member / qualify by age/health/habits / decision made today / cannot circle back / preliminary medical questions",
+            "Hour Power 1 - How many hours per week? / heard of hour power principle?",
+            "Hour Power 2 - Old union term / one hour wages per week / protect family & future",
+            "Hour Power 3 - Most waste half their money / not setting aside enough / one hour never changes lifestyle",
+            "Hour Power 4 - Work one less hour, don't notice / spend on something don't need / 39 hours vs 1 hour / most want more / at least one hour / make sense?",
+            "Funeral 1 - Ever handle funeral financial arrangements? / someone close passed / how long ago / how much / put money down upfront?",
+            "Funeral 2 - Know funeral costs? / $15,000 / life insurance not handling like before / used to serve as collateral",
+            "Funeral 3 - Used to pay in 24 days / now up to 6 months / they gain interest / money takes long / people burdened",
+            "Funeral 4 - Freedom of Choice funeral benefit / any funeral home/cemetery/crematorium / funeral directors love it / union backed / certificate process / $30,000 limit / don't reveal amount / get difference back / pre-arranged but better / not limited geographically / tie down",
+            "Income 1 - Next concern deals with income protection",
+            "Income 2 - If hurt, off work 3 months no paycheck / how would that affect family? / tough but get by",
+            "Income 3 - If killed on way home / ability to earn stops forever / first thing you'll miss / hopefully him, then paycheck / unions saw concern",
+            "Income 4 - Monthly income continues / tax-free/probate-free / 60 months / time to grieve & adjust / tie down: protect or not protect?",
+            "Mortgage 1 - Next concern deals with mortgage / what's biggest asset?",
+            "Mortgage 2 - But who actually owns home? / bank / biggest liability",
+            "Mortgage 3 - What happens if died and can't make payments?",
+            "Mortgage 4 - Benefit pays off home / keep home free and clear / avoid losing home with memories / tie down: peace of mind?",
+            "Education 1 - Goes without saying / want kids to have better opportunities",
+            "Education 2 - What this benefit designed to protect",
+            "Education 3 - If anything happens / up to $100,000 per child",
+            "Education 4 - College, trade school, start business / may not be around but still supporting dreams / tie down: makes sense to protect?",
+            "Child Rider 1 - Almost forgot / program includes child rider",
+            "Child Rider 2 - Covers all kids under 18",
+            "Child Rider 3 - $10,000 Freedom of Choice until 21",
+            "Child Rider 4 - Option to increase to $50,000 / no questions asked",
+            "Close 1 - Benefits set up like payroll deduction / once a month / checking account",
+            "Close 2 - Change jobs or retire / don't lose benefits / under your control / everyone dies, no choice",
+            "Close 3 - Simple choice / take care when young, healthy, affordable / or family in trouble / both die in car wreck / total amount / who gets money? / confirm beneficiaries",
+            "Close 4 - Most do one hour program / some ask for two hours / doubles benefits / or start with one and add later / make sure qualify / get excited / show pitch sheet / which works best: 1 or 2 hours?"
+        ];
+
+        let currentDifficulty = 'easy';
+        let currentItems = [...easyItems];
+        let correctOrder = [...easyItems];
+        let score = 0;
+        let attempts = 0;
+        let totalChecks = 0;
+        let startTime;
+        let timerInterval;
+        let draggedElement = null;
+        let hintUsed = false;
+
+        function setDifficulty(difficulty) {
+            currentDifficulty = difficulty;
+            document.querySelectorAll('.difficulty-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (difficulty === 'easy') {
+                currentItems = [...easyItems];
+                correctOrder = [...easyItems];
+            } else if (difficulty === 'medium') {
+                currentItems = [...mediumItems];
+                correctOrder = [...mediumItems];
+            } else {
+                currentItems = [...hardItems];
+                correctOrder = [...hardItems];
+            }
+
+            startGame();
+        }
+
+        function shuffle(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function startGame() {
+            score = 0;
+            attempts = 0;
+            totalChecks = 0;
+            hintUsed = false;
+            document.getElementById('score').textContent = score;
+            document.getElementById('total').textContent = correctOrder.length;
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('completeMessage').style.display = 'none';
+            document.getElementById('gameArea').style.display = 'grid';
+            updateProgress();
+
+            const shuffled = shuffle(currentItems);
+            const sourceContainer = document.getElementById('sourceItems');
+            const dropContainer = document.getElementById('dropZones');
+
+            sourceContainer.innerHTML = '';
+            dropContainer.innerHTML = '';
+
+            shuffled.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'draggable-item';
+                div.draggable = true;
+                div.textContent = item;
+                div.dataset.item = item;
+                div.addEventListener('dragstart', handleDragStart);
+                div.addEventListener('dragend', handleDragEnd);
+                sourceContainer.appendChild(div);
+            });
+
+            correctOrder.forEach((item, index) => {
+                const zone = document.createElement('div');
+                zone.className = 'drop-zone';
+                zone.dataset.position = index;
+                zone.innerHTML = `<span class="item-number">${index + 1}</span> Drop here...`;
+                zone.addEventListener('dragover', handleDragOver);
+                zone.addEventListener('drop', handleDrop);
+                zone.addEventListener('dragleave', handleDragLeave);
+                dropContainer.appendChild(zone);
+            });
+
+            startTimer();
+        }
+
+        function handleDragStart(e) {
+            draggedElement = e.target;
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', e.target.innerHTML);
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            e.currentTarget.classList.add('drag-over');
+            return false;
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+            e.preventDefault();
+
+            const dropZone = e.currentTarget;
+            dropZone.classList.remove('drag-over');
+
+            if (draggedElement && dropZone.classList.contains('drop-zone')) {
+                // If drop zone already has an item, return it to source
+                const existingItem = dropZone.querySelector('.draggable-item');
+                if (existingItem) {
+                    document.getElementById('sourceItems').appendChild(existingItem);
+                }
+
+                // Add the dragged item to drop zone
+                dropZone.innerHTML = '';
+                const clonedItem = draggedElement.cloneNode(true);
+                clonedItem.addEventListener('dragstart', handleDragStart);
+                clonedItem.addEventListener('dragend', handleDragEnd);
+                dropZone.appendChild(clonedItem);
+                dropZone.classList.add('filled');
+
+                // Remove original from source
+                draggedElement.remove();
+
+                // Auto-check if all zones are filled
+                const allFilled = Array.from(document.querySelectorAll('.drop-zone')).every(zone => 
+                    zone.querySelector('.draggable-item')
+                );
+                
+                if (allFilled) {
+                    updateProgress();
+                }
+            }
+
+            return false;
+        }
+
+        function checkAnswers() {
+            attempts++;
+            totalChecks++;
+            let correct = 0;
+            const dropZones = document.querySelectorAll('.drop-zone');
+
+            dropZones.forEach((zone, index) => {
+                const item = zone.querySelector('.draggable-item');
+                zone.classList.remove('incorrect');
+                
+                if (item) {
+                    const itemText = item.dataset.item;
+                    if (itemText === correctOrder[index]) {
+                        correct++;
+                        zone.classList.add('filled');
+                    } else {
+                        zone.classList.add('incorrect');
+                    }
+                }
+            });
+
+            score = correct;
+            document.getElementById('score').textContent = score;
+            updateProgress();
+
+            const feedback = document.getElementById('feedback');
+            if (score === correctOrder.length) {
+                feedback.className = 'feedback success';
+                feedback.textContent = '🎉 Perfect! You got them all correct!';
+                feedback.style.display = 'block';
+                stopTimer();
+                showCompletionMessage();
+            } else {
+                feedback.className = 'feedback error';
+                feedback.textContent = `You got ${score} out of ${correctOrder.length} correct. Keep trying!`;
+                feedback.style.display = 'block';
+            }
+        }
+
+        function showHint() {
+            hintUsed = true;
+            const dropZones = document.querySelectorAll('.drop-zone');
+            let hintGiven = false;
+
+            for (let i = 0; i < dropZones.length; i++) {
+                const zone = dropZones[i];
+                const item = zone.querySelector('.draggable-item');
+                
+                if (!item || item.dataset.item !== correctOrder[i]) {
+                    // Show what should be in this position
+                    const feedback = document.getElementById('feedback');
+                    feedback.className = 'feedback';
+                    feedback.style.display = 'block';
+                    feedback.style.background = '#bee3f8';
+                    feedback.style.color = '#2c5282';
+                    feedback.textContent = `💡 Hint: Position ${i + 1} should be "${correctOrder[i]}"`;
+                    hintGiven = true;
+                    break;
+                }
+            }
+
+            if (!hintGiven) {
+                const feedback = document.getElementById('feedback');
+                feedback.className = 'feedback success';
+                feedback.textContent = '✨ Everything looks good so far! Keep going!';
+                feedback.style.display = 'block';
+            }
+        }
+
+        function resetGame() {
+            const sourceContainer = document.getElementById('sourceItems');
+            const dropZones = document.querySelectorAll('.drop-zone');
+
+            dropZones.forEach((zone, index) => {
+                const item = zone.querySelector('.draggable-item');
+                if (item) {
+                    sourceContainer.appendChild(item);
+                }
+                zone.innerHTML = `<span class="item-number">${index + 1}</span> Drop here...`;
+                zone.classList.remove('filled', 'incorrect');
+            });
+
+            score = 0;
+            document.getElementById('score').textContent = score;
+            document.getElementById('feedback').style.display = 'none';
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const percentage = Math.round((score / correctOrder.length) * 100);
+            const progressBar = document.getElementById('progress');
+            progressBar.style.width = percentage + '%';
+            progressBar.textContent = percentage + '%';
+        }
+
+        function startTimer() {
+            startTime = Date.now();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('timer').textContent = 
+                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function showCompletionMessage() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            const timeStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            
+            const accuracy = totalChecks > 0 ? Math.round((correctOrder.length / totalChecks) * 100) : 100;
+
+            document.getElementById('finalTime').textContent = timeStr;
+            document.getElementById('finalAttempts').textContent = attempts;
+            document.getElementById('finalAccuracy').textContent = accuracy + '%';
+
+            document.getElementById('gameArea').style.display = 'none';
+            document.getElementById('completeMessage').style.display = 'block';
+        }
+
+        // Initialize game on load
+        window.onload = () => {
+            startGame();
+        };
+    </script>
+</body>
+</html>
