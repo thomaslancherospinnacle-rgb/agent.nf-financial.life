@@ -86,7 +86,7 @@
         }
 
         input[type="text"],
-        input[type="number"],
+        input[type="datetime-local"],
         select {
             width: 100%;
             padding: 1rem;
@@ -103,16 +103,7 @@
             box-shadow: 0 0 0 3px rgba(3, 69, 129, 0.1);
         }
 
-        input:disabled {
-            background: #f5f5f5;
-            cursor: not-allowed;
-        }
-
         /* Meeting Type Cards */
-        .meeting-types-label {
-            margin-bottom: 1rem;
-        }
-
         .meeting-types {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -158,7 +149,6 @@
             font-size: 0.9rem;
         }
 
-        /* None Option */
         .type-none {
             background: #f8f8f8;
             border-style: dashed;
@@ -191,12 +181,6 @@
             box-shadow: 0 6px 20px rgba(3, 69, 129, 0.3);
         }
 
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
         .btn-secondary {
             background: #6c757d;
         }
@@ -211,6 +195,14 @@
 
         .btn-success:hover {
             background: #1b5e20;
+        }
+
+        .btn-warning {
+            background: #f57c00;
+        }
+
+        .btn-warning:hover {
+            background: #e65100;
         }
 
         .btn-outline {
@@ -259,21 +251,44 @@
             gap: 0.5rem;
         }
 
-        .success-icon {
-            font-size: 2rem;
+        .link-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            border: 2px solid #034581;
+        }
+
+        .link-section.host-section {
+            border-color: #f57c00;
+            background: #fff3e0;
+        }
+
+        .link-section-title {
+            font-weight: 700;
+            color: #034581;
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .link-section.host-section .link-section-title {
+            color: #f57c00;
         }
 
         .link-display {
-            background: white;
-            padding: 1.25rem;
-            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 1rem;
+            border-radius: 6px;
             font-family: 'Courier New', monospace;
             word-break: break-all;
-            margin-bottom: 1.5rem;
-            border: 2px solid #034581;
-            font-size: 0.95rem;
+            border: 1px solid rgba(3, 69, 129, 0.3);
+            font-size: 0.9rem;
             color: #034581;
             line-height: 1.6;
+            margin-bottom: 1rem;
         }
 
         .link-info {
@@ -304,14 +319,16 @@
         }
 
         .link-actions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
         }
 
         .link-actions button {
-            padding: 1rem 1.5rem;
-            font-size: 1rem;
+            flex: 1;
+            min-width: 180px;
+            padding: 0.875rem 1.25rem;
+            font-size: 0.95rem;
         }
 
         /* Copy Notification */
@@ -344,6 +361,17 @@
             }
         }
 
+        .host-badge {
+            display: inline-block;
+            background: #f57c00;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
         /* Mobile Responsive */
         @media (max-width: 768px) {
             body {
@@ -367,7 +395,12 @@
             }
 
             .link-actions {
-                grid-template-columns: 1fr;
+                flex-direction: column;
+            }
+
+            .link-actions button {
+                width: 100%;
+                min-width: auto;
             }
 
             .link-info-item {
@@ -394,7 +427,7 @@
                 <!-- Meeting ID -->
                 <div class="form-group">
                     <label for="meeting-id">Meeting ID *</label>
-                    <div class="label-description">Enter a unique identifier for this meeting (letters, numbers, hyphens, and underscores only)</div>
+                    <div class="label-description">Enter a unique identifier for this meeting (letters, numbers, hyphens, and underscores only). This will be used as the Jitsi room name.</div>
                     <input 
                         type="text" 
                         id="meeting-id" 
@@ -402,6 +435,17 @@
                         required
                         pattern="[a-zA-Z0-9-_]+"
                         title="Only letters, numbers, hyphens, and underscores allowed"
+                    >
+                </div>
+
+                <!-- Scheduled Date & Time -->
+                <div class="form-group">
+                    <label for="scheduled-time">Scheduled Meeting Date & Time *</label>
+                    <div class="label-description">Select when the meeting should start. The countdown will show time remaining until this moment.</div>
+                    <input 
+                        type="datetime-local" 
+                        id="scheduled-time" 
+                        required
                     >
                 </div>
 
@@ -451,20 +495,6 @@
                     <input type="hidden" id="meeting-type" value="">
                 </div>
 
-                <!-- Wait Time -->
-                <div class="form-group">
-                    <label for="wait-time">Waiting Room Duration (seconds) *</label>
-                    <div class="label-description">How long should the countdown be before the meeting starts? (5-300 seconds)</div>
-                    <input 
-                        type="number" 
-                        id="wait-time" 
-                        value="30"
-                        min="5"
-                        max="300"
-                        required
-                    >
-                </div>
-
                 <!-- Base URL -->
                 <div class="form-group">
                     <label for="base-url">Base URL *</label>
@@ -472,20 +502,20 @@
                     <input 
                         type="text" 
                         id="base-url" 
-                        value="https://www.americanincome.life/meeting/index.html"
+                        value="https://www.americanincome.life/meeting.html"
                         required
                     >
                 </div>
 
                 <!-- Submit Button -->
-                <button type="submit" class="btn">🚀 Generate Meeting Link</button>
+                <button type="submit" class="btn">🚀 Generate Meeting Links</button>
             </form>
 
             <!-- Generated Link Section -->
             <div class="generated-link" id="generated-link">
                 <h3>
                     <span class="success-icon">✅</span>
-                    Your Meeting Link is Ready!
+                    Your Meeting Links are Ready!
                 </h3>
 
                 <div class="link-info">
@@ -494,26 +524,81 @@
                         <span class="link-info-value" id="info-meeting-id">-</span>
                     </div>
                     <div class="link-info-item">
+                        <span class="link-info-label">Scheduled Time:</span>
+                        <span class="link-info-value" id="info-scheduled-time">-</span>
+                    </div>
+                    <div class="link-info-item">
                         <span class="link-info-label">Meeting Type:</span>
                         <span class="link-info-value" id="info-meeting-type">-</span>
                     </div>
                     <div class="link-info-item">
-                        <span class="link-info-label">Wait Duration:</span>
-                        <span class="link-info-value" id="info-wait-time">-</span>
+                        <span class="link-info-label">Jitsi Room:</span>
+                        <span class="link-info-value" id="info-jitsi-room">-</span>
                     </div>
                 </div>
 
-                <div class="link-display" id="link-display"></div>
-                
-                <div class="link-actions">
-                    <button class="btn btn-success" onclick="copyLink()">
-                        📋 Copy Link
-                    </button>
-                    <button class="btn btn-outline" onclick="openLink()">
-                        🔗 Preview Link
-                    </button>
+                <!-- Host Link (Agent) -->
+                <div class="link-section host-section">
+                    <div class="link-section-title">
+                        👨‍💼 Host Link (Agent - For You)
+                        <span class="host-badge">PRIVATE</span>
+                    </div>
+                    <div style="color: #e65100; font-size: 0.9rem; margin-bottom: 1rem;">
+                        ⚠️ Keep this private! Gives you access to the waiting room and direct meeting join.
+                    </div>
+                    <div class="link-display" id="host-link-display"></div>
+                    <div class="link-actions">
+                        <button class="btn btn-warning" onclick="copyHostLink()">
+                            📋 Copy Host Link
+                        </button>
+                        <button class="btn btn-outline" onclick="openHostLink()">
+                            🚀 Open Host Link
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Client Link -->
+                <div class="link-section">
+                    <div class="link-section-title">
+                        👥 Client Link (Send to Client)
+                    </div>
+                    <div style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">
+                        Share this link with your client. They'll see the waiting room countdown.
+                    </div>
+                    <div class="link-display" id="client-link-display"></div>
+                    <div class="link-actions">
+                        <button class="btn btn-success" onclick="copyClientLink()">
+                            📋 Copy Client Link
+                        </button>
+                        <button class="btn btn-outline" onclick="openClientLink()">
+                            🔗 Preview Client
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Direct Jitsi Link -->
+                <div class="link-section">
+                    <div class="link-section-title">
+                        🎥 Direct Jitsi Link (Alternative)
+                    </div>
+                    <div style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">
+                        Skip the waiting room and join the meeting directly.
+                    </div>
+                    <div class="link-display" id="jitsi-link-display"></div>
+                    <div class="link-actions">
+                        <button class="btn btn-success" onclick="copyJitsiLink()">
+                            📋 Copy Jitsi Link
+                        </button>
+                        <button class="btn btn-outline" onclick="openJitsiLink()">
+                            🚀 Join Meeting
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Reset Button -->
+                <div style="margin-top: 2rem;">
                     <button class="btn btn-secondary" onclick="resetForm()">
-                        ➕ Create Another
+                        ➕ Create Another Meeting
                     </button>
                 </div>
             </div>
@@ -523,11 +608,17 @@
         <div class="card">
             <h2>📖 How to Use</h2>
             <ol style="line-height: 2; color: #666; padding-left: 1.5rem;">
-                <li><strong>Enter a Meeting ID:</strong> Create a unique identifier for your meeting</li>
-                <li><strong>Select Meeting Type:</strong> Choose the presentation type or select "None" for generic meetings</li>
-                <li><strong>Set Wait Duration:</strong> Choose how long the countdown should be (recommended: 30-60 seconds)</li>
-                <li><strong>Generate Link:</strong> Click the button to create your meeting link</li>
-                <li><strong>Share with Client:</strong> Copy the link and send it to your client via email or text</li>
+                <li><strong>Enter Meeting ID:</strong> Create a unique identifier (will be used in Jitsi room name)</li>
+                <li><strong>Set Date & Time:</strong> Choose when the meeting should start</li>
+                <li><strong>Select Meeting Type:</strong> Choose presentation type or "None" for generic</li>
+                <li><strong>Generate Links:</strong> System creates three links:
+                    <ul style="margin-top: 0.5rem;">
+                        <li><strong>Host Link:</strong> For you - access waiting room with special controls</li>
+                        <li><strong>Client Link:</strong> For client - waiting room with countdown</li>
+                        <li><strong>Jitsi Link:</strong> Direct meeting access (skip waiting room)</li>
+                    </ul>
+                </li>
+                <li><strong>Share Appropriately:</strong> Send client link to client, keep host link private</li>
             </ol>
         </div>
     </div>
@@ -539,7 +630,9 @@
 
     <script>
         let selectedType = null;
-        let generatedLink = '';
+        let generatedHostLink = '';
+        let generatedClientLink = '';
+        let generatedJitsiLink = '';
 
         function selectMeetingType(type) {
             selectedType = type;
@@ -552,12 +645,17 @@
             event.currentTarget.classList.add('selected');
         }
 
+        // Set minimum datetime to now
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById('scheduled-time').min = now.toISOString().slice(0, 16);
+
         // Form submission
         document.getElementById('meeting-form').addEventListener('submit', function(e) {
             e.preventDefault();
             
             const meetingId = document.getElementById('meeting-id').value.trim();
-            const waitTime = document.getElementById('wait-time').value;
+            const scheduledTime = document.getElementById('scheduled-time').value;
             const meetingType = document.getElementById('meeting-type').value;
             const baseUrl = document.getElementById('base-url').value.trim();
             
@@ -568,22 +666,51 @@
                 alert('Meeting ID has been sanitized to remove invalid characters.');
             }
             
-            // Build URL
-            let url = `${baseUrl}?meeting=${sanitizedId}&wait=${waitTime}`;
+            // Generate host token (simple random string for identification)
+            const hostToken = 'host_' + Math.random().toString(36).substring(2, 15);
+            
+            // Build host URL (includes host token)
+            let hostUrl = `${baseUrl}?meeting=${sanitizedId}&time=${encodeURIComponent(scheduledTime)}&host=${hostToken}`;
             if (meetingType) {
-                url += `&type=${meetingType}`;
+                hostUrl += `&type=${meetingType}`;
             }
             
-            generatedLink = url;
+            // Build client waiting room URL
+            let clientUrl = `${baseUrl}?meeting=${sanitizedId}&time=${encodeURIComponent(scheduledTime)}`;
+            if (meetingType) {
+                clientUrl += `&type=${meetingType}`;
+            }
+            
+            // Build Jitsi direct link
+            const jitsiUrl = `https://meet.jit.si/AmericanIncome-${sanitizedId}`;
+            
+            generatedHostLink = hostUrl;
+            generatedClientLink = clientUrl;
+            generatedJitsiLink = jitsiUrl;
+            
+            // Format scheduled time for display
+            const schedDate = new Date(scheduledTime);
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric', 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+            };
             
             // Update info display
             document.getElementById('info-meeting-id').textContent = sanitizedId;
+            document.getElementById('info-scheduled-time').textContent = schedDate.toLocaleString('en-US', options);
             document.getElementById('info-meeting-type').textContent = meetingType ? 
                 meetingType.charAt(0).toUpperCase() + meetingType.slice(1) : 'None (Generic)';
-            document.getElementById('info-wait-time').textContent = `${waitTime} seconds`;
+            document.getElementById('info-jitsi-room').textContent = `AmericanIncome-${sanitizedId}`;
             
-            // Display link
-            document.getElementById('link-display').textContent = generatedLink;
+            // Display links
+            document.getElementById('host-link-display').textContent = generatedHostLink;
+            document.getElementById('client-link-display').textContent = generatedClientLink;
+            document.getElementById('jitsi-link-display').textContent = generatedJitsiLink;
             document.getElementById('generated-link').classList.add('show');
             
             // Scroll to link
@@ -595,30 +722,52 @@
             }, 100);
         });
 
-        function copyLink() {
-            navigator.clipboard.writeText(generatedLink).then(() => {
-                // Show notification
-                const notification = document.getElementById('copy-notification');
-                notification.classList.add('show');
-                
-                setTimeout(() => {
-                    notification.classList.remove('show');
-                }, 3000);
+        function copyHostLink() {
+            copyToClipboard(generatedHostLink, 'Host');
+        }
+
+        function copyClientLink() {
+            copyToClipboard(generatedClientLink, 'Client');
+        }
+
+        function copyJitsiLink() {
+            copyToClipboard(generatedJitsiLink, 'Jitsi');
+        }
+
+        function copyToClipboard(text, label) {
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification(`${label} link copied!`);
             }).catch(() => {
-                // Fallback for older browsers
                 const textarea = document.createElement('textarea');
-                textarea.value = generatedLink;
+                textarea.value = text;
                 document.body.appendChild(textarea);
                 textarea.select();
                 document.execCommand('copy');
                 document.body.removeChild(textarea);
-                
-                alert('Link copied to clipboard!');
+                showNotification(`${label} link copied!`);
             });
         }
 
-        function openLink() {
-            window.open(generatedLink, '_blank');
+        function showNotification(message) {
+            const notification = document.getElementById('copy-notification');
+            notification.textContent = '✓ ' + message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function openHostLink() {
+            window.open(generatedHostLink, '_blank');
+        }
+
+        function openClientLink() {
+            window.open(generatedClientLink, '_blank');
+        }
+
+        function openJitsiLink() {
+            window.open(generatedJitsiLink, '_blank');
         }
 
         function resetForm() {
@@ -632,6 +781,11 @@
             });
             document.querySelector('.type-none').classList.add('selected');
             
+            // Reset datetime min
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('scheduled-time').min = now.toISOString().slice(0, 16);
+            
             // Scroll to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -644,15 +798,6 @@
                 const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
                 this.placeholder = `Meeting-${dateStr}-${randomStr}`;
             }
-        });
-
-        // Prevent form submission on Enter in text fields (except the form button)
-        document.querySelectorAll('input').forEach(input => {
-            input.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter' && e.target.type !== 'submit') {
-                    e.preventDefault();
-                }
-            });
         });
     </script>
 </body>
