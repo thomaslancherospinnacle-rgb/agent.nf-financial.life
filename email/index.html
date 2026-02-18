@@ -747,6 +747,17 @@
       display: block;
     }
     
+    .preset-item-header {
+      padding: 8px 16px 4px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: #f9fafb;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    
     .preset-item {
       padding: 12px 16px;
       cursor: pointer;
@@ -913,6 +924,39 @@
     .attached-file-size {
       font-size: 11px;
       color: #6b7280;
+    }
+    
+    .drop-zone {
+      flex: 1;
+      min-width: 120px;
+      padding: 8px 14px;
+      border: 2px dashed #d1d5db;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #9ca3af;
+      text-align: center;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    
+    .drop-zone.drag-over {
+      border-color: #3b82f6;
+      background: #eff6ff;
+      color: #3b82f6;
+    }
+    
+    .attached-file.auto-attached {
+      border-color: #10b981;
+      background: #f0fdf4;
+    }
+    
+    .auto-badge {
+      font-size: 10px;
+      background: #10b981;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
     }
     
     .remove-attachment {
@@ -1295,11 +1339,11 @@
           </div>
           <h2 class="email-viewer-subject" id="viewerSubject">Email Subject</h2>
           <div class="email-viewer-meta">
-            <span class="email-viewer-from" id="viewerFrom">from@example.com</span>
+            <span class="email-viewer-from" id="viewerFrom"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="8ee8fce1e3ceebf6efe3fee2eba0ede1e3">[email&#160;protected]</a></span>
             <span>•</span>
             <span id="viewerDate">Jan 1, 2025</span>
             <span>•</span>
-            <span id="viewerTo">To: you@example.com</span>
+            <span id="viewerTo">To: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2e57415b6e4b564f435e424b004d4143">[email&#160;protected]</a></span>
           </div>
         </div>
         <div class="email-viewer-body" id="viewerBody">
@@ -1388,13 +1432,19 @@
         
         <!-- Preset Menu -->
         <div class="preset-menu" id="presetMenu">
+          <div class="preset-item-header">📋 During Presentation</div>
           <div class="preset-item" onclick="insertChildSafeKit()">
-            <strong>Child Safe Kit</strong>
-            <span>App download links and info</span>
+            <strong>🛡️ Child Safe Kit</strong>
+            <span>Send app during CSK portion of preso</span>
           </div>
           <div class="preset-item" onclick="insertWillKit()">
-            <strong>Will Kit</strong>
-            <span>Estate planning guide (with PDF)</span>
+            <strong>📄 Will Kit</strong>
+            <span>Send PDF during Will Kit preso (auto-attaches files)</span>
+          </div>
+          <div class="preset-item-header">📞 Outreach</div>
+          <div class="preset-item" onclick="insertHardCard()">
+            <strong>🚨 Hard Card — Urgent Benefits</strong>
+            <span>Not answering — urgent prepaid benefits notice</span>
           </div>
           <div class="preset-item" onclick="insertFollowUp()">
             <strong>Follow-Up</strong>
@@ -1417,7 +1467,7 @@
             <strong id="signatureName">Your Name</strong><br>
             American Income Life<br>
             📞 <span id="signaturePhone">(555) 123-4567</span><br>
-            📧 <span id="signatureEmail">your.email@example.com</span></p>
+            📧 <span id="signatureEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="21584e54530f444c40484d614459404c514d440f424e4c">[email&#160;protected]</a></span></p>
           </div>
         </div>
         
@@ -1428,6 +1478,9 @@
             <button class="attachment-btn" onclick="document.getElementById('fileInput').click()">
               📎 Attach Files
             </button>
+            <div class="drop-zone" id="dropZone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+              Drop files here
+            </div>
             <span style="font-size: 12px; color: #6b7280;">Max 10MB per file</span>
           </div>
           <div class="attachment-list" id="attachmentList"></div>
@@ -1445,7 +1498,7 @@
     </div>
   </div>
 
-  <script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     let currentUser = null;
     let currentView = 'inbox';
     let toEmails = [];
@@ -2119,11 +2172,11 @@
     function insertChildSafeKit() {
       const editor = document.getElementById('bodyEditor');
       editor.innerHTML = `
-<p>Hi there,</p>
+<p>Hi there!</p>
 
-<p>I wanted to share an important resource with you - the <strong>Child Safe Kit</strong> app. This free app provides crucial safety information and tools to help protect your family.</p>
+<p>As we go through your <strong>Child Safe Kit</strong> today, I'm sending you the download link right now so you have it handy on your phone.</p>
 
-<p><strong>Download the Child Safe Kit app:</strong></p>
+<p>Please download the free app here:</p>
 
 <p>
 📱 <strong>Apple iPhone/iPad:</strong><br>
@@ -2135,11 +2188,11 @@
 <a href="https://play.google.com/store/search?q=child%20safe%20kit&c=apps&hl=en_US" target="_blank" style="color: #3b82f6; text-decoration: none;">Download from Google Play →</a>
 </p>
 
-<p>This app includes features like emergency contacts, safety checklists, and important information storage to keep your children safe.</p>
+<p>This app stores your child's vital info — photos, fingerprints, emergency contacts, and safety records — all in one secure place. We'll walk through how to set it up together right now.</p>
 
-<p>Let me know if you have any questions!</p>
+<p>Any questions, just ask!</p>
 
-<p>Best regards,</p>
+<p>Talk soon,</p>
       `;
       
       document.getElementById('presetMenu').classList.remove('active');
@@ -2149,30 +2202,61 @@
     function insertWillKit() {
       const editor = document.getElementById('bodyEditor');
       editor.innerHTML = `
-<p>Hi there,</p>
+<p>Hi there!</p>
 
-<p>I'm pleased to share with you our comprehensive <strong>Will Kit</strong> guide. This document will help you understand the importance of estate planning and guide you through creating your will.</p>
+<p>As promised during our presentation, I'm sending over your <strong>Will Kit</strong> right now. The PDF is attached to this email — please save it somewhere you can find it easily.</p>
 
-<p><strong>📄 Will Kit PDF is attached to this email.</strong></p>
-
-<p>Inside the Will Kit, you'll find:</p>
+<p>This Will Kit includes everything you need to get your estate plan started:</p>
 <ul>
-  <li>Step-by-step instructions for creating a will</li>
-  <li>Important considerations for estate planning</li>
-  <li>Sample templates and forms</li>
-  <li>Checklist to ensure nothing is overlooked</li>
+  <li>Instructions for naming your beneficiaries</li>
+  <li>Guidance on designating guardianship for minor children</li>
+  <li>Asset and property documentation templates</li>
+  <li>Final wishes and funeral preference forms</li>
 </ul>
 
-<p>Planning your estate is one of the most important steps you can take to protect your family's future. Please review the attached document carefully.</p>
+<p>We're going through this together today so you leave with a plan in place — not just a packet you'll set aside. Take a look at the attachment and let me know if anything needs clarification as we go.</p>
 
-<p>If you have any questions or would like to discuss your specific situation, feel free to reach out. I'm here to help!</p>
-
-<p>Best regards,</p>
+<p>Talk soon,</p>
       `;
       
       document.getElementById('presetMenu').classList.remove('active');
-      alert('📎 Note: Remember to attach willkit.pdf from your /email/ folder!');
+      
+      // Auto-attach the Will Kit files
+      attachWillKitFiles();
+      
       editor.focus();
+    }
+
+    async function attachWillKitFiles() {
+      const filesToAttach = [
+        { path: 'willkit.pdf', name: 'Will Kit.pdf', type: 'application/pdf' },
+        { path: 'qrcode.png', name: 'QR Code.png', type: 'image/png' }
+      ];
+
+      for (const file of filesToAttach) {
+        // Check if already attached
+        if (attachments.some(a => a.name === file.name)) continue;
+
+        try {
+          const response = await fetch(file.path);
+          if (!response.ok) continue;
+          const blob = await response.blob();
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            attachments.push({
+              name: file.name,
+              size: blob.size,
+              type: file.type,
+              data: e.target.result.split(',')[1],
+              autoAttached: true
+            });
+            displayAttachments();
+          };
+          reader.readAsDataURL(blob);
+        } catch (err) {
+          console.warn('Could not auto-attach ' + file.path + ':', err);
+        }
+      }
     }
 
     function insertFollowUp() {
@@ -2227,32 +2311,80 @@
       editor.focus();
     }
 
-    // File attachments
-    function handleFileUpload() {
-      const files = document.getElementById('fileInput').files;
+    function insertHardCard() {
+      const editor = document.getElementById('bodyEditor');
+      // Pre-fill subject too
+      document.getElementById('subject').value = '⚠️ URGENT: Your Prepaid Benefits Are Waiting — Please Respond';
+      editor.innerHTML = `
+<p>Hi [Name],</p>
+
+<p>I've been trying to reach you by phone and haven't been able to get through — I want to make sure this doesn't fall through the cracks because <strong>this is time-sensitive</strong>.</p>
+
+<p>You have <strong>prepaid benefits on file</strong> that need to be confirmed and activated. These benefits were set aside specifically for you and your family, and I need just a few minutes of your time to make sure everything is properly set up before the window closes.</p>
+
+<p>Here's what's waiting for you:</p>
+<ul>
+  <li>✅ Prepaid life insurance benefits already in process</li>
+  <li>✅ Accidental Death Benefit (ADB) certificate</li>
+  <li>✅ Will Kit — estate planning document for your family</li>
+</ul>
+
+<p><strong>This is not a sales call.</strong> Your benefits have already been approved — I simply need to confirm your information and get everything finalized so your family is protected.</p>
+
+<p>Please reply to this email or call me directly as soon as possible:</p>
+
+<p>📞 <strong>[Your Phone Number]</strong></p>
+
+<p>I'll be available [days/hours]. If you'd prefer, you can also text me and we'll set up a quick call at a time that works for you.</p>
+
+<p>Please don't let this sit — your family's protection depends on it.</p>
+
+<p>Looking forward to hearing from you,</p>
+      `;
       
+      document.getElementById('presetMenu').classList.remove('active');
+      editor.focus();
+    }
+
+    function handleDragOver(event) {
+      event.preventDefault();
+      document.getElementById('dropZone').classList.add('drag-over');
+    }
+
+    function handleDragLeave(event) {
+      document.getElementById('dropZone').classList.remove('drag-over');
+    }
+
+    function handleDrop(event) {
+      event.preventDefault();
+      document.getElementById('dropZone').classList.remove('drag-over');
+      const files = event.dataTransfer.files;
+      processFiles(files);
+    }
+
+    function processFiles(files) {
       for (let file of files) {
-        if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        if (file.size > 10 * 1024 * 1024) {
           alert(`File "${file.name}" is too large. Maximum size is 10MB.`);
           continue;
         }
-        
-        // Convert to base64
         const reader = new FileReader();
         reader.onload = function(e) {
           attachments.push({
             name: file.name,
             size: file.size,
             type: file.type,
-            data: e.target.result.split(',')[1] // Remove data:type;base64, prefix
+            data: e.target.result.split(',')[1]
           });
-          
           displayAttachments();
         };
         reader.readAsDataURL(file);
       }
-      
-      // Reset input
+    }
+
+    // File attachments
+    function handleFileUpload() {
+      processFiles(document.getElementById('fileInput').files);
       document.getElementById('fileInput').value = '';
     }
 
@@ -2260,10 +2392,10 @@
       const list = document.getElementById('attachmentList');
       
       list.innerHTML = attachments.map((file, index) => `
-        <div class="attached-file">
-          <div class="attached-file-icon">📄</div>
+        <div class="attached-file ${file.autoAttached ? 'auto-attached' : ''}">
+          <div class="attached-file-icon">${file.type === 'application/pdf' ? '📄' : file.type.startsWith('image/') ? '🖼️' : '📎'}</div>
           <div class="attached-file-info">
-            <div class="attached-file-name">${escapeHtml(file.name)}</div>
+            <div class="attached-file-name">${escapeHtml(file.name)} ${file.autoAttached ? '<span class="auto-badge">AUTO</span>' : ''}</div>
             <div class="attached-file-size">${formatFileSize(file.size)}</div>
           </div>
           <div class="remove-attachment" onclick="removeAttachment(${index})">×</div>
@@ -2563,19 +2695,12 @@
         } else if (e.key === 'u') {
           e.preventDefault();
           formatText('underline');
-        } else if (e.key === 's') {
-          e.preventDefault();
-          saveDraft();
+        } else if (e.key === 'Enter' && e.shiftKey) {
+          // Shift+Enter = line break
         }
       }
     });
 
-    // Global keyboard shortcut for compose
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'c' && !e.ctrlKey && !e.metaKey && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
-        openCompose();
-      }
-    });
   </script>
 </body>
 </html>
