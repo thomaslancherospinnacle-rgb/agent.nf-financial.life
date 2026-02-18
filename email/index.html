@@ -1443,8 +1443,8 @@
           </div>
           <div class="preset-item-header">📞 Outreach</div>
           <div class="preset-item" onclick="insertHardCard()">
-            <strong>🚨 Hard Card — Urgent Benefits</strong>
-            <span>Not answering — urgent prepaid benefits notice</span>
+            <strong>📞 Hard Card — Benefits Follow-Up</strong>
+            <span>Not answering — professional benefits follow-up</span>
           </div>
           <div class="preset-item" onclick="insertFollowUp()">
             <strong>Follow-Up</strong>
@@ -2313,33 +2313,29 @@
 
     function insertHardCard() {
       const editor = document.getElementById('bodyEditor');
-      // Pre-fill subject too
-      document.getElementById('subject').value = '⚠️ URGENT: Your Prepaid Benefits Are Waiting — Please Respond';
+      // Pre-fill subject — clean, personal, no spam triggers
+      document.getElementById('subject').value = 'Following up on your benefits — [First Name]';
       editor.innerHTML = `
-<p>Hi [Name],</p>
+<p>Hi [First Name],</p>
 
-<p>I've been trying to reach you by phone and haven't been able to get through — I want to make sure this doesn't fall through the cracks because <strong>this is time-sensitive</strong>.</p>
+<p>I've tried reaching you by phone a couple of times and haven't been able to connect. I wanted to follow up by email so nothing slips through the cracks on my end.</p>
 
-<p>You have <strong>prepaid benefits on file</strong> that need to be confirmed and activated. These benefits were set aside specifically for you and your family, and I need just a few minutes of your time to make sure everything is properly set up before the window closes.</p>
+<p>I have some items on file for you that I'd like to go over — including your coverage details and a few documents I set aside for your family. It should only take a few minutes.</p>
 
-<p>Here's what's waiting for you:</p>
+<p>Specifically, I have the following ready for you:</p>
 <ul>
-  <li>✅ Prepaid life insurance benefits already in process</li>
-  <li>✅ Accidental Death Benefit (ADB) certificate</li>
-  <li>✅ Will Kit — estate planning document for your family</li>
+  <li>Your life insurance benefit summary</li>
+  <li>An Accidental Death Benefit (ADB) certificate</li>
+  <li>A Will Kit — an estate planning document I put together for your family</li>
 </ul>
 
-<p><strong>This is not a sales call.</strong> Your benefits have already been approved — I simply need to confirm your information and get everything finalized so your family is protected.</p>
-
-<p>Please reply to this email or call me directly as soon as possible:</p>
+<p>Would you be available for a quick call this week? You can reply here or reach me directly:</p>
 
 <p>📞 <strong>[Your Phone Number]</strong></p>
 
-<p>I'll be available [days/hours]. If you'd prefer, you can also text me and we'll set up a quick call at a time that works for you.</p>
+<p>Happy to work around your schedule — just let me know what time works best.</p>
 
-<p>Please don't let this sit — your family's protection depends on it.</p>
-
-<p>Looking forward to hearing from you,</p>
+<p>Talk soon,</p>
       `;
       
       document.getElementById('presetMenu').classList.remove('active');
@@ -2569,7 +2565,11 @@
               bcc: bccEmails.join(', '),
               subject: subject,
               html: fullHtml,
-              attachments: attachments
+              attachments: attachments,
+              headers: {
+                'List-Unsubscribe': '<mailto:unsubscribe@americanincome.life>',
+                'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click'
+              }
             })
           });
           
