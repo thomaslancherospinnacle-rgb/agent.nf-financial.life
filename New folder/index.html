@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Client Link Generator</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 20px; color: #333; }
+    h1 { font-size: 1.4rem; margin-bottom: 4px; }
+    p.sub { color: #666; font-size: 0.9rem; margin-bottom: 20px; }
+
+    .domain-row {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+    }
+    .domain-row input {
+      padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px;
+      font-size: 0.95rem; width: 280px;
+    }
+    .domain-row label { font-weight: bold; white-space: nowrap; }
+
+    .upload-area {
+      border: 2px dashed #aaa; border-radius: 8px; padding: 30px;
+      text-align: center; background: #fff; cursor: pointer;
+      margin-bottom: 20px; transition: border-color 0.2s;
+    }
+    .upload-area:hover { border-color: #4a90e2; }
+    .upload-area input { display: none; }
+    .upload-area span { font-size: 1rem; color: #666; }
+
+    .controls { display: flex; gap: 10px; margin-bottom: 16px; align-items: center; }
+    .controls input[type=text] {
+      padding: 7px 12px; border: 1px solid #ccc; border-radius: 6px;
+      font-size: 0.9rem; width: 240px;
+    }
+    button {
+      padding: 8px 16px; border: none; border-radius: 6px;
+      background: #4a90e2; color: #fff; cursor: pointer; font-size: 0.9rem;
+    }
+    button:hover { background: #357abd; }
+    button.sec { background: #6c757d; }
+    button.sec:hover { background: #545b62; }
+
+    #count { font-size: 0.85rem; color: #666; margin-left: auto; }
+
+    table { width: 100%; border-collapse: collapse; background: #fff;
+            border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+    thead tr { background: #4a90e2; color: #fff; }
+    th, td { padding: 10px 14px; text-align: left; font-size: 0.88rem; border-bottom: 1px solid #eee; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f0f7ff; }
+
+    a { color: #4a90e2; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .copy-btn {
+      padding: 3px 8px; font-size: 0.75rem; background: #e0e0e0; color: #333;
+      border-radius: 4px; cursor: pointer; border: none; margin-left: 6px;
+    }
+    .copy-btn:hover { background: #ccc; }
+
+    #placeholder { text-align: center; color: #aaa; padding: 40px; }
+  </style>
+</head>
+<body>
+
+<h1>Client Link Generator</h1>
+<p class="sub">Upload your leads CSV to generate address and phone hyperlinks per client.</p>
+
+<div class="domain-row">
+  <label>Domain:</label>
+  <input type="text" id="domain" value="fastpeoplesearch.com" placeholder="yourdomain.com">
+  <button onclick="rerender()">Apply</button>
+</div>
+
+<div class="upload-area" onclick="document.getElementById('fileInput').click()">
+  <input type="file" id="fileInput" accept=".csv" onchange="handleFile(event)">
+  <span>📂 Click to upload CSV file</span>
+</div>
+
+<div class="controls" id="controls" style="display:none">
+  <input type="text" id="search" placeholder="Search by name, address, phone…" oninput="renderTable()">
+  <button class="sec" onclick="exportCSV()">Export with Links</button>
+  <span id="count"></span>
+</div>
+
+<div id="output"><div id="placeholder">Upload a CSV to get started.</div></div>
+
+<script>
+let rows = [];
+
+function handleFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    rows = parseCSV(ev.target.result);
+    document.getElementById('controls').style.display = 'flex';
+    renderTable();
+  };
+  reader.readAsText(file);
+}
+
+function parseCSV(text) {
+  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+  const headers = parseCSVLine(lines[0]);
+  const result = [];
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    const vals = parseCSVLine(lines[i]);
+    const obj = {};
+    headers.forEach((h, idx) => obj[h.trim()] = (vals[idx] || '').trim());
+    result.push(obj);
+  }
+  return result;
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let cur = '', inQuote = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') { inQuote = !inQuote; }
+    else if (c === ',' && !inQuote) { result.push(cur); cur = ''; }
+    else { cur += c; }
+  }
+  result.push(cur);
+  return result;
+}
+
+function getDomain() {
+  let d = document.getElementById('domain').value.trim();
+  if (!d) d = 'fastpeoplesearch.com';
+  d = d.replace(/^https?:\/\//,'').replace(/\/$/,'');
+  return d;
+}
+
+function stateToAbbr(state) {
+  const map = {
+    'alabama':'al','alaska':'ak','arizona':'az','arkansas':'ar','california':'ca',
+    'colorado':'co','connecticut':'ct','delaware':'de','florida':'fl','georgia':'ga',
+    'hawaii':'hi','idaho':'id','illinois':'il','indiana':'in','iowa':'ia',
+    'kansas':'ks','kentucky':'ky','louisiana':'la','maine':'me','maryland':'md',
+    'massachusetts':'ma','michigan':'mi','minnesota':'mn','mississippi':'ms',
+    'missouri':'mo','montana':'mt','nebraska':'ne','nevada':'nv','new hampshire':'nh',
+    'new jersey':'nj','new mexico':'nm','new york':'ny','north carolina':'nc',
+    'north dakota':'nd','ohio':'oh','oklahoma':'ok','oregon':'or','pennsylvania':'pa',
+    'rhode island':'ri','south carolina':'sc','south dakota':'sd','tennessee':'tn',
+    'texas':'tx','utah':'ut','vermont':'vt','virginia':'va','washington':'wa',
+    'west virginia':'wv','wisconsin':'wi','wyoming':'wy'
+  };
+  return map[state.toLowerCase()] || state.toLowerCase().slice(0,2);
+}
+
+function slugifyAddress(addr) {
+  // CSV format: "4716 WALWIT ST, Dearborn, Michigan, 48126-XXXX"
+  const parts = addr.split(',').map(p => p.trim());
+  const street = (parts[0] || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const city   = (parts[1] || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const stateAbbr = stateToAbbr((parts[2] || '').trim());
+  const zip = (parts[3] || '').trim().replace(/^(\d{5}).*/, '$1');
+  return `${street}_${city}-${stateAbbr}${zip ? '-' + zip : ''}`;
+}
+
+function slugifyPhone(phone) {
+  // Format as digits with dashes: 734-657-3544
+  const digits = phone.replace(/\D/g, '');
+  if (digits.length === 10) return digits.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+  return digits;
+}
+
+function rerender() { if (rows.length) renderTable(); }
+
+function renderTable() {
+  const domain = getDomain();
+  const q = document.getElementById('search').value.toLowerCase();
+  const filtered = rows.filter(r =>
+    Object.values(r).some(v => v.toLowerCase().includes(q))
+  );
+  document.getElementById('count').textContent = `${filtered.length} of ${rows.length} records`;
+
+  if (!filtered.length) {
+    document.getElementById('output').innerHTML = '<div id="placeholder">No matching records.</div>';
+    return;
+  }
+
+  let html = `<table><thead><tr>
+    <th>Name</th><th>Address Link</th><th>Phone Link</th><th>Group</th><th>Email</th>
+  </tr></thead><tbody>`;
+
+  filtered.forEach(r => {
+    const addrSlug = slugifyAddress(r.Address || '');
+    const phoneSlug = slugifyPhone(r.Number || '');
+    const addrURL = `https://${domain}/address/${addrSlug}`;
+    const phoneURL = `https://${domain}/${phoneSlug}`;
+
+    html += `<tr>
+      <td><strong>${r.Name || ''}</strong></td>
+      <td>
+        <a href="${addrURL}" target="_blank">${r.Address || ''}</a>
+        <button class="copy-btn" onclick="copyText('${addrURL}')">Copy</button>
+      </td>
+      <td>
+        <a href="${phoneURL}" target="_blank">${r.Number || ''}</a>
+        <button class="copy-btn" onclick="copyText('${phoneURL}')">Copy</button>
+      </td>
+      <td>${r.Group || ''}</td>
+      <td>${r.Email || ''}</td>
+    </tr>`;
+  });
+
+  html += '</tbody></table>';
+  document.getElementById('output').innerHTML = html;
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    alert('Copied: ' + text);
+  });
+}
+
+function exportCSV() {
+  const domain = getDomain();
+  let csv = 'Name,Number,Address,Address URL,Phone URL,Group,Email\n';
+  rows.forEach(r => {
+    const addrURL = `https://${domain}/address/${slugifyAddress(r.Address || '')}`;
+    const phoneURL = `https://${domain}/${slugifyPhone(r.Number || '')}`;
+    csv += [r.Name, r.Number, r.Address, addrURL, phoneURL, r.Group, r.Email]
+      .map(v => `"${(v||'').replace(/"/g,'""')}"`)
+      .join(',') + '\n';
+  });
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'clients-with-links.csv';
+  a.click();
+}
+</script>
+</body>
+</html>
