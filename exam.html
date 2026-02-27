@@ -161,11 +161,32 @@
       color: rgba(220,255,233,.96);
     }
     .choice.wrong{
-      border-color: rgba(255,90,122,.55);
-      box-shadow: 0 0 0 4px rgba(255,90,122,.10);
-      background: rgba(255,90,122,.12);
-      color: rgba(255,220,228,.96);
-    }
+  border-color: rgba(255,90,122,.55);
+  box-shadow: 0 0 0 4px rgba(255,90,122,.10);
+  background: rgba(255,90,122,.12);
+  color: rgba(255,220,228,.96);
+}
+
+/* === Study Mode UI === */
+#showAnswerBtn{
+  transition: opacity .25s ease, transform .25s ease;
+}
+
+#showAnswerBtn.hidden{
+  opacity:0;
+  pointer-events:none;
+  transform: translateY(4px);
+}
+
+.studyBadge{
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:900;
+  border:1px solid rgba(45,212,191,.35);
+  background: rgba(45,212,191,.15);
+  color: rgba(220,255,233,.95);
+}
     .exp{
       margin-top:12px;
       padding:12px;
@@ -344,10 +365,11 @@
         </div>
 
         <div class="right">
-          <span id="userBadge" class="badge">Checking login…</span>
-          <button id="logoutBtn" class="btn secondary" style="display:none">Logout</button>
-        </div>
-      </div>
+  <span id="userBadge" class="badge">Checking login…</span>
+  <button id="logoutBtn" class="btn secondary" style="display:none">Logout</button>
+</div>
+</div> 
+
 
       <div class="body">
         <div class="grid">
@@ -376,6 +398,25 @@
             </div>
           </div>
 
+          
+          <div class="row2">
+            <div>
+              <label>Mode</label>
+              <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
+                <label style="display:flex; gap:10px; align-items:center; cursor:pointer; user-select:none; margin:0">
+                  <input id="studyMode" type="checkbox" style="width:auto; accent-color: var(--accent)" />
+                  <span class="muted" style="font-size:13px">Study Mode (no timer, no score upload, show explanations)</span>
+                </label>
+              </div>
+            </div>
+            <div>
+              <label>Tip</label>
+              <div class="muted" style="font-size:13px">
+                In Study Mode you can use <b>Show Answer</b> if you just want to review without guessing.
+              </div>
+            </div>
+          </div>
+
           <div class="actions">
             <button id="loadBtn" class="btn secondary">Load Exam Bank</button>
             <button id="startBtn" class="btn" disabled>Start Exam</button>
@@ -400,10 +441,10 @@
 
             <div class="question" id="qText">—</div>
             <div class="choices" id="choices"></div>
-            <div style="margin-top:14px">
-              <button id="nextBtn" class="btn secondary" disabled style="width:100%">
-                Next
-              </button>
+            
+            <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap">
+              <button id="showAnswerBtn" class="btn secondary hidden" style="flex:1; min-width:180px">Show Answer</button>
+              <button id="nextBtn" class="btn secondary" disabled style="flex:2; min-width:220px">Next</button>
             </div>
             <div class="exp" id="explainBox">
               <b>Explanation:</b>
@@ -768,6 +809,7 @@ const nextBtn = document.getElementById("nextBtn");
 const finishBtn = document.getElementById("finishBtn");
 const qCountEl = document.getElementById("qCount");
 const loadedPill = document.getElementById("loadedPill");
+const showAnswerBtn = document.getElementById("showAnswerBtn");
 
 const examArea = document.getElementById("examArea");
 const doneArea = document.getElementById("doneArea");
@@ -800,6 +842,21 @@ let locked = false;
 
 let startTs = 0;
 let timerInt = null;
+
+function isStudyMode(){ const el = document.getElementById("studyMode"); return !!(el && el.checked); }
+
+function updateStudyUI() {
+  const checkbox = document.getElementById("studyMode");
+  if (!showAnswerBtn || !checkbox) return;
+
+  // Only show Show Answer when Study Mode is checked
+  if (checkbox.checked) {
+    showAnswerBtn.classList.remove("hidden");
+  } else {
+    showAnswerBtn.classList.add("hidden");
+  }
+}
+
 
 // Missed questions tracking
 let missedThisSession = []; // questions missed in current exam
@@ -947,6 +1004,7 @@ function resetExamState(){
   retakeMissedArea.style.display = "none";
   nextBtn.disabled = true;
   finishBtn.disabled = true;
+  if (showAnswerBtn) showAnswerBtn.disabled = true;
   progressEl.textContent = "—";
   scoreEl.textContent = "—";
   timerEl.textContent = "0:00";
@@ -982,7 +1040,12 @@ function render(){
   nextBtn.disabled = true;
   finishBtn.disabled = false;
 
-  examArea.style.display = "";
+  
+  if (showAnswerBtn) {
+    showAnswerBtn.disabled = false;
+    showAnswerBtn.textContent = isStudyMode() ? "Show Answer" : "Show Answer";
+  }
+examArea.style.display = "";
   doneArea.style.display = "none";
 
   explainBox.classList.remove("show");
@@ -1005,15 +1068,19 @@ function render(){
   }
 
   progressEl.textContent = `${idx + 1}/${deck.length}`;
-  scoreEl.textContent = `${correct}/${answered}`;
+  scoreEl.textContent = isStudyMode() ? "—" : `${correct}/${answered}`;
 
   statusPill.textContent = "Pick an answer";
   statusPill.className = "badge";
 
   for (const opt of choices){
-    const c = document.createElement("div");
-    c.className = "choice";
-    c.innerHTML = highlightTerms(opt);
+  const c = document.createElement("div");
+  c.className = "choice";
+
+  // Store raw answer safely
+  c.dataset.answer = opt;
+
+  c.innerHTML = highlightTerms(opt);
 
     c.addEventListener("click", () => {
       if (locked) return;
@@ -1023,7 +1090,7 @@ function render(){
       const kids = Array.from(choicesEl.children);
       kids.forEach(k => k.classList.add("locked"));
 
-      const isRight = opt === q.correct;
+      const isRight = c.dataset.answer === q.correct;
 
       // Track domain stats
       const domain = q.domain || q.category || "General";
@@ -1035,8 +1102,10 @@ function render(){
 
       // paint
       kids.forEach(k => {
-        if (k.textContent === q.correct) k.classList.add("correct");
-      });
+  if (k.dataset.answer === q.correct) {
+    k.classList.add("correct");
+  }
+   });
       if (!isRight){
         c.classList.add("wrong");
         
@@ -1052,10 +1121,12 @@ function render(){
         });
       }
 
-      answered++;
-      if (isRight) correct++;
+      if (!isStudyMode()) {
+        answered++;
+        if (isRight) correct++;
+      }
 
-      scoreEl.textContent = `${correct}/${answered}`;
+      scoreEl.textContent = isStudyMode() ? "—" : `${correct}/${answered}`;
 
       // show explanation
       const exp = (q.explanation || "").trim();
@@ -1101,7 +1172,8 @@ startBtn.addEventListener("click", () => {
   correct = 0;
   answered = 0;
 
-  startTimer();
+  if (!isStudyMode()) startTimer();
+  else { timerEl.textContent = "—"; startTs = Date.now(); }
   render();
 
   startBtn.disabled = true;
@@ -1110,6 +1182,36 @@ startBtn.addEventListener("click", () => {
   qCountEl.disabled = true;
   retakeMissedBtn.disabled = true;
 });
+
+if (showAnswerBtn) {
+  showAnswerBtn.addEventListener("click", () => {
+    if (locked) return;
+    const q = deck[idx];
+    if (!q) return;
+
+    locked = true;
+    const kids = Array.from(choicesEl.children);
+    kids.forEach(k => k.classList.add("locked"));
+
+    // Highlight correct answer
+    kids.forEach(k => {
+  if (k.dataset.answer === q.correct) {
+    k.classList.add("correct");
+  }
+});
+
+    // Show explanation immediately
+    const exp = (q.explanation || "").trim();
+    explainText.innerHTML = highlightTerms(exp || "No explanation provided.");
+    explainBox.classList.add("show");
+
+    statusPill.textContent = "Answer Revealed";
+    statusPill.className = "badge ok";
+
+    nextBtn.disabled = false;
+    if (showAnswerBtn) showAnswerBtn.disabled = true;
+  });
+}
 
 nextBtn.addEventListener("click", () => {
   if (idx < deck.length - 1){
@@ -1158,7 +1260,8 @@ takeMissedBtn.addEventListener("click", () => {
 });
 
 async function finishExam(){
-  const time_sec = stopTimer();
+  const study = isStudyMode();
+  const time_sec = study ? Math.floor((Date.now() - startTs) / 1000) : stopTimer();
   const total = deck.length || 0;
 
   const score_pct = total ? Math.round((correct / total) * 100) : 0;
@@ -1217,6 +1320,24 @@ async function finishExam(){
   qCountEl.disabled = false;
   nextBtn.disabled = true;
   finishBtn.disabled = true;
+
+  if (study) {
+    uploadPill.style.display = "none";
+    // Re-enable setup UI
+    startBtn.disabled = false;
+    loadBtn.disabled = false;
+    examSelect.disabled = false;
+    qCountEl.disabled = false;
+    nextBtn.disabled = true;
+    finishBtn.disabled = true;
+    retakeMissedArea.style.display = "none";
+    document.getElementById("doneText").innerHTML += `
+      <div style="margin-top:12px;color:var(--muted);font-size:13px">
+        Study Mode: score was not uploaded.
+      </div>
+    `;
+    return;
+  }
 
   // Upload score (existing logic)
   uploadPill.style.display = "";
@@ -1402,17 +1523,19 @@ examSelect.addEventListener("change", async () => {
   }
 });
 
+document.getElementById("studyMode")
+  .addEventListener("change", updateStudyUI);
+
 /**********************
  * BOOT
  **********************/
 async function boot() {
   try {
-    await requireLogin();         // blocks if not logged in
-    // auto-load initial exam bank
+    await requireLogin();
     await loadExamBank();
-    // load missed questions count
     await loadMissedQuestions();
-  } catch(e) {
+    updateStudyUI(); // <-- add this
+  } catch (e) {
     console.error("Auto-load failed:", e);
     statusPill.textContent = "Click 'Load Exam Bank' to start";
     statusPill.className = "badge err";
@@ -1420,6 +1543,62 @@ async function boot() {
 }
 
 boot();
+</script>
+
+
+<script>
+(function() {
+  function addBackButton(){
+    if (document.querySelector('[data-global-back-button="1"]')) return;
+
+    var btn = document.createElement("button");
+    btn.setAttribute("data-global-back-button","1");
+    btn.innerHTML = "← Back";
+
+    // Use site styling
+    btn.style.position = "fixed";
+    btn.style.top = "20px";
+    btn.style.left = "20px";
+    btn.style.padding = "10px 18px";
+    btn.style.borderRadius = "8px";
+    btn.style.border = "1px solid rgba(255,255,255,0.1)";
+    btn.style.background = "rgba(255,255,255,0.05)";
+    btn.style.backdropFilter = "blur(6px)";
+    btn.style.color = "inherit";
+    btn.style.fontFamily = "inherit";
+    btn.style.fontSize = "14px";
+    btn.style.fontWeight = "500";
+    btn.style.cursor = "pointer";
+    btn.style.transition = "all 0.2s ease";
+    btn.style.zIndex = "9999";
+
+    btn.addEventListener("mouseenter", function(){
+        btn.style.background = "rgba(255,255,255,0.12)";
+        btn.style.transform = "translateY(-2px)";
+    });
+
+    btn.addEventListener("mouseleave", function(){
+        btn.style.background = "rgba(255,255,255,0.05)";
+        btn.style.transform = "translateY(0px)";
+    });
+
+    btn.addEventListener("click", function() {
+      if (document.referrer && document.referrer !== "") {
+        window.history.back();
+      } else {
+        window.location.href = "/home.html";
+      }
+    });
+
+    document.body.appendChild(btn);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", addBackButton);
+  } else {
+    addBackButton();
+  }
+})();
 </script>
 </body>
 </html>
