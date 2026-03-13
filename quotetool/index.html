@@ -97,6 +97,67 @@ body>*{position:relative;z-index:1}
 .addon-tier-total span{display:block;margin-top:4px;font-family:var(--mono);font-size:16px;color:var(--green);letter-spacing:0}
 @media (max-width:980px){.a71-addon-grid,.a71-benefits{grid-template-columns:1fr}}
 @media (max-width:700px){.header{padding:12px!important}.button-goto-grid,.option-stats-grid-container,.option-group{max-width:none}.a71-addon-title{font-size:18px}}
+
+/* household setup makeover */
+.header .piA > .option-stats-grid-container,
+.header .piB > .option-stats-grid-container{display:none!important}
+#option-builder-slide{margin-top:14px!important}
+.setup-shell{max-width:1320px;margin:24px auto 18px auto;padding:0 6px}
+.setup-hero{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:stretch}
+.setup-card,.hourpower-card,.setup-mini-card{background:linear-gradient(180deg,var(--navy2),var(--navy3));border:1px solid var(--border2);border-radius:20px;box-shadow:0 18px 40px rgba(0,0,0,.24)}
+.setup-card{padding:24px}
+.setup-eyebrow{font-family:var(--cond);font-size:12px;letter-spacing:1.8px;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+.setup-title{font-family:var(--display);font-size:38px;line-height:1.05;margin:0 0 10px 0;color:var(--text)}
+.setup-sub{color:var(--text2);font-size:14px;line-height:1.45;max-width:64ch;margin-bottom:18px}
+.setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.setup-person{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:18px;padding:16px}
+.setup-person-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.setup-person-title{font-family:var(--cond);font-size:16px;letter-spacing:1px;text-transform:uppercase;color:var(--gold)}
+.setup-pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border2);padding:7px 11px;border-radius:999px;background:var(--gold-dim);font-family:var(--cond);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gold2)}
+.setup-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.setup-field{display:flex;flex-direction:column;gap:6px}
+.setup-field.span-2{grid-column:span 2}
+.setup-field label{font-family:var(--cond);font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--text2)}
+.setup-input,.setup-select{width:100%;background:var(--navy)!important;border:1px solid var(--border2)!important;border-radius:12px!important;color:var(--text)!important;padding:12px 13px;font-family:var(--font)!important;font-size:15px;box-sizing:border-box}
+.setup-input::placeholder{color:var(--muted)}
+.setup-input:focus,.setup-select:focus{outline:none;border-color:var(--gold)!important;box-shadow:0 0 0 2px var(--gold-dim)}
+.setup-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:rgba(0,0,0,.18);border:1px solid var(--border);border-radius:14px}
+.setup-toggle strong{display:block;font-family:var(--cond);font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--gold)}
+.setup-toggle span{display:block;font-size:12px;color:var(--text2)}
+.setup-toggle input{accent-color:var(--gold);transform:scale(1.15)}
+.setup-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+.setup-btn{appearance:none;border:none;border-radius:14px;padding:13px 18px;font-family:var(--cond);font-size:13px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .15s ease}
+.setup-btn.primary{background:linear-gradient(180deg,var(--gold2),var(--gold));color:#101722;box-shadow:0 12px 28px rgba(201,168,76,.22)}
+.setup-btn.secondary{background:var(--navy4);border:1px solid var(--border2);color:var(--text2)}
+.setup-btn:hover{transform:translateY(-1px)}
+.hourpower-card{padding:22px;display:flex;flex-direction:column;gap:16px}
+.hp-title{font-family:var(--display);font-size:28px;color:var(--text);margin:0}
+.hp-sub{font-size:13px;color:var(--text2);line-height:1.45}
+.hp-methods{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hp-radio{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--border);border-radius:14px;background:rgba(0,0,0,.18);cursor:pointer}
+.hp-radio input{accent-color:var(--gold)}
+.hp-radio span{font-family:var(--cond);font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--text)}
+.hp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hp-output-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.hp-stat{padding:14px;border-radius:16px;background:linear-gradient(180deg,var(--navy3),var(--navy4));border:1px solid var(--border)}
+.hp-kicker{font-family:var(--cond);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:8px}
+.hp-value{font-family:var(--mono);font-size:28px;color:var(--gold3)}
+.hp-note{font-size:12px;color:var(--text2);margin-top:5px}
+.hp-budget-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hp-budget{padding:16px;border-radius:16px;background:rgba(0,0,0,.18);border:1px solid var(--border);transition:all .15s ease}
+.hp-budget.active{border-color:var(--gold2);box-shadow:0 0 0 2px var(--gold-dim)}
+.hp-budget strong{display:block;font-family:var(--cond);font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--gold)}
+.hp-budget .amt{display:block;margin-top:8px;font-family:var(--mono);font-size:24px;color:var(--green)}
+.hp-budget .mini{display:block;margin-top:6px;font-size:12px;color:var(--text2)}
+.setup-mini-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
+.setup-mini-card{padding:14px 16px}
+.setup-mini-card .label{display:block;font-family:var(--cond);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:8px}
+.setup-mini-card .value{display:block;font-family:var(--mono);font-size:20px;color:var(--gold3)}
+.hourpower-tier-meta{margin-top:6px;font-size:11px;color:var(--text2);line-height:1.35}
+.household-hidden{display:none!important}
+@media (max-width:1100px){.setup-hero{grid-template-columns:1fr}.setup-mini-grid,.hp-output-grid{grid-template-columns:1fr 1fr}}
+@media (max-width:760px){.setup-grid,.setup-fields,.hp-grid,.hp-methods,.hp-budget-grid,.setup-mini-grid,.hp-output-grid{grid-template-columns:1fr}.setup-title{font-size:30px}.setup-shell{padding:0}.setup-field.span-2{grid-column:span 1}}
+
 </style>
 
 </head>
@@ -325,6 +386,153 @@ optionIncomeInputB.addEventListener('input', handleInputChangeB);
 <div style="margin-top: 10vh;">
 <link rel="stylesheet" href="./files/option-builder-style.css" type="text/css">
 <script src="./files/optionBuilderFormat.js"></script>
+
+<div class="setup-shell">
+  <div class="setup-hero">
+    <section class="setup-card">
+      <div class="setup-eyebrow">Household setup</div>
+      <h1 class="setup-title">Start the quote the right way.</h1>
+      <div class="setup-sub">Set up the main insured, optional spouse, household income, and Hour Power before you move into the quote columns. The quote engine underneath stays intact — this just makes it cleaner, faster, and easier to read.</div>
+      <div class="setup-grid">
+        <div class="setup-person">
+          <div class="setup-person-head">
+            <div class="setup-person-title">Main insured</div>
+            <span class="setup-pill">Required</span>
+          </div>
+          <div class="setup-fields">
+            <div class="setup-field span-2">
+              <label for="setupNameA">Name</label>
+              <input id="setupNameA" class="setup-input" placeholder="Main insured name">
+            </div>
+            <div class="setup-field">
+              <label for="setupAgeA">Age</label>
+              <select id="setupAgeA" class="setup-select"></select>
+            </div>
+            <div class="setup-field">
+              <label for="setupTobA">TU / NTU</label>
+              <select id="setupTobA" class="setup-select">
+                <option value="ntu" selected>NTU</option>
+                <option value="tu">TU</option>
+              </select>
+            </div>
+            <div class="setup-field span-2">
+              <label for="setupSexA">Sex</label>
+              <select id="setupSexA" class="setup-select">
+                <option value="male" selected>Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="setup-person">
+          <div class="setup-person-head">
+            <div class="setup-person-title">Spouse</div>
+            <label class="setup-pill" style="cursor:pointer"><input id="setupIncludeB" type="checkbox" checked style="accent-color:var(--gold)"> Include spouse</label>
+          </div>
+          <div class="setup-fields" id="setupSpouseFields">
+            <div class="setup-field span-2">
+              <label for="setupNameB">Name</label>
+              <input id="setupNameB" class="setup-input" placeholder="Spouse name">
+            </div>
+            <div class="setup-field">
+              <label for="setupAgeB">Age</label>
+              <select id="setupAgeB" class="setup-select"></select>
+            </div>
+            <div class="setup-field">
+              <label for="setupTobB">TU / NTU</label>
+              <select id="setupTobB" class="setup-select">
+                <option value="ntu" selected>NTU</option>
+                <option value="tu">TU</option>
+              </select>
+            </div>
+            <div class="setup-field span-2">
+              <label for="setupSexB">Sex</label>
+              <select id="setupSexB" class="setup-select">
+                <option value="male" selected>Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="setup-actions">
+        <button type="button" class="setup-btn primary" id="applyHouseholdSetup">Apply household setup</button>
+        <button type="button" class="setup-btn secondary" id="jumpToQuotesBtn">Jump to quotes</button>
+      </div>
+      <div class="setup-mini-grid">
+        <div class="setup-mini-card"><span class="label">Main age / tobacco</span><span class="value" id="setupSummaryA">30 · NTU</span></div>
+        <div class="setup-mini-card"><span class="label">Spouse status</span><span class="value" id="setupSummaryB">Included</span></div>
+        <div class="setup-mini-card"><span class="label">Home income</span><span class="value" id="setupSummaryIncome">$0/mo</span></div>
+        <div class="setup-mini-card"><span class="label">Focus budget</span><span class="value" id="setupSummaryBudget">$0/mo</span></div>
+      </div>
+    </section>
+    <aside class="hourpower-card">
+      <div>
+        <div class="setup-eyebrow">Hour Power</div>
+        <h2 class="hp-title">Make the budget visual.</h2>
+        <div class="hp-sub">Choose whether to calculate hourly value from monthly home income using 160 hours per month, or type the hourly value directly. Then compare 1 hour or 2 hours per week.</div>
+      </div>
+      <div class="hp-methods">
+        <label class="hp-radio"><input type="radio" name="hpMethod" value="monthly" checked><span>Use home income</span></label>
+        <label class="hp-radio"><input type="radio" name="hpMethod" value="hourly"><span>Input hourly</span></label>
+      </div>
+      <div class="hp-grid">
+        <div class="setup-field">
+          <label for="setupHomeIncome">Home income / month</label>
+          <input id="setupHomeIncome" class="setup-input" inputmode="numeric" placeholder="6500">
+        </div>
+        <div class="setup-field" id="hourlyFieldWrap">
+          <label for="setupHourlyInput">Hourly value</label>
+          <input id="setupHourlyInput" class="setup-input" inputmode="decimal" placeholder="25">
+        </div>
+        <div class="setup-field">
+          <label for="setupHoursPerWeek">Hours per week</label>
+          <select id="setupHoursPerWeek" class="setup-select">
+            <option value="1" selected>1 hour / week</option>
+            <option value="2">2 hours / week</option>
+          </select>
+        </div>
+        <div class="setup-field">
+          <label for="setupQuoteFocus">Show quotes for</label>
+          <select id="setupQuoteFocus" class="setup-select">
+            <option value="A" selected>Main</option>
+            <option value="B">Spouse</option>
+          </select>
+        </div>
+      </div>
+      <div class="hp-output-grid">
+        <div class="hp-stat">
+          <div class="hp-kicker">Calculated hourly</div>
+          <div class="hp-value" id="hpHourlyValue">$0.00</div>
+          <div class="hp-note">Based on 160 hours per month.</div>
+        </div>
+        <div class="hp-stat">
+          <div class="hp-kicker">Selected monthly set-aside</div>
+          <div class="hp-value" id="hpSelectedBudget">$0.00</div>
+          <div class="hp-note" id="hpSelectedBudgetNote">0 hours per month selected.</div>
+        </div>
+        <div class="hp-stat">
+          <div class="hp-kicker">Quote focus</div>
+          <div class="hp-value" id="hpFocusValue">Main</div>
+          <div class="hp-note">Use the tab switch below any time.</div>
+        </div>
+      </div>
+      <div class="hp-budget-grid">
+        <div class="hp-budget active" id="hpBudget1">
+          <strong>1 hour a week</strong>
+          <span class="amt" id="hpBudgetAmt1">$0.00</span>
+          <span class="mini">4 hours per month</span>
+        </div>
+        <div class="hp-budget" id="hpBudget2">
+          <strong>2 hours a week</strong>
+          <span class="amt" id="hpBudgetAmt2">$0.00</span>
+          <span class="mini">8 hours per month</span>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
 <div class="button-goto-grid no-slide" id="option-builder-slide">
   <div style="display: flex; flex-direction: row; align-items: center;">
     <button onclick="showPiA(); calculatePremium(&#39;A&#39;); toggleSeniorShowHide(&#39;A&#39;); toggleCopyPrimaryButtonVisibilityOff();" class="button-goto-primary">Principal</button>
@@ -1120,6 +1328,131 @@ function optionClearFaceAmounts(pi) {
   var originalShowPiB = window.showPiB;
   if(typeof originalShowPiA === 'function') window.showPiA = function(){ var out=originalShowPiA.apply(this, arguments); setTimeout(refreshAll, 0); return out; };
   if(typeof originalShowPiB === 'function') window.showPiB = function(){ var out=originalShowPiB.apply(this, arguments); setTimeout(refreshAll, 0); return out; };
+})();
+</script>
+
+
+<script>
+(function(){
+  function byId(id){ return document.getElementById(id); }
+  function money(n){ return '$' + (Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  function moneyMo(n){ return money(n) + '/mo'; }
+  function cleanNum(v){ return Number(String(v || '').replace(/[^0-9.]/g,'')) || 0; }
+  function fillAgeSelect(id){
+    var el = byId(id); if(!el || el.options.length) return;
+    for(var i=18;i<=80;i++){
+      var opt=document.createElement('option'); opt.value=String(i); opt.textContent=String(i); if(i===30) opt.selected=true; el.appendChild(opt);
+    }
+  }
+  function setBackendValue(id, value){ var el=byId(id); if(el) el.value=value; }
+  function setIncome(id, amount){ var el=byId(id); if(el) el.value = amount ? Math.round(amount).toLocaleString() : ''; }
+  function updateHourPower(){
+    var method = (document.querySelector('input[name="hpMethod"]:checked')||{}).value || 'monthly';
+    var homeIncome = cleanNum(byId('setupHomeIncome').value);
+    var directHourly = cleanNum(byId('setupHourlyInput').value);
+    var selectedHours = Number((byId('setupHoursPerWeek')||{}).value || 1);
+    var hourly = method === 'hourly' ? directHourly : (homeIncome / 160);
+    var budget1 = hourly * 4;
+    var budget2 = hourly * 8;
+    var selectedBudget = selectedHours === 2 ? budget2 : budget1;
+    byId('hourlyFieldWrap').style.opacity = method === 'hourly' ? '1' : '.65';
+    byId('setupHourlyInput').disabled = method !== 'hourly';
+    byId('hpHourlyValue').textContent = money(hourly);
+    byId('hpSelectedBudget').textContent = money(selectedBudget);
+    byId('hpSelectedBudgetNote').textContent = (selectedHours === 2 ? '8' : '4') + ' hours per month selected.';
+    byId('hpBudgetAmt1').textContent = money(budget1);
+    byId('hpBudgetAmt2').textContent = money(budget2);
+    byId('hpBudget1').classList.toggle('active', selectedHours === 1);
+    byId('hpBudget2').classList.toggle('active', selectedHours === 2);
+    byId('setupSummaryIncome').textContent = moneyMo(homeIncome);
+    byId('setupSummaryBudget').textContent = moneyMo(selectedBudget);
+    var focus = (byId('setupQuoteFocus')||{}).value || 'A';
+    byId('hpFocusValue').textContent = focus === 'B' ? 'Spouse' : 'Main';
+    updateTierHourPower(hourly);
+  }
+  function updateTierHourPower(hourly){
+    ['A','B'].forEach(function(pi){
+      ['platinum','gold','silver'].forEach(function(tier){
+        var host = byId(tier + 'AddonTotal' + pi);
+        if(!host) return;
+        var meta = host.querySelector('.hourpower-tier-meta');
+        if(!meta){ meta = document.createElement('div'); meta.className='hourpower-tier-meta'; host.appendChild(meta); }
+        var text = host.querySelector('span') ? host.querySelector('span').textContent : '';
+        var premium = cleanNum(text);
+        if(!premium){
+          var base = byId(tier+'Result'+pi);
+          premium = cleanNum(base ? base.textContent : '');
+        }
+        if(!premium || !hourly){ meta.textContent = 'Hour Power will show here once income or hourly value is entered.'; return; }
+        var hoursPerMonth = premium / hourly;
+        var hoursPerWeek = hoursPerMonth / 4;
+        meta.textContent = '≈ ' + hoursPerWeek.toFixed(2) + ' hrs/week · ' + hoursPerMonth.toFixed(2) + ' hrs/month at ' + money(hourly) + '/hr';
+      });
+    });
+  }
+  function syncSetupSummaries(){
+    byId('setupSummaryA').textContent = byId('setupAgeA').value + ' · ' + byId('setupTobA').value.toUpperCase();
+    var spouseOn = byId('setupIncludeB').checked;
+    byId('setupSummaryB').textContent = spouseOn ? (byId('setupAgeB').value + ' · ' + byId('setupTobB').value.toUpperCase()) : 'Not included';
+    byId('setupSpouseFields').style.opacity = spouseOn ? '1' : '.45';
+    Array.from(byId('setupSpouseFields').querySelectorAll('input,select')).forEach(function(el){ if(el.id !== 'setupIncludeB') el.disabled = !spouseOn; });
+    var spouseBtn = document.querySelector('.button-goto-spouse');
+    if(spouseBtn) spouseBtn.style.display = spouseOn ? 'inline-flex' : 'none';
+    var spouseFocusOpt = byId('setupQuoteFocus').querySelector('option[value="B"]');
+    if(spouseFocusOpt) spouseFocusOpt.disabled = !spouseOn;
+    if(!spouseOn && byId('setupQuoteFocus').value === 'B') byId('setupQuoteFocus').value = 'A';
+    var bPanels = document.querySelectorAll('.option-bigboy-container.piB, .header .piB');
+    bPanels.forEach(function(el){ if(!spouseOn) el.classList.add('household-hidden'); else el.classList.remove('household-hidden'); });
+    updateHourPower();
+  }
+  function applyHouseholdSetup(goFocus){
+    var spouseOn = byId('setupIncludeB').checked;
+    setBackendValue('optionNameInputA', byId('setupNameA').value);
+    setBackendValue('optionAgeInputA', byId('setupAgeA').value);
+    setBackendValue('optionTobInputA', byId('setupTobA').value);
+    setBackendValue('optionSexInputA', byId('setupSexA').value);
+    setIncome('optionIncomeInputA', cleanNum(byId('setupHomeIncome').value));
+    if(spouseOn){
+      setBackendValue('optionNameInputB', byId('setupNameB').value);
+      setBackendValue('optionAgeInputB', byId('setupAgeB').value);
+      setBackendValue('optionTobInputB', byId('setupTobB').value);
+      setBackendValue('optionSexInputB', byId('setupSexB').value);
+      setIncome('optionIncomeInputB', cleanNum(byId('setupHomeIncome').value));
+    } else {
+      setBackendValue('optionNameInputB', '');
+      setIncome('optionIncomeInputB', 0);
+      var a71b = byId('a71EnabledB'); if(a71b) a71b.checked = false;
+    }
+    if(typeof handleInputChange === 'function') try{ handleInputChange(); }catch(e){}
+    if(typeof handleInputChangeB === 'function') try{ handleInputChangeB(); }catch(e){}
+    if(typeof updateOptionAveragePremium === 'function') try{ updateOptionAveragePremium(byId('optionIncomeInputA').value); }catch(e){}
+    if(typeof updateOptionAveragePremiumB === 'function') try{ updateOptionAveragePremiumB(byId('optionIncomeInputB').value); }catch(e){}
+    if(typeof calculatePremium === 'function'){
+      try{ calculatePremium('A'); }catch(e){}
+      if(spouseOn){ try{ calculatePremium('B'); }catch(e){} }
+    }
+    if(goFocus === 'B' && spouseOn){ if(typeof showPiB === 'function') showPiB(); }
+    else { if(typeof showPiA === 'function') showPiA(); }
+    syncSetupSummaries();
+    updateHourPower();
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    var a71B = document.querySelector('.option-bigboy-container.piA .a71-addon-card[data-pi="B"]');
+    var spouseForm = document.querySelector('.option-bigboy-container.piB form');
+    if(a71B && spouseForm){ spouseForm.insertAdjacentElement('afterbegin', a71B); }
+    ['setupAgeA','setupAgeB'].forEach(fillAgeSelect);
+    ['setupNameA','setupNameB','setupHomeIncome','setupHourlyInput'].forEach(function(id){ var el=byId(id); if(el) el.addEventListener('input', function(){ if(id==='setupHomeIncome' || id==='setupHourlyInput') updateHourPower(); }); });
+    ['setupAgeA','setupTobA','setupSexA','setupAgeB','setupTobB','setupSexB','setupIncludeB','setupHoursPerWeek','setupQuoteFocus'].forEach(function(id){ var el=byId(id); if(el) el.addEventListener('change', syncSetupSummaries); });
+    document.querySelectorAll('input[name="hpMethod"]').forEach(function(el){ el.addEventListener('change', updateHourPower); });
+    byId('applyHouseholdSetup').addEventListener('click', function(){ applyHouseholdSetup(byId('setupQuoteFocus').value); });
+    byId('jumpToQuotesBtn').addEventListener('click', function(){ applyHouseholdSetup(byId('setupQuoteFocus').value); var nav=byId('option-builder-slide'); if(nav) nav.scrollIntoView({behavior:'smooth', block:'start'}); });
+    var mainBtn = document.querySelector('.button-goto-primary');
+    var spouseBtn = document.querySelector('.button-goto-spouse');
+    if(mainBtn) mainBtn.addEventListener('click', function(){ byId('setupQuoteFocus').value='A'; updateHourPower(); });
+    if(spouseBtn) spouseBtn.addEventListener('click', function(){ byId('setupQuoteFocus').value='B'; updateHourPower(); });
+    syncSetupSummaries();
+    applyHouseholdSetup('A');
+  });
 })();
 </script>
 
