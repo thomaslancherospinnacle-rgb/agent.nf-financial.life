@@ -6,6 +6,99 @@
 
 <link rel="icon" href="https://salebase.ai/option_builder/img/favicon.ico" type="image/x-icon">
 <link rel="stylesheet" type="text/css" href="./files/style.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0a1628;
+  --navy2:#0f1f3d;
+  --navy3:#162847;
+  --navy4:#1e3358;
+  --navy5:#254070;
+  --gold:#c9a84c;
+  --gold2:#e2c06a;
+  --gold3:#f0d48a;
+  --gold-dim:rgba(201,168,76,0.12);
+  --gold-glow:rgba(201,168,76,0.18);
+  --border:rgba(201,168,76,0.12);
+  --border2:rgba(201,168,76,0.22);
+  --text:#eef2f8;
+  --text2:#a8b8d0;
+  --muted:#5a7090;
+  --green:#3dd68c;
+  --green-bg:rgba(61,214,140,0.10);
+  --red:#f87171;
+  --font:'Barlow',sans-serif;
+  --display:'Playfair Display',serif;
+  --cond:'Barlow Condensed',sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --r:10px;
+}
+html,body{background:var(--navy)!important;color:var(--text)!important;font-family:var(--font)!important;min-height:100%;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(201,168,76,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+body>*{position:relative;z-index:1}
+.header{position:sticky!important;top:0;z-index:50;background:linear-gradient(180deg,var(--navy),var(--navy2))!important;border-bottom:1px solid var(--border2)!important;backdrop-filter:blur(10px);padding:12px 20px!important;box-shadow:0 10px 30px rgba(0,0,0,.28)}
+.header::before{content:'AIL QUOTE TOOL';display:block;width:max-content;margin:0 auto 10px auto;font-family:var(--cond);font-size:12px;font-weight:700;letter-spacing:2px;color:var(--gold);text-transform:uppercase}
+.logo{max-height:44px!important;filter:drop-shadow(0 4px 12px rgba(0,0,0,.35))}
+#fullscreenBtn{background:var(--navy3)!important;border:1px solid var(--border2)!important;border-radius:8px!important;padding:8px!important;margin-left:10px}
+#fullscreenBtn img{filter:invert(88%) sepia(26%) saturate(417%) hue-rotate(352deg) brightness(94%) contrast(88%)}
+.option-bigboy-container,.button-goto-grid,.option-stats-grid-container,.option-group,.option-product-type,.option-product-type-group-option{background:transparent!important}
+.button-goto-grid{background:var(--navy2)!important;border:1px solid var(--border2)!important;border-radius:12px!important;padding:10px 14px!important;margin:18px auto!important;max-width:1320px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+.button-goto-primary,.button-goto-spouse,.button-goto,.hide-stats.button-goto{background:var(--navy3)!important;border:1px solid var(--border2)!important;border-radius:8px!important;color:var(--text2)!important;font-family:var(--cond)!important;font-size:12px!important;font-weight:700!important;letter-spacing:.8px!important;text-transform:uppercase!important;transition:all .15s ease!important}
+.button-goto-primary:hover,.button-goto-spouse:hover,.button-goto:hover{border-color:var(--gold)!important;color:var(--gold)!important;box-shadow:0 0 0 2px var(--gold-dim)}
+.option-stats-grid-container{max-width:1320px;margin:0 auto!important;background:var(--navy2)!important;border:1px solid var(--border2)!important;border-radius:14px!important;box-shadow:0 18px 40px rgba(0,0,0,.22)!important;overflow:hidden}
+.option-stats-grid-item{background:transparent!important}
+.option-stats-left-column{padding:18px!important}
+.option-text,.option-drop,.option-face{background:var(--navy3)!important;border:1px solid var(--border2)!important;border-radius:10px!important;color:var(--text)!important;font-family:var(--font)!important;box-shadow:none!important}
+.option-text::placeholder,.option-face::placeholder{color:var(--muted)!important}
+.option-text:focus,.option-drop:focus,.option-face:focus{outline:none!important;border-color:var(--gold)!important;box-shadow:0 0 0 2px var(--gold-dim)!important}
+.option-drop option{background:var(--navy2);color:var(--text)}
+.label,.show-premium,.death-from,.product-sub-title,.product-sub-sub-title{color:var(--text2)!important}
+.option-average-premium-item,.mbd-premium,.option-face-total{font-family:var(--mono)!important}
+.option-average-premium-item{color:var(--gold3)!important}
+.option-stats-middle-column-top{font-family:var(--cond)!important;font-size:11px!important;letter-spacing:1.4px!important;text-transform:uppercase!important;color:var(--gold)!important}
+.option-stats-middle-column-bottom{background:var(--gold-dim)!important}
+.option-group{max-width:1320px;margin:0 auto 30px auto!important}
+.option-product-type-group{gap:14px!important}
+.option-product-type{background:var(--navy2)!important;border:1px solid var(--border)!important;border-radius:12px!important;box-shadow:0 12px 30px rgba(0,0,0,.18)!important}
+.option-product-type-group-option{background:var(--navy2)!important;border:1px solid var(--border)!important;border-radius:16px!important;margin-top:14px!important;overflow:hidden;box-shadow:0 14px 34px rgba(0,0,0,.2)!important}
+.option-product-type-group-option:hover{border-color:var(--border2)!important}
+.option-pgs-title{filter:drop-shadow(0 6px 16px rgba(0,0,0,.35));padding-top:16px}
+.product-title{font-family:var(--cond)!important;font-size:13px!important;font-weight:700!important;letter-spacing:1px!important;text-transform:uppercase!important;color:var(--gold)!important}
+.product-sub-title{font-family:var(--font)!important;font-size:13px!important}
+.product-sub-sub-title{font-family:var(--mono)!important;font-size:11px!important;color:var(--muted)!important;text-transform:uppercase!important;letter-spacing:.8px}
+.edit-button{background:var(--navy3)!important;border:1px solid var(--border2)!important;border-radius:999px!important;padding:5px!important;margin:0 4px!important}
+.option-face-total,.mbd-premium{background:var(--navy3)!important;border:1px solid var(--border)!important;border-radius:10px!important;padding:10px 12px!important;color:var(--gold3)!important}
+.mbd-premium{font-size:24px!important;font-weight:600!important;letter-spacing:.4px}
+.show-senior label,.hide-senior label{color:var(--text2)!important}
+.a71-addon-card{margin:14px 0 18px 0;background:var(--navy2);border:1px solid var(--border2);border-radius:16px;overflow:hidden;box-shadow:0 16px 36px rgba(0,0,0,.22)}
+.a71-addon-head{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--border);gap:10px}
+.a71-addon-title{font-family:var(--display);font-size:22px;color:var(--text)}
+.a71-addon-sub{font-size:13px;color:var(--text2);margin-top:2px}
+.a71-addon-badge{font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;background:var(--green-bg);color:var(--green);border:1px solid rgba(61,214,140,.2);border-radius:999px;padding:6px 10px;white-space:nowrap}
+.a71-addon-body{padding:18px}
+.a71-addon-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;align-items:start}
+.a71-benefits{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.a71-benefit{background:var(--navy3);border:1px solid var(--border);border-radius:12px;padding:14px}
+.a71-kicker{font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:1.1px;color:var(--gold);text-transform:uppercase;margin-bottom:6px}
+.a71-benefit strong{display:block;font-family:var(--mono);font-size:20px;color:var(--gold3);margin-bottom:4px}
+.a71-benefit span{display:block;font-size:12px;color:var(--text2);line-height:1.35}
+.a71-price-panel{background:linear-gradient(180deg,var(--navy3),var(--navy4));border:1px solid var(--border2);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.a71-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:rgba(0,0,0,.16);border:1px solid var(--border);border-radius:12px}
+.a71-toggle-left{display:flex;flex-direction:column;gap:3px}
+.a71-toggle-left strong{font-family:var(--cond);font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--gold)}
+.a71-toggle-left span{font-size:12px;color:var(--text2)}
+.a71-toggle input{accent-color:var(--gold);transform:scale(1.15)}
+.a71-price{font-family:var(--mono);font-size:30px;color:var(--green);line-height:1}
+.a71-price-note,.a71-household-total,.a71-availability{font-size:12px;color:var(--text2)}
+.a71-household-total strong,.a71-availability strong{color:var(--gold3);font-family:var(--mono)}
+.a71-rate-band{padding:10px 12px;background:var(--gold-dim);border:1px solid var(--border);border-radius:10px;font-family:var(--mono);font-size:12px;color:var(--gold2)}
+.addon-tier-total{margin-top:8px;padding:8px 10px;border:1px dashed var(--border2);border-radius:10px;background:rgba(0,0,0,.14);font-family:var(--cond);font-size:11px;letter-spacing:.9px;text-transform:uppercase;color:var(--gold)}
+.addon-tier-total span{display:block;margin-top:4px;font-family:var(--mono);font-size:16px;color:var(--green);letter-spacing:0}
+@media (max-width:980px){.a71-addon-grid,.a71-benefits{grid-template-columns:1fr}}
+@media (max-width:700px){.header{padding:12px!important}.button-goto-grid,.option-stats-grid-container,.option-group{max-width:none}.a71-addon-title{font-size:18px}}
+</style>
+
 </head>
 
 <body style="margin: auto; padding: auto; user-select: auto; -moz-user-select: auto; -webkit-user-select: auto; -ms-user-select: auto; overflow: auto;">
@@ -423,6 +516,74 @@ function handleInputChange() {
 optionIncomeInputA.addEventListener('input', handleInputChange);
 </script>
 <script src="./files/toggleSeniorShowHide.js"></script></div>
+
+    <div class="a71-addon-card" data-pi="A">
+      <div class="a71-addon-head">
+        <div>
+          <div class="a71-addon-title">Get Hurt Get Paid / A71</div>
+          <div class="a71-addon-sub">Fixed-indemnity add-on quote with age-based pricing and live combined premium preview.</div>
+        </div>
+        <div class="a71-addon-badge">Add-on Quote</div>
+      </div>
+      <div class="a71-addon-body">
+        <div class="a71-addon-grid">
+          <div class="a71-benefits">
+            <div class="a71-benefit"><div class="a71-kicker">Get hurt get paid</div><strong>$250</strong><span>Urgent care or ER visit benefit.</span></div>
+            <div class="a71-benefit"><div class="a71-kicker">Hospital</div><strong>$500/night</strong><span>Every night in the hospital, up to 365 nights.</span></div>
+            <div class="a71-benefit"><div class="a71-kicker">ICU</div><strong>$1,000/night</strong><span>ICU every night up to 14 nights.</span></div>
+            <div class="a71-benefit"><div class="a71-kicker">Extended stay</div><strong>$500/night</strong><span>After ICU day 14, $500 a night for the rest of the 365-night period.</span></div>
+          </div>
+          <div class="a71-price-panel">
+            <label class="a71-toggle">
+              <div class="a71-toggle-left">
+                <strong>Include A71</strong>
+                <span>Turn this add-on quote on or off for this insured.</span>
+              </div>
+              <input type="checkbox" id="a71EnabledA" checked>
+            </label>
+            <div class="a71-price" id="a71PriceA">$27/mo</div>
+            <div class="a71-price-note" id="a71PriceNoteA">Current insured add-on premium.</div>
+            <div class="a71-rate-band" id="a71BandA">Age 18–60 band · $27/mo</div>
+            <div class="a71-availability" id="a71AvailabilityA"><strong>Available</strong> through age 65.</div>
+            <div class="a71-household-total" id="a71HouseholdTotalA">Household add-on total: <strong>$27/mo</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="a71-addon-card" data-pi="B">
+      <div class="a71-addon-head">
+        <div>
+          <div class="a71-addon-title">Get Hurt Get Paid / A71</div>
+          <div class="a71-addon-sub">Fixed-indemnity add-on quote with age-based pricing and live combined premium preview.</div>
+        </div>
+        <div class="a71-addon-badge">Add-on Quote</div>
+      </div>
+      <div class="a71-addon-body">
+        <div class="a71-addon-grid">
+          <div class="a71-benefits">
+            <div class="a71-benefit"><div class="a71-kicker">Get hurt get paid</div><strong>$250</strong><span>Urgent care or ER visit benefit.</span></div>
+            <div class="a71-benefit"><div class="a71-kicker">Hospital</div><strong>$500/night</strong><span>Every night in the hospital, up to 365 nights.</span></div>
+            <div class="a71-benefit"><div class="a71-kicker">ICU</div><strong>$1,000/night</strong><span>ICU every night up to 14 nights.</span></div>
+            <div class="a71-benefit"><div class="a71-kicker">Extended stay</div><strong>$500/night</strong><span>After ICU day 14, $500 a night for the rest of the 365-night period.</span></div>
+          </div>
+          <div class="a71-price-panel">
+            <label class="a71-toggle">
+              <div class="a71-toggle-left">
+                <strong>Include A71</strong>
+                <span>Turn this add-on quote on or off for this insured.</span>
+              </div>
+              <input type="checkbox" id="a71EnabledB" checked>
+            </label>
+            <div class="a71-price" id="a71PriceB">$27/mo</div>
+            <div class="a71-price-note" id="a71PriceNoteB">Current insured add-on premium.</div>
+            <div class="a71-rate-band" id="a71BandB">Age 18–60 band · $27/mo</div>
+            <div class="a71-availability" id="a71AvailabilityB"><strong>Available</strong> through age 65.</div>
+            <div class="a71-household-total" id="a71HouseholdTotalB">Household add-on total: <strong>$27/mo</strong></div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="option-group">
       <div class="hidden-grid option-product-type-group">
 <!-- HIDE IF SENIOR -->
@@ -876,5 +1037,90 @@ function optionClearFaceAmounts(pi) {
 <script src="./files/fullscreen.js"></script>
 <script src="./files/needsOptionTransfer.js"></script>
 
+
+
+<script>
+(function(){
+  function money(n){ return '$' + (Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) + '/mo'; }
+  function rateForAge(age){ age = Number(age)||0; if(age<=17) return 20; if(age<=60) return 27; if(age<=65) return 35; return null; }
+  function getAge(pi){ var el=document.getElementById('optionAgeInput'+pi); return el?Number(el.value||0):0; }
+  function enabled(pi){ var el=document.getElementById('a71Enabled'+pi); return !!(el && el.checked); }
+  function addonRate(pi){ return enabled(pi) ? rateForAge(getAge(pi)) : 0; }
+  function parseMoney(text){ if(!text) return 0; var m=String(text).replace(/,/g,'').match(/\$?\s*([0-9]+(?:\.[0-9]{1,2})?)/); return m?Number(m[1]):0; }
+  function totalHousehold(){ return addonRate('A') + addonRate('B'); }
+  function updateAddonCard(pi){
+    var age=getAge(pi), rate=rateForAge(age), isEnabled=enabled(pi);
+    var price=document.getElementById('a71Price'+pi), note=document.getElementById('a71PriceNote'+pi), band=document.getElementById('a71Band'+pi), avail=document.getElementById('a71Availability'+pi), total=document.getElementById('a71HouseholdTotal'+pi);
+    if(!price) return;
+    if(!isEnabled){
+      price.textContent='Off';
+      note.textContent='A71 is not included in this quote.';
+    } else if(rate===null){
+      price.textContent='N/A';
+      note.textContent='No A71 quote available above age 65.';
+    } else {
+      price.textContent=money(rate);
+      note.textContent='Current insured add-on premium.';
+    }
+    if(age<=17) band.textContent='Age 0–17 band · $20/mo';
+    else if(age<=60) band.textContent='Age 18–60 band · $27/mo';
+    else if(age<=65) band.textContent='Age 61–65 band · $35/mo';
+    else band.textContent='Over age 65 · unavailable';
+    avail.innerHTML=(rate===null?'<strong>Unavailable</strong> over age 65.':'<strong>Available</strong> through age 65.') + ' Fixed benefits only.';
+    total.innerHTML='Household add-on total: <strong>' + money(totalHousehold()) + '</strong>';
+  }
+  function ensureAddonTotals(){
+    ['A','B'].forEach(function(pi){
+      ['platinum','gold','silver'].forEach(function(tier){
+        var result=document.getElementById(tier+'Result'+pi);
+        if(result && !document.getElementById(tier+'AddonTotal'+pi)){
+          var wrap=document.createElement('div');
+          wrap.className='addon-tier-total';
+          wrap.id=tier+'AddonTotal'+pi;
+          wrap.innerHTML='With A71 add-on<span>—</span>';
+          result.insertAdjacentElement('afterend', wrap);
+        }
+      });
+    });
+  }
+  function updateTierTotals(pi){
+    var rate=addonRate(pi);
+    ['platinum','gold','silver'].forEach(function(tier){
+      var baseEl=document.getElementById(tier+'Result'+pi);
+      var totalEl=document.getElementById(tier+'AddonTotal'+pi);
+      if(!baseEl || !totalEl) return;
+      var span=totalEl.querySelector('span');
+      var base=parseMoney(baseEl.textContent);
+      if(!enabled(pi)) span.textContent='Base plan only';
+      else if(rate===null) span.textContent='A71 unavailable at this age';
+      else if(base>0) span.textContent=money(base + rate);
+      else span.textContent=money(rate);
+    });
+  }
+  function refreshAll(){ ensureAddonTotals(); ['A','B'].forEach(function(pi){ updateAddonCard(pi); updateTierTotals(pi); }); }
+  document.addEventListener('DOMContentLoaded', function(){
+    ['A','B'].forEach(function(pi){
+      var age=document.getElementById('optionAgeInput'+pi), tog=document.getElementById('a71Enabled'+pi);
+      if(age) age.addEventListener('change', function(){ setTimeout(refreshAll, 0); });
+      if(tog) tog.addEventListener('change', function(){ setTimeout(refreshAll, 0); });
+    });
+    setTimeout(refreshAll, 50);
+  });
+  var originalCalculatePremium = window.calculatePremium;
+  if(typeof originalCalculatePremium === 'function'){
+    window.calculatePremium = function(pi){
+      var out = originalCalculatePremium.apply(this, arguments);
+      setTimeout(function(){ refreshAll(); }, 0);
+      return out;
+    };
+  } else {
+    window.addEventListener('load', refreshAll);
+  }
+  var originalShowPiA = window.showPiA;
+  var originalShowPiB = window.showPiB;
+  if(typeof originalShowPiA === 'function') window.showPiA = function(){ var out=originalShowPiA.apply(this, arguments); setTimeout(refreshAll, 0); return out; };
+  if(typeof originalShowPiB === 'function') window.showPiB = function(){ var out=originalShowPiB.apply(this, arguments); setTimeout(refreshAll, 0); return out; };
+})();
+</script>
 
 </body></html>
