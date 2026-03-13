@@ -218,6 +218,20 @@ body>*{position:relative;z-index:1}
 @media (max-width:1100px){.quote-overview{grid-template-columns:1fr 1fr}.overview-hourpower{grid-column:1/-1}}
 @media (max-width:760px){.quote-overview{grid-template-columns:1fr}.overview-hour-grid{grid-template-columns:1fr}.overview-tier-name{font-size:24px}.overview-quote-amount{font-size:34px}}
 
+
+.overview-topbar{max-width:1320px;margin:0 auto 14px auto;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.overview-mode-switch{display:inline-flex;align-items:center;gap:8px;padding:8px;background:var(--navy2);border:1px solid var(--border2);border-radius:14px;box-shadow:0 12px 28px rgba(0,0,0,.18)}
+.overview-mode-btn{appearance:none;border:none;background:transparent;color:var(--text2);padding:11px 16px;border-radius:10px;font-family:var(--cond);font-size:12px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .15s ease}
+.overview-mode-btn.active{background:linear-gradient(180deg,var(--gold2),var(--gold));color:#101722;box-shadow:0 10px 24px rgba(201,168,76,.2)}
+.overview-a71-check{display:inline-flex;align-items:center;gap:10px;padding:12px 14px;background:var(--navy2);border:1px solid var(--border2);border-radius:14px;font-family:var(--cond);font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--gold)}
+.overview-a71-check input{accent-color:var(--gold);transform:scale(1.15)}
+.overview-panel{display:none}
+.overview-panel.active{display:block}
+.quote-overview-recommended{grid-template-columns:repeat(3,1fr)}
+.hourpower-overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.overview-hourpower-card{border-color:rgba(61,214,140,.18)}
+.overview-hourpower-card.two-hour{border-color:rgba(201,168,76,.28)}
+@media (max-width:900px){.quote-overview-recommended,.hourpower-overview-grid{grid-template-columns:1fr}}
 </style>
 
 </head>
@@ -678,69 +692,91 @@ optionIncomeInputB.addEventListener('input', handleInputChangeB);
 
 
 <div class="quote-active-banner">
-  <div class="quote-active-chip">Now showing <strong id="activeQuoteLabel">Main quote</strong></div>
+  <div class="quote-active-chip">Household mode <strong id="activeQuoteLabel">Main only</strong></div>
 </div>
 
 <div class="quote-overview-shell">
-  <div class="quote-overview">
-    <section class="overview-card overview-hourpower">
-      <div class="overview-card-inner">
-        <div>
-          <div class="overview-kicker">Hour Power</div>
-          <div class="overview-title">Simple budget view</div>
-          <div class="overview-sub">Use 1 hour or 2 hours a week as the money frame, then compare it against Platinum, Gold, and Silver.</div>
-        </div>
-        <div class="overview-hour-grid">
-          <div class="overview-hour-tile">
-            <strong>1 hour / week</strong>
-            <span class="amt" id="overviewHp1">$0.00</span>
-            <span class="mini">4 hours per month</span>
+  <div class="overview-topbar">
+    <div class="overview-mode-switch" role="tablist" aria-label="Quote view switch">
+      <button type="button" class="overview-mode-btn active" id="modeRecommendedBtn">Recommended</button>
+      <button type="button" class="overview-mode-btn" id="modeHourPowerBtn">Hour Power</button>
+    </div>
+    <label class="overview-a71-check">
+      <span>Add A71</span>
+      <input type="checkbox" id="overviewA71">
+    </label>
+  </div>
+
+  <div id="recommendedPanel" class="overview-panel active">
+    <div class="quote-overview quote-overview-recommended">
+      <section class="overview-card overview-quote-card platinum">
+        <div class="overview-card-inner">
+          <div class="overview-tier-name">Platinum</div>
+          <div class="overview-quote-amount" id="overviewPlatinum">$0/mo</div>
+          <div class="overview-quote-note" id="overviewPlatinumNote">Household combined</div>
+          <div class="overview-quote-meta">
+            <div class="overview-line"><span>Main</span><strong id="overviewPlatinumMain">$0/mo</strong></div>
+            <div class="overview-line"><span>Spouse</span><strong id="overviewPlatinumSpouse">$0/mo</strong></div>
+            <div class="overview-line"><span>Base household</span><strong id="overviewPlatinumBase">$0/mo</strong></div>
           </div>
-          <div class="overview-hour-tile">
-            <strong>2 hours / week</strong>
-            <span class="amt" id="overviewHp2">$0.00</span>
-            <span class="mini">8 hours per month</span>
+        </div>
+      </section>
+      <section class="overview-card overview-quote-card gold">
+        <div class="overview-card-inner">
+          <div class="overview-tier-name">Gold</div>
+          <div class="overview-quote-amount" id="overviewGold">$0/mo</div>
+          <div class="overview-quote-note" id="overviewGoldNote">Household combined</div>
+          <div class="overview-quote-meta">
+            <div class="overview-line"><span>Main</span><strong id="overviewGoldMain">$0/mo</strong></div>
+            <div class="overview-line"><span>Spouse</span><strong id="overviewGoldSpouse">$0/mo</strong></div>
+            <div class="overview-line"><span>Base household</span><strong id="overviewGoldBase">$0/mo</strong></div>
           </div>
         </div>
-      </div>
-    </section>
-
-    <section class="overview-card overview-quote-card platinum">
-      <div class="overview-card-inner">
-        <div class="overview-tier-name">Platinum</div>
-        <div class="overview-quote-amount" id="overviewPlatinum">$0/mo</div>
-        <div class="overview-quote-note" id="overviewPlatinumNote">Base plan only</div>
-        <div class="overview-a71-toggle"><span>Add A71</span><input type="checkbox" id="overviewA71"></div>
-        <div class="overview-quote-meta">
-          <div class="overview-line"><span>Without A71</span><strong id="overviewPlatinumBase">$0/mo</strong></div>
-          <div class="overview-line"><span>Hour Power fit</span><strong id="overviewPlatinumHours">—</strong></div>
+      </section>
+      <section class="overview-card overview-quote-card silver">
+        <div class="overview-card-inner">
+          <div class="overview-tier-name">Silver</div>
+          <div class="overview-quote-amount" id="overviewSilver">$0/mo</div>
+          <div class="overview-quote-note" id="overviewSilverNote">Household combined</div>
+          <div class="overview-quote-meta">
+            <div class="overview-line"><span>Main</span><strong id="overviewSilverMain">$0/mo</strong></div>
+            <div class="overview-line"><span>Spouse</span><strong id="overviewSilverSpouse">$0/mo</strong></div>
+            <div class="overview-line"><span>Base household</span><strong id="overviewSilverBase">$0/mo</strong></div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
+  </div>
 
-    <section class="overview-card overview-quote-card gold">
-      <div class="overview-card-inner">
-        <div class="overview-tier-name">Gold</div>
-        <div class="overview-quote-amount" id="overviewGold">$0/mo</div>
-        <div class="overview-quote-note" id="overviewGoldNote">Base plan only</div>
-        <div class="overview-quote-meta">
-          <div class="overview-line"><span>Without A71</span><strong id="overviewGoldBase">$0/mo</strong></div>
-          <div class="overview-line"><span>Hour Power fit</span><strong id="overviewGoldHours">—</strong></div>
+  <div id="hourPowerPanel" class="overview-panel">
+    <div class="hourpower-overview-grid">
+      <section class="overview-card overview-hourpower-card">
+        <div class="overview-card-inner">
+          <div class="overview-kicker">One Hour</div>
+          <div class="overview-title">1 hour per week</div>
+          <div class="overview-quote-amount" id="overviewHp1">$0.00</div>
+          <div class="overview-sub">Monthly budget based on 4 hours.</div>
+          <div class="overview-quote-meta">
+            <div class="overview-line"><span>Hourly value</span><strong id="overviewHourly">$0.00/hr</strong></div>
+            <div class="overview-line"><span>Best household fit</span><strong id="overviewHp1Fit">—</strong></div>
+            <div class="overview-line"><span>Gap left</span><strong id="overviewHp1Gap">—</strong></div>
+          </div>
         </div>
-      </div>
-    </section>
-
-    <section class="overview-card overview-quote-card silver">
-      <div class="overview-card-inner">
-        <div class="overview-tier-name">Silver</div>
-        <div class="overview-quote-amount" id="overviewSilver">$0/mo</div>
-        <div class="overview-quote-note" id="overviewSilverNote">Base plan only</div>
-        <div class="overview-quote-meta">
-          <div class="overview-line"><span>Without A71</span><strong id="overviewSilverBase">$0/mo</strong></div>
-          <div class="overview-line"><span>Hour Power fit</span><strong id="overviewSilverHours">—</strong></div>
+      </section>
+      <section class="overview-card overview-hourpower-card two-hour">
+        <div class="overview-card-inner">
+          <div class="overview-kicker">Two Hour</div>
+          <div class="overview-title">2 hours per week</div>
+          <div class="overview-quote-amount" id="overviewHp2">$0.00</div>
+          <div class="overview-sub">Monthly budget based on 8 hours.</div>
+          <div class="overview-quote-meta">
+            <div class="overview-line"><span>Hourly value</span><strong id="overviewHourly2">$0.00/hr</strong></div>
+            <div class="overview-line"><span>Best household fit</span><strong id="overviewHp2Fit">—</strong></div>
+            <div class="overview-line"><span>Gap left</span><strong id="overviewHp2Gap">—</strong></div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   </div>
 </div>
 
@@ -1590,50 +1626,103 @@ function optionClearFaceAmounts(pi) {
   function byId(id){ return document.getElementById(id); }
   function cleanNum(v){ return Number(String(v || '').replace(/[^0-9.]/g,'')) || 0; }
   function moneyMo(n){ return '$' + (Number(n)||0).toLocaleString(undefined,{maximumFractionDigits:0}) + '/mo'; }
-  function activePi(){
-    var spouseVisible = !(document.querySelector('.option-bigboy-container.piB')||{}).classList?.contains('household-hidden');
-    var piB = document.getElementById('piB');
-    if(spouseVisible && piB && getComputedStyle(piB).display !== 'none') return 'B';
-    return 'A';
-  }
+  function money(n){ return '$' + (Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  function spouseIncluded(){ return !!((byId('setupIncludeB')||{}).checked); }
   function setText(id, txt){ var el=byId(id); if(el) el.textContent = txt; }
-  function syncOverviewToggle(){
-    var pi = activePi();
-    var src = byId('a71Enabled'+pi), ov = byId('overviewA71');
-    if(src && ov && ov.checked !== src.checked) ov.checked = src.checked;
+  function tierValue(tier, pi, withAddon){
+    var base = cleanNum((byId(tier+'Result'+pi)||{}).textContent);
+    var addon = cleanNum((byId(tier+'AddonTotal'+pi)||{}).textContent);
+    if(withAddon && addon) return addon;
+    return base;
   }
-  function calcHourFit(amount){
-    var hourly = cleanNum((byId('hpHourlyValue')||{}).textContent);
-    if(!amount || !hourly) return '—';
-    var hrsMonth = amount / hourly;
-    return (hrsMonth/4).toFixed(2) + ' hrs/wk';
+  function householdTierTotal(tier, withAddon){
+    var total = tierValue(tier, 'A', withAddon);
+    if(spouseIncluded()) total += tierValue(tier, 'B', withAddon);
+    return total;
+  }
+  function updateOverviewToggle(){
+    var ov = byId('overviewA71');
+    var srcA = byId('a71EnabledA');
+    if(srcA && ov && ov.checked !== srcA.checked) ov.checked = srcA.checked;
+    var srcB = byId('a71EnabledB');
+    if(srcB) srcB.checked = ov ? ov.checked : srcB.checked;
+  }
+  function bestFitLabel(budget, totals){
+    if(!budget) return '—';
+    if(totals.platinum && totals.platinum <= budget) return 'Platinum';
+    if(totals.gold && totals.gold <= budget) return 'Gold';
+    if(totals.silver && totals.silver <= budget) return 'Silver';
+    return 'Below Silver';
+  }
+  function fitGapText(budget, totals){
+    if(!budget) return '—';
+    var fit = bestFitLabel(budget, totals);
+    var map = {Platinum: totals.platinum, Gold: totals.gold, Silver: totals.silver};
+    if(fit === 'Below Silver'){
+      if(!totals.silver) return 'No quote yet';
+      return money(budget - totals.silver);
+    }
+    return money(budget - (map[fit] || 0));
   }
   function updateOverview(){
-    var pi = activePi();
-    setText('activeQuoteLabel', pi === 'B' ? 'Spouse quote' : 'Main quote');
-    setText('overviewHp1', (byId('hpBudgetAmt1')||{}).textContent || '$0.00');
-    setText('overviewHp2', (byId('hpBudgetAmt2')||{}).textContent || '$0.00');
+    var spouseOn = spouseIncluded();
+    setText('activeQuoteLabel', spouseOn ? 'Main + spouse' : 'Main only');
+    var withAddon = !!((byId('overviewA71')||{}).checked);
+    var totals = {
+      platinum: householdTierTotal('platinum', withAddon),
+      gold: householdTierTotal('gold', withAddon),
+      silver: householdTierTotal('silver', withAddon)
+    };
     [['platinum','Platinum'],['gold','Gold'],['silver','Silver']].forEach(function(row){
       var key=row[0], label=row[1];
-      var base = cleanNum((byId(key+'Result'+pi)||{}).textContent);
-      var total = cleanNum((byId(key+'AddonTotal'+pi)||{}).textContent) || base;
-      var enabled = !!((byId('a71Enabled'+pi)||{}).checked);
-      setText('overview'+label, moneyMo(total));
-      setText('overview'+label+'Base', moneyMo(base));
-      setText('overview'+label+'Hours', calcHourFit(total));
-      setText('overview'+label+'Note', enabled ? 'With A71 if selected' : 'Base plan only');
+      var mainBase = tierValue(key,'A',false);
+      var spouseBase = spouseOn ? tierValue(key,'B',false) : 0;
+      var totalBase = mainBase + spouseBase;
+      var totalShown = totals[key];
+      setText('overview'+label, moneyMo(totalShown));
+      setText('overview'+label+'Main', moneyMo(mainBase));
+      setText('overview'+label+'Spouse', spouseOn ? moneyMo(spouseOn ? tierValue(key,'B',withAddon) : 0) : '—');
+      setText('overview'+label+'Base', moneyMo(totalBase));
+      setText('overview'+label+'Note', withAddon ? 'Household combined with A71' : 'Household combined without A71');
     });
-    syncOverviewToggle();
+    var hp1 = cleanNum((byId('hpBudgetAmt1')||{}).textContent);
+    var hp2 = cleanNum((byId('hpBudgetAmt2')||{}).textContent);
+    var hourly = cleanNum((byId('hpHourlyValue')||{}).textContent);
+    setText('overviewHp1', (byId('hpBudgetAmt1')||{}).textContent || '$0.00');
+    setText('overviewHp2', (byId('hpBudgetAmt2')||{}).textContent || '$0.00');
+    setText('overviewHourly', hourly ? money(hourly) + '/hr' : '$0.00/hr');
+    setText('overviewHourly2', hourly ? money(hourly) + '/hr' : '$0.00/hr');
+    setText('overviewHp1Fit', bestFitLabel(hp1, totals));
+    setText('overviewHp2Fit', bestFitLabel(hp2, totals));
+    setText('overviewHp1Gap', fitGapText(hp1, totals));
+    setText('overviewHp2Gap', fitGapText(hp2, totals));
+    updateOverviewToggle();
+  }
+  function setMode(mode){
+    var rec = byId('recommendedPanel'), hp = byId('hourPowerPanel');
+    var recBtn = byId('modeRecommendedBtn'), hpBtn = byId('modeHourPowerBtn');
+    if(rec && hp && recBtn && hpBtn){
+      var isRec = mode !== 'hour';
+      rec.classList.toggle('active', isRec);
+      hp.classList.toggle('active', !isRec);
+      recBtn.classList.toggle('active', isRec);
+      hpBtn.classList.toggle('active', !isRec);
+    }
   }
   document.addEventListener('DOMContentLoaded', function(){
     var ov = byId('overviewA71');
     if(ov){
       ov.addEventListener('change', function(){
-        var pi = activePi();
-        var src = byId('a71Enabled'+pi);
-        if(src){ src.checked = ov.checked; src.dispatchEvent(new Event('change',{bubbles:true})); }
+        ['A','B'].forEach(function(pi){
+          var src = byId('a71Enabled'+pi);
+          if(src){ src.checked = ov.checked; src.dispatchEvent(new Event('change',{bubbles:true})); }
+        });
+        setTimeout(updateOverview, 0);
       });
     }
+    var recBtn = byId('modeRecommendedBtn'), hpBtn = byId('modeHourPowerBtn');
+    if(recBtn) recBtn.addEventListener('click', function(){ setMode('recommended'); });
+    if(hpBtn) hpBtn.addEventListener('click', function(){ setMode('hour'); });
     ['applyHouseholdSetup','jumpToQuotesBtn'].forEach(function(id){
       var el = byId(id); if(el) el.addEventListener('click', function(){ setTimeout(updateOverview, 50); });
     });
@@ -1641,6 +1730,7 @@ function optionClearFaceAmounts(pi) {
       var el = byId(id); if(el) el.addEventListener('input', function(){ setTimeout(updateOverview, 0); });
       if(el) el.addEventListener('change', function(){ setTimeout(updateOverview, 0); });
     });
+    setMode('recommended');
     setTimeout(updateOverview, 120);
   });
   var origRefreshAll = window.refreshAll;
