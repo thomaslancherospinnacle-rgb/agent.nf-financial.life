@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AIL — Registro de Cliente</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
-<link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
-<script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
+
 <style>
   :root {
     --navy: #0a1628;
@@ -183,19 +182,47 @@
     border-radius: 10px; overflow: hidden; display: none; margin-bottom: 20px;
   }
   .calendly-section.active { display: block; animation: fadeIn 0.3s ease; }
-  .calendly-header { padding: 24px 32px 20px; border-bottom: 1px solid var(--border); }
-  .calendly-header p { color: var(--muted); font-size: 13px; margin-top: 4px; }
-  .calendly-embed-wrap { background: #fff; min-height: 660px; }
-  .calendly-inline-widget { min-width: 100% !important; height: 660px !important; border: none; }
+  .calendly-card {
+    padding: 36px 32px; display: flex; flex-direction: column;
+    align-items: center; gap: 20px; text-align: center;
+  }
+  .calendly-icon {
+    width: 60px; height: 60px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    border-radius: 14px; display: flex; align-items: center; justify-content: center;
+    font-size: 26px; box-shadow: 0 6px 24px rgba(201,168,76,0.28);
+  }
+  .calendly-card h3 { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--white); }
+  .calendly-card p { color: var(--muted); font-size: 13px; line-height: 1.7; max-width: 480px; }
+  .prefill-preview {
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+    border-radius: var(--radius); padding: 14px 20px; width: 100%; max-width: 420px;
+    text-align: left;
+  }
+  .prefill-preview .pf-label { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; font-weight: 600; }
+  .prefill-preview .pf-row { display: flex; align-items: center; gap: 10px; padding: 4px 0; font-size: 13px; color: var(--text); }
+  .prefill-preview .pf-row .pf-key { color: var(--muted); min-width: 80px; font-size: 12px; }
+  .prefill-preview .pf-empty { color: var(--muted); font-size: 12px; font-style: italic; }
+  .btn-calendly {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 13px 32px; border-radius: var(--radius);
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--navy); font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 700; letter-spacing: 0.4px;
+    text-decoration: none; border: none; cursor: pointer;
+    transition: all 0.2s; box-shadow: 0 4px 16px rgba(201,168,76,0.25);
+  }
+  .btn-calendly:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(201,168,76,0.4); }
+  .btn-calendly svg { flex-shrink: 0; }
+  .skip-link {
+    font-size: 12px; color: var(--muted); cursor: pointer;
+    text-decoration: underline; text-underline-offset: 3px; background: none; border: none;
+  }
+  .skip-link:hover { color: var(--gold); }
   .cal-btn-row {
     display: flex; justify-content: space-between; align-items: center;
     padding: 18px 32px; border-top: 1px solid var(--border);
   }
-  .skip-link {
-    font-size: 12px; color: var(--muted); cursor: pointer;
-    text-decoration: underline; text-underline-offset: 3px;
-  }
-  .skip-link:hover { color: var(--gold); }
 
   /* Success */
   #success-screen {
@@ -728,15 +755,26 @@
 
   <!-- ══ PASO 4: Calendly ════════════════════════════════════════════ -->
   <div class="calendly-section" id="step-4">
-    <div class="calendly-header">
-      <div class="section-label">Paso 4 de 4</div>
-      <div class="section-title">Agendar Cita</div>
-      <p>Seleccione un horario disponible. Nombre y correo se pre-llenan automáticamente.</p>
+    <div class="calendly-card">
+      <div class="calendly-icon">📅</div>
+      <h3>Agendar Cita con el Cliente</h3>
+      <p>El enlace abrirá Calendly en una nueva pestaña con el nombre y correo del cliente ya pre-llenados. Compártalo con su cliente o agéndelo directamente.</p>
+
+      <div class="prefill-preview" id="prefillPreview">
+        <div class="pf-label">Datos que se enviarán a Calendly</div>
+        <div id="pfRows"></div>
+      </div>
+
+      <a id="calendlyLink" href="#" target="_blank" rel="noopener" class="btn-calendly" onclick="openCalendly(event)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        Abrir Calendly en Nueva Pestaña
+      </a>
     </div>
-    <div class="calendly-embed-wrap" id="calendlyEmbed"></div>
     <div class="cal-btn-row">
-      <button type="button" class="btn btn-secondary" onclick="backFromCalendar()">← Atrás</button>
-      <span class="skip-link" onclick="submitFormOnly()">Omitir calendario — solo guardar lead →</span>
+      <button type="button" class="btn btn-secondary" onclick="showStep(3)">← Atrás</button>
+      <button type="button" class="skip-link" onclick="submitFormOnly()">Omitir y solo guardar lead →</button>
     </div>
   </div>
 
@@ -875,64 +913,49 @@
     };
   }
 
-  // ── Go to Calendly ─────────────────────────────────────────────────
+  // ── Go to Calendly step ────────────────────────────────────────────
   function goToCalendar() {
-    // Auto-send to Sheets as soon as entering calendar step
     if (!sheetsSubmitted) {
       sendToSheets(buildPayload("Pendiente"), false);
       sheetsSubmitted = true;
     }
+    buildCalendlyLink();
+    showStep(4);
+  }
 
+  function buildCalendlyLink() {
     const firstName = document.getElementById("firstName").value.trim();
     const lastName  = document.getElementById("lastName").value.trim();
     const email     = document.getElementById("email").value.trim();
     const fullName  = [firstName, lastName].filter(Boolean).join(" ");
 
-    let calUrl = CALENDLY_URL + "?hide_gdpr_banner=1&background_color=112240&text_color=e2e8f4&primary_color=c9a84c";
-    if (fullName) calUrl += "&name=" + encodeURIComponent(fullName);
-    if (email)    calUrl += "&email=" + encodeURIComponent(email);
+    let url = CALENDLY_URL;
+    const params = [];
+    if (fullName) params.push("name=" + encodeURIComponent(fullName));
+    if (email)    params.push("email=" + encodeURIComponent(email));
+    if (params.length) url += "?" + params.join("&");
 
-    const wrap = document.getElementById("calendlyEmbed");
-    wrap.innerHTML = "";
+    document.getElementById("calendlyLink").href = url;
 
-    // Wait for Calendly widget script to be ready
-    const tryInit = () => {
-      if (typeof Calendly !== "undefined" && Calendly.initInlineWidget) {
-        Calendly.initInlineWidget({ url: calUrl, parentElement: wrap });
-      } else {
-        setTimeout(tryInit, 300);
-      }
-    };
-    tryInit();
-
-    window.removeEventListener("message", handleCalendlyEvent);
-    window.addEventListener("message", handleCalendlyEvent);
-
-    showStep(4);
-  }
-
-  function handleCalendlyEvent(e) {
-    if (!e.data || !e.data.event) return;
-    if (e.data.event === "calendly.event_scheduled") {
-      appointmentBooked = true;
-      // Update Sheets with appointment confirmed
-      sendToSheets(buildPayload("Sí"), false);
-      // Show success after brief delay
-      setTimeout(() => {
-        window.removeEventListener("message", handleCalendlyEvent);
-        showSuccessScreen(true);
-      }, 1200);
+    // Build prefill preview
+    const rows = [];
+    if (fullName) rows.push({ k: "Nombre",  v: fullName });
+    if (email)    rows.push({ k: "Correo",  v: email });
+    const pfRows = document.getElementById("pfRows");
+    if (rows.length) {
+      pfRows.innerHTML = rows.map(r =>
+        `<div class="pf-row"><span class="pf-key">${r.k}</span><span>${r.v}</span></div>`
+      ).join("");
+    } else {
+      pfRows.innerHTML = '<div class="pf-empty">No hay nombre ni correo — se abrirá el formulario en blanco.</div>';
     }
   }
 
-  function backFromCalendar() {
-    window.removeEventListener("message", handleCalendlyEvent);
-    document.getElementById("calendlyEmbed").innerHTML = "";
-    showStep(3);
+  function openCalendly(e) {
+    // href already set — just let the browser open it; no extra logic needed
   }
 
   async function submitFormOnly() {
-    window.removeEventListener("message", handleCalendlyEvent);
     document.getElementById("loading").classList.add("show");
     await sendToSheets(buildPayload("No"), false);
     document.getElementById("loading").classList.remove("show");
@@ -973,12 +996,10 @@
     document.getElementById("step-4").style.display = "";
     document.getElementById("success-screen").style.display = "none";
     document.getElementById("tobaccoDetail").classList.remove("show");
-    document.getElementById("calendlyEmbed").innerHTML = "";
     appointmentBooked = false;
     sheetsSubmitted = false;
     setHeightUnit("ft");
     setWeightUnit("lbs");
-    window.removeEventListener("message", handleCalendlyEvent);
     showStep(1);
   }
 
