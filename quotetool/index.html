@@ -755,7 +755,7 @@ optionIncomeInputB.addEventListener('input', handleInputChangeB);
           <div class="overview-kicker">One Hour</div>
           <div class="overview-title">1 hour per week</div>
           <div class="overview-quote-amount" id="overviewHp1">$0.00</div>
-          <div class="overview-sub">Monthly budget based on 4 hours.</div>
+          <div class="overview-sub" id="overviewHp1BudgetNote">Monthly budget based on 4 hours.</div>
           <div class="overview-quote-meta">
             <div class="overview-line"><span>Hourly value</span><strong id="overviewHourly">$0.00/hr</strong></div>
             <div class="overview-line"><span>Best household fit</span><strong id="overviewHp1Fit">—</strong></div>
@@ -768,7 +768,7 @@ optionIncomeInputB.addEventListener('input', handleInputChangeB);
           <div class="overview-kicker">Two Hour</div>
           <div class="overview-title">2 hours per week</div>
           <div class="overview-quote-amount" id="overviewHp2">$0.00</div>
-          <div class="overview-sub">Monthly budget based on 8 hours.</div>
+          <div class="overview-sub" id="overviewHp2BudgetNote">Monthly budget based on 8 hours.</div>
           <div class="overview-quote-meta">
             <div class="overview-line"><span>Hourly value</span><strong id="overviewHourly2">$0.00/hr</strong></div>
             <div class="overview-line"><span>Best household fit</span><strong id="overviewHp2Fit">—</strong></div>
@@ -1624,135 +1624,201 @@ function optionClearFaceAmounts(pi) {
 <script>
 (function(){
   function byId(id){ return document.getElementById(id); }
-  function cleanNum(v){ return Number(String(v || '').replace(/[^0-9.]/g,'')) || 0; }
-  function moneyMo(n){ return '$' + (Number(n)||0).toLocaleString(undefined,{maximumFractionDigits:0}) + '/mo'; }
+  function setText(id, txt){ var el = byId(id); if(el) el.textContent = txt; }
   function money(n){ return '$' + (Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  function moneyMo(n){ return '$' + (Number(n)||0).toLocaleString(undefined,{maximumFractionDigits:0}) + '/mo'; }
+  function extractFirstAmount(text){
+    var match = String(text || '').match(/(\d[\d,]*\.?\d{0,2})/);
+    return match ? (parseFloat(match[1].replace(/,/g,'')) || 0) : 0;
+  }
   function spouseIncluded(){ return !!((byId('setupIncludeB')||{}).checked); }
-  function setText(id, txt){ var el=byId(id); if(el) el.textContent = txt; }
+  function getBaseTierValue(tier, pi){
+    var el = byId(tier + 'Result' + pi);
+    return extractFirstAmount(el ? el.textContent : '');
+  }
+  function getAddonTierValue(tier, pi){
+    var host = byId(tier + 'AddonTotal' + pi);
+    if(!host) return 0;
+    var preferred = host.querySelector('.addon-tier-total span, .addon-tier-total, span');
+    return extractFirstAmount(preferred ? preferred.textContent : host.textContent);
+  }
   function tierValue(tier, pi, withAddon){
-    var base = cleanNum((byId(tier+'Result'+pi)||{}).textContent);
-    var addon = cleanNum((byId(tier+'AddonTotal'+pi)||{}).textContent);
-    if(withAddon && addon) return addon;
-    return base;
+    var addon = getAddonTierValue(tier, pi);
+    var base = getBaseTierValue(tier, pi);
+    return withAddon && addon ? addon : base;
   }
   function householdTierTotal(tier, withAddon){
     var total = tierValue(tier, 'A', withAddon);
     if(spouseIncluded()) total += tierValue(tier, 'B', withAddon);
     return total;
   }
-  function updateOverviewToggle(){
-    var ov = byId('overviewA71');
-    var srcA = byId('a71EnabledA');
-    if(srcA && ov && ov.checked !== srcA.checked) ov.checked = srcA.checked;
-    var srcB = byId('a71EnabledB');
-    if(srcB) srcB.checked = ov ? ov.checked : srcB.checked;
+  function syncOverviewA71FromTop(){
+    var top = byId('overviewA71');
+    if(!top) return;
+    var a = byId('a71EnabledA'), b = byId('a71EnabledB');
+    if(a) a.checked = top.checked;
+    if(b) b.checked = top.checked;
   }
-  function bestFitLabel(budget, totals){
-    if(!budget) return '—';
-    if(totals.platinum && totals.platinum <= budget) return 'Platinum';
-    if(totals.gold && totals.gold <= budget) return 'Gold';
-    if(totals.silver && totals.silver <= budget) return 'Silver';
-    return 'Below Silver';
+  function pullOverviewA71FromForms(){
+    var top = byId('overviewA71');
+    var a = byId('a71EnabledA');
+    if(top && a) top.checked = !!a.checked;
   }
-  function fitGapText(budget, totals){
-    if(!budget) return '—';
-    var fit = bestFitLabel(budget, totals);
-    var map = {Platinum: totals.platinum, Gold: totals.gold, Silver: totals.silver};
-    if(fit === 'Below Silver'){
-      if(!totals.silver) return 'No quote yet';
-      return money(budget - totals.silver);
-    }
-    return money(budget - (map[fit] || 0));
+  function getHourlyValue(){
+    var hp = byId('hpHourlyValue');
+    return extractFirstAmount(hp ? hp.textContent : '');
+  }
+  function getBudget(which){
+    var el = byId(which === 2 ? 'hpBudgetAmt2' : 'hpBudgetAmt1');
+    return extractFirstAmount(el ? el.textContent : '');
+  }
+  function chooseFit(budget, totals){
+    if(!budget) return {label:'—', total:0, gap:0, status:'No budget yet'};
+    if(totals.platinum && totals.platinum <= budget) return {label:'Platinum', total:totals.platinum, gap:budget - totals.platinum, status:'Fits Platinum'};
+    if(totals.gold && totals.gold <= budget) return {label:'Gold', total:totals.gold, gap:budget - totals.gold, status:'Fits Gold'};
+    if(totals.silver && totals.silver <= budget) return {label:'Silver', total:totals.silver, gap:budget - totals.silver, status:'Fits Silver'};
+    if(totals.silver) return {label:'Below Silver', total:totals.silver, gap:budget - totals.silver, status:'Need more for Silver'};
+    return {label:'—', total:0, gap:0, status:'No quote yet'};
   }
   function updateOverview(){
+    pullOverviewA71FromForms();
+    var withAddon = !!((byId('overviewA71')||{}).checked);
     var spouseOn = spouseIncluded();
     setText('activeQuoteLabel', spouseOn ? 'Main + spouse' : 'Main only');
-    var withAddon = !!((byId('overviewA71')||{}).checked);
+
     var totals = {
       platinum: householdTierTotal('platinum', withAddon),
       gold: householdTierTotal('gold', withAddon),
       silver: householdTierTotal('silver', withAddon)
     };
+
     [['platinum','Platinum'],['gold','Gold'],['silver','Silver']].forEach(function(row){
-      var key=row[0], label=row[1];
-      var mainBase = tierValue(key,'A',false);
-      var spouseBase = spouseOn ? tierValue(key,'B',false) : 0;
+      var key = row[0], label = row[1];
+      var mainShown = tierValue(key,'A',withAddon);
+      var spouseShown = spouseOn ? tierValue(key,'B',withAddon) : 0;
+      var totalShown = mainShown + spouseShown;
+      var mainBase = getBaseTierValue(key,'A');
+      var spouseBase = spouseOn ? getBaseTierValue(key,'B') : 0;
       var totalBase = mainBase + spouseBase;
-      var totalShown = totals[key];
+
       setText('overview'+label, moneyMo(totalShown));
-      setText('overview'+label+'Main', moneyMo(mainBase));
-      setText('overview'+label+'Spouse', spouseOn ? moneyMo(spouseOn ? tierValue(key,'B',withAddon) : 0) : '—');
+      setText('overview'+label+'Main', moneyMo(mainShown));
+      setText('overview'+label+'Spouse', spouseOn ? moneyMo(spouseShown) : '—');
       setText('overview'+label+'Base', moneyMo(totalBase));
       setText('overview'+label+'Note', withAddon ? 'Household combined with A71' : 'Household combined without A71');
     });
-    var hp1 = cleanNum((byId('hpBudgetAmt1')||{}).textContent);
-    var hp2 = cleanNum((byId('hpBudgetAmt2')||{}).textContent);
-    var hourly = cleanNum((byId('hpHourlyValue')||{}).textContent);
-    setText('overviewHp1', (byId('hpBudgetAmt1')||{}).textContent || '$0.00');
-    setText('overviewHp2', (byId('hpBudgetAmt2')||{}).textContent || '$0.00');
+
+    var hourly = getHourlyValue();
+    var hp1Budget = getBudget(1);
+    var hp2Budget = getBudget(2);
+    var fit1 = chooseFit(hp1Budget, totals);
+    var fit2 = chooseFit(hp2Budget, totals);
+
+    setText('overviewHp1', fit1.total ? moneyMo(fit1.total) : '$0/mo');
+    setText('overviewHp2', fit2.total ? moneyMo(fit2.total) : '$0/mo');
     setText('overviewHourly', hourly ? money(hourly) + '/hr' : '$0.00/hr');
     setText('overviewHourly2', hourly ? money(hourly) + '/hr' : '$0.00/hr');
-    setText('overviewHp1Fit', bestFitLabel(hp1, totals));
-    setText('overviewHp2Fit', bestFitLabel(hp2, totals));
-    setText('overviewHp1Gap', fitGapText(hp1, totals));
-    setText('overviewHp2Gap', fitGapText(hp2, totals));
-    updateOverviewToggle();
+    setText('overviewHp1Fit', fit1.label === 'Below Silver' ? 'Below Silver' : fit1.status);
+    setText('overviewHp2Fit', fit2.label === 'Below Silver' ? 'Below Silver' : fit2.status);
+    setText('overviewHp1Gap', fit1.total ? (fit1.gap >= 0 ? money(fit1.gap) + ' left' : money(Math.abs(fit1.gap)) + ' short') : '—');
+    setText('overviewHp2Gap', fit2.total ? (fit2.gap >= 0 ? money(fit2.gap) + ' left' : money(Math.abs(fit2.gap)) + ' short') : '—');
+    setText('overviewHp1BudgetNote', 'Budget ' + money(hp1Budget) + ' /mo based on 4 hours.');
+    setText('overviewHp2BudgetNote', 'Budget ' + money(hp2Budget) + ' /mo based on 8 hours.');
   }
+
   function setMode(mode){
     var rec = byId('recommendedPanel'), hp = byId('hourPowerPanel');
     var recBtn = byId('modeRecommendedBtn'), hpBtn = byId('modeHourPowerBtn');
-    if(rec && hp && recBtn && hpBtn){
-      var isRec = mode !== 'hour';
-      rec.classList.toggle('active', isRec);
-      hp.classList.toggle('active', !isRec);
-      recBtn.classList.toggle('active', isRec);
-      hpBtn.classList.toggle('active', !isRec);
-    }
+    var isRec = mode !== 'hour';
+    if(rec) rec.classList.toggle('active', isRec);
+    if(hp) hp.classList.toggle('active', !isRec);
+    if(recBtn) recBtn.classList.toggle('active', isRec);
+    if(hpBtn) hpBtn.classList.toggle('active', !isRec);
+    document.documentElement.setAttribute('data-quote-mode', isRec ? 'recommended' : 'hour');
   }
-  document.addEventListener('DOMContentLoaded', function(){
+
+  function wireTopControls(){
+    var recBtn = byId('modeRecommendedBtn');
+    var hpBtn = byId('modeHourPowerBtn');
     var ov = byId('overviewA71');
+
+    if(recBtn){ recBtn.onclick = function(e){ e.preventDefault(); setMode('recommended'); updateOverview(); }; }
+    if(hpBtn){ hpBtn.onclick = function(e){ e.preventDefault(); setMode('hour'); updateOverview(); }; }
+
     if(ov){
-      ov.addEventListener('change', function(){
+      ov.onchange = function(){
         ['A','B'].forEach(function(pi){
           var src = byId('a71Enabled'+pi);
-          if(src){ src.checked = ov.checked; src.dispatchEvent(new Event('change',{bubbles:true})); }
+          if(src){
+            src.checked = ov.checked;
+            src.dispatchEvent(new Event('change', {bubbles:true}));
+          }
         });
-        setTimeout(updateOverview, 0);
-      });
+        setTimeout(updateOverview, 20);
+      };
     }
-    var recBtn = byId('modeRecommendedBtn'), hpBtn = byId('modeHourPowerBtn');
-    if(recBtn) recBtn.addEventListener('click', function(){ setMode('recommended'); });
-    if(hpBtn) hpBtn.addEventListener('click', function(){ setMode('hour'); });
-    ['applyHouseholdSetup','jumpToQuotesBtn'].forEach(function(id){
-      var el = byId(id); if(el) el.addEventListener('click', function(){ setTimeout(updateOverview, 50); });
+
+    ['a71EnabledA','a71EnabledB'].forEach(function(id){
+      var el = byId(id);
+      if(el){
+        el.addEventListener('change', function(){
+          pullOverviewA71FromForms();
+          setTimeout(updateOverview, 20);
+        });
+      }
     });
-    ['setupHoursPerWeek','setupHomeIncome','setupHourlyInput','setupQuoteFocus','setupIncludeB'].forEach(function(id){
-      var el = byId(id); if(el) el.addEventListener('input', function(){ setTimeout(updateOverview, 0); });
-      if(el) el.addEventListener('change', function(){ setTimeout(updateOverview, 0); });
+
+    document.addEventListener('click', function(e){
+      var btn = e.target.closest('#modeRecommendedBtn, #modeHourPowerBtn');
+      if(!btn) return;
+      e.preventDefault();
+      setMode(btn.id === 'modeHourPowerBtn' ? 'hour' : 'recommended');
+      updateOverview();
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    wireTopControls();
+    ['applyHouseholdSetup','jumpToQuotesBtn'].forEach(function(id){
+      var el = byId(id);
+      if(el) el.addEventListener('click', function(){ setTimeout(updateOverview, 80); });
+    });
+    ['setupHoursPerWeek','setupHomeIncome','setupHourlyInput','setupQuoteFocus','setupIncludeB','setupAgeA','setupAgeB','setupTobA','setupTobB','setupSexA','setupSexB'].forEach(function(id){
+      var el = byId(id);
+      if(el){
+        el.addEventListener('input', function(){ setTimeout(updateOverview, 20); });
+        el.addEventListener('change', function(){ setTimeout(updateOverview, 20); });
+      }
     });
     setMode('recommended');
-    setTimeout(updateOverview, 120);
+    setTimeout(updateOverview, 250);
+    setTimeout(updateOverview, 800);
   });
+
   var origRefreshAll = window.refreshAll;
   if(typeof origRefreshAll === 'function'){
     window.refreshAll = function(){
       var out = origRefreshAll.apply(this, arguments);
-      setTimeout(updateOverview, 0);
+      setTimeout(updateOverview, 30);
       return out;
-    }
+    };
   } else {
-    window.addEventListener('load', function(){ setTimeout(updateOverview, 50); });
+    window.addEventListener('load', function(){ setTimeout(updateOverview, 120); });
   }
-  ['showPiA','showPiB'].forEach(function(fn){
+
+  ['showPiA','showPiB','calculatePremium'].forEach(function(fn){
     var orig = window[fn];
     if(typeof orig === 'function'){
       window[fn] = function(){
         var out = orig.apply(this, arguments);
-        setTimeout(updateOverview, 0);
+        setTimeout(updateOverview, 30);
         return out;
-      }
+      };
     }
   });
+
+  window.quoteToolUpdateOverview = updateOverview;
+  window.quoteToolSetMode = setMode;
 })();
 </script>
 
