@@ -8,566 +8,358 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --navy:#0a1628;
-  --navy2:#0f1f3d;
-  --navy3:#162847;
-  --navy4:#1e3358;
-  --navy5:#254070;
-  --gold:#c9a84c;
-  --gold2:#e2c06a;
-  --gold3:#f0d48a;
-  --gold-dim:rgba(201,168,76,0.12);
-  --gold-glow:rgba(201,168,76,0.25);
-  --border:rgba(201,168,76,0.12);
-  --border2:rgba(201,168,76,0.22);
-  --text:#eef2f8;
-  --text2:#a8b8d0;
-  --muted:#5a7090;
-  --green:#3dd68c;
-  --green-bg:rgba(61,214,140,0.1);
-  --red:#f87171;
-  --red-bg:rgba(248,113,113,0.1);
-  --r:8px;
-  --font:'Barlow',sans-serif;
-  --display:'Playfair Display',serif;
-  --cond:'Barlow Condensed',sans-serif;
-  --mono:'JetBrains Mono',monospace;
+  --navy:#0a1628;--navy2:#0f1f3d;--navy3:#162847;--navy4:#1e3358;
+  --gold:#c9a84c;--gold2:#e2c06a;--gold3:#f0d48a;
+  --gold-dim:rgba(201,168,76,0.12);--border:rgba(201,168,76,0.12);--border2:rgba(201,168,76,0.22);
+  --text:#eef2f8;--text2:#a8b8d0;--muted:#5a7090;
+  --green:#3dd68c;--red:#f87171;
+  --r:8px;--font:'Barlow',sans-serif;--display:'Playfair Display',serif;
+  --cond:'Barlow Condensed',sans-serif;--mono:'JetBrains Mono',monospace;
 }
 body{background:var(--navy);color:var(--text);font-family:var(--font);min-height:100vh;font-size:14px}
-
-/* subtle grid bg */
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(201,168,76,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
 
 /* NAV */
-nav{position:sticky;top:0;z-index:200;background:var(--navy);border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:58px}
-.logo{display:flex;align-items:center;gap:10px}
-.logo-mark{width:30px;height:30px;border:2px solid var(--gold);border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:13px;color:var(--gold);font-weight:700}
-.logo-text{font-family:var(--cond);font-size:15px;font-weight:700;letter-spacing:1.5px;color:var(--text);text-transform:uppercase}
+nav{position:sticky;top:0;z-index:200;background:var(--navy);border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:56px;gap:16px}
+.logo{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.logo-mark{width:28px;height:28px;border:2px solid var(--gold);border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:12px;color:var(--gold);font-weight:700}
+.logo-text{font-family:var(--cond);font-size:14px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase}
 .logo-text span{color:var(--gold)}
-.tabs{display:flex;gap:1px;background:rgba(201,168,76,0.08);border:1px solid var(--border2);border-radius:var(--r);padding:3px;overflow:hidden}
-.tab{padding:7px 18px;border-radius:6px;border:none;background:none;color:var(--text2);cursor:pointer;font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;transition:all .15s}
-.tab.on{background:var(--navy4);color:var(--gold);border:none}
-.tab:hover:not(.on){color:var(--text)}
-
-/* WEEK BAR */
-.week-bar{position:sticky;top:58px;z-index:100;background:var(--navy2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:44px}
-.week-info{display:flex;align-items:center;gap:14px}
-.week-eyebrow{font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase}
-.week-range{font-family:var(--mono);font-size:12px;color:var(--gold2)}
-.pay-pill{font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:0.8px;background:rgba(61,214,140,0.1);color:var(--green);border:1px solid rgba(61,214,140,0.2);border-radius:4px;padding:3px 10px;text-transform:uppercase}
+.nav-mid{display:flex;align-items:center;gap:6px;flex:1;justify-content:center}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0}
+.sync-dot.ok{background:var(--green)}.sync-dot.err{background:var(--red)}.sync-dot.spin{animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.sync-txt{font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:.6px;color:var(--muted);text-transform:uppercase}
+.refresh-pill{padding:4px 10px;border:1px solid var(--border2);border-radius:4px;background:none;color:var(--text2);cursor:pointer;font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:.5px;transition:all .15s}
+.refresh-pill:hover{border-color:var(--gold);color:var(--gold)}
+.tabs{display:flex;gap:1px;background:rgba(201,168,76,0.08);border:1px solid var(--border2);border-radius:var(--r);padding:3px}
+.tab{padding:6px 14px;border-radius:5px;border:none;background:none;color:var(--text2);cursor:pointer;font-family:var(--cond);font-size:12px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;transition:all .15s;white-space:nowrap}
+.tab.on{background:var(--navy4);color:var(--gold)}.tab:hover:not(.on){color:var(--text)}
 
 /* LAYOUT */
-.content{position:relative;z-index:1;padding:32px}
-.page{display:none}
-.page.on{display:block}
-
-/* SECTION TITLE */
-.section-title{font-family:var(--display);font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px}
+.content{position:relative;z-index:1;padding:28px;max-width:1060px;margin:0 auto}
+.page{display:none}.page.on{display:block}
+.section-title{font-family:var(--display);font-size:22px;font-weight:700;margin-bottom:4px}
 .section-sub{color:var(--text2);font-size:13px;margin-bottom:24px}
 
 /* FORM */
-.form-wrap{max-width:820px}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.field{display:flex;flex-direction:column;gap:6px}
+.form-wrap{max-width:800px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{display:flex;flex-direction:column;gap:5px}
 .field.full{grid-column:1/-1}
 .field label{font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:1.2px;color:var(--gold);text-transform:uppercase}
-input[type=text],input[type=number],input[type=date],select{
-  background:var(--navy3);border:1px solid var(--border2);border-radius:var(--r);
-  color:var(--text);font-family:var(--font);font-size:14px;padding:10px 14px;
-  outline:none;transition:all .15s;width:100%;appearance:none
-}
-input:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-dim)}
-select option{background:var(--navy2)}
-
-/* TYPE TOGGLES */
-.toggle-row{display:flex;gap:8px}
-.tog{flex:1;padding:10px 8px;border:1px solid var(--border2);border-radius:var(--r);background:var(--navy3);color:var(--text2);cursor:pointer;font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;transition:all .15s;text-align:center}
+input[type=text],input[type=number],input[type=date]{background:var(--navy3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:var(--font);font-size:14px;padding:9px 13px;outline:none;transition:all .15s;width:100%}
+input:focus{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-dim)}
+.tog-row{display:flex;gap:7px}
+.tog{flex:1;padding:9px 8px;border:1px solid var(--border2);border-radius:var(--r);background:var(--navy3);color:var(--text2);cursor:pointer;font-family:var(--cond);font-size:12px;font-weight:700;letter-spacing:0.4px;text-transform:uppercase;transition:all .15s;text-align:center}
 .tog.on{border-color:var(--gold);background:var(--gold-dim);color:var(--gold)}
-.tog:hover:not(.on){border-color:rgba(201,168,76,0.3);color:var(--text)}
+.tog:hover:not(.on){border-color:rgba(201,168,76,0.3)}
 
 /* CALC BOX */
-.calc-box{margin-top:20px;background:var(--navy2);border:1px solid var(--border2);border-radius:12px;overflow:hidden}
-.calc-head{padding:10px 18px;border-bottom:1px solid var(--border);font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;display:flex;align-items:center;gap:8px}
-.calc-head::before{content:'';display:inline-block;width:6px;height:6px;background:var(--gold);border-radius:50%}
-.calc-cols{display:grid;grid-template-columns:repeat(3,1fr)}
-.calc-col{padding:16px 18px;border-right:1px solid var(--border)}
-.calc-col:last-child{border-right:none}
-.calc-lbl{font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:0.8px;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
-.calc-val{font-family:var(--mono);font-size:20px;font-weight:500}
-.calc-val.g{color:var(--green)}
-.calc-val.b{color:var(--gold2)}
-.calc-val.a{color:var(--gold3)}
-.calc-sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:3px}
+.calc-box{margin-top:18px;background:var(--navy2);border:1px solid var(--border2);border-radius:10px;overflow:hidden}
+.calc-head{padding:9px 16px;border-bottom:1px solid var(--border);font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:1.4px;color:var(--gold);text-transform:uppercase}
+.calc-cols{display:grid}
+.cc{padding:14px 16px;border-right:1px solid var(--border)}
+.cc:last-child{border-right:none}
+.cc-lbl{font-family:var(--cond);font-size:9px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase;margin-bottom:3px}
+.cc-val{font-family:var(--mono);font-size:19px;font-weight:500}
+.cc-sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:2px}
+.gv{color:var(--green)}.bv{color:var(--gold2)}.sv{color:#60a5fa}.av{color:var(--gold3)}
 
-/* SUBMIT BTN */
-.submit-btn{margin-top:20px;padding:12px 36px;background:var(--gold);color:var(--navy);border:none;border-radius:var(--r);font-family:var(--cond);font-size:14px;font-weight:700;letter-spacing:1px;cursor:pointer;text-transform:uppercase;transition:all .15s}
-.submit-btn:hover{background:var(--gold2);transform:translateY(-1px)}
+.submit-btn{margin-top:18px;padding:11px 32px;background:var(--gold);color:var(--navy);border:none;border-radius:var(--r);font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:1px;cursor:pointer;text-transform:uppercase;transition:all .15s}
+.submit-btn:hover{background:var(--gold2)}.submit-btn:disabled{opacity:.4;cursor:not-allowed}
 
-/* STATS GRID */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
-.stat{background:var(--navy2);border:1px solid var(--border);border-radius:12px;padding:18px}
-.stat-lbl{font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:1.2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
-.stat-val{font-family:var(--mono);font-size:24px;font-weight:500;line-height:1}
-.stat-val.gold{color:var(--gold)}
-.stat-val.green{color:var(--green)}
-.stat-sub{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:4px}
-
-/* TABLE */
-.tbl-wrap{background:var(--navy2);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-.tbl-head{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border)}
-.tbl-head h3{font-family:var(--cond);font-size:12px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--gold)}
-.tbl-actions{display:flex;gap:8px}
+/* LEDGER TABLE */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat{background:var(--navy2);border:1px solid var(--border);border-radius:10px;padding:16px}
+.stat-lbl{font-family:var(--cond);font-size:9px;font-weight:700;letter-spacing:1.2px;color:var(--muted);text-transform:uppercase;margin-bottom:7px}
+.stat-val{font-family:var(--mono);font-size:22px;font-weight:500;line-height:1}
+.gold{color:var(--gold)}.green{color:var(--green)}.blue{color:#60a5fa}
+.filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.filter-bar label{font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:.7px;color:var(--muted);text-transform:uppercase}
+.filter-bar select{background:var(--navy3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:var(--font);font-size:13px;padding:6px 11px;outline:none;appearance:none;cursor:pointer}
+.filter-bar select:focus{border-color:var(--gold)}
+select option{background:var(--navy2)}
+.tbl-wrap{background:var(--navy2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.tbl-head{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--border)}
+.tbl-head h3{font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gold)}
 table{width:100%;border-collapse:collapse}
-th{padding:9px 16px;text-align:left;font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap}
-td{padding:11px 16px;font-size:13px;border-bottom:1px solid var(--border);font-family:var(--mono);white-space:nowrap}
+th{font-family:var(--cond);font-size:9px;font-weight:700;letter-spacing:.7px;color:var(--muted);text-transform:uppercase;padding:9px 13px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:10px 13px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:12px;vertical-align:middle}
 tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(201,168,76,0.04)}
-.pill{display:inline-flex;padding:2px 8px;border-radius:3px;font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase}
-.pill.std{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(201,168,76,0.25)}
-.pill.a71{background:rgba(248,113,113,0.1);color:var(--red);border:1px solid rgba(248,113,113,0.2)}
-.pill.both{background:rgba(96,165,250,0.1);color:#60a5fa;border:1px solid rgba(96,165,250,0.2)}
-.pill.setter{background:rgba(139,92,246,0.1);color:#a78bfa;border:1px solid rgba(139,92,246,0.2)}
-.pill.closer{background:rgba(245,158,11,0.1);color:#fbbf24;border:1px solid rgba(245,158,11,0.2)}
-.paid-yes{color:var(--green);font-size:12px}
-.paid-no{color:var(--muted);font-size:12px}
-.paid-toggle{background:none;border:1px solid var(--border2);border-radius:4px;color:var(--text2);cursor:pointer;font-size:11px;padding:3px 8px;font-family:var(--cond);font-weight:700;text-transform:uppercase;transition:all .15s}
-.paid-toggle.paid{border-color:rgba(61,214,140,0.3);color:var(--green);background:var(--green-bg)}
-.del-btn{background:none;border:none;color:var(--muted);cursor:pointer;padding:3px 7px;border-radius:4px;font-size:12px;transition:all .1s}
-.del-btn:hover{color:var(--red);background:var(--red-bg)}
-
-/* OWED GRID */
-.owed-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px}
-.owed-card{background:var(--navy2);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-.owed-card-head{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-.owed-card-head h3{font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gold)}
-.owed-total{font-family:var(--mono);font-size:16px;color:var(--gold3)}
-.owed-item{display:flex;justify-content:space-between;align-items:center;padding:11px 18px;border-bottom:1px solid var(--border);font-size:12px}
-.owed-item:last-child{border-bottom:none}
-.owed-name{font-family:var(--font);font-weight:600;color:var(--text2)}
-.owed-amt{font-family:var(--mono);color:var(--green)}
-
-/* HISTORY FILTER */
-.filter-bar{display:flex;gap:10px;align-items:center;margin-bottom:20px;flex-wrap:wrap}
-.filter-bar select,.filter-bar input{background:var(--navy3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:var(--font);font-size:13px;padding:8px 12px;outline:none;max-width:180px}
-.filter-bar label{font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
-
-/* COP CONVERTER */
-.cop-wrap{max-width:520px}
-.cop-box{background:var(--navy2);border:1px solid var(--border2);border-radius:12px;overflow:hidden}
-.cop-hdr{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-.cop-hdr h2{font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gold)}
-.rate-badge{font-family:var(--mono);font-size:11px;background:var(--gold-dim);color:var(--gold2);border:1px solid var(--border2);padding:4px 10px;border-radius:4px}
-.cop-body{padding:20px;display:flex;flex-direction:column;gap:14px}
-.cop-field label{display:block;font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
-.cop-input-wrap{position:relative}
-.cop-input-wrap input{font-family:var(--mono);font-size:20px;font-weight:500;padding:12px 50px 12px 16px}
-.cop-sym{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-family:var(--cond);font-size:13px;font-weight:700;color:var(--muted)}
-.cop-result{font-family:var(--mono);font-size:24px;font-weight:500;color:var(--gold3);padding:14px 16px;background:var(--navy3);border:1px solid var(--border);border-radius:var(--r)}
-.cop-divider{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px}
-.cop-divider::before,.cop-divider::after{content:'';flex:1;height:1px;background:var(--border)}
-.cop-footer{padding:10px 20px 16px;text-align:center;font-size:11px;color:var(--muted);font-family:var(--font)}
-.refresh-btn{background:none;border:1px solid var(--border2);border-radius:4px;color:var(--text2);cursor:pointer;font-size:11px;padding:3px 8px;font-family:var(--cond);font-weight:700;letter-spacing:0.5px;margin-left:6px}
-.refresh-btn:hover{border-color:var(--gold);color:var(--gold)}
-
-/* OWED QUICK */
-.owed-quick{margin-top:20px;background:var(--navy2);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-.oq-head{padding:11px 18px;border-bottom:1px solid var(--border);font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--gold)}
-.oq-body{padding:4px 0}
-.oq-row{display:flex;justify-content:space-between;align-items:center;padding:10px 18px;border-bottom:1px solid var(--border);font-size:12px}
-.oq-row:last-child{border-bottom:none}
-.oq-name{color:var(--text2)}
-.oq-usd{font-family:var(--mono);color:var(--green)}
-.oq-cop{font-family:var(--mono);font-size:11px;color:var(--muted)}
-
-/* EMPTY */
-.empty{padding:40px;text-align:center;color:var(--muted);font-size:13px;font-family:var(--font)}
-
-/* ICON BUTTONS */
-.icon-btn{background:none;border:1px solid var(--border2);border-radius:5px;color:var(--text2);cursor:pointer;font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:0.5px;padding:5px 12px;text-transform:uppercase;transition:all .15s}
+tr:hover td{background:rgba(255,255,255,0.015)}
+.tbl-totals td{background:rgba(201,168,76,0.07);font-weight:700;color:var(--gold3);font-size:13px;border-top:2px solid var(--border2)}
+.pill{display:inline-block;padding:2px 7px;border-radius:3px;font-family:var(--cond);font-size:9px;font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+.pill.std{background:rgba(201,168,76,0.15);color:var(--gold)}
+.pill.a71{background:rgba(248,113,113,0.15);color:var(--red)}
+.pill.both{background:rgba(96,165,250,0.15);color:#60a5fa}
+.pill.setter{background:rgba(96,165,250,0.15);color:#60a5fa}
+.pill.closer{background:rgba(167,139,250,0.15);color:#a78bfa}
+.paid-toggle{padding:3px 9px;border-radius:3px;border:1px solid var(--border2);background:var(--navy3);color:var(--muted);font-family:var(--cond);font-size:9px;font-weight:700;letter-spacing:.4px;cursor:pointer;transition:all .15s}
+.paid-toggle.paid{background:rgba(61,214,140,0.1);color:var(--green);border-color:rgba(61,214,140,0.3)}
+.del-btn{padding:3px 7px;border-radius:3px;border:1px solid transparent;background:none;color:var(--muted);cursor:pointer;font-size:12px;transition:all .15s}
+.del-btn:hover{color:var(--red);border-color:rgba(248,113,113,0.4);background:rgba(248,113,113,0.08)}
+.icon-btn{padding:6px 13px;border:1px solid var(--border2);border-radius:5px;background:none;color:var(--text2);cursor:pointer;font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:.4px;transition:all .15s}
 .icon-btn:hover{border-color:var(--gold);color:var(--gold)}
-.icon-btn.danger:hover{border-color:rgba(248,113,113,0.4);color:var(--red)}
-
-/* TOAST */
-.toast{position:fixed;bottom:24px;right:24px;background:var(--gold);color:var(--navy);padding:10px 20px;border-radius:6px;font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:0.5px;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;z-index:999}
-.toast.show{opacity:1;transform:translateY(0)}
-
-/* MONTHS SUMMARY */
-.month-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
-.month-card{background:var(--navy2);border:1px solid var(--border);border-radius:12px;padding:18px;cursor:pointer;transition:border-color .15s}
-.month-card:hover,.month-card.on{border-color:var(--gold2)}
-.month-card-hdr{font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
-.month-card-val{font-family:var(--mono);font-size:18px;color:var(--text);margin-bottom:2px}
-.month-card-sub{font-family:var(--mono);font-size:11px;color:var(--muted)}
 
 /* PERSISTENCY */
-.persist-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
-.persist-card{background:var(--navy2);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .15s}
-.persist-card:hover{border-color:var(--border2)}
-.persist-card-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-.persist-card-name{font-weight:600;color:var(--text);font-size:14px}
-.persist-card-role{font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)}
-.persist-meter{padding:14px 18px 10px}
-.meter-track{height:8px;background:var(--navy3);border-radius:4px;overflow:hidden;margin-bottom:8px;position:relative}
-.meter-fill{height:100%;border-radius:4px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+.persist-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px}
+.pc{background:var(--navy2);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.pc-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.pc-name{font-weight:700;font-size:15px}
+.pc-role{font-family:var(--cond);font-size:9px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-top:2px}
+.pc-rate-big{font-family:var(--mono);font-size:22px;font-weight:500}
+.meter-track{height:7px;background:var(--navy3);border-radius:4px;overflow:hidden;margin:12px 18px 6px}
+.meter-fill{height:100%;border-radius:4px;transition:width .35s ease}
 .meter-fill.c0{background:var(--muted)}
 .meter-fill.c1{background:linear-gradient(90deg,#f87171,#fbbf24)}
-.meter-fill.c2{background:linear-gradient(90deg,#fbbf24,#c9a84c)}
-.meter-fill.c3{background:linear-gradient(90deg,#c9a84c,#3dd68c)}
-.meter-fill.c4{background:linear-gradient(90deg,#3dd68c,#22c55e)}
-.meter-labels{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--muted)}
-.persist-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-top:1px solid var(--border)}
-.ps{padding:12px 14px;border-right:1px solid var(--border)}
-.ps:last-child{border-right:none}
-.ps-lbl{font-family:var(--cond);font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
-.ps-val{font-family:var(--mono);font-size:15px;font-weight:500}
-.persist-input-row{display:flex;align-items:center;gap:8px;padding:12px 18px;border-top:1px solid var(--border);background:rgba(0,0,0,0.15)}
-.persist-input-row label{font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);white-space:nowrap}
-.persist-pct-input{width:70px;padding:6px 10px;background:var(--navy3);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;text-align:center}
-.persist-pct-input:focus{border-color:var(--gold)}
-.persist-save-btn{padding:6px 14px;background:var(--gold-dim);border:1px solid var(--border2);border-radius:6px;color:var(--gold);font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:.5px;cursor:pointer;transition:all .15s}
-.persist-save-btn:hover{background:var(--gold);color:var(--navy)}
-.bonus-line{display:flex;justify-content:space-between;align-items:center;padding:10px 18px;background:rgba(201,168,76,0.06);border-top:1px solid var(--border)}
-.bonus-lbl{font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--gold)}
-.bonus-amt{font-family:var(--mono);font-size:14px;color:var(--gold3);font-weight:500}
-.curve-box{background:var(--navy2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px}
-.curve-title{font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
-.curve-bars{display:flex;align-items:flex-end;gap:6px;height:80px}
-.curve-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
-.curve-bar{width:100%;border-radius:3px 3px 0 0;transition:height .3s}
-.curve-bar-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);text-align:center}
-.curve-bar-pct{font-family:var(--mono);font-size:9px;color:var(--gold);text-align:center}
+.meter-fill.c2{background:linear-gradient(90deg,#fbbf24,var(--gold))}
+.meter-fill.c3{background:linear-gradient(90deg,var(--gold),var(--green))}
+.pc-stats{display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid var(--border)}
+.ps{padding:10px 14px;border-right:1px solid var(--border)}.ps:last-child{border-right:none}
+.ps-lbl{font-family:var(--cond);font-size:8px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.ps-val{font-family:var(--mono);font-size:13px;font-weight:500}
+.pc-input-row{display:flex;align-items:center;gap:8px;padding:10px 18px;border-top:1px solid var(--border);background:rgba(0,0,0,.12)}
+.pc-input-row label{font-family:var(--cond);font-size:9px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.pct-inp{width:65px;padding:5px 9px;background:var(--navy3);border:1px solid var(--border2);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;text-align:center}
+.pct-inp:focus{border-color:var(--gold)}
 
-@media(max-width:700px){
-  .form-grid,.calc-cols,.stats,.owed-grid,.month-cards,.persist-grid{grid-template-columns:1fr}
-  .calc-col{border-right:none;border-bottom:1px solid var(--border)}
-  nav{padding:0 16px}
-  .content{padding:20px 16px}
-  .tabs .tab{padding:7px 10px;font-size:11px}
-}
+/* COP */
+.cop-box{max-width:480px}
+.cop-field{margin-bottom:18px}
+.cop-lbl{font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;display:block}
+.cop-result{font-family:var(--mono);font-size:21px;color:var(--gold3);margin-top:6px}
+.rate-line{display:flex;align-items:center;gap:10px;margin-bottom:22px}
+.rate-txt{font-family:var(--mono);font-size:13px;color:var(--text2)}
+
+/* SETTINGS */
+.setup-card{background:var(--navy2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:18px}
+.setup-card-head{padding:12px 18px;border-bottom:1px solid var(--border);font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:.9px;text-transform:uppercase;color:var(--gold)}
+.setup-card-body{padding:18px}
+.url-row{display:flex;gap:8px;margin-bottom:10px}
+.url-inp{flex:1;background:var(--navy3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:11px;padding:9px 13px;outline:none}
+.url-inp:focus{border-color:var(--gold)}
+.url-save{padding:9px 18px;background:var(--gold);color:var(--navy);border:none;border-radius:var(--r);font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:.4px;cursor:pointer;white-space:nowrap}
+.url-save:hover{background:var(--gold2)}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+.conn-res{font-family:var(--mono);font-size:12px;margin-top:10px;display:none}
+
+/* OVERLAY / TOAST */
+.overlay{position:fixed;inset:0;background:rgba(10,22,40,.75);z-index:500;display:none;align-items:center;justify-content:center}
+.overlay.on{display:flex}
+.spinner-wrap{text-align:center}
+.spin-ring{width:38px;height:38px;border:3px solid var(--border2);border-top-color:var(--gold);border-radius:50%;animation:spn .7s linear infinite;margin:0 auto 10px}
+@keyframes spn{to{transform:rotate(360deg)}}
+.spin-msg{font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--gold);text-transform:uppercase}
+.toast{position:fixed;bottom:22px;right:22px;background:var(--navy4);color:var(--text);border:1px solid var(--border2);border-radius:7px;padding:10px 18px;font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:.4px;z-index:900;opacity:0;transform:translateY(6px);transition:all .2s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+
+@media(max-width:680px){.form-grid,.stats,.persist-grid{grid-template-columns:1fr}nav{flex-wrap:wrap;height:auto;padding:10px 16px;gap:8px}.content{padding:18px 14px}}
 </style>
 </head>
 <body>
+
+<div class="overlay" id="overlay">
+  <div class="spinner-wrap">
+    <div class="spin-ring"></div>
+    <div class="spin-msg" id="overlayMsg">Loading…</div>
+  </div>
+</div>
 
 <nav>
   <div class="logo">
     <div class="logo-mark">A</div>
     <div class="logo-text">AIL <span>Comp</span></div>
   </div>
+  <div class="nav-mid">
+    <div class="sync-dot spin" id="syncDot"></div>
+    <span class="sync-txt" id="syncTxt">Connecting…</span>
+    <button class="refresh-pill" onclick="loadSheet()">↻ Refresh</button>
+  </div>
   <div class="tabs">
-    <button class="tab on" onclick="showPage('submit',this)">Submit</button>
-    <button class="tab" onclick="showPage('week',this)">This Week</button>
-    <button class="tab" onclick="showPage('history',this)">History</button>
-    <button class="tab" onclick="showPage('persist',this)">Persistency</button>
-    <button class="tab" onclick="showPage('cop',this)">USD→COP</button>
-    <button class="tab" onclick="showPage('settings',this)" id="settingsTab">⚙ Sheets</button>
+    <button class="tab on"  onclick="go('submit',this)">Submit</button>
+    <button class="tab"     onclick="go('ledger',this)">Ledger</button>
+    <button class="tab"     onclick="go('persist',this)">Persistency</button>
+    <button class="tab"     onclick="go('cop',this)">USD→COP</button>
+    <button class="tab"     onclick="go('setup',this)">⚙ Setup</button>
   </div>
 </nav>
 
-<div class="week-bar">
-  <div class="week-info">
-    <span class="week-eyebrow">Current Week</span>
-    <span class="week-range" id="weekRange">—</span>
-  </div>
-  <span class="pay-pill" id="payBadge">Paid —</span>
-</div>
-
-<!-- ── SUBMIT ── -->
+<!-- SUBMIT -->
 <div class="page on content" id="page-submit">
   <div class="form-wrap">
     <div class="section-title">Submit a Sale</div>
-    <div class="section-sub">Enter sale details — payout calculates live below</div>
+    <div class="section-sub">Saved directly to Google Sheet — all data lives there</div>
     <div class="form-grid">
       <div class="field">
         <label>Client Name</label>
-        <input type="text" id="clientName" placeholder="Jane Smith">
+        <input type="text" id="iClient" placeholder="Jane Smith">
       </div>
-
+      <div class="field">
+        <label>Date</label>
+        <input type="date" id="iDate">
+      </div>
       <div class="field full">
         <label>Product Type</label>
-        <div class="toggle-row">
-          <button class="tog on" id="t-std" onclick="setType('std')">Standard (60%)</button>
-          <button class="tog" id="t-a71" onclick="setType('a71')">A71 (35%)</button>
-          <button class="tog" id="t-both" onclick="setType('both')">Both Stacked</button>
+        <div class="tog-row">
+          <button class="tog on" id="t-std"  onclick="setType('std')">Standard</button>
+          <button class="tog"    id="t-a71"  onclick="setType('a71')">A71</button>
+          <button class="tog"    id="t-both" onclick="setType('both')">Both Stacked</button>
         </div>
       </div>
-
-      <!-- Single ALP — shown for std and a71 -->
-      <div class="field full" id="alp-single-wrap">
+      <div class="field full" id="wrap-single">
         <label>Monthly Premium (ALP)</label>
-        <input type="number" id="alp" placeholder="1200" min="0" step="1" oninput="calcPreview()">
+        <input type="number" id="iAlp" placeholder="1200" min="0" step="1" oninput="preview()">
       </div>
-
-      <!-- Split ALPs — shown only for both -->
-      <div class="field" id="alp-std-wrap" style="display:none">
-        <label>Monthly Life Premium (Standard @ 60%)</label>
-        <input type="number" id="alpStd" placeholder="1200" min="0" step="1" oninput="calcPreview()">
+      <div class="field" id="wrap-std" style="display:none">
+        <label>Life Monthly Premium</label>
+        <input type="number" id="iAlpStd" placeholder="1200" min="0" step="1" oninput="preview()">
       </div>
-      <div class="field" id="alp-a71-wrap" style="display:none">
-        <label>Monthly A71 Premium (A71 @ 35%)</label>
-        <input type="number" id="alpA71" placeholder="400" min="0" step="1" oninput="calcPreview()">
+      <div class="field" id="wrap-a71" style="display:none">
+        <label>A71 Monthly Premium</label>
+        <input type="number" id="iAlpA71" placeholder="400" min="0" step="1" oninput="preview()">
       </div>
-
       <div class="field full">
         <label>Comp Role</label>
-        <div class="toggle-row">
+        <div class="tog-row">
           <button class="tog on" id="r-setter" onclick="setRole('setter')">Setter — 15%</button>
-          <button class="tog" id="r-closer" onclick="setRole('closer')">Closer — 25%</button>
+          <button class="tog"    id="r-closer" onclick="setRole('closer')">Closer — 25%</button>
         </div>
       </div>
-
       <div class="field">
-        <label>Date Submitted</label>
-        <input type="date" id="saleDate">
+        <label>Paid To</label>
+        <div style="background:var(--navy3);border:1px solid var(--border);border-radius:var(--r);padding:9px 13px;font-family:var(--mono);font-size:13px;color:var(--gold2)">Call Center</div>
+      </div>
+      <div class="field">
+        <label>Persistency Factor</label>
+        <div style="background:var(--navy3);border:1px solid var(--border);border-radius:var(--r);padding:9px 13px;font-family:var(--mono);font-size:13px;color:var(--text2)" id="previewPFactor">—</div>
       </div>
     </div>
 
     <div class="calc-box" id="calcBox" style="display:none">
-      <div class="calc-head">Payout Breakdown</div>
-      <!-- Single product (std or a71) -->
-      <div class="calc-cols" id="calc-single">
-        <div class="calc-col">
-          <div class="calc-lbl">9-Month Advance Pool</div>
-          <div class="calc-val g" id="pv-advance">—</div>
-          <div class="calc-sub" id="pv-advance-sub">—</div>
-        </div>
-        <div class="calc-col">
-          <div class="calc-lbl">Your Earned Cut</div>
-          <div class="calc-val b" id="pv-yours">—</div>
-          <div class="calc-sub" id="pv-yours-sub">—</div>
-        </div>
-        <div class="calc-col">
-          <div class="calc-lbl">Owed to Call Center</div>
-          <div class="calc-val a" id="pv-owed">—</div>
-          <div class="calc-sub" id="pv-owed-sub">—</div>
-        </div>
-      </div>
-      <!-- Both stacked — 5 columns -->
-      <div id="calc-both" style="display:none">
-        <div style="display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--border)">
-          <div class="calc-col" style="border-top:none">
-            <div class="calc-lbl">Life Advance</div>
-            <div class="calc-val g" id="pb-std-adv">—</div>
-            <div class="calc-sub" id="pb-std-adv-sub">—</div>
-          </div>
-          <div class="calc-col" style="border-top:none">
-            <div class="calc-lbl">A71 Advance</div>
-            <div class="calc-val g" id="pb-a71-adv">—</div>
-            <div class="calc-sub" id="pb-a71-adv-sub">—</div>
-          </div>
-          <div class="calc-col" style="border-top:none">
-            <div class="calc-lbl">Life Cut (60%)</div>
-            <div class="calc-val b" id="pb-std-cut">—</div>
-            <div class="calc-sub" id="pb-std-cut-sub">—</div>
-          </div>
-          <div class="calc-col" style="border-top:none">
-            <div class="calc-lbl">A71 Cut (35%)</div>
-            <div class="calc-val b" id="pb-a71-cut">—</div>
-            <div class="calc-sub" id="pb-a71-cut-sub">—</div>
-          </div>
-          <div class="calc-col" style="border-top:none;background:var(--gold-dim)">
-            <div class="calc-lbl">Total Owed</div>
-            <div class="calc-val a" id="pb-owed">—</div>
-            <div class="calc-sub" id="pb-owed-sub">—</div>
-          </div>
-        </div>
-      </div>
+      <div class="calc-head">Payout Preview</div>
+      <div id="calcInner"></div>
     </div>
 
-    <button class="submit-btn" onclick="submitSale()">Add to Week →</button>
+    <button class="submit-btn" id="submitBtn" onclick="submitSale()">Add Sale → Sheet</button>
   </div>
 </div>
 
-<!-- ── THIS WEEK ── -->
-<div class="page content" id="page-week">
-  <div class="section-title">This Week</div>
-  <div class="section-sub" id="weekSubhead">Wed–Tue cycle</div>
+<!-- LEDGER -->
+<div class="page content" id="page-ledger">
+  <div class="section-title">Sales Ledger</div>
+  <div class="section-sub">Reading directly from Google Sheet — edit there anytime, then hit Refresh</div>
 
   <div class="stats">
-    <div class="stat"><div class="stat-lbl">Sales</div><div class="stat-val" id="s-count">0</div></div>
-    <div class="stat"><div class="stat-lbl">Total ALP</div><div class="stat-val gold" id="s-alp">$0</div></div>
-    <div class="stat"><div class="stat-lbl">Your Advance</div><div class="stat-val green" id="s-advance">$0</div></div>
-    <div class="stat"><div class="stat-lbl">Total Owed Out</div><div class="stat-val gold" id="s-owed">$0</div></div>
+    <div class="stat"><div class="stat-lbl">Sales</div><div class="stat-val" id="ls-count">—</div></div>
+    <div class="stat"><div class="stat-lbl">Total ALP</div><div class="stat-val gold" id="ls-alp">—</div></div>
+    <div class="stat"><div class="stat-lbl">Total Advance</div><div class="stat-val green" id="ls-adv">—</div></div>
+    <div class="stat"><div class="stat-lbl">Total Owed</div><div class="stat-val gold" id="ls-owed">—</div></div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+    <div class="filter-bar" style="margin:0;flex:1">
+      <label>Month</label>
+      <select id="fMonth" onchange="renderLedger()"><option value="">All</option></select>
+      <label>Role</label>
+      <select id="fRole" onchange="renderLedger()">
+        <option value="">All</option>
+        <option value="setter">Setter</option>
+        <option value="closer">Closer</option>
+      </select>
+      <label>Paid</label>
+      <select id="fPaid" onchange="renderLedger()">
+        <option value="">All</option>
+        <option value="YES">Paid</option>
+        <option value="NO">Unpaid</option>
+      </select>
+    </div>
+    <button class="icon-btn" onclick="exportCSV()">↓ CSV</button>
   </div>
 
   <div class="tbl-wrap">
     <div class="tbl-head">
-      <h3>Sales Log</h3>
-      <div class="tbl-actions">
-        <button class="icon-btn" onclick="exportWeekCSV()">Export CSV</button>
-        <button class="icon-btn danger" onclick="clearWeek()">Clear Week</button>
-      </div>
+      <h3 id="ledgerTitle">Sales — Call Center</h3>
     </div>
-    <div id="weekTableBody"><div class="empty">No sales this week yet.</div></div>
-  </div>
-
-  <div class="owed-grid" id="owedGrid" style="display:none">
-    <div class="owed-card" style="grid-column:1/-1">
-      <div class="owed-card-head"><h3>Call Center Owed This Week</h3><span class="owed-total" id="callCenterTotal">$0</span></div>
-      <div id="callCenterList"></div>
-    </div>
+    <div id="ledgerBody"><div style="padding:28px;text-align:center;color:var(--muted);font-family:var(--cond);font-size:11px;text-transform:uppercase;letter-spacing:.8px">Loading…</div></div>
   </div>
 </div>
 
-<!-- ── HISTORY ── -->
-<div class="page content" id="page-history">
-  <div class="section-title">History</div>
-  <div class="section-sub">All sales by month — filter, review, and mark as paid</div>
-
-  <div class="month-cards" id="monthCards"></div>
-
-  <div class="filter-bar">
-    <label>Month</label>
-    <select id="filterMonth" onchange="renderHistory()">
-      <option value="">All Months</option>
-    </select>
-    <label>Paid?</label>
-    <select id="filterPaid" onchange="renderHistory()">
-      <option value="">All</option>
-      <option value="yes">Paid</option>
-      <option value="no">Unpaid</option>
-    </select>
-  </div>
-
-  <div class="tbl-wrap">
-    <div class="tbl-head">
-      <h3>All Sales</h3>
-      <button class="icon-btn" onclick="exportAllCSV()">Export All CSV</button>
-    </div>
-    <div id="historyTableBody"><div class="empty">No sales yet.</div></div>
-  </div>
-</div>
-
-<!-- ── PERSISTENCY ── -->
+<!-- PERSISTENCY -->
 <div class="page content" id="page-persist">
-  <div class="section-title">Persistency Bonuses</div>
-  <div class="section-sub">Track each payee's policy persistency rate — bonus up to +10% on top of base comp</div>
+  <div class="section-title">Persistency Factor</div>
+  <div class="section-sub">Set this month's persistency rate — bonus added on top of base comp (hockey stick curve, +0% to +10%). Syncs to Sheet.</div>
 
-  <!-- Hockey stick curve visual -->
-  <div class="curve-box">
-    <div class="curve-title">Bonus Curve — Hockey Stick</div>
-    <div class="curve-bars" id="curveBars"></div>
-    <div style="display:flex;justify-content:space-between;margin-top:6px">
-      <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">&lt;70%</span>
-      <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">70%</span>
-      <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">75%</span>
-      <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">80%</span>
-      <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">85%</span>
-      <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">90%</span>
-      <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">95%</span>
-      <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">100%</span>
+  <div class="persist-grid" id="persistGrid"></div>
+
+  <div style="background:var(--navy2);border:1px solid var(--border);border-radius:10px;padding:18px;max-width:560px">
+    <div style="font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--gold);margin-bottom:12px">How it works</div>
+    <div style="color:var(--text2);font-size:13px;line-height:1.9">
+      <code style="font-family:var(--mono);color:var(--gold3);font-size:12px">advance  = (monthly × 12) × 0.60 × 0.65</code><br>
+      <code style="font-family:var(--mono);color:var(--gold3);font-size:12px">base     = advance × role% &nbsp;&nbsp;(setter 15%, closer 25%)</code><br>
+      <code style="font-family:var(--mono);color:var(--gold3);font-size:12px">bonus    = hockey stick curve, 0% → +10% (unlocks at 70%)</code><br>
+      <code style="font-family:var(--mono);color:var(--gold3);font-size:12px">owed     = base × (1 + bonus%)</code><br><br>
+      Base pay is always fixed. Persistency only adds on top as a bonus.
     </div>
-  </div>
-
-  <div class="persist-grid" id="persistGrid">
-    <div class="empty" style="grid-column:1/-1">No payees yet — submit sales first.</div>
-  </div>
-
-  <!-- Bonus summary -->
-  <div class="tbl-wrap" id="bonusSummaryWrap" style="display:none">
-    <div class="tbl-head">
-      <h3>Bonus Payouts This Period</h3>
-      <span style="font-family:var(--mono);font-size:13px;color:var(--gold3)" id="bonusTotalDisplay">$0</span>
-    </div>
-    <div id="bonusSummaryBody"></div>
   </div>
 </div>
 
-<!-- ── COP ── -->
+<!-- COP -->
 <div class="page content" id="page-cop">
-  <div class="section-title">USD → COP Converter</div>
-  <div class="section-sub">Live exchange rate — convert your payouts to Colombian pesos</div>
-  <div class="cop-wrap">
-    <div class="cop-box">
-      <div class="cop-hdr">
-        <h2>Live Rate</h2>
-        <span class="rate-badge" id="rateDisplay">Loading…</span>
-      </div>
-      <div class="cop-body">
-        <div class="cop-field">
-          <label>US Dollars (USD)</label>
-          <div class="cop-input-wrap">
-            <input type="number" id="usdInput" placeholder="0.00" step="0.01" min="0" oninput="convertUSD()">
-            <span class="cop-sym">USD</span>
-          </div>
-        </div>
-        <div class="cop-divider">converts to</div>
-        <div class="cop-field">
-          <label>Colombian Pesos (COP)</label>
-          <div class="cop-result" id="copResult">—</div>
-        </div>
-        <div class="cop-divider">or reverse</div>
-        <div class="cop-field">
-          <label>Colombian Pesos (COP)</label>
-          <div class="cop-input-wrap">
-            <input type="number" id="copInput" placeholder="0" step="1" oninput="convertCOP()">
-            <span class="cop-sym">COP</span>
-          </div>
-        </div>
-        <div class="cop-divider">converts to</div>
-        <div class="cop-field">
-          <label>US Dollars (USD)</label>
-          <div class="cop-result" id="usdResult" style="font-size:20px">—</div>
-        </div>
-      </div>
-      <div class="cop-footer" id="rateUpdated">
-        Rate: —<button class="refresh-btn" onclick="fetchRate()">↻ Refresh</button>
-      </div>
+  <div class="section-title">USD → COP</div>
+  <div class="section-sub">Live exchange rate</div>
+  <div class="rate-line">
+    <span class="rate-txt" id="rateDisplay">Loading…</span>
+    <button class="refresh-pill" onclick="fetchRate(true)">↻ Refresh Rate</button>
+    <span style="font-family:var(--mono);font-size:11px;color:var(--muted)" id="rateTs"></span>
+  </div>
+  <div class="cop-box">
+    <div class="cop-field">
+      <span class="cop-lbl">US Dollars (USD)</span>
+      <input type="number" id="usdIn" placeholder="0.00" step="0.01" min="0" oninput="conv('usd')">
+      <div class="cop-result" id="copOut">—</div>
     </div>
+    <div class="cop-field">
+      <span class="cop-lbl">Colombian Pesos (COP)</span>
+      <input type="number" id="copIn" placeholder="0" step="1000" min="0" oninput="conv('cop')">
+      <div class="cop-result" id="usdOut">—</div>
+    </div>
+  </div>
 
-    <div class="owed-quick" id="owedQuick" style="display:none">
-      <div class="oq-head">This Week's Owed — in COP</div>
-      <div class="oq-body" id="owedQuickBody"></div>
-    </div>
+  <div class="tbl-wrap" id="copOwedWrap" style="display:none;margin-top:28px">
+    <div class="tbl-head"><h3>This Month — Owed in COP</h3></div>
+    <div id="copOwedBody"></div>
   </div>
 </div>
 
-<!-- ── SETTINGS ── -->
-<div class="page content" id="page-settings">
-  <div class="section-title">Google Sheets Sync</div>
-  <div class="section-sub">Paste your Web App URL once — all sales sync automatically</div>
-
-  <div style="max-width:640px">
-    <div style="background:var(--navy2);border:1px solid var(--border2);border-radius:12px;overflow:hidden;margin-bottom:20px">
-      <div style="padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
-        <span style="font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gold)">Web App URL</span>
-        <span id="syncStatusBadge" style="font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:0.5px;padding:3px 10px;border-radius:4px;background:var(--navy3);color:var(--muted)">NOT CONFIGURED</span>
+<!-- SETUP -->
+<div class="page content" id="page-setup">
+  <div class="section-title">Setup</div>
+  <div class="section-sub">Connect to your Google Apps Script — the sheet is the database</div>
+  <div class="setup-card">
+    <div class="setup-card-head">Web App URL</div>
+    <div class="setup-card-body">
+      <div class="url-row">
+        <input class="url-inp" type="text" id="urlInp" placeholder="https://script.google.com/macros/s/…/exec">
+        <button class="url-save" onclick="saveUrl()">Save & Connect</button>
       </div>
-      <div style="padding:20px;display:flex;flex-direction:column;gap:12px">
-        <div class="field">
-          <label>Google Apps Script Web App URL</label>
-          <input type="text" id="sheetUrl" placeholder="https://script.google.com/macros/s/.../exec" style="font-family:var(--mono);font-size:12px">
-        </div>
-        <div style="display:flex;gap:10px">
-          <button class="submit-btn" style="margin-top:0;padding:10px 24px" onclick="saveSheetUrl()">Save URL</button>
-          <button class="icon-btn" onclick="testConnection()" style="padding:10px 20px">Test Connection</button>
-          <button class="icon-btn danger" onclick="clearSheetUrl()" style="padding:10px 20px">Clear</button>
-        </div>
-        <div id="connResult" style="font-family:var(--mono);font-size:12px;color:var(--muted);display:none"></div>
+      <div class="btn-row">
+        <button class="icon-btn" onclick="testConn()">Test Connection</button>
+        <button class="icon-btn" style="color:var(--red);border-color:rgba(248,113,113,0.25)" onclick="clearUrl()">Clear</button>
       </div>
+      <div class="conn-res" id="connRes"></div>
     </div>
-
-    <div style="background:var(--navy2);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px">
-      <div style="padding:14px 20px;border-bottom:1px solid var(--border)">
-        <span style="font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gold)">Sync Controls</span>
-      </div>
-      <div style="padding:20px;display:flex;flex-direction:column;gap:12px">
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="icon-btn" onclick="pushAllToSheet()" style="padding:10px 20px">Push All Local → Sheet</button>
-          <button class="icon-btn" onclick="pullFromSheet()" style="padding:10px 20px">Pull Sheet → Local</button>
-        </div>
-        <div id="syncLog" style="font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.7;display:none;background:var(--navy3);padding:12px;border-radius:6px;border:1px solid var(--border)"></div>
-      </div>
-    </div>
-
-    <div style="background:var(--navy3);border:1px solid var(--border);border-radius:12px;padding:20px">
-      <div style="font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--gold);margin-bottom:12px">Setup Instructions</div>
-      <ol style="color:var(--text2);font-size:13px;line-height:2;padding-left:18px">
-        <li>Open your Google Sheet → <strong style="color:var(--gold2)">Extensions → Apps Script</strong></li>
-        <li>Paste the contents of <strong style="color:var(--gold2)">AIL_CompTracker_GAS.js</strong> and save</li>
-        <li>Run <strong style="color:var(--gold2)">setupSheets()</strong> once (creates all tabs)</li>
-        <li>Click <strong style="color:var(--gold2)">Deploy → New Deployment</strong></li>
-        <li>Type: <strong style="color:var(--gold2)">Web App</strong> · Execute as: <strong style="color:var(--gold2)">Me</strong> · Access: <strong style="color:var(--gold2)">Anyone</strong></li>
-        <li>Copy the Web App URL and paste it above</li>
+  </div>
+  <div class="setup-card">
+    <div class="setup-card-head">Setup Instructions</div>
+    <div class="setup-card-body">
+      <ol style="color:var(--text2);font-size:13px;line-height:2.3;padding-left:16px">
+        <li>Open Google Sheet → <strong style="color:var(--gold2)">Extensions → Apps Script</strong></li>
+        <li>Paste <strong style="color:var(--gold2)">AIL_CompTracker_GAS.js</strong> → Save</li>
+        <li>Run <strong style="color:var(--gold2)">setupSheet()</strong> once — creates the Sales tab with headers + totals row</li>
+        <li><strong style="color:var(--gold2)">Deploy → New Deployment → Web App</strong><br>Execute as: <strong style="color:var(--gold2)">Me</strong> · Access: <strong style="color:var(--gold2)">Anyone</strong></li>
+        <li>Copy the URL and paste it above → Save &amp; Connect</li>
+        <li>App auto-loads from Sheet on every open — edit rows directly in Sheets anytime</li>
       </ol>
     </div>
   </div>
@@ -576,512 +368,31 @@ tr:hover td{background:rgba(201,168,76,0.04)}
 <div class="toast" id="toast"></div>
 
 <script>
-// ─── STATE ─────────────────────────────────────────────────────────────────
-let sales   = JSON.parse(localStorage.getItem('ailSales2')||'[]');
-let copRate = parseFloat(localStorage.getItem('ailCopRate')||'0');
-let rateTs  = parseInt(localStorage.getItem('ailRateTs')||'0');
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+let sales       = [];        // loaded from sheet each time
+let copRate     = parseFloat(localStorage.getItem('ailCopRate') || '0');
+let rateTs      = parseInt(  localStorage.getItem('ailRateTs')  || '0');
+let SHEET_URL   = localStorage.getItem('ailSheetUrl') || '';
+let persistData = JSON.parse(localStorage.getItem('ailPersist') || '{}');
+// persistData: { setter: { rate:92, month:'2025-06' }, closer: { rate:88, month:'2025-06' } }
+
 let selType = 'std';
 let selRole = 'setter';
-let SHEET_URL = localStorage.getItem('ailSheetUrl')||'';
 
-// ─── GOOGLE SHEETS SYNC ────────────────────────────────────────────────────
-function getSheetUrl(){ return localStorage.getItem('ailSheetUrl')||''; }
-
-function saveSheetUrl(){
-  const val = document.getElementById('sheetUrl').value.trim();
-  if(!val){ toast('Paste a URL first'); return; }
-  localStorage.setItem('ailSheetUrl', val);
-  SHEET_URL = val;
-  updateSyncBadge(true);
-  toast('URL saved — hit Test Connection to verify');
-}
-function clearSheetUrl(){
-  localStorage.removeItem('ailSheetUrl');
-  SHEET_URL='';
-  document.getElementById('sheetUrl').value='';
-  updateSyncBadge(false);
-  toast('Sheet URL cleared');
-}
-function updateSyncBadge(connected){
-  const b = document.getElementById('syncStatusBadge');
-  if(!b) return;
-  if(connected){
-    b.style.background='var(--green-bg)'; b.style.color='var(--green)';
-    b.style.border='1px solid rgba(61,214,140,0.2)'; b.textContent='CONNECTED';
-  } else {
-    b.style.background='var(--navy3)'; b.style.color='var(--muted)';
-    b.style.border='none'; b.textContent='NOT CONFIGURED';
-  }
-}
-async function sheetPost(payload){
-  const url = getSheetUrl();
-  if(!url) return null;
-  try{
-    const r = await fetch(url, {
-      method:'POST', mode:'no-cors',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(payload)
-    });
-    return true;
-  } catch(e){ return null; }
-}
-async function sheetGet(params){
-  const url = getSheetUrl();
-  if(!url) return null;
-  const qs = new URLSearchParams(params).toString();
-  try{
-    const r = await fetch(url+'?'+qs);
-    return await r.json();
-  } catch(e){ return null; }
-}
-async function testConnection(){
-  const url = getSheetUrl();
-  const el = document.getElementById('connResult');
-  el.style.display='block';
-  if(!url){ el.style.color='var(--red)'; el.textContent='✕ No URL saved.'; return; }
-  el.style.color='var(--muted)'; el.textContent='Testing…';
-  try{
-    const r = await fetch(url+'?action=getSales');
-    const d = await r.json();
-    if(d.success){
-      el.style.color='var(--green)';
-      el.textContent=`✓ Connected — ${d.sales.length} sales in sheet.`;
-      updateSyncBadge(true);
-    } else {
-      el.style.color='var(--red)'; el.textContent='✕ Connected but got error: '+(d.error||'unknown');
-    }
-  } catch(e){
-    el.style.color='var(--red)'; el.textContent='✕ Could not reach URL. Check deployment settings.';
-  }
-}
-async function pushAllToSheet(){
-  const log = document.getElementById('syncLog');
-  log.style.display='block'; log.textContent='Pushing '+sales.length+' sales to sheet…\n';
-  let ok=0, fail=0;
-  for(const sale of sales){
-    const res = await sheetPost({action:'addSale', sale});
-    if(res) ok++; else fail++;
-    log.textContent='Pushed '+ok+'/'+sales.length+(fail?' ('+fail+' failed)':'')+'…\n';
-  }
-  log.textContent=`Done. ${ok} pushed, ${fail} failed.`;
-  toast('Push complete');
-}
-async function pullFromSheet(){
-  const log = document.getElementById('syncLog');
-  log.style.display='block'; log.textContent='Pulling from sheet…\n';
-  const d = await sheetGet({action:'getSales'});
-  if(!d||!d.success){ log.style.color='var(--red)'; log.textContent='Pull failed — check connection.'; return; }
-  // Merge: sheet is source of truth, keep local entries not yet in sheet
-  const sheetIds = new Set(d.sales.map(s=>String(s.id)));
-  const localOnly = sales.filter(s=>!sheetIds.has(String(s.id)));
-  const merged = [
-    ...d.sales.map(s=>({
-      id:+s.id, client:s.client, alp:+s.alp, type:s.type?.toLowerCase()||'std',
-      role:s.role, payee:s.payee||'Call Center', date:s.date,
-      paid: s.paid==='YES'||s.paid===true,
-      alpStd:+s.alp_std||0, alpA71:+s.alp_a71||0,
-      advance:+s['advance_pool']||+s.advance||0,
-      myEarned:+s['agent_cut']||+s.myEarned||0,
-      owed:+s.owed||0, agentPcts:'', payeePct:0
-    })),
-    ...localOnly
-  ];
-  sales = merged;
-  save(false);
-
-  // Pull persistency data
-  const pd = await sheetGet({action:'getPersist'});
-  if(pd&&pd.success&&pd.persist){
-    persistData = pd.persist;
-    savePersist();
-  }
-
-  renderWeek(); buildMonthCards(); buildHistoryFilters(); renderHistory(); renderOwedQuick();
-  log.textContent=`Pulled ${d.sales.length} from sheet + kept ${localOnly.length} local-only. Total: ${sales.length}`;
-  toast('Pull complete — '+sales.length+' sales loaded');
+// ═══════════════════════════════════════════════════════════
+//  MATH
+//    advance   = (monthly × 12) × 0.60 × 0.65
+//    baseOwed  = advance × rolePct          (setter 15%, closer 25%)
+//    bonusPct  = getPersistBonus(rate)      (hockey stick 0–10%)
+//    owed      = baseOwed × (1 + bonusPct/100)
+// ═══════════════════════════════════════════════════════════
+function calcAdvance(monthly) {
+  return monthly * 12 * 0.60 * 0.65;
 }
 
-// ─── WEEK ──────────────────────────────────────────────────────────────────
-function getWeekBounds(){
-  const now=new Date(), day=now.getDay();
-  const diff=(day-3+7)%7;
-  const wed=new Date(now); wed.setDate(now.getDate()-diff); wed.setHours(0,0,0,0);
-  const tue=new Date(wed); tue.setDate(wed.getDate()+6); tue.setHours(23,59,59,999);
-  const fri=new Date(wed); fri.setDate(wed.getDate()+9);
-  return{wed,tue,fri};
-}
-function fd(d){return d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}
-function initWeekBar(){
-  const{wed,tue,fri}=getWeekBounds();
-  document.getElementById('weekRange').textContent=`${fd(wed)} – ${fd(tue)}`;
-  document.getElementById('payBadge').textContent=`Paid ${fd(fri)}`;
-  document.getElementById('weekSubhead').textContent=`${fd(wed)} → ${fd(tue)} · Paid ${fd(fri)}`;
-}
-function inCurrentWeek(dateStr){
-  if(!dateStr)return true;
-  const{wed,tue}=getWeekBounds();
-  const d=new Date(dateStr+'T12:00:00');
-  return d>=wed&&d<=tue;
-}
-
-// ─── MATH ──────────────────────────────────────────────────────────────────
-// For std/a71: pass alp, alpA71 ignored. For both: pass both.
-function calcPayout(alp, type, role, alpA71){
-  const payeePct = role==='setter' ? 0.15 : 0.25;
-  if(type==='std'){
-    const advance  = alp * 9 * 0.60;
-    const myEarned = advance * 0.60;
-    return { alp, alpA71:0, advanceStd:advance, advanceA71:0, cutStd:myEarned, cutA71:0,
-             advance, myEarned, payeePct, owed:myEarned*payeePct, agentPcts:'60%' };
-  }
-  if(type==='a71'){
-    const advance  = alp * 9 * 0.60;
-    const myEarned = advance * 0.35;
-    return { alp, alpA71:0, advanceStd:0, advanceA71:advance, cutStd:0, cutA71:myEarned,
-             advance, myEarned, payeePct, owed:myEarned*payeePct, agentPcts:'35%' };
-  }
-  // both stacked — two separate premiums, two separate calcs
-  const a71 = alpA71 || 0;
-  const advStd  = alp  * 9 * 0.60;
-  const advA71  = a71  * 9 * 0.60;
-  const cutStd  = advStd * 0.60;
-  const cutA71  = advA71 * 0.35;
-  const myEarned = cutStd + cutA71;
-  const totalAlp = alp + a71;
-  return { alp:totalAlp, alpStd:alp, alpA71:a71,
-           advanceStd:advStd, advanceA71:advA71, cutStd, cutA71,
-           advance:advStd+advA71, myEarned, payeePct,
-           owed:myEarned*payeePct, agentPcts:'60%+35%' };
-}
-function fmt(n){return'$'+n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',')}
-
-// ─── PREVIEW ───────────────────────────────────────────────────────────────
-function calcPreview(){
-  const payeePct = selRole==='setter' ? 0.15 : 0.25;
-  if(selType==='both'){
-    const alpStd = parseFloat(document.getElementById('alpStd').value)||0;
-    const alpA71 = parseFloat(document.getElementById('alpA71').value)||0;
-    if(!alpStd && !alpA71){ document.getElementById('calcBox').style.display='none'; return; }
-    const p = calcPayout(alpStd,'both',selRole,alpA71);
-    document.getElementById('calcBox').style.display='block';
-    document.getElementById('calc-single').style.display='none';
-    document.getElementById('calc-both').style.display='block';
-    document.getElementById('pb-std-adv').textContent    = fmt(p.advanceStd);
-    document.getElementById('pb-std-adv-sub').textContent= `${fmt(alpStd)} × 9mo × 60%`;
-    document.getElementById('pb-a71-adv').textContent    = fmt(p.advanceA71);
-    document.getElementById('pb-a71-adv-sub').textContent= `${fmt(alpA71)} × 9mo × 60%`;
-    document.getElementById('pb-std-cut').textContent    = fmt(p.cutStd);
-    document.getElementById('pb-std-cut-sub').textContent= `${fmt(p.advanceStd)} × 60%`;
-    document.getElementById('pb-a71-cut').textContent    = fmt(p.cutA71);
-    document.getElementById('pb-a71-cut-sub').textContent= `${fmt(p.advanceA71)} × 35%`;
-    document.getElementById('pb-owed').textContent       = fmt(p.owed);
-    document.getElementById('pb-owed-sub').textContent   = `${fmt(p.myEarned)} × ${(payeePct*100).toFixed(0)}% (${selRole})`;
-  } else {
-    const alp = parseFloat(document.getElementById('alp').value);
-    if(!alp||alp<=0){ document.getElementById('calcBox').style.display='none'; return; }
-    const p = calcPayout(alp,selType,selRole);
-    document.getElementById('calcBox').style.display='block';
-    document.getElementById('calc-single').style.display='grid';
-    document.getElementById('calc-both').style.display='none';
-    document.getElementById('pv-advance').textContent     = fmt(p.advance);
-    document.getElementById('pv-advance-sub').textContent = `${fmt(alp)} × 9mo × 60%`;
-    document.getElementById('pv-yours').textContent       = fmt(p.myEarned);
-    document.getElementById('pv-yours-sub').textContent   = `${fmt(p.advance)} × ${p.agentPcts}`;
-    document.getElementById('pv-owed').textContent        = fmt(p.owed);
-    document.getElementById('pv-owed-sub').textContent    = `${fmt(p.myEarned)} × ${(payeePct*100).toFixed(0)}% (${selRole})`;
-  }
-}
-function setType(t){
-  selType=t;
-  ['std','a71','both'].forEach(x=>document.getElementById('t-'+x).classList.toggle('on',x===t));
-  // toggle input visibility
-  const isBoth = t==='both';
-  document.getElementById('alp-single-wrap').style.display = isBoth ? 'none' : 'block';
-  document.getElementById('alp-std-wrap').style.display    = isBoth ? 'block' : 'none';
-  document.getElementById('alp-a71-wrap').style.display    = isBoth ? 'block' : 'none';
-  document.getElementById('calcBox').style.display='none';
-  calcPreview();
-}
-function setRole(r){
-  selRole=r;
-  ['setter','closer'].forEach(x=>document.getElementById('r-'+x).classList.toggle('on',x===r));
-  calcPreview();
-}
-
-// ─── SUBMIT ────────────────────────────────────────────────────────────────
-function submitSale(){
-  const client  = document.getElementById('clientName').value.trim();
-  const dateVal = document.getElementById('saleDate').value||new Date().toISOString().split('T')[0];
-  if(!client){ toast('Enter client name'); return; }
-
-  // Payee is always Call Center — role determines setter vs closer comp
-  const payee = 'Call Center';
-
-  let p, alp;
-  if(selType==='both'){
-    const alpStd = parseFloat(document.getElementById('alpStd').value)||0;
-    const alpA71 = parseFloat(document.getElementById('alpA71').value)||0;
-    if(!alpStd && !alpA71){ toast('Enter at least one premium amount'); return; }
-    p = calcPayout(alpStd,'both',selRole,alpA71);
-    alp = p.alp;
-  } else {
-    alp = parseFloat(document.getElementById('alp').value);
-    if(!alp||alp<=0){ toast('Enter an ALP amount'); return; }
-    p = calcPayout(alp,selType,selRole);
-  }
-
-  const sale = { id:Date.now(), client, alp, type:selType, role:selRole, payee, date:dateVal, paid:false,
-                 alpStd:p.alpStd||alp, alpA71:p.alpA71||0, ...p };
-  sales.push(sale);
-  save();
-  if(getSheetUrl()) sheetPost({action:'addSale', sale}).then(r=>{ if(!r) toast('Sheet sync failed — saved locally'); });
-  toast(`Added — ${fmt(sale.owed)} owed to Call Center (${selRole})`);
-  document.getElementById('clientName').value='';
-  document.getElementById('alp').value='';
-  document.getElementById('alpStd').value='';
-  document.getElementById('alpA71').value='';
-  document.getElementById('calcBox').style.display='none';
-  renderWeek(); renderOwedQuick();
-}
-
-// ─── WEEK TABLE ────────────────────────────────────────────────────────────
-function renderWeek(){
-  const ws=sales.filter(s=>inCurrentWeek(s.date));
-  const body=document.getElementById('weekTableBody');
-  if(!ws.length){
-    body.innerHTML='<div class="empty">No sales submitted yet for this week.</div>';
-    ['s-count','s-alp','s-advance','s-owed'].forEach(id=>document.getElementById(id).textContent=id==='s-count'?'0':'$0');
-    document.getElementById('owedGrid').style.display='none';return;
-  }
-  document.getElementById('s-count').textContent=ws.length;
-  document.getElementById('s-alp').textContent=fmt(ws.reduce((a,s)=>a+s.alp,0));
-  document.getElementById('s-advance').textContent=fmt(ws.reduce((a,s)=>a+s.myEarned,0));
-  document.getElementById('s-owed').textContent=fmt(ws.reduce((a,s)=>a+s.owed,0));
-  body.innerHTML=`<table><thead><tr>
-    <th>Date</th><th>Client</th><th>ALP</th><th>Type</th><th>Role</th><th>Your Cut</th><th>Owed (Call Center)</th><th>Paid</th><th></th>
-  </tr></thead><tbody>${ws.map(s=>`<tr>
-    <td>${s.date}</td>
-    <td style="font-family:var(--font)">${s.client}</td>
-    <td>${s.type==='both'
-      ?`<span style="font-size:10px;color:var(--muted);font-family:var(--cond);letter-spacing:.5px">LIFE </span>${fmt(s.alpStd||0)}<br><span style="font-size:10px;color:var(--muted);font-family:var(--cond);letter-spacing:.5px">A71&nbsp;&nbsp;</span>${fmt(s.alpA71||0)}`
-      :fmt(s.alp)}</td>
-    <td><span class="pill ${s.type}">${s.type.toUpperCase()}</span></td>
-    <td><span class="pill ${s.role}">${s.role}</span></td>
-    <td style="color:var(--green)">${fmt(s.myEarned)}</td>
-    <td style="color:var(--gold3);font-weight:500">${fmt(s.owed)}</td>
-    <td><button class="paid-toggle ${s.paid?'paid':''}" onclick="togglePaid(${s.id})">${s.paid?'✓ PAID':'UNPAID'}</button></td>
-    <td><button class="del-btn" onclick="deleteSale(${s.id})">✕</button></td>
-  </tr>`).join('')}</tbody></table>`;
-  // owed breakdown — Call Center setter vs closer, with this month's persistency bonus
-  const curMonth = new Date().toISOString().slice(0,7);
-  const monthSales = sales.filter(s => s.date.startsWith(curMonth));
-  const setterBase = monthSales.filter(s=>s.role==='setter').reduce((a,s)=>a+s.owed,0);
-  const closerBase = monthSales.filter(s=>s.role==='closer').reduce((a,s)=>a+s.owed,0);
-  const setterBonus = getPersistBonus(persistData['Call Center (Setter)']?.rate||0) / 100;
-  const closerBonus = getPersistBonus(persistData['Call Center (Closer)']?.rate||0) / 100;
-
-  // This week owed (for the owed card header)
-  const wsSetterOwed = ws.filter(s=>s.role==='setter').reduce((a,s)=>a+s.owed,0);
-  const wsCloserOwed = ws.filter(s=>s.role==='closer').reduce((a,s)=>a+s.owed,0);
-  const wsTotal = wsSetterOwed + wsCloserOwed;
-
-  document.getElementById('callCenterTotal').textContent = fmt(wsTotal);
-  document.getElementById('callCenterList').innerHTML = `
-    <div class="owed-item">
-      <span class="owed-name">
-        <span class="pill setter" style="margin-right:6px">setter</span>This Week
-      </span>
-      <span class="owed-amt">${fmt(wsSetterOwed)}</span>
-    </div>
-    <div class="owed-item">
-      <span class="owed-name">
-        <span class="pill closer" style="margin-right:6px">closer</span>This Week
-      </span>
-      <span class="owed-amt">${fmt(wsCloserOwed)}</span>
-    </div>
-    ${setterBase>0||closerBase>0?`<div style="border-top:1px solid var(--border);margin:8px 0;padding-top:8px">
-      <div style="font-family:var(--cond);font-size:9px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;padding:0 0 6px">Month-to-Date (incl. persistency bonus)</div>
-      <div class="owed-item">
-        <span class="owed-name"><span class="pill setter" style="margin-right:6px">setter</span>${fmtMonth(curMonth)}</span>
-        <span class="owed-amt" style="color:var(--gold3)">${fmt(setterBase*(1+setterBonus))}${setterBonus>0?` <span style="font-size:10px;color:var(--gold);font-family:var(--cond)">+${(setterBonus*100).toFixed(0)}%</span>`:''}</span>
-      </div>
-      <div class="owed-item">
-        <span class="owed-name"><span class="pill closer" style="margin-right:6px">closer</span>${fmtMonth(curMonth)}</span>
-        <span class="owed-amt" style="color:var(--gold3)">${fmt(closerBase*(1+closerBonus))}${closerBonus>0?` <span style="font-size:10px;color:var(--gold);font-family:var(--cond)">+${(closerBonus*100).toFixed(0)}%</span>`:''}</span>
-      </div>
-    </div>`:''}
-  `;
-  document.getElementById('owedGrid').style.display='grid';
-}
-// ─── HISTORY ───────────────────────────────────────────────────────────────
-function renderHistory(){
-  const mf=document.getElementById('filterMonth').value;
-  const padf=document.getElementById('filterPaid').value;
-  let filtered=sales;
-  if(mf)filtered=filtered.filter(s=>s.date.startsWith(mf));
-  if(padf==='yes')filtered=filtered.filter(s=>s.paid);
-  if(padf==='no')filtered=filtered.filter(s=>!s.paid);
-  filtered.sort((a,b)=>b.date.localeCompare(a.date));
-  const body=document.getElementById('historyTableBody');
-  if(!filtered.length){body.innerHTML='<div class="empty">No records match.</div>';return;}
-  body.innerHTML=`<table><thead><tr>
-    <th>Date</th><th>Client</th><th>ALP</th><th>Type</th><th>Role</th><th>Your Cut</th><th>Owed (Call Center)</th><th>Paid</th><th></th>
-  </tr></thead><tbody>${filtered.map(s=>`<tr>
-    <td>${s.date}</td>
-    <td style="font-family:var(--font)">${s.client}</td>
-    <td>${s.type==='both'
-      ?`<span style="font-size:10px;color:var(--muted);font-family:var(--cond);letter-spacing:.5px">LIFE </span>${fmt(s.alpStd||0)}<br><span style="font-size:10px;color:var(--muted);font-family:var(--cond);letter-spacing:.5px">A71&nbsp;&nbsp;</span>${fmt(s.alpA71||0)}`
-      :fmt(s.alp)}</td>
-    <td><span class="pill ${s.type}">${s.type.toUpperCase()}</span></td>
-    <td><span class="pill ${s.role}">${s.role}</span></td>
-    <td style="color:var(--green)">${fmt(s.myEarned)}</td>
-    <td style="color:var(--gold3)">${fmt(s.owed)}</td>
-    <td><button class="paid-toggle ${s.paid?'paid':''}" onclick="togglePaid(${s.id})">${s.paid?'✓ PAID':'UNPAID'}</button></td>
-    <td><button class="del-btn" onclick="deleteSale(${s.id})">✕</button></td>
-  </tr>`).join('')}</tbody></table>`;
-}
-function buildHistoryFilters(){
-  const months=[...new Set(sales.map(s=>s.date.slice(0,7)))].sort().reverse();
-  const mSel=document.getElementById('filterMonth');
-  const mCur=mSel.value;
-  mSel.innerHTML='<option value="">All Months</option>'+months.map(m=>`<option value="${m}"${m===mCur?' selected':''}>${fmtMonth(m)}</option>`).join('');
-}
-function fmtMonth(ym){
-  const[y,m]=ym.split('-');
-  return new Date(y,m-1,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});
-}
-function buildMonthCards(){
-  const el=document.getElementById('monthCards');
-  const months=[...new Set(sales.map(s=>s.date.slice(0,7)))].sort().reverse().slice(0,6);
-  if(!months.length){el.innerHTML='';return;}
-  el.innerHTML=months.map(m=>{
-    const ms=sales.filter(s=>s.date.startsWith(m));
-    const owed=ms.reduce((a,s)=>a+s.owed,0);
-    const unpaid=ms.filter(s=>!s.paid).reduce((a,s)=>a+s.owed,0);
-    return`<div class="month-card" onclick="jumpMonth('${m}')">
-      <div class="month-card-hdr">${fmtMonth(m)}</div>
-      <div class="month-card-val">${fmt(owed)} owed</div>
-      <div class="month-card-sub">${ms.length} sale${ms.length!==1?'s':''} · ${fmt(unpaid)} unpaid</div>
-    </div>`;
-  }).join('');
-}
-function jumpMonth(m){
-  document.getElementById('filterMonth').value=m;
-  renderHistory();
-}
-
-// ─── PAID TOGGLE ───────────────────────────────────────────────────────────
-function togglePaid(id){
-  const s=sales.find(x=>x.id===id);
-  if(!s)return;
-  s.paid=!s.paid;
-  save();
-  if(getSheetUrl()) sheetPost({action:'updatePaid', id, paid:s.paid});
-  renderWeek();renderHistory();buildMonthCards();
-  toast(s.paid?`Marked paid: ${s.client}`:`Marked unpaid: ${s.client}`);
-}
-function deleteSale(id){
-  sales=sales.filter(s=>s.id!==id);
-  save();
-  if(getSheetUrl()) sheetPost({action:'deleteSale', id});
-  renderWeek();renderHistory();buildMonthCards();buildHistoryFilters();renderOwedQuick();
-}
-function clearWeek(){
-  if(!confirm('Clear all this week\'s sales?'))return;
-  sales=sales.filter(s=>!inCurrentWeek(s.date));
-  save();renderWeek();renderHistory();buildMonthCards();buildHistoryFilters();
-}
-
-// ─── COP ───────────────────────────────────────────────────────────────────
-async function fetchRate(){
-  document.getElementById('rateDisplay').textContent='Loading…';
-  try{
-    const r=await fetch('https://open.er-api.com/v6/latest/USD');
-    const d=await r.json();
-    if(d.rates&&d.rates.COP){
-      copRate=d.rates.COP;rateTs=Date.now();
-      localStorage.setItem('ailCopRate',copRate);
-      localStorage.setItem('ailRateTs',rateTs);
-      updateRateDisplay();convertUSD();convertCOP();renderOwedQuick();
-    }
-  }catch{
-    if(!copRate)copRate=4100;
-    document.getElementById('rateDisplay').textContent=`~${Math.round(copRate).toLocaleString()} (offline)`;
-  }
-}
-function updateRateDisplay(){
-  document.getElementById('rateDisplay').textContent=`1 USD = ${Math.round(copRate).toLocaleString()} COP`;
-  const ts=rateTs?new Date(rateTs).toLocaleTimeString():'—';
-  document.getElementById('rateUpdated').innerHTML=`Updated ${ts}<button class="refresh-btn" onclick="fetchRate()">↻ Refresh</button>`;
-}
-function convertUSD(){
-  const v=parseFloat(document.getElementById('usdInput').value);
-  document.getElementById('copResult').textContent=(!v||!copRate)?'—':
-    '$ '+Math.round(v*copRate).toLocaleString('es-CO')+' COP';
-}
-function convertCOP(){
-  const v=parseFloat(document.getElementById('copInput').value);
-  document.getElementById('usdResult').textContent=(!v||!copRate)?'—':
-    '$ '+(v/copRate).toFixed(2)+' USD';
-}
-function renderOwedQuick(){
-  const curMonth = new Date().toISOString().slice(0,7);
-  const monthSales = sales.filter(s => s.date.startsWith(curMonth));
-  const setterBase = monthSales.filter(s=>s.role==='setter').reduce((a,s)=>a+s.owed,0);
-  const closerBase = monthSales.filter(s=>s.role==='closer').reduce((a,s)=>a+s.owed,0);
-  const setterBonus = getPersistBonus(persistData['Call Center (Setter)']?.rate||0) / 100;
-  const closerBonus = getPersistBonus(persistData['Call Center (Closer)']?.rate||0) / 100;
-  const setterTotal = setterBase * (1 + setterBonus);
-  const closerTotal = closerBase * (1 + closerBonus);
-  const grandTotal  = setterTotal + closerTotal;
-
-  const wrap = document.getElementById('owedQuick');
-  if((!setterBase && !closerBase) || !copRate){ wrap.style.display='none'; return; }
-  wrap.style.display='block';
-  document.getElementById('owedQuickBody').innerHTML=`
-    <div class="oq-row">
-      <span class="oq-name"><span class="pill setter" style="margin-right:6px">setter</span>Call Center</span>
-      <span><span class="oq-usd">${fmt(setterTotal)}${setterBonus>0?` <span style="font-size:10px;color:var(--gold)">(+${(setterBonus*100).toFixed(0)}% bonus)</span>`:''}</span>
-      <span class="oq-cop"> = $${Math.round(setterTotal*copRate).toLocaleString('es-CO')} COP</span></span>
-    </div>
-    <div class="oq-row">
-      <span class="oq-name"><span class="pill closer" style="margin-right:6px">closer</span>Call Center</span>
-      <span><span class="oq-usd">${fmt(closerTotal)}${closerBonus>0?` <span style="font-size:10px;color:var(--gold)">(+${(closerBonus*100).toFixed(0)}% bonus)</span>`:''}</span>
-      <span class="oq-cop"> = $${Math.round(closerTotal*copRate).toLocaleString('es-CO')} COP</span></span>
-    </div>
-    <div class="oq-row" style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px">
-      <span class="oq-name" style="font-weight:700">Total</span>
-      <span><span class="oq-usd" style="color:var(--gold3)">${fmt(grandTotal)}</span>
-      <span class="oq-cop"> = $${Math.round(grandTotal*copRate).toLocaleString('es-CO')} COP</span></span>
-    </div>`;
-}
-
-// ─── CSV EXPORT ────────────────────────────────────────────────────────────
-function toCSV(rows){
-  const hdr='Date,Client,ALP,Type,Role,Payee,Advance Pool,Your Cut,Owed,Paid';
-  const body=rows.map(s=>[s.date,`"${s.client}"`,s.alp.toFixed(2),s.type,s.role,`"${s.payee}"`,s.advance.toFixed(2),s.myEarned.toFixed(2),s.owed.toFixed(2),s.paid?'YES':'NO'].join(',')).join('\n');
-  return hdr+'\n'+body;
-}
-function downloadCSV(content,name){
-  const a=document.createElement('a');
-  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(content);
-  a.download=name;a.click();
-}
-function exportWeekCSV(){
-  const ws=sales.filter(s=>inCurrentWeek(s.date));
-  if(!ws.length){toast('No sales this week');return;}
-  downloadCSV(toCSV(ws),`ail-week-${new Date().toISOString().split('T')[0]}.csv`);
-}
-function exportAllCSV(){
-  if(!sales.length){toast('No sales yet');return;}
-  downloadCSV(toCSV([...sales].sort((a,b)=>b.date.localeCompare(a.date))),'ail-all-sales.csv');
-}
-
-// ─── PERSISTENCY ───────────────────────────────────────────────────────────
-// Keys: 'Call Center (Setter)' and 'Call Center (Closer)'
-// persistData[key] = { rate: number 0-100, month: 'YYYY-MM' }
-let persistData = JSON.parse(localStorage.getItem('ailPersist')||'{}');
-
+// Hockey stick curve: 0% below 70, up to +10% at 100%
 function getPersistBonus(rate) {
   if (rate < 70)  return 0;
   if (rate < 75)  return parseFloat((((rate-70)/5)*1).toFixed(2));
@@ -1092,184 +403,597 @@ function getPersistBonus(rate) {
   if (rate < 100) return parseFloat((9+((rate-95)/5)*1).toFixed(2));
   return 10;
 }
-function getBonusColor(bonus){
-  if(bonus===0) return 'c0';
-  if(bonus<3)   return 'c1';
-  if(bonus<6)   return 'c2';
-  if(bonus<9)   return 'c3';
-  return 'c4';
-}
-function savePersist(){ localStorage.setItem('ailPersist', JSON.stringify(persistData)); }
 
-function updatePersistRate(key, val){
-  const rate = Math.min(100, Math.max(0, parseFloat(val)||0));
-  const curMonth = new Date().toISOString().slice(0,7);
-  if(!persistData[key]) persistData[key] = {};
-  persistData[key].rate  = rate;
-  persistData[key].month = curMonth;
-  savePersist();
-  // Sync to sheet
-  if(getSheetUrl()) sheetPost({
-    action:'updatePersist',
-    key, rate, month: curMonth
-  }).catch(()=>{});
-  renderPersist();
-  renderWeek();      // refresh bonus in week owed card
-  renderOwedQuick(); // refresh COP page
+function getPersistRate(role) {
+  const pd = persistData[role] || {};
+  return pd.rate != null ? pd.rate : 0;
 }
 
-function renderPersist(){
-  const curMonth = new Date().toISOString().slice(0,7);
+function calcSale(alp, type, role, alpA71) {
+  const rate     = getPersistRate(role);
+  const bonusPct = getPersistBonus(rate);
+  const rolePct  = role === 'setter' ? 0.15 : 0.25;
 
-  // Curve bars
-  const segments = [
-    {bonus:0},{bonus:getPersistBonus(70)},{bonus:getPersistBonus(75)},
-    {bonus:getPersistBonus(80)},{bonus:getPersistBonus(85)},
-    {bonus:getPersistBonus(90)},{bonus:getPersistBonus(95)},{bonus:10}
-  ];
-  document.getElementById('curveBars').innerHTML = segments.map(s=>{
-    const h = Math.round((s.bonus/10)*72)+8;
-    return `<div class="curve-bar-wrap">
-      <div class="curve-bar-pct">+${s.bonus}%</div>
-      <div class="curve-bar ${getBonusColor(s.bonus)}" style="height:${h}px"></div>
-    </div>`;
-  }).join('');
+  if (type === 'both') {
+    const a2     = alpA71 || 0;
+    const advStd = calcAdvance(alp);
+    const advA71 = calcAdvance(a2);
+    const advTot = advStd + advA71;
+    const base   = advTot * rolePct;
+    const owed   = base * (1 + bonusPct / 100);
+    return { alp: alp + a2, alpStd: alp, alpA71: a2,
+             advStd, advA71, advance: advTot,
+             baseOwed: base, owed, bonusPct, rate, rolePct };
+  }
+  const adv    = calcAdvance(alp);
+  const base   = adv * rolePct;
+  const owed   = base * (1 + bonusPct / 100);
+  return { alp, alpStd: type==='std'?alp:0, alpA71: type==='a71'?alp:0,
+           advance: adv, baseOwed: base, owed, bonusPct, rate, rolePct };
+}
 
-  // Month-to-date owed per role
-  const monthSales = sales.filter(s=>s.date.startsWith(curMonth));
+// ═══════════════════════════════════════════════════════════
+//  FORMATTING
+// ═══════════════════════════════════════════════════════════
+function fmt(n) {
+  if (n == null || isNaN(n)) return '—';
+  return '$' + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+function fmtCOP(n) {
+  return '$ ' + Math.round(n).toLocaleString('es-CO') + ' COP';
+}
+function fmtMonth(ym) {
+  if (!ym) return '—';
+  const [y, m] = String(ym).split('-');
+  return new Date(y, m - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SHEET API  (GAS as pass-through, sheet is source of truth)
+// ═══════════════════════════════════════════════════════════
+async function apiGet(params) {
+  if (!SHEET_URL) return null;
+  try {
+    const r = await fetch(SHEET_URL + '?' + new URLSearchParams(params));
+    return await r.json();
+  } catch { return null; }
+}
+
+async function apiPost(body) {
+  if (!SHEET_URL) return null;
+  try {
+    await fetch(SHEET_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    return true;
+  } catch { return null; }
+}
+
+// ─── LOAD all sales from sheet ───────────────────────────────
+async function loadSheet(silent = false) {
+  if (!SHEET_URL) { setSyncBadge('err', 'Not configured'); return; }
+  if (!silent) overlay('Loading from Sheet…');
+  setSyncBadge('spin', 'Loading…');
+  try {
+    const [sRes, pRes] = await Promise.all([
+      apiGet({ action: 'getSales' }),
+      apiGet({ action: 'getPersist' })
+    ]);
+    if (!sRes?.success) throw new Error(sRes?.error || 'No response');
+
+    sales = (sRes.sales || []).map(normalizeRow);
+
+    if (pRes?.success && pRes.persist) {
+      persistData = pRes.persist;
+      localStorage.setItem('ailPersist', JSON.stringify(persistData));
+    }
+
+    setSyncBadge('ok', `${sales.length} sales`);
+    buildMonthFilter();
+    renderLedger();
+    renderPersist();
+    renderCopOwed();
+    if (!silent) toast('Loaded ' + sales.length + ' sales');
+  } catch(e) {
+    setSyncBadge('err', 'Error — check URL');
+    if (!silent) toast('Load failed: ' + e.message);
+  } finally {
+    hideOverlay();
+  }
+}
+
+function normalizeRow(r) {
+  // Keys from GAS come back with underscores: alp_std, alp_a71, base_owed etc.
+  return {
+    id:       String(r.id || r.ID || ''),
+    client:   r.client || r.Client || '',
+    date:     r.date   || r.Date  || '',
+    type:    (r.type   || r.Type  || 'std').toLowerCase(),
+    role:    (r.role   || r.Role  || 'setter').toLowerCase(),
+    alp:     parseFloat(r.alp    || r.ALP   || 0),
+    alpStd:  parseFloat(r.alp_std || r['ALP Std'] || 0),
+    alpA71:  parseFloat(r.alp_a71 || r['ALP A71'] || 0),
+    advance:  parseFloat(r.advance   || r.Advance   || 0),
+    baseOwed: parseFloat(r.base_owed || r['Base Owed'] || 0),
+    owed:     parseFloat(r.owed      || r.Owed || r['Owed (USD)'] || 0),
+    bonusPct: parseFloat(r.bonus_pct || r['Bonus %']   || 0),
+    rate:     parseFloat(r.rate      || r.Rate         || 0),
+    paid:    r.paid === 'YES' || r.paid === true || r.Paid === 'YES',
+    month:   r.month || r.Month || (r.date||r.Date||'').slice(0,7)
+  };
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SUBMIT
+// ═══════════════════════════════════════════════════════════
+async function submitSale() {
+  if (!SHEET_URL) { toast('Set Sheet URL in ⚙ Setup first'); return; }
+  const client = document.getElementById('iClient').value.trim();
+  const date   = document.getElementById('iDate').value || today();
+  if (!client) { toast('Enter client name'); return; }
+
+  let p;
+  if (selType === 'both') {
+    const s = parseFloat(document.getElementById('iAlpStd').value) || 0;
+    const a = parseFloat(document.getElementById('iAlpA71').value) || 0;
+    if (!s && !a) { toast('Enter at least one premium'); return; }
+    p = calcSale(s, 'both', selRole, a);
+  } else {
+    const alp = parseFloat(document.getElementById('iAlp').value);
+    if (!alp || alp <= 0) { toast('Enter monthly premium'); return; }
+    p = calcSale(alp, selType, selRole);
+  }
+
+  const sale = {
+    id: String(Date.now()), client, date, type: selType, role: selRole,
+    alp: p.alp, alpStd: p.alpStd, alpA71: p.alpA71,
+    advance: p.advance, baseOwed: p.baseOwed, owed: p.owed,
+    bonusPct: p.bonusPct, rate: p.rate, paid: false,
+    month: date.slice(0,7)
+  };
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  overlay('Saving to Sheet…');
+  try {
+    const ok = await apiPost({ action: 'addSale', sale });
+    if (ok === null) throw new Error('Could not reach sheet');
+    await loadSheet(true);
+    toast(`Saved — ${fmt(sale.owed)} owed`);
+    document.getElementById('iClient').value = '';
+    ['iAlp','iAlpStd','iAlpA71'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('calcBox').style.display = 'none';
+  } catch(e) {
+    toast('Save failed: ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Add Sale → Sheet';
+    hideOverlay();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  PREVIEW CALC
+// ═══════════════════════════════════════════════════════════
+function preview() {
+  const rate   = getPersistRate(selRole);
+  const bonus  = getPersistBonus(rate);
+  const pLabel = bonus > 0 ? `${rate}% persist → +${bonus}% bonus` : `${rate}% persist (no bonus <70%)`;
+  document.getElementById('previewPFactor').textContent = pLabel;
+
+  if (selType === 'both') {
+    const s = parseFloat(document.getElementById('iAlpStd').value) || 0;
+    const a = parseFloat(document.getElementById('iAlpA71').value) || 0;
+    if (!s && !a) { document.getElementById('calcBox').style.display='none'; return; }
+    const p = calcSale(s, 'both', selRole, a);
+    const cols = [
+      { lbl:'Life Advance',  val:p.advStd,    cls:'gv', sub:`${fmt(s)}×12×60%×65%` },
+      { lbl:'A71 Advance',   val:p.advA71,    cls:'gv', sub:`${fmt(a)}×12×60%×65%` },
+      { lbl:'Total Advance', val:p.advance,   cls:'bv', sub:'Life + A71' },
+      { lbl:`Base (${(p.rolePct*100).toFixed(0)}%)`, val:p.baseOwed, cls:'sv',
+        sub:`${fmt(p.advance)} × ${(p.rolePct*100).toFixed(0)}%` },
+    ];
+    if (bonus > 0) cols.push({
+      lbl:`+${bonus}% Bonus`, val:p.owed - p.baseOwed, cls:'av',
+      sub:`${fmt(p.baseOwed)} × ${bonus}%`
+    });
+    cols.push({ lbl:'Total Owed', val:p.owed, cls:'av',
+      sub: bonus > 0 ? `base + bonus` : 'no bonus this month' });
+    showCalc(cols);
+  } else {
+    const alp = parseFloat(document.getElementById('iAlp').value);
+    if (!alp || alp <= 0) { document.getElementById('calcBox').style.display='none'; return; }
+    const p = calcSale(alp, selType, selRole);
+    const cols = [
+      { lbl:'Annual Premium', val:alp*12,      cls:'gv', sub:`${fmt(alp)} × 12` },
+      { lbl:'Advance',        val:p.advance,   cls:'bv', sub:`${fmt(alp*12)}×60%×65%` },
+      { lbl:`Base (${(p.rolePct*100).toFixed(0)}%)`, val:p.baseOwed, cls:'sv',
+        sub:`${fmt(p.advance)} × ${(p.rolePct*100).toFixed(0)}%` },
+    ];
+    if (bonus > 0) cols.push({
+      lbl:`+${bonus}% Bonus`, val:p.owed - p.baseOwed, cls:'av',
+      sub:`${fmt(p.baseOwed)} × ${bonus}%`
+    });
+    cols.push({ lbl:'Total Owed', val:p.owed, cls:'av',
+      sub: bonus > 0 ? `base + bonus` : 'no bonus this month' });
+    showCalc(cols);
+  }
+}
+
+function showCalc(cols) {
+  document.getElementById('calcBox').style.display = 'block';
+  document.getElementById('calcInner').innerHTML =
+    `<div class="calc-cols" style="grid-template-columns:repeat(${cols.length},1fr)">` +
+    cols.map(c => `<div class="cc"><div class="cc-lbl">${c.lbl}</div>
+      <div class="cc-val ${c.cls}">${fmt(c.val)}</div>
+      <div class="cc-sub">${c.sub}</div></div>`).join('') + '</div>';
+}
+
+function setType(t) {
+  selType = t;
+  ['std','a71','both'].forEach(x => document.getElementById('t-'+x).classList.toggle('on', x===t));
+  const b = t === 'both';
+  document.getElementById('wrap-single').style.display = b ? 'none'  : 'block';
+  document.getElementById('wrap-std').style.display    = b ? 'block' : 'none';
+  document.getElementById('wrap-a71').style.display    = b ? 'block' : 'none';
+  document.getElementById('calcBox').style.display = 'none';
+  preview();
+}
+function setRole(r) {
+  selRole = r;
+  ['setter','closer'].forEach(x => document.getElementById('r-'+x).classList.toggle('on', x===r));
+  preview();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  LEDGER
+// ═══════════════════════════════════════════════════════════
+function buildMonthFilter() {
+  const months = [...new Set(sales.map(s=>s.month))].filter(Boolean).sort().reverse();
+  const sel = document.getElementById('fMonth');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">All Months</option>' +
+    months.map(m=>`<option value="${m}"${m===cur?' selected':''}>${fmtMonth(m)}</option>`).join('');
+}
+
+function renderLedger() {
+  const mf = document.getElementById('fMonth').value;
+  const rf = document.getElementById('fRole').value;
+  const pf = document.getElementById('fPaid').value;
+
+  let rows = [...sales];
+  if (mf) rows = rows.filter(s=>s.month===mf);
+  if (rf) rows = rows.filter(s=>s.role===rf);
+  if (pf) rows = rows.filter(s=>(s.paid?'YES':'NO')===pf);
+  rows.sort((a,b)=>b.date.localeCompare(a.date));
+
+  // stats (from filtered set)
+  const totAlp  = rows.reduce((a,s)=>a+s.alp,     0);
+  const totAdv  = rows.reduce((a,s)=>a+s.advance,  0);
+  const totOwed = rows.reduce((a,s)=>a+s.owed,     0);
+  document.getElementById('ls-count').textContent = rows.length;
+  document.getElementById('ls-alp').textContent   = fmt(totAlp);
+  document.getElementById('ls-adv').textContent   = fmt(totAdv);
+  document.getElementById('ls-owed').textContent  = fmt(totOwed);
+  document.getElementById('ledgerTitle').textContent = `Sales — Call Center${mf?' · '+fmtMonth(mf):''}`;
+
+  const body = document.getElementById('ledgerBody');
+  if (!rows.length) {
+    body.innerHTML = '<div style="padding:28px;text-align:center;color:var(--muted);font-family:var(--cond);font-size:11px;text-transform:uppercase;letter-spacing:.8px">No sales match filter</div>';
+    return;
+  }
+
+  const copTot = copRate ? Math.round(totOwed * copRate) : null;
+
+  body.innerHTML = `<table>
+    <thead><tr>
+      <th>Date</th><th>Client</th><th>ALP</th><th>Type</th><th>Role</th>
+      <th>Advance</th><th>Base Owed</th><th>Bonus %</th><th>Total Owed</th><th>Paid</th><th></th>
+    </tr></thead>
+    <tbody>
+    ${rows.map(s => {
+      const rate     = getPersistRate(s.role);
+      const bonusPct = getPersistBonus(rate);
+      const base     = s.baseOwed || 0;
+      const owed     = base * (1 + bonusPct / 100);
+      return `<tr>
+        <td>${s.date}</td>
+        <td style="font-family:var(--font)">${s.client}</td>
+        <td>${s.type==='both'
+          ? `<span style="font-size:10px;color:var(--muted)">L </span>${fmt(s.alpStd)} <span style="font-size:10px;color:var(--muted)">A </span>${fmt(s.alpA71)}`
+          : fmt(s.alp)}</td>
+        <td><span class="pill ${s.type}">${s.type.toUpperCase()}</span></td>
+        <td><span class="pill ${s.role}">${s.role}</span></td>
+        <td style="color:var(--green)">${fmt(s.advance)}</td>
+        <td style="color:var(--text2)">${fmt(base)}</td>
+        <td style="color:${bonusPct>0?'var(--gold)':'var(--muted)'}">${bonusPct>0?'+'+bonusPct+'%':'—'}</td>
+        <td style="color:var(--gold3);font-weight:600">${fmt(owed)}</td>
+        <td><button class="paid-toggle${s.paid?' paid':''}" onclick="togglePaid('${s.id}')">${s.paid?'✓ PAID':'UNPAID'}</button></td>
+        <td><button class="del-btn" onclick="delSale('${s.id}')">✕</button></td>
+      </tr>`;
+    }).join('')}
+    </tbody>
+    <tfoot>
+      <tr class="tbl-totals">
+        <td colspan="2" style="font-family:var(--cond);font-size:10px;letter-spacing:.5px;text-transform:uppercase">TOTAL — ${rows.length} sales</td>
+        <td>${fmt(totAlp)}</td>
+        <td colspan="2"></td>
+        <td>${fmt(totAdv)}</td>
+        <td colspan="2"></td>
+        <td>${fmt(totOwed)}${copTot?`<div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:2px">${fmtCOP(totOwed*copRate)}</div>`:''}</td>
+        <td colspan="2"></td>
+      </tr>
+    </tfoot>
+  </table>`;
+}
+
+async function togglePaid(id) {
+  const s = sales.find(x=>x.id===id);
+  if (!s) return;
+  const newPaid = !s.paid;
+  // optimistic update
+  s.paid = newPaid;
+  renderLedger();
+  const ok = await apiPost({ action:'updatePaid', id, paid:newPaid });
+  if (ok===null) { s.paid = !newPaid; renderLedger(); toast('Sync failed'); }
+  else toast(newPaid ? `Paid: ${s.client}` : `Unpaid: ${s.client}`);
+}
+
+async function delSale(id) {
+  const s = sales.find(x=>x.id===id);
+  if (!s || !confirm(`Delete sale for ${s.client}?\nThis also deletes the row from the Sheet.`)) return;
+  sales = sales.filter(x=>x.id!==id);
+  renderLedger();
+  const ok = await apiPost({ action:'deleteSale', id });
+  if (ok===null) { toast('Sheet delete may have failed — refresh to verify'); }
+  else toast('Deleted');
+}
+
+function exportCSV() {
+  const mf = document.getElementById('fMonth').value;
+  const rf = document.getElementById('fRole').value;
+  let rows = [...sales];
+  if (mf) rows = rows.filter(s=>s.month===mf);
+  if (rf) rows = rows.filter(s=>s.role===rf);
+  const hdr = 'Date,Client,ALP,Type,Role,Advance,Base Owed,Bonus %,Owed (USD),Paid';
+  const csv = rows.map(s => {
+    const bonusPct = getPersistBonus(getPersistRate(s.role));
+    const base     = s.baseOwed || 0;
+    const owed     = base * (1 + bonusPct / 100);
+    return [s.date, `"${s.client}"`, s.alp.toFixed(2), s.type, s.role,
+      s.advance.toFixed(2), base.toFixed(2), bonusPct+'%',
+      owed.toFixed(2), s.paid?'YES':'NO'].join(',');
+  }).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,'+encodeURIComponent(hdr+'\n'+csv);
+  a.download = `ail-comp-${today()}.csv`; a.click();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  PERSISTENCY
+// ═══════════════════════════════════════════════════════════
+function renderPersist() {
+  const curMonth   = today().slice(0,7);
+  const monthSales = sales.filter(s => s.month === curMonth);
+
   const roles = [
-    { key:'Call Center (Setter)', role:'setter', label:'Setter', pct:'15%' },
-    { key:'Call Center (Closer)', role:'closer', label:'Closer', pct:'25%' }
+    { key:'setter', label:'Setter', pct:'15%', pill:'setter' },
+    { key:'closer', label:'Closer', pct:'25%', pill:'closer' }
   ];
 
-  document.getElementById('persistGrid').innerHTML = roles.map(({key,role,label,pct})=>{
+  document.getElementById('persistGrid').innerHTML = roles.map(({key,label,pct,pill}) => {
     const pd       = persistData[key] || {};
-    const rate     = pd.rate || 0;
-    const month    = pd.month || curMonth;
-    const bonus    = getPersistBonus(rate);
-    const colorCls = getBonusColor(bonus);
-    const baseOwed = monthSales.filter(s=>s.role===role).reduce((a,s)=>a+s.owed,0);
-    const bonusAmt = baseOwed * (bonus/100);
-    const total    = baseOwed + bonusAmt;
-    const rateColor= rate>=90?'var(--green)':rate>=70?'var(--gold2)':'var(--muted)';
-    const safeKey  = key.replace(/[^a-zA-Z0-9]/g,'_');
+    const rate     = pd.rate != null ? pd.rate : 0;
+    const bonusPct = getPersistBonus(rate);
+    const baseOwed = monthSales.filter(s=>s.role===key).reduce((a,s)=>a+s.baseOwed,0);
+    const bonusAmt = baseOwed * (bonusPct / 100);
+    const totalOwed= baseOwed + bonusAmt;
+    const rColor   = rate>=90 ? 'var(--green)' : rate>=70 ? 'var(--gold2)' : 'var(--muted)';
+    const fillW    = Math.min(rate, 100);
+    const fillCls  = rate>=90 ? 'c3' : rate>=70 ? 'c2' : rate>=50 ? 'c1' : 'c0';
 
-    return `<div class="persist-card">
-      <div class="persist-card-head">
+    return `<div class="pc">
+      <div class="pc-head">
         <div>
-          <div class="persist-card-name">Call Center</div>
-          <div class="persist-card-role"><span class="pill ${role}">${role}</span> &nbsp;${pct} comp</div>
+          <div class="pc-name">Call Center <span class="pill ${pill}">${label}</span></div>
+          <div class="pc-role">${pct} of advance + persist bonus</div>
         </div>
         <div style="text-align:right">
-          <div style="font-family:var(--mono);font-size:22px;font-weight:500;color:${rateColor}">${rate.toFixed(1)}%</div>
-          <div style="font-family:var(--cond);font-size:10px;color:var(--muted)">persistency</div>
+          <div class="pc-rate-big" style="color:${rColor}">${rate}%</div>
+          <div style="font-family:var(--cond);font-size:9px;color:var(--muted)">persistency rate</div>
         </div>
       </div>
-      <div class="persist-meter">
-        <div class="meter-track">
-          <div class="meter-fill ${colorCls}" style="width:${rate}%"></div>
-        </div>
-        <div class="meter-labels">
-          <span>0%</span><span style="color:var(--gold)">+${bonus}% bonus</span><span>100%</span>
-        </div>
+      <div class="meter-track"><div class="meter-fill ${fillCls}" style="width:${fillW}%"></div></div>
+      <div style="display:flex;justify-content:space-between;padding:2px 18px 10px;font-family:var(--mono);font-size:10px;color:var(--muted)">
+        <span>0%</span>
+        <span style="color:var(--gold)">+${bonusPct}% bonus${rate>=70?'':' (need ≥70% to unlock)'}</span>
+        <span>100%</span>
       </div>
-      <div class="persist-stats">
+      <div class="pc-stats">
         <div class="ps">
           <div class="ps-lbl">Base (${fmtMonth(curMonth)})</div>
           <div class="ps-val">${fmt(baseOwed)}</div>
         </div>
         <div class="ps">
-          <div class="ps-lbl">Bonus</div>
-          <div class="ps-val" style="color:var(--gold3)">${fmt(bonusAmt)}</div>
+          <div class="ps-lbl">Bonus (+${bonusPct}%)</div>
+          <div class="ps-val" style="color:${bonusAmt>0?'var(--gold3)':'var(--muted)'}">${bonusAmt>0?fmt(bonusAmt):'—'}</div>
         </div>
         <div class="ps">
           <div class="ps-lbl">Total Payout</div>
-          <div class="ps-val" style="color:var(--green)">${fmt(total)}</div>
+          <div class="ps-val" style="color:var(--green)">${fmt(totalOwed)}</div>
         </div>
       </div>
-      <div class="persist-input-row">
-        <label>This Month's Rate</label>
-        <input class="persist-pct-input" type="number" min="0" max="100" step="0.1"
-          value="${rate}" id="pr-${safeKey}"
-          oninput="updatePersistRate('${key}', this.value)">
-        <span style="font-family:var(--mono);font-size:12px;color:var(--muted)">%</span>
-        ${bonus>0?`<div class="bonus-lbl" style="margin-left:auto;font-size:10px">+${bonus}% = ${fmt(bonusAmt)}</div>`:''}
+      <div class="pc-input-row">
+        <label>Persistency Rate</label>
+        <input class="pct-inp" type="number" min="0" max="100" step="0.1"
+          value="${rate}" oninput="setPersist('${key}',this.value)">
+        <span style="font-family:var(--mono);font-size:11px;color:var(--muted)">%</span>
+        ${bonusPct > 0
+          ? `<span style="margin-left:auto;font-family:var(--cond);font-size:9px;color:var(--gold)">+${bonusPct}% → ${fmt(bonusAmt)} extra</span>`
+          : `<span style="margin-left:auto;font-family:var(--cond);font-size:9px;color:var(--muted)">no bonus below 70%</span>`}
       </div>
     </div>`;
   }).join('');
+}
 
-  // Summary — only show if any bonus
-  const setterBonusAmt = monthSales.filter(s=>s.role==='setter').reduce((a,s)=>a+s.owed,0)
-    * (getPersistBonus(persistData['Call Center (Setter)']?.rate||0)/100);
-  const closerBonusAmt = monthSales.filter(s=>s.role==='closer').reduce((a,s)=>a+s.owed,0)
-    * (getPersistBonus(persistData['Call Center (Closer)']?.rate||0)/100);
-  const grandBonus = setterBonusAmt + closerBonusAmt;
+async function setPersist(role, val) {
+  const rate  = Math.min(100, Math.max(0, parseFloat(val) || 0));
+  const month = today().slice(0,7);
+  persistData[role] = { rate, month };
+  localStorage.setItem('ailPersist', JSON.stringify(persistData));
+  renderPersist();
+  renderCopOwed();
+  preview();
+  if (SHEET_URL) apiPost({ action:'updatePersist', role, rate, month }).catch(()=>{});
+}
 
-  const wrap = document.getElementById('bonusSummaryWrap');
-  if(grandBonus <= 0){ wrap.style.display='none'; return; }
-  wrap.style.display='block';
-  document.getElementById('bonusTotalDisplay').textContent = `Total bonus: ${fmt(grandBonus)}`;
+// ═══════════════════════════════════════════════════════════
+//  COP
+// ═══════════════════════════════════════════════════════════
+async function fetchRate(force=false) {
+  if (!force && copRate && Date.now()-rateTs < 3600000) { updateRateUI(); return; }
+  document.getElementById('rateDisplay').textContent = 'Fetching…';
+  try {
+    const r = await fetch('https://open.er-api.com/v6/latest/USD');
+    const d = await r.json();
+    if (d.rates?.COP) {
+      copRate = d.rates.COP; rateTs = Date.now();
+      localStorage.setItem('ailCopRate', copRate);
+      localStorage.setItem('ailRateTs',  rateTs);
+    }
+  } catch { if (!copRate) copRate = 4100; }
+  updateRateUI();
+  renderCopOwed();
+}
 
-  document.getElementById('bonusSummaryBody').innerHTML = `<table>
-    <thead><tr>
-      <th>Role</th><th>Month</th><th>Persistency</th><th>Bonus %</th>
-      <th>Base Owed</th><th>Bonus</th><th>Total Payout</th>
-    </tr></thead>
-    <tbody>${roles.map(({key,role})=>{
-      const pd      = persistData[key]||{};
-      const rate    = pd.rate||0;
-      const bonus   = getPersistBonus(rate);
-      const base    = monthSales.filter(s=>s.role===role).reduce((a,s)=>a+s.owed,0);
-      const bAmt    = base*(bonus/100);
-      return `<tr>
-        <td><span class="pill ${role}">${role}</span></td>
-        <td>${fmtMonth(curMonth)}</td>
-        <td style="color:${rate>=90?'var(--green)':'var(--gold2)'}">${rate.toFixed(1)}%</td>
-        <td style="color:var(--gold)">+${bonus}%</td>
-        <td>${fmt(base)}</td>
-        <td style="color:var(--gold3)">${fmt(bAmt)}</td>
-        <td style="color:var(--green);font-weight:600">${fmt(base+bAmt)}</td>
-      </tr>`;
-    }).join('')}
-    <tr style="border-top:2px solid var(--border2)">
-      <td colspan="5" style="text-align:right;color:var(--muted);font-family:var(--cond);font-size:11px;letter-spacing:.5px">TOTAL BONUS</td>
-      <td style="color:var(--gold3);font-weight:600">${fmt(grandBonus)}</td>
-      <td></td>
-    </tr>
+function updateRateUI() {
+  document.getElementById('rateDisplay').textContent = `1 USD = ${Math.round(copRate).toLocaleString()} COP`;
+  document.getElementById('rateTs').textContent = rateTs ? 'Updated '+new Date(rateTs).toLocaleTimeString():'';
+}
+function conv(dir) {
+  if (dir==='usd') {
+    const v = parseFloat(document.getElementById('usdIn').value);
+    document.getElementById('copOut').textContent = (v&&copRate)?fmtCOP(v*copRate):'—';
+  } else {
+    const v = parseFloat(document.getElementById('copIn').value);
+    document.getElementById('usdOut').textContent = (v&&copRate)?fmt(v/copRate)+' USD':'—';
+  }
+}
+
+function renderCopOwed() {
+  if (!copRate) return;
+  const curMonth = today().slice(0,7);
+  const ms = sales.filter(s => s.month === curMonth);
+
+  const setterBase  = ms.filter(s=>s.role==='setter').reduce((a,s)=>a+s.baseOwed,0);
+  const closerBase  = ms.filter(s=>s.role==='closer').reduce((a,s)=>a+s.baseOwed,0);
+  const sBonusPct   = getPersistBonus(getPersistRate('setter'));
+  const cBonusPct   = getPersistBonus(getPersistRate('closer'));
+  const setterOwed  = setterBase * (1 + sBonusPct / 100);
+  const closerOwed  = closerBase * (1 + cBonusPct / 100);
+  const total       = setterOwed + closerOwed;
+  const wrap = document.getElementById('copOwedWrap');
+  if (!total) { wrap.style.display='none'; return; }
+  wrap.style.display = 'block';
+  document.getElementById('copOwedBody').innerHTML = `<table>
+    <thead><tr><th>Role</th><th>Base Owed</th><th>Bonus</th><th>Total (USD)</th><th>Total (COP)</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="pill setter">setter</span></td>
+        <td style="color:var(--text2)">${fmt(setterBase)}</td>
+        <td style="color:${sBonusPct>0?'var(--gold)':'var(--muted)'}">${sBonusPct>0?'+'+sBonusPct+'%':'—'}</td>
+        <td style="color:var(--gold3)">${fmt(setterOwed)}</td>
+        <td style="color:var(--gold2)">${fmtCOP(setterOwed*copRate)}</td>
+      </tr>
+      <tr>
+        <td><span class="pill closer">closer</span></td>
+        <td style="color:var(--text2)">${fmt(closerBase)}</td>
+        <td style="color:${cBonusPct>0?'var(--gold)':'var(--muted)'}">${cBonusPct>0?'+'+cBonusPct+'%':'—'}</td>
+        <td style="color:var(--gold3)">${fmt(closerOwed)}</td>
+        <td style="color:var(--gold2)">${fmtCOP(closerOwed*copRate)}</td>
+      </tr>
     </tbody>
+    <tfoot>
+      <tr class="tbl-totals">
+        <td style="font-family:var(--cond);font-size:10px;text-transform:uppercase;letter-spacing:.5px" colspan="3">Total</td>
+        <td>${fmt(total)}</td>
+        <td>${fmtCOP(total*copRate)}</td>
+      </tr>
+    </tfoot>
   </table>`;
 }
 
-// ─── NAV ───────────────────────────────────────────────────────────────────
-function showPage(id,btn){
+// ═══════════════════════════════════════════════════════════
+//  SETTINGS
+// ═══════════════════════════════════════════════════════════
+function saveUrl() {
+  const v = document.getElementById('urlInp').value.trim();
+  if (!v) { toast('Paste a URL first'); return; }
+  SHEET_URL = v; localStorage.setItem('ailSheetUrl', v);
+  toast('URL saved — connecting…');
+  loadSheet();
+}
+function clearUrl() {
+  SHEET_URL=''; localStorage.removeItem('ailSheetUrl');
+  document.getElementById('urlInp').value='';
+  setSyncBadge('err','Not connected'); toast('URL cleared');
+}
+async function testConn() {
+  const el=document.getElementById('connRes');
+  el.style.display='block'; el.style.color='var(--muted)'; el.textContent='Testing…';
+  if (!SHEET_URL){ el.style.color='var(--red)'; el.textContent='✕ No URL saved.'; return; }
+  try {
+    const d = await apiGet({action:'getSales'});
+    if (d?.success){ el.style.color='var(--green)'; el.textContent=`✓ Connected — ${d.sales.length} rows in sheet.`; setSyncBadge('ok',`${d.sales.length} sales`); }
+    else { el.style.color='var(--red)'; el.textContent='✕ '+(d?.error||'Unknown error'); }
+  } catch { el.style.color='var(--red)'; el.textContent='✕ Could not reach URL'; }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  UI HELPERS
+// ═══════════════════════════════════════════════════════════
+function go(id, btn) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
   document.getElementById('page-'+id).classList.add('on');
-  if(btn)btn.classList.add('on');
-  if(id==='week')renderWeek();
-  if(id==='history'){buildMonthCards();buildHistoryFilters();renderHistory();}
-  if(id==='cop'){renderOwedQuick();}
-  if(id==='settings'){initSettingsPage();}
-  if(id==='persist'){renderPersist();}
+  btn?.classList.add('on');
+  if (id==='ledger')  { buildMonthFilter(); renderLedger(); }
+  if (id==='persist') renderPersist();
+  if (id==='cop')     { renderCopOwed(); if(copRate) updateRateUI(); }
+  if (id==='setup')   document.getElementById('urlInp').value = SHEET_URL||'';
 }
-function initSettingsPage(){
-  const url=getSheetUrl();
-  document.getElementById('sheetUrl').value=url||'';
-  updateSyncBadge(!!url);
+function setSyncBadge(state, txt) {
+  const d=document.getElementById('syncDot'), t=document.getElementById('syncTxt');
+  d.className='sync-dot'; t.textContent=txt;
+  if(state==='ok')  { d.classList.add('ok'); }
+  else if(state==='err') { d.classList.add('err'); }
+  else { d.classList.add('spin'); }
 }
-function save(push=true){localStorage.setItem('ailSales2',JSON.stringify(sales));}
-function toast(msg){
-  const el=document.getElementById('toast');
-  el.textContent=msg;el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'),2200);
-}
+function overlay(msg) { document.getElementById('overlayMsg').textContent=msg||'Loading…'; document.getElementById('overlay').classList.add('on'); }
+function hideOverlay() { document.getElementById('overlay').classList.remove('on'); }
+function toast(msg) { const e=document.getElementById('toast'); e.textContent=msg; e.classList.add('show'); setTimeout(()=>e.classList.remove('show'),2500); }
+function today() { return new Date().toISOString().split('T')[0]; }
 
-// ─── INIT ──────────────────────────────────────────────────────────────────
-initWeekBar();
-document.getElementById('saleDate').value=new Date().toISOString().split('T')[0];
-if(copRate)updateRateDisplay();
-if(!rateTs||Date.now()-rateTs>3600000)fetchRate();
-renderWeek();
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+document.getElementById('iDate').value = today();
+// Show initial persist bonus label on submit form
+(function() {
+  const rate  = getPersistRate(selRole);
+  const bonus = getPersistBonus(rate);
+  document.getElementById('previewPFactor').textContent =
+    bonus > 0 ? `${rate}% persist → +${bonus}% bonus` : `${rate}% persist (no bonus <70%)`;
+})();
+fetchRate();
+if (SHEET_URL) {
+  loadSheet();
+} else {
+  setSyncBadge('err','No sheet URL — see ⚙ Setup');
+  document.getElementById('ledgerBody').innerHTML =
+    '<div style="padding:28px;text-align:center;color:var(--muted);font-family:var(--cond);font-size:11px;text-transform:uppercase;letter-spacing:.8px">Configure sheet URL in ⚙ Setup to begin</div>';
+}
 </script>
 </body>
 </html>
