@@ -2,10 +2,10 @@
 <!-- saved from url=(0058)https://salebase.ai/option_builder/option_builder_solo.php -->
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-<title>Keefer Option Builder</title>
+<title>Keefer Constructor de Opciones</title>
 
 <link rel="icon" href="https://salebase.ai/option_builder/img/favicon.ico" type="image/x-icon">
-<link rel="stylesheet" type="text/css" href="./Keefer Option Builder_files/style.css">
+<link rel="stylesheet" type="text/css" href="./Keefer Constructor de Opciones_files/style.css">
 </head>
 
 <body style="margin: auto; padding: auto; user-select: auto; -moz-user-select: auto; -webkit-user-select: auto; -ms-user-select: auto; overflow: auto;">
@@ -17,7 +17,7 @@
 <div class="header" style="height: unset; height: 10vh; justify-content: center; align-items: center;">
 	<div class="piA"><div class="option-stats-grid-container">
   <div class="option-stats-grid-item option-stats-left-column">
-    <input type="text" id="optionNameInputA" class="option-text" placeholder="Name" autocomplete="off">
+    <input type="text" id="optionNameInputA" class="option-text" placeholder="Nombre" autocomplete="off">
     <select id="optionAgeInputA" class="option-drop" oninput="calculatePremium(&#39;A&#39;)" onchange="calculatePremium(&#39;A&#39;); toggleSeniorShowHide(&#39;A&#39;)" autocomplete="off">
       <option value="18">18</option>
       <option value="19">19</option>
@@ -84,20 +84,20 @@
       <option value="80">80</option>
     </select>
     <select id="optionSexInputA" class="option-drop" onchange="calculatePremium(&#39;A&#39;)" autocomplete="off">
-      <option value="male" selected="">MALE</option>
-      <option value="female">FEMALE</option>
+      <option value="male" selected="">MASCULINO</option>
+      <option value="female">FEMENINO</option>
     </select>
     <select id="optionTobInputA" class="option-drop" onchange="calculatePremium(&#39;A&#39;)" autocomplete="off">
       <option value="ntu" selected="">NTU</option>
       <option value="tu">TU</option>
     </select>
-    <input type="text" id="optionIncomeInputA" class="option-text option-text-income" placeholder="Monthly Income" maxlength="7" autocomplete="off" oninput="lockAutoComplete(&#39;A&#39;); optionFormatCurrency(this)" onchange="calculatePremium(&#39;A&#39;); updateOptionAveragePremium(this.value)">
+    <input type="text" id="optionIncomeInputA" class="option-text option-text-income" placeholder="Ingreso Mensual" maxlength="7" autocomplete="off" oninput="lockAutoComplete(&#39;A&#39;); optionFormatCurrency(this)" onchange="calculatePremium(&#39;A&#39;); updateOptionAveragePremium(this.value)">
     <input type="checkbox" id="autoPlanCheckboxA" class="option-checkbox" onchange="lockAutoComplete(&#39;A&#39;); calculatePremium(&#39;A&#39;)" disabled="">
-    <label class="label" style="margin-right: 10px;">Auto Plan</label>
+    <label class="label" style="margin-right: 10px;">Plan Automático</label>
     <input type="checkbox" id="autoCompleteCheckboxA" class="option-checkbox" onchange="calculatePremium(&#39;A&#39;)" style="margin-left: 10px;" checked="">
-    <label class="label">Auto Complete</label>
+    <label class="label">Completar Automáticamente</label>
   </div>
-  <div class="option-stats-grid-item option-stats-middle-column-top">Most People Set Aside</div>
+  <div class="option-stats-grid-item option-stats-middle-column-top">La Mayoría Aparta</div>
   <div class="option-stats-grid-item option-stats-middle-column-bottom"><span id="optionAveragePremiumA" class="option-average-premium-item"></span></div>
 </div>
 <script>
@@ -120,10 +120,10 @@ function handleInputChange() {
 // Add event listener to the input element
 optionIncomeInputA.addEventListener('input', handleInputChange);
 </script>
-<script src="./Keefer Option Builder_files/toggleSeniorShowHide.js.download"></script></div>
+<script src="./Keefer Constructor de Opciones_files/toggleSeniorShowHide.js.download"></script></div>
 	<div class="piB" style="display: none;"><div class="option-stats-grid-container">
   <div class="option-stats-grid-item option-stats-left-column">
-    <input type="text" id="optionNameInputB" class="option-text" placeholder="Name" autocomplete="off">
+    <input type="text" id="optionNameInputB" class="option-text" placeholder="Nombre" autocomplete="off">
     <select id="optionAgeInputB" class="option-drop" oninput="calculatePremium(&#39;B&#39;)" onchange="calculatePremium(&#39;B&#39;); toggleSeniorShowHide(&#39;B&#39;)" autocomplete="off">
       <option value="18">18</option>
       <option value="19">19</option>
@@ -190,20 +190,20 @@ optionIncomeInputA.addEventListener('input', handleInputChange);
       <option value="80">80</option>
     </select>
     <select id="optionSexInputB" class="option-drop" onchange="calculatePremium(&#39;B&#39;)" autocomplete="off">
-      <option value="male">MALE</option>
-      <option value="female" selected="">FEMALE</option>
+      <option value="male">MASCULINO</option>
+      <option value="female" selected="">FEMENINO</option>
     </select>
     <select id="optionTobInputB" class="option-drop" onchange="calculatePremium(&#39;B&#39;)" autocomplete="off">
       <option value="ntu" selected="">NTU</option>
       <option value="tu">TU</option>
     </select>
-    <input type="text" id="optionIncomeInputB" class="option-text option-text-income" placeholder="Monthly Income" maxlength="7" autocomplete="off" oninput="lockAutoComplete(&#39;B&#39;); optionFormatCurrency(this)" onblur="clearJunk(this); calculatePremium(&#39;B&#39;); updateOptionAveragePremiumB(this.value)">
+    <input type="text" id="optionIncomeInputB" class="option-text option-text-income" placeholder="Ingreso Mensual" maxlength="7" autocomplete="off" oninput="lockAutoComplete(&#39;B&#39;); optionFormatCurrency(this)" onblur="clearJunk(this); calculatePremium(&#39;B&#39;); updateOptionAveragePremiumB(this.value)">
     <input type="checkbox" id="autoPlanCheckboxB" class="option-checkbox" onchange="lockAutoComplete(&#39;B&#39;); calculatePremium(&#39;B&#39;)" disabled="">
-    <label class="label" style="margin-right: 10px;">Auto Plan</label>
+    <label class="label" style="margin-right: 10px;">Plan Automático</label>
     <input type="checkbox" id="autoCompleteCheckboxB" class="option-checkbox" onchange="calculatePremium(&#39;B&#39;)" style="margin-left: 10px;" checked="">
-    <label class="label">Auto Complete</label>
+    <label class="label">Completar Automáticamente</label>
   </div>
-  <div class="option-stats-grid-item option-stats-middle-column-top">Most People Set Aside</div>
+  <div class="option-stats-grid-item option-stats-middle-column-top">La Mayoría Aparta</div>
   <div class="option-stats-grid-item option-stats-middle-column-bottom"><span id="optionAveragePremiumB" class="option-average-premium-item"></span></div>
 </div>
 <script>
@@ -227,19 +227,19 @@ function handleInputChangeB() {
 optionIncomeInputB.addEventListener('input', handleInputChangeB);
 
 </script></div>
-  <div style="text-align: center;"><img src="./Keefer Option Builder_files/AIL_logo.png" class="logo" alt="AIL"><button id="fullscreenBtn" tabindex="-1"><img id="fullscreenIcon" src="./Keefer Option Builder_files/fullscreen.png" alt="Fullscreen"></button></div>
+  <div style="text-align: center;"><img src="./Keefer Constructor de Opciones_files/AIL_logo.png" class="logo" alt="AIL"><button id="fullscreenBtn" tabindex="-1"><img id="fullscreenIcon" src="./Keefer Constructor de Opciones_files/fullscreen.png" alt="Fullscreen"></button></div>
 </div>
 <div style="margin-top: 10vh;">
-<link rel="stylesheet" href="./Keefer Option Builder_files/option-builder-style.css" type="text/css">
-<script src="./Keefer Option Builder_files/optionBuilderFormat.js.download"></script>
+<link rel="stylesheet" href="./Keefer Constructor de Opciones_files/option-builder-style.css" type="text/css">
+<script src="./Keefer Constructor de Opciones_files/optionBuilderFormat.js.download"></script>
 <div class="button-goto-grid no-slide" id="option-builder-slide">
   <div style="display: flex; flex-direction: row; align-items: center;">
-    <button onclick="showPiA(); calculatePremium(&#39;A&#39;); toggleSeniorShowHide(&#39;A&#39;); toggleCopyPrimaryButtonVisibilityOff();" class="button-goto-primary">Primary</button>
-    <button onclick="showPiB(); calculatePremium(&#39;A&#39;); toggleSeniorShowHide(&#39;B&#39;); toggleCopyPrimaryButtonVisibility();" class="button-goto-spouse">Spouse</button>
-    <button type="button" id="copyPrimaryButton" class="button-goto" style="width: unset; display: none;" onclick="copyPrimary()">COPY PRIMARY</button>
+    <button onclick="showPiA(); calculatePremium(&#39;A&#39;); toggleSeniorShowHide(&#39;A&#39;); toggleCopyPrimaryButtonVisibilityOff();" class="button-goto-primary">Principal</button>
+    <button onclick="showPiB(); calculatePremium(&#39;A&#39;); toggleSeniorShowHide(&#39;B&#39;); toggleCopyPrimaryButtonVisibility();" class="button-goto-spouse">Cónyuge</button>
+    <button type="button" id="copyPrimaryButton" class="button-goto" style="width: unset; display: none;" onclick="copyPrimary()">COPIAR PRINCIPAL</button>
 	  <span class="show-senior" style="display: none;">
   <select id="state" class="option-drop" onchange="calculatePremium(&#39;A&#39;); calculatePremium(&#39;B&#39;)">
-  <optgroup label="United States">
+  <optgroup label="Estados Unidos">
   <option value="AL">AL</option>
   <option value="AK">AK</option>
   <option value="AZ">AZ</option>
@@ -290,7 +290,7 @@ optionIncomeInputB.addEventListener('input', handleInputChangeB);
   <option value="WI">WI</option>
   <option value="WY">WY</option>
   </optgroup>
-  <optgroup label="Canada">
+  <optgroup label="Canadá">
   <option value="AB">AB</option>
   <option value="BC">BC</option>
   <option value="MB">MB</option>
@@ -306,10 +306,10 @@ optionIncomeInputB.addEventListener('input', handleInputChangeB);
   <option value="YT">YT</option>
   </optgroup>
 </select>
-<label style="margin-left: 5px;">STATE</label></span>
+<label style="margin-left: 5px;">ESTADO</label></span>
   </div>
   <div style="text-align: right;">
-	  <button type="button" class="hide-stats button-goto" id="backToNeeds" onclick="goToSlideByElementId(&#39;needs-anal-slide&#39;);">← BACK TO NEEDS&nbsp;&nbsp;&nbsp;</button>
+	  <button type="button" class="hide-stats button-goto" id="backToNeeds" onclick="goToSlideByElementId(&#39;needs-anal-slide&#39;);">← VOLVER A NECESIDADES&nbsp;&nbsp;&nbsp;</button>
 <!--  <span id="totalPremiumDisplay" class="show-premium">TOTAL</span>  
 -->
   </div>
@@ -319,7 +319,7 @@ optionIncomeInputB.addEventListener('input', handleInputChangeB);
   <form id="optionMyFormA">
     <div class="hide-stats"><div class="option-stats-grid-container">
   <div class="option-stats-grid-item option-stats-left-column">
-    <input type="text" id="optionNameInputA" class="option-text" placeholder="Name" autocomplete="off">
+    <input type="text" id="optionNameInputA" class="option-text" placeholder="Nombre" autocomplete="off">
     <select id="optionAgeInputA" class="option-drop" oninput="calculatePremium(&#39;A&#39;)" onchange="calculatePremium(&#39;A&#39;); toggleSeniorShowHide(&#39;A&#39;)" autocomplete="off">
       <option value="18">18</option>
       <option value="19">19</option>
@@ -386,20 +386,20 @@ optionIncomeInputB.addEventListener('input', handleInputChangeB);
       <option value="80">80</option>
     </select>
     <select id="optionSexInputA" class="option-drop" onchange="calculatePremium(&#39;A&#39;)" autocomplete="off">
-      <option value="male" selected="">MALE</option>
-      <option value="female">FEMALE</option>
+      <option value="male" selected="">MASCULINO</option>
+      <option value="female">FEMENINO</option>
     </select>
     <select id="optionTobInputA" class="option-drop" onchange="calculatePremium(&#39;A&#39;)" autocomplete="off">
       <option value="ntu" selected="">NTU</option>
       <option value="tu">TU</option>
     </select>
-    <input type="text" id="optionIncomeInputA" class="option-text option-text-income" placeholder="Monthly Income" maxlength="7" autocomplete="off" oninput="lockAutoComplete(&#39;A&#39;); optionFormatCurrency(this)" onchange="calculatePremium(&#39;A&#39;); updateOptionAveragePremium(this.value)">
+    <input type="text" id="optionIncomeInputA" class="option-text option-text-income" placeholder="Ingreso Mensual" maxlength="7" autocomplete="off" oninput="lockAutoComplete(&#39;A&#39;); optionFormatCurrency(this)" onchange="calculatePremium(&#39;A&#39;); updateOptionAveragePremium(this.value)">
     <input type="checkbox" id="autoPlanCheckboxA" class="option-checkbox" onchange="lockAutoComplete(&#39;A&#39;); calculatePremium(&#39;A&#39;)" disabled="" autocomplete="off">
-    <label class="label" style="margin-right: 10px;">Auto Plan</label>
+    <label class="label" style="margin-right: 10px;">Plan Automático</label>
     <input type="checkbox" id="autoCompleteCheckboxA" class="option-checkbox" onchange="calculatePremium(&#39;A&#39;)" style="margin-left: 10px;" checked="" autocomplete="off">
-    <label class="label">Auto Complete</label>
+    <label class="label">Completar Automáticamente</label>
   </div>
-  <div class="option-stats-grid-item option-stats-middle-column-top">Most People Set Aside</div>
+  <div class="option-stats-grid-item option-stats-middle-column-top">La Mayoría Aparta</div>
   <div class="option-stats-grid-item option-stats-middle-column-bottom"><span id="optionAveragePremiumA" class="option-average-premium-item"></span></div>
 </div>
 <script>
@@ -422,104 +422,104 @@ function handleInputChange() {
 // Add event listener to the input element
 optionIncomeInputA.addEventListener('input', handleInputChange);
 </script>
-<script src="./Keefer Option Builder_files/toggleSeniorShowHide.js.download"></script></div>
+<script src="./Keefer Constructor de Opciones_files/toggleSeniorShowHide.js.download"></script></div>
     <div class="option-group">
       <div class="hidden-grid option-product-type-group">
 <!-- HIDE IF SENIOR -->
 <span class="hide-senior" style="display: block;">
         <div class="option-product-type foc">
-			<span class="product-title">FREEDOM OF CHOICE</span>
-			<div><img src="./Keefer Option Builder_files/increase.png" class="edit-button" alt="INCREASE" onclick="increase(&#39;wlPlatinumInput&#39;, &#39;A&#39;); increase(&#39;wlGoldInput&#39;, &#39;A&#39;); increase(&#39;wlSilverInput&#39;, &#39;A&#39;)"><span class="product-sub-title">Any Cause of Death<img src="./Keefer Option Builder_files/reduce.png" class="edit-button" alt="REDUCE" onclick="reduce(&#39;wlPlatinumInput&#39;, &#39;A&#39;); reduce(&#39;wlGoldInput&#39;, &#39;A&#39;); reduce(&#39;wlSilverInput&#39;, &#39;A&#39;)"></span></div>
-			<span class="product-sub-sub-title">Whole Life</span>
+			<span class="product-title">LIBERTAD DE ELECCIÓN</span>
+			<div><img src="./Keefer Constructor de Opciones_files/increase.png" class="edit-button" alt="AUMENTAR" onclick="increase(&#39;wlPlatinumInput&#39;, &#39;A&#39;); increase(&#39;wlGoldInput&#39;, &#39;A&#39;); increase(&#39;wlSilverInput&#39;, &#39;A&#39;)"><span class="product-sub-title">Cualquier Causa de Muerte<img src="./Keefer Constructor de Opciones_files/reduce.png" class="edit-button" alt="REDUCIR" onclick="reduce(&#39;wlPlatinumInput&#39;, &#39;A&#39;); reduce(&#39;wlGoldInput&#39;, &#39;A&#39;); reduce(&#39;wlSilverInput&#39;, &#39;A&#39;)"></span></div>
+			<span class="product-sub-sub-title">Vida Entera</span>
 	</div>
 </span>
 <!-- SHOW IF SENIOR -->
 <span class="show-senior" style="display: none;">
         <div class="option-product-type foc">
-			<img src="./Keefer Option Builder_files/FOC Front.png" style="width: 100%;" alt="">
+			<img src="./Keefer Constructor de Opciones_files/FOC Front.png" style="width: 100%;" alt="">
 			<div>
-<img src="./Keefer Option Builder_files/increase.png" class="edit-button" alt="INCREASE" onclick="increase(&#39;wlPlatinumInput&#39;, &#39;A&#39;); increase(&#39;wlGoldInput&#39;, &#39;A&#39;); increase(&#39;wlSilverInput&#39;, &#39;A&#39;)">
-<img src="./Keefer Option Builder_files/reduce.png" class="edit-button" alt="REDUCE" onclick="reduce(&#39;wlPlatinumInput&#39;, &#39;A&#39;); reduce(&#39;wlGoldInput&#39;, &#39;A&#39;); reduce(&#39;wlSilverInput&#39;, &#39;A&#39;)">
+<img src="./Keefer Constructor de Opciones_files/increase.png" class="edit-button" alt="AUMENTAR" onclick="increase(&#39;wlPlatinumInput&#39;, &#39;A&#39;); increase(&#39;wlGoldInput&#39;, &#39;A&#39;); increase(&#39;wlSilverInput&#39;, &#39;A&#39;)">
+<img src="./Keefer Constructor de Opciones_files/reduce.png" class="edit-button" alt="REDUCIR" onclick="reduce(&#39;wlPlatinumInput&#39;, &#39;A&#39;); reduce(&#39;wlGoldInput&#39;, &#39;A&#39;); reduce(&#39;wlSilverInput&#39;, &#39;A&#39;)">
 				</div>
 	</div>
 </span>
 <!-- HIDE IF SENIOR -->
 <span class="hide-senior" style="display: block;">
-<div class="option-product-type income"><span class="product-title">INCOME PROTECTION</span><span class="product-sub-title">Any Cause of Death</span><span class="product-sub-sub-title">10RC</span></div>
-<div class="option-product-type income"><span class="product-title">MORTGAGE/DEBT</span><span class="product-sub-title">Accidental Death</span><span class="product-sub-sub-title">ADB</span></div>
+<div class="option-product-type income"><span class="product-title">PROTECCIÓN DE INGRESOS</span><span class="product-sub-title">Cualquier Causa de Muerte</span><span class="product-sub-sub-title">10RC</span></div>
+<div class="option-product-type income"><span class="product-title">HIPOTECA/DEUDA</span><span class="product-sub-title">Muerte Accidental</span><span class="product-sub-sub-title">ADB</span></div>
 </span>
       </div>
 
       <div id="platinumA" class="option-product-type-group-option" style="border-left: unset;">
-        <div><img src="./Keefer Option Builder_files/PLATINUM.png" alt="PLATINUM" class="option-pgs-title" onclick="dimOthers(&#39;platinumA&#39;, &#39;goldA&#39;, &#39;silverA&#39;)"></div>
+        <div><img src="./Keefer Constructor de Opciones_files/PLATINUM.png" alt="PLATINUM" class="option-pgs-title" onclick="dimOthers(&#39;platinumA&#39;, &#39;goldA&#39;, &#39;silverA&#39;)"></div>
         <div class="option-product-type">
-          <input type="text" id="wlPlatinumInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="10" placeholder="WHOLE LIFE" autocomplete="off">
+          <input type="text" id="wlPlatinumInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="10" placeholder="VIDA ENTERA" autocomplete="off">
         </div>
 <!-- HIDE IF SENIOR -->
 <span class="hide-senior" style="display: block;">
         <div class="option-product-type">
-          <input type="text" id="tenrcPlatinumInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="10" placeholder="INCOME" autocomplete="off">
+          <input type="text" id="tenrcPlatinumInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="10" placeholder="INGRESO" autocomplete="off">
         </div>
         <div class="option-product-type">
-          <input type="text" id="adbPlatinumInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="9" placeholder="MORT/DEBT" autocomplete="off">
+          <input type="text" id="adbPlatinumInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="9" placeholder="HIP/DEUDA" autocomplete="off">
         </div>
 </span>
         <div class="option-product-type">
 <!-- HIDE IF SENIOR -->
 <span class="hide-senior" style="display: block;">
-          <div class="death-from">DEATH FROM SICKNESS</div>
+          <div class="death-from">MUERTE POR ENFERMEDAD</div>
           <div id="platinumDeathFromSicknessA" class="option-face-total"></div>
-          <div class="death-from">DEATH FROM ACCIDENT</div>
+          <div class="death-from">MUERTE POR ACCIDENTE</div>
           <div id="platinumDeathFromAccidentA" class="option-face-total"></div>
 </span>
           <div id="platinumResultA" class="mbd-premium"></div>
         </div>
       </div>
       <div id="goldA" class="option-product-type-group-option">
-        <div><img src="./Keefer Option Builder_files/GOLD.png" alt="GOLD" class="option-pgs-title" onclick="dimOthers(&#39;goldA&#39;, &#39;platinumA&#39;, &#39;silverA&#39;)"></div>
+        <div><img src="./Keefer Constructor de Opciones_files/GOLD.png" alt="GOLD" class="option-pgs-title" onclick="dimOthers(&#39;goldA&#39;, &#39;platinumA&#39;, &#39;silverA&#39;)"></div>
         <div class="option-product-type">
-          <input type="text" id="wlGoldInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="10" placeholder="WHOLE LIFE" autocomplete="off">
+          <input type="text" id="wlGoldInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="10" placeholder="VIDA ENTERA" autocomplete="off">
         </div>
 <!-- HIDE IF SENIOR -->
 <span class="hide-senior" style="display: block;">
         <div class="option-product-type">
-          <input type="text" id="tenrcGoldInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="10" placeholder="INCOME" autocomplete="off">
+          <input type="text" id="tenrcGoldInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="10" placeholder="INGRESO" autocomplete="off">
         </div>
         <div class="option-product-type">
-          <input type="text" id="adbGoldInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="9" placeholder="MORT/DEBT" autocomplete="off">
+          <input type="text" id="adbGoldInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="9" placeholder="HIP/DEUDA" autocomplete="off">
         </div>
 </span>
         <div class="option-product-type">
 <!-- HIDE IF SENIOR -->
 <span class="hide-senior" style="display: block;">
-          <div class="death-from">DEATH FROM SICKNESS</div>
+          <div class="death-from">MUERTE POR ENFERMEDAD</div>
           <div id="goldDeathFromSicknessA" class="option-face-total"></div>
-          <div class="death-from">DEATH FROM ACCIDENT</div>
+          <div class="death-from">MUERTE POR ACCIDENTE</div>
           <div id="goldDeathFromAccidentA" class="option-face-total"></div>
 </span>
           <div id="goldResultA" class="mbd-premium"></div>
         </div>
       </div>
       <div id="silverA" class="option-product-type-group-option">
-        <div><img src="./Keefer Option Builder_files/SILVER.png" alt="SILVER" class="option-pgs-title" onclick="dimOthers(&#39;silverA&#39;, &#39;goldA&#39;, &#39;platinumA&#39;)"></div>
+        <div><img src="./Keefer Constructor de Opciones_files/SILVER.png" alt="SILVER" class="option-pgs-title" onclick="dimOthers(&#39;silverA&#39;, &#39;goldA&#39;, &#39;platinumA&#39;)"></div>
         <div class="option-product-type">
-          <input type="text" id="wlSilverInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="10" placeholder="WHOLE LIFE" autocomplete="off">
+          <input type="text" id="wlSilverInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="10" placeholder="VIDA ENTERA" autocomplete="off">
         </div>
 <!-- HIDE IF SENIOR -->
 <span class="hide-senior" style="display: block;">
         <div class="option-product-type">
-          <input type="text" id="tenrcSilverInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="10" placeholder="INCOME" autocomplete="off">
+          <input type="text" id="tenrcSilverInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="10" placeholder="INGRESO" autocomplete="off">
         </div>
         <div class="option-product-type">
-          <input type="text" id="adbSilverInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="9" placeholder="MORT/DEBT" autocomplete="off">
+          <input type="text" id="adbSilverInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="9" placeholder="HIP/DEUDA" autocomplete="off">
         </div>
 </span>
         <div class="option-product-type">
 <!-- HIDE IF SENIOR -->
 <span class="hide-senior" style="display: block;">
-          <div class="death-from">DEATH FROM SICKNESS</div>
+          <div class="death-from">MUERTE POR ENFERMEDAD</div>
           <div id="silverDeathFromSicknessA" class="option-face-total"></div>
-          <div class="death-from">DEATH FROM ACCIDENT</div>
+          <div class="death-from">MUERTE POR ACCIDENTE</div>
           <div id="silverDeathFromAccidentA" class="option-face-total"></div>
 </span>
           <div id="silverResultA" class="mbd-premium"></div>
@@ -528,7 +528,7 @@ optionIncomeInputA.addEventListener('input', handleInputChange);
     </div>
     <div class="option-group">
       <div class="option-product-type-group">
-        <button type="button" class="option-button-clear" onclick="optionClearFaceAmounts(&#39;A&#39;)">CLEAR</button>
+        <button type="button" class="option-button-clear" onclick="optionClearFaceAmounts(&#39;A&#39;)">BORRAR</button>
       </div>
       <div></div>
     </div>
@@ -541,7 +541,7 @@ optionIncomeInputA.addEventListener('input', handleInputChange);
   <form id="optionMyFormB">
     <div class="hide-stats"><div class="option-stats-grid-container">
   <div class="option-stats-grid-item option-stats-left-column">
-    <input type="text" id="optionNameInputB" class="option-text" placeholder="Name" autocomplete="off">
+    <input type="text" id="optionNameInputB" class="option-text" placeholder="Nombre" autocomplete="off">
     <select id="optionAgeInputB" class="option-drop" oninput="calculatePremium(&#39;B&#39;)" onchange="calculatePremium(&#39;B&#39;); toggleSeniorShowHide(&#39;B&#39;)" autocomplete="off">
       <option value="18">18</option>
       <option value="19">19</option>
@@ -608,20 +608,20 @@ optionIncomeInputA.addEventListener('input', handleInputChange);
       <option value="80">80</option>
     </select>
     <select id="optionSexInputB" class="option-drop" onchange="calculatePremium(&#39;B&#39;)" autocomplete="off">
-      <option value="male">MALE</option>
-      <option value="female" selected="">FEMALE</option>
+      <option value="male">MASCULINO</option>
+      <option value="female" selected="">FEMENINO</option>
     </select>
     <select id="optionTobInputB" class="option-drop" onchange="calculatePremium(&#39;B&#39;)" autocomplete="off">
       <option value="ntu" selected="">NTU</option>
       <option value="tu">TU</option>
     </select>
-    <input type="text" id="optionIncomeInputB" class="option-text option-text-income" placeholder="Monthly Income" maxlength="7" autocomplete="off" oninput="lockAutoComplete(&#39;B&#39;); optionFormatCurrency(this)" onblur="clearJunk(this); calculatePremium(&#39;B&#39;); updateOptionAveragePremiumB(this.value)">
+    <input type="text" id="optionIncomeInputB" class="option-text option-text-income" placeholder="Ingreso Mensual" maxlength="7" autocomplete="off" oninput="lockAutoComplete(&#39;B&#39;); optionFormatCurrency(this)" onblur="clearJunk(this); calculatePremium(&#39;B&#39;); updateOptionAveragePremiumB(this.value)">
     <input type="checkbox" id="autoPlanCheckboxB" class="option-checkbox" onchange="lockAutoComplete(&#39;B&#39;); calculatePremium(&#39;B&#39;)" disabled="" autocomplete="off">
-    <label class="label" style="margin-right: 10px;">Auto Plan</label>
+    <label class="label" style="margin-right: 10px;">Plan Automático</label>
     <input type="checkbox" id="autoCompleteCheckboxB" class="option-checkbox" onchange="calculatePremium(&#39;B&#39;)" style="margin-left: 10px;" checked="" autocomplete="off">
-    <label class="label">Auto Complete</label>
+    <label class="label">Completar Automáticamente</label>
   </div>
-  <div class="option-stats-grid-item option-stats-middle-column-top">Most People Set Aside</div>
+  <div class="option-stats-grid-item option-stats-middle-column-top">La Mayoría Aparta</div>
   <div class="option-stats-grid-item option-stats-middle-column-bottom"><span id="optionAveragePremiumB" class="option-average-premium-item"></span></div>
 </div>
 <script>
@@ -650,97 +650,97 @@ optionIncomeInputB.addEventListener('input', handleInputChangeB);
 <!-- HIDE IF SENIOR -->
 <span class="hide-senior" style="display: block;">
         <div class="option-product-type foc">
-			<span class="product-title">FREEDOM OF CHOICE</span>
-			<div><img src="./Keefer Option Builder_files/increase.png" class="edit-button" alt="INCREASE" onclick="increase(&#39;wlPlatinumInput&#39;, &#39;B&#39;); increase(&#39;wlGoldInput&#39;, &#39;B&#39;); increase(&#39;wlSilverInput&#39;, &#39;B&#39;)"><span class="product-sub-title">Any Cause of Death<img src="./Keefer Option Builder_files/reduce.png" class="edit-button" alt="REDUCE" onclick="reduce(&#39;wlPlatinumInput&#39;, &#39;B&#39;); reduce(&#39;wlGoldInput&#39;, &#39;B&#39;); reduce(&#39;wlSilverInput&#39;, &#39;B&#39;)"></span></div>
-			<span class="product-sub-sub-title">Whole Life</span>
+			<span class="product-title">LIBERTAD DE ELECCIÓN</span>
+			<div><img src="./Keefer Constructor de Opciones_files/increase.png" class="edit-button" alt="AUMENTAR" onclick="increase(&#39;wlPlatinumInput&#39;, &#39;B&#39;); increase(&#39;wlGoldInput&#39;, &#39;B&#39;); increase(&#39;wlSilverInput&#39;, &#39;B&#39;)"><span class="product-sub-title">Cualquier Causa de Muerte<img src="./Keefer Constructor de Opciones_files/reduce.png" class="edit-button" alt="REDUCIR" onclick="reduce(&#39;wlPlatinumInput&#39;, &#39;B&#39;); reduce(&#39;wlGoldInput&#39;, &#39;B&#39;); reduce(&#39;wlSilverInput&#39;, &#39;B&#39;)"></span></div>
+			<span class="product-sub-sub-title">Vida Entera</span>
 	</div>
 </span>
 <!-- SHOW IF SENIOR -->
 <span class="show-senior" style="display: none;">
         <div class="option-product-type foc">
-			<img src="./Keefer Option Builder_files/FOC Front.png" style="width: 100%;" alt="">
+			<img src="./Keefer Constructor de Opciones_files/FOC Front.png" style="width: 100%;" alt="">
 						<div>
-<img src="./Keefer Option Builder_files/increase.png" class="edit-button" alt="INCREASE" onclick="increase(&#39;wlPlatinumInput&#39;, &#39;B&#39;); increase(&#39;wlGoldInput&#39;, &#39;B&#39;); increase(&#39;wlSilverInput&#39;, &#39;B&#39;)">
-<img src="./Keefer Option Builder_files/reduce.png" class="edit-button" alt="REDUCE" onclick="reduce(&#39;wlPlatinumInput&#39;, &#39;B&#39;); reduce(&#39;wlGoldInput&#39;, &#39;B&#39;); reduce(&#39;wlSilverInput&#39;, &#39;B&#39;)">
+<img src="./Keefer Constructor de Opciones_files/increase.png" class="edit-button" alt="AUMENTAR" onclick="increase(&#39;wlPlatinumInput&#39;, &#39;B&#39;); increase(&#39;wlGoldInput&#39;, &#39;B&#39;); increase(&#39;wlSilverInput&#39;, &#39;B&#39;)">
+<img src="./Keefer Constructor de Opciones_files/reduce.png" class="edit-button" alt="REDUCIR" onclick="reduce(&#39;wlPlatinumInput&#39;, &#39;B&#39;); reduce(&#39;wlGoldInput&#39;, &#39;B&#39;); reduce(&#39;wlSilverInput&#39;, &#39;B&#39;)">
 				</div>
 	</div>
 </span>
 <!-- HIDE IF SENIOR -->
 <span class="hide-senior" style="display: block;">
-<div class="option-product-type income"><span class="product-title">INCOME PROTECTION</span><span class="product-sub-title">Any Cause of Death</span><span class="product-sub-sub-title">10RC</span></div>
-<div class="option-product-type income"><span class="product-title">MORTGAGE/DEBT</span><span class="product-sub-title">Accidental Death</span><span class="product-sub-sub-title">ADB</span></div>
+<div class="option-product-type income"><span class="product-title">PROTECCIÓN DE INGRESOS</span><span class="product-sub-title">Cualquier Causa de Muerte</span><span class="product-sub-sub-title">10RC</span></div>
+<div class="option-product-type income"><span class="product-title">HIPOTECA/DEUDA</span><span class="product-sub-title">Muerte Accidental</span><span class="product-sub-sub-title">ADB</span></div>
 </span>
       </div>
       <div id="platinumB" class="option-product-type-group-option" style="border-left: unset;">
-        <div><img src="./Keefer Option Builder_files/PLATINUM.png" alt="PLATINUM" class="option-pgs-title" onclick="dimOthers(&#39;platinumB&#39;, &#39;goldB&#39;, &#39;silverB&#39;)"></div>
+        <div><img src="./Keefer Constructor de Opciones_files/PLATINUM.png" alt="PLATINUM" class="option-pgs-title" onclick="dimOthers(&#39;platinumB&#39;, &#39;goldB&#39;, &#39;silverB&#39;)"></div>
         <div class="option-product-type">
-          <input type="text" id="wlPlatinumInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="10" placeholder="WHOLE LIFE" autocomplete="off">
+          <input type="text" id="wlPlatinumInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="10" placeholder="VIDA ENTERA" autocomplete="off">
         </div>
 <!-- HIDE IF SENIOR -->
 <span class="hide-senior" style="display: block;">
         <div class="option-product-type">
-          <input type="text" id="tenrcPlatinumInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="10" placeholder="INCOME" autocomplete="off">
+          <input type="text" id="tenrcPlatinumInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="10" placeholder="INGRESO" autocomplete="off">
         </div>
         <div class="option-product-type">
-          <input type="text" id="adbPlatinumInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="9" placeholder="MORT/DEBT" autocomplete="off">
+          <input type="text" id="adbPlatinumInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="9" placeholder="HIP/DEUDA" autocomplete="off">
         </div>
 </span>
         <div class="option-product-type">
 <!-- HIDE IF SENIOR -->
 <span class="hide-senior" style="display: block;">
-          <div class="death-from">DEATH FROM SICKNESS</div>
+          <div class="death-from">MUERTE POR ENFERMEDAD</div>
           <div id="platinumDeathFromSicknessB" class="option-face-total"></div>
-          <div class="death-from">DEATH FROM ACCIDENT</div>
+          <div class="death-from">MUERTE POR ACCIDENTE</div>
           <div id="platinumDeathFromAccidentB" class="option-face-total"></div>
 </span>
           <div id="platinumResultB" class="mbd-premium"></div>
         </div>
       </div>
       <div id="goldB" class="option-product-type-group-option">
-        <div><img src="./Keefer Option Builder_files/GOLD.png" alt="GOLD" class="option-pgs-title" onclick="dimOthers(&#39;goldB&#39;, &#39;platinumB&#39;, &#39;silverB&#39;)"></div>
+        <div><img src="./Keefer Constructor de Opciones_files/GOLD.png" alt="GOLD" class="option-pgs-title" onclick="dimOthers(&#39;goldB&#39;, &#39;platinumB&#39;, &#39;silverB&#39;)"></div>
         <div class="option-product-type">
-          <input type="text" id="wlGoldInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="10" placeholder="WHOLE LIFE" autocomplete="off">
+          <input type="text" id="wlGoldInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="10" placeholder="VIDA ENTERA" autocomplete="off">
         </div>
 <!-- HIDE IF SENIOR -->
 <span class="hide-senior" style="display: block;">
         <div class="option-product-type">
-          <input type="text" id="tenrcGoldInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="10" placeholder="INCOME" autocomplete="off">
+          <input type="text" id="tenrcGoldInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="10" placeholder="INGRESO" autocomplete="off">
         </div>
         <div class="option-product-type">
-          <input type="text" id="adbGoldInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="9" placeholder="MORT/DEBT" autocomplete="off">
+          <input type="text" id="adbGoldInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="9" placeholder="HIP/DEUDA" autocomplete="off">
         </div>
 </span>
         <div class="option-product-type">
 <!-- HIDE IF SENIOR -->
 <span class="hide-senior" style="display: block;">
-          <div class="death-from">DEATH FROM SICKNESS</div>
+          <div class="death-from">MUERTE POR ENFERMEDAD</div>
           <div id="goldDeathFromSicknessB" class="option-face-total"></div>
-          <div class="death-from">DEATH FROM ACCIDENT</div>
+          <div class="death-from">MUERTE POR ACCIDENTE</div>
           <div id="goldDeathFromAccidentB" class="option-face-total"></div>
 </span>
           <div id="goldResultB" class="mbd-premium"></div>
         </div>
       </div>
       <div id="silverB" class="option-product-type-group-option">
-        <div><img src="./Keefer Option Builder_files/SILVER.png" alt="SILVER" class="option-pgs-title" onclick="dimOthers(&#39;silverB&#39;, &#39;goldB&#39;, &#39;platinumB&#39;)"></div>
+        <div><img src="./Keefer Constructor de Opciones_files/SILVER.png" alt="SILVER" class="option-pgs-title" onclick="dimOthers(&#39;silverB&#39;, &#39;goldB&#39;, &#39;platinumB&#39;)"></div>
         <div class="option-product-type">
-          <input type="text" id="wlSilverInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="10" placeholder="WHOLE LIFE" autocomplete="off">
+          <input type="text" id="wlSilverInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="10" placeholder="VIDA ENTERA" autocomplete="off">
         </div>
 <!-- HIDE IF SENIOR -->
 <span class="hide-senior" style="display: block;">
         <div class="option-product-type">
-          <input type="text" id="tenrcSilverInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="10" placeholder="INCOME" autocomplete="off">
+          <input type="text" id="tenrcSilverInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="10" placeholder="INGRESO" autocomplete="off">
         </div>
         <div class="option-product-type">
-          <input type="text" id="adbSilverInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="9" placeholder="MORT/DEBT" autocomplete="off">
+          <input type="text" id="adbSilverInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="9" placeholder="HIP/DEUDA" autocomplete="off">
         </div>
 </span>
         <div class="option-product-type">
 <!-- HIDE IF SENIOR -->
 <span class="hide-senior" style="display: block;">
-          <div class="death-from">DEATH FROM SICKNESS</div>
+          <div class="death-from">MUERTE POR ENFERMEDAD</div>
           <div id="silverDeathFromSicknessB" class="option-face-total"></div>
-          <div class="death-from">DEATH FROM ACCIDENT</div>
+          <div class="death-from">MUERTE POR ACCIDENTE</div>
           <div id="silverDeathFromAccidentB" class="option-face-total"></div>
 </span>
           <div id="silverResultB" class="mbd-premium"></div>
@@ -749,13 +749,13 @@ optionIncomeInputB.addEventListener('input', handleInputChangeB);
     </div>
     <div class="option-group">
       <div class="option-product-type-group">
-        <button type="button" class="option-button-clear" onclick="optionClearFaceAmounts(&#39;B&#39;)">CLEAR</button>
+        <button type="button" class="option-button-clear" onclick="optionClearFaceAmounts(&#39;B&#39;)">BORRAR</button>
       </div>
       <div></div>
     </div>
   </form>
 </div>
-<div style="margin-left: 1vw; color: grey;">*For American Income Life only</div>
+<div style="margin-left: 1vw; color: grey;">*Solo para American Income Life</div>
 <script>
 function dimOthers(sourceId, target1Id, target2Id) {
     var source = document.getElementById(sourceId);
@@ -818,7 +818,7 @@ function checkBoxControl(target, state) {
     }
   }
 </script> 
-<script src="./Keefer Option Builder_files/optionPremiums.js.download"></script>
+<script src="./Keefer Constructor de Opciones_files/optionPremiums.js.download"></script>
 <script>
     function lockAutoComplete(pi) {
         var autoCompleteCheckbox = document.getElementById("autoCompleteCheckbox" + pi);
@@ -871,10 +871,10 @@ function optionClearFaceAmounts(pi) {
     });
   });
 </script>
-<script src="./Keefer Option Builder_files/seniorDropAdjuster.js.download"></script></div>
-<script src="./Keefer Option Builder_files/colorChange.js.download"></script> 
-<script src="./Keefer Option Builder_files/fullscreen.js.download"></script>
-<script src="./Keefer Option Builder_files/needsOptionTransfer.js.download"></script>
+<script src="./Keefer Constructor de Opciones_files/seniorDropAdjuster.js.download"></script></div>
+<script src="./Keefer Constructor de Opciones_files/colorChange.js.download"></script> 
+<script src="./Keefer Constructor de Opciones_files/fullscreen.js.download"></script>
+<script src="./Keefer Constructor de Opciones_files/needsOptionTransfer.js.download"></script>
 
 
 </body></html>
