@@ -288,18 +288,21 @@ tr:hover td{background:rgba(255,255,255,0.015)}
 <!-- PERSISTENCY -->
 <div class="page content" id="page-persist">
   <div class="section-title">Persistency Factor</div>
-  <div class="section-sub">Set this month's persistency rate — bonus added on top of base comp (hockey stick curve, +0% to +10%). Syncs to Sheet.</div>
+  <div class="section-sub" id="persistSub">Auto-calculated from the <strong style="color:var(--gold2)">Status</strong> column — rolling 12-month window. Set rows to <strong style="color:#3dd68c">GOOD</strong> or <strong style="color:#f87171">CHARGEBACK</strong> in Sheets. Bonus unlocks after 10+ policies total in the window.</div>
 
   <div class="persist-grid" id="persistGrid"></div>
 
   <div style="background:var(--navy2);border:1px solid var(--border);border-radius:10px;padding:18px;max-width:560px">
     <div style="font-family:var(--cond);font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--gold);margin-bottom:12px">How it works</div>
     <div style="color:var(--text2);font-size:13px;line-height:1.9">
-      <code style="font-family:var(--mono);color:var(--gold3);font-size:12px">advance  = (monthly × 12) × 0.60 × 0.65</code><br>
-      <code style="font-family:var(--mono);color:var(--gold3);font-size:12px">base     = advance × role% &nbsp;&nbsp;(setter 15%, closer 25%)</code><br>
-      <code style="font-family:var(--mono);color:var(--gold3);font-size:12px">bonus    = hockey stick curve, 0% → +10% (unlocks at 70%)</code><br>
-      <code style="font-family:var(--mono);color:var(--gold3);font-size:12px">owed     = base × (1 + bonus%)</code><br><br>
-      Base pay is always fixed. Persistency only adds on top as a bonus.
+      <code style="font-family:var(--mono);color:var(--gold3);font-size:12px">advance        = (monthly × 12) × 0.60 × 0.65</code><br>
+      <code style="font-family:var(--mono);color:var(--gold3);font-size:12px">base           = advance × role%  (setter 15%, closer 25%)</code><br>
+      <code style="font-family:var(--mono);color:var(--gold3);font-size:12px">persistency%   = GOOD rows ÷ total rows (this month)</code><br>
+      <code style="font-family:var(--mono);color:var(--gold3);font-size:12px">bonus          = hockey stick 0–10% (requires 10+ policies)</code><br>
+      <code style="font-family:var(--mono);color:var(--gold3);font-size:12px">owed           = base × (1 + bonus%)</code><br><br>
+      Base pay is always fixed. The persistency bonus adds on top.
+      Bonus unlocks only after 10 policies are sold in the month —
+      then scales from +0% at 70% persistency up to +10% at 100%.
     </div>
   </div>
 </div>
@@ -404,14 +407,10 @@ function getPersistBonus(rate) {
   return 10;
 }
 
-function getPersistRate(role) {
-  const pd = persistData[role] || {};
-  return pd.rate != null ? pd.rate : 0;
-}
-
 function calcSale(alp, type, role, alpA71) {
-  const rate     = getPersistRate(role);
-  const bonusPct = getPersistBonus(rate);
+  const lp       = calcLocalPersist();
+  const rate     = lp[role]?.rate  || 0;
+  const bonusPct = lp[role]?.bonus || 0;
   const rolePct  = role === 'setter' ? 0.15 : 0.25;
 
   if (type === 'both') {
@@ -477,16 +476,14 @@ async function loadSheet(silent = false) {
   if (!silent) overlay('Loading from Sheet…');
   setSyncBadge('spin', 'Loading…');
   try {
-    const [sRes, pRes] = await Promise.all([
-      apiGet({ action: 'getSales' }),
-      apiGet({ action: 'getPersist' })
-    ]);
+    const sRes = await apiGet({ action: 'getSales' });
     if (!sRes?.success) throw new Error(sRes?.error || 'No response');
 
     sales = (sRes.sales || []).map(normalizeRow);
 
-    if (pRes?.success && pRes.persist) {
-      persistData = pRes.persist;
+    // Persist is now derived live from Status column — comes back inline with getSales
+    if (sRes.persist) {
+      persistData = sRes.persist;
       localStorage.setItem('ailPersist', JSON.stringify(persistData));
     }
 
@@ -505,23 +502,22 @@ async function loadSheet(silent = false) {
 }
 
 function normalizeRow(r) {
-  // Keys from GAS come back with underscores: alp_std, alp_a71, base_owed etc.
   return {
-    id:       String(r.id || r.ID || ''),
-    client:   r.client || r.Client || '',
-    date:     r.date   || r.Date  || '',
-    type:    (r.type   || r.Type  || 'std').toLowerCase(),
-    role:    (r.role   || r.Role  || 'setter').toLowerCase(),
-    alp:     parseFloat(r.alp    || r.ALP   || 0),
-    alpStd:  parseFloat(r.alp_std || r['ALP Std'] || 0),
-    alpA71:  parseFloat(r.alp_a71 || r['ALP A71'] || 0),
-    advance:  parseFloat(r.advance   || r.Advance   || 0),
-    baseOwed: parseFloat(r.base_owed || r['Base Owed'] || 0),
-    owed:     parseFloat(r.owed      || r.Owed || r['Owed (USD)'] || 0),
-    bonusPct: parseFloat(r.bonus_pct || r['Bonus %']   || 0),
-    rate:     parseFloat(r.rate      || r.Rate         || 0),
-    paid:    r.paid === 'YES' || r.paid === true || r.Paid === 'YES',
-    month:   r.month || r.Month || (r.date||r.Date||'').slice(0,7)
+    id:       String(r.id || ''),
+    client:   r.client || '',
+    date:     r.date   || '',
+    type:    (r.type   || 'std').toLowerCase(),
+    role:    (r.role   || 'setter').toLowerCase(),
+    alp:     parseFloat(r.alp     || 0),
+    alpStd:  parseFloat(r.alp_std || 0),
+    alpA71:  parseFloat(r.alp_a71 || 0),
+    advance:  parseFloat(r.advance   || 0),
+    baseOwed: parseFloat(r.base_owed || 0),
+    status:   String(r.status || 'GOOD').toUpperCase(),   // GOOD | CHARGEBACK
+    bonusPct: parseFloat(r.bonus_pct || 0),
+    owed:     parseFloat(r.owed      || 0),
+    paid:     r.paid === 'YES' || r.paid === true,
+    month:    r.month || (r.date||'').slice(0,7)
   };
 }
 
@@ -577,9 +573,14 @@ async function submitSale() {
 //  PREVIEW CALC
 // ═══════════════════════════════════════════════════════════
 function preview() {
-  const rate   = getPersistRate(selRole);
-  const bonus  = getPersistBonus(rate);
-  const pLabel = bonus > 0 ? `${rate}% persist → +${bonus}% bonus` : `${rate}% persist (no bonus <70%)`;
+  const lp     = calcLocalPersist();
+  const rate   = lp[selRole]?.rate  || 0;
+  const bonus  = lp[selRole]?.bonus || 0;
+  const eligible = lp[selRole]?.eligible || false;
+  const pLabel = eligible && bonus > 0
+    ? `${rate.toFixed(1)}% persist → +${bonus}% bonus`
+    : eligible ? `${rate.toFixed(1)}% persist (need ≥70% for bonus)`
+    : `${lp[selRole]?.count||0}/10 policies — bonus locked`;
   document.getElementById('previewPFactor').textContent = pLabel;
 
   if (selType === 'both') {
@@ -689,15 +690,15 @@ function renderLedger() {
   body.innerHTML = `<table>
     <thead><tr>
       <th>Date</th><th>Client</th><th>ALP</th><th>Type</th><th>Role</th>
-      <th>Advance</th><th>Base Owed</th><th>Bonus %</th><th>Total Owed</th><th>Paid</th><th></th>
+      <th>Advance</th><th>Base Owed</th><th>Status</th><th>Bonus %</th><th>Total Owed</th><th>Paid</th><th></th>
     </tr></thead>
     <tbody>
     ${rows.map(s => {
-      const rate     = getPersistRate(s.role);
-      const bonusPct = getPersistBonus(rate);
-      const base     = s.baseOwed || 0;
-      const owed     = base * (1 + bonusPct / 100);
-      return `<tr>
+      const isChargeback = s.status === 'CHARGEBACK';
+      const base  = s.baseOwed || 0;
+      const bonus = s.bonusPct || 0;
+      const owed  = base * (1 + bonus / 100);
+      return `<tr style="${isChargeback?'opacity:.65':''}">
         <td>${s.date}</td>
         <td style="font-family:var(--font)">${s.client}</td>
         <td>${s.type==='both'
@@ -707,7 +708,10 @@ function renderLedger() {
         <td><span class="pill ${s.role}">${s.role}</span></td>
         <td style="color:var(--green)">${fmt(s.advance)}</td>
         <td style="color:var(--text2)">${fmt(base)}</td>
-        <td style="color:${bonusPct>0?'var(--gold)':'var(--muted)'}">${bonusPct>0?'+'+bonusPct+'%':'—'}</td>
+        <td><span class="pill" style="${isChargeback
+          ? 'background:rgba(248,113,113,0.15);color:#f87171'
+          : 'background:rgba(61,214,140,0.12);color:#3dd68c'}">${isChargeback?'⚡ CHARGEBACK':'✓ GOOD'}</span></td>
+        <td style="color:${bonus>0?'var(--gold)':'var(--muted)'}">${bonus>0?'+'+bonus+'%':'—'}</td>
         <td style="color:var(--gold3);font-weight:600">${fmt(owed)}</td>
         <td><button class="paid-toggle${s.paid?' paid':''}" onclick="togglePaid('${s.id}')">${s.paid?'✓ PAID':'UNPAID'}</button></td>
         <td><button class="del-btn" onclick="delSale('${s.id}')">✕</button></td>
@@ -718,7 +722,7 @@ function renderLedger() {
       <tr class="tbl-totals">
         <td colspan="2" style="font-family:var(--cond);font-size:10px;letter-spacing:.5px;text-transform:uppercase">TOTAL — ${rows.length} sales</td>
         <td>${fmt(totAlp)}</td>
-        <td colspan="2"></td>
+        <td colspan="3"></td>
         <td>${fmt(totAdv)}</td>
         <td colspan="2"></td>
         <td>${fmt(totOwed)}${copTot?`<div style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:2px">${fmtCOP(totOwed*copRate)}</div>`:''}</td>
@@ -756,14 +760,13 @@ function exportCSV() {
   let rows = [...sales];
   if (mf) rows = rows.filter(s=>s.month===mf);
   if (rf) rows = rows.filter(s=>s.role===rf);
-  const hdr = 'Date,Client,ALP,Type,Role,Advance,Base Owed,Bonus %,Owed (USD),Paid';
+  const hdr = 'Date,Client,ALP,Type,Role,Advance,Base Owed,Bonus %,Owed (USD),Status,Paid';
   const csv = rows.map(s => {
-    const bonusPct = getPersistBonus(getPersistRate(s.role));
-    const base     = s.baseOwed || 0;
-    const owed     = base * (1 + bonusPct / 100);
+    const base = s.baseOwed || 0;
+    const owed = base * (1 + (s.bonusPct || 0) / 100);
     return [s.date, `"${s.client}"`, s.alp.toFixed(2), s.type, s.role,
-      s.advance.toFixed(2), base.toFixed(2), bonusPct+'%',
-      owed.toFixed(2), s.paid?'YES':'NO'].join(',');
+      s.advance.toFixed(2), base.toFixed(2), (s.bonusPct||0)+'%',
+      owed.toFixed(2), s.status||'GOOD', s.paid?'YES':'NO'].join(',');
   }).join('\n');
   const a = document.createElement('a');
   a.href = 'data:text/csv;charset=utf-8,'+encodeURIComponent(hdr+'\n'+csv);
@@ -771,11 +774,47 @@ function exportCSV() {
 }
 
 // ═══════════════════════════════════════════════════════════
-//  PERSISTENCY
+//  PERSISTENCY  — auto-derived from Status column in sheet
 // ═══════════════════════════════════════════════════════════
+
+// Calculate rolling 12-month persistency from local sales array (mirrors GAS logic).
+// Counts ALL rows from the past 12 calendar months.
+// A chargeback on any old sale affects the current rate.
+// Bonus unlocks only after 10+ total policies in the window.
+function calcLocalPersist() {
+  const cutoff = getRolling12Cutoff();
+  const window = sales.filter(s => s.month && s.month >= cutoff);
+  const result = {};
+  ['setter','closer'].forEach(role => {
+    const rows        = window.filter(s => s.role === role);
+    const count       = rows.length;
+    const good        = rows.filter(s => s.status !== 'CHARGEBACK').length;
+    const chargebacks = count - good;
+    const eligible    = count >= 10;
+    const rate        = count > 0 ? parseFloat(((good / count) * 100).toFixed(2)) : 0;
+    const bonus       = eligible ? getPersistBonus(rate) : 0;
+    result[role]      = { count, good, chargebacks, eligible, rate, bonus };
+  });
+  return result;
+}
+
+// Returns earliest month (YYYY-MM) in rolling 12-month window
+function getRolling12Cutoff() {
+  const d = new Date();
+  d.setMonth(d.getMonth() - 11);
+  return d.toISOString().slice(0, 7);
+}
+
 function renderPersist() {
-  const curMonth   = today().slice(0,7);
-  const monthSales = sales.filter(s => s.month === curMonth);
+  const curMonth = today().slice(0,7);
+  const cutoff   = getRolling12Cutoff();
+  // Update subtitle with live window range
+  const subEl = document.getElementById('persistSub');
+  if (subEl) subEl.innerHTML = `Rolling 12-month window: <strong style="color:var(--gold2)">${fmtMonth(cutoff)}</strong> → <strong style="color:var(--gold2)">${fmtMonth(curMonth)}</strong> &nbsp;·&nbsp; Set rows to <strong style="color:#3dd68c">GOOD</strong> or <strong style="color:#f87171">CHARGEBACK</strong> in Sheets &nbsp;·&nbsp; Bonus unlocks after 10+ policies`;
+  // Use sheet-returned persistData or fall back to local calc
+  const pd = (persistData && persistData.setter)
+    ? persistData
+    : calcLocalPersist();
 
   const roles = [
     { key:'setter', label:'Setter', pct:'15%', pill:'setter' },
@@ -783,69 +822,86 @@ function renderPersist() {
   ];
 
   document.getElementById('persistGrid').innerHTML = roles.map(({key,label,pct,pill}) => {
-    const pd       = persistData[key] || {};
-    const rate     = pd.rate != null ? pd.rate : 0;
-    const bonusPct = getPersistBonus(rate);
-    const baseOwed = monthSales.filter(s=>s.role===key).reduce((a,s)=>a+s.baseOwed,0);
-    const bonusAmt = baseOwed * (bonusPct / 100);
-    const totalOwed= baseOwed + bonusAmt;
-    const rColor   = rate>=90 ? 'var(--green)' : rate>=70 ? 'var(--gold2)' : 'var(--muted)';
-    const fillW    = Math.min(rate, 100);
-    const fillCls  = rate>=90 ? 'c3' : rate>=70 ? 'c2' : rate>=50 ? 'c1' : 'c0';
+    const p = pd[key] || { count:0, good:0, chargebacks:0, eligible:false, rate:0, bonus:0 };
+    const { count, good, eligible, rate, bonus } = p;
+    const chargebacks = p.chargebacks ?? (count - good);
+    const baseOwed    = sales.filter(s => s.month >= cutoff && s.role === key).reduce((a,s)=>a+s.baseOwed,0);
+    const bonusAmt    = baseOwed * (bonus / 100);
+    const totalOwed   = baseOwed + bonusAmt;
+    const fillW       = Math.min(rate, 100);
+    const fillCls     = rate>=90?'c3':rate>=70?'c2':rate>=50?'c1':'c0';
+    const rColor      = rate>=90?'var(--green)':rate>=70?'var(--gold2)':'var(--muted)';
+    const needMore    = Math.max(0, 10 - count);
+    const policyFill  = Math.min((count/10)*100, 100);
 
     return `<div class="pc">
       <div class="pc-head">
         <div>
           <div class="pc-name">Call Center <span class="pill ${pill}">${label}</span></div>
-          <div class="pc-role">${pct} of advance + persist bonus</div>
+          <div class="pc-role">${pct} of advance · rolling 12 months</div>
         </div>
         <div style="text-align:right">
-          <div class="pc-rate-big" style="color:${rColor}">${rate}%</div>
-          <div style="font-family:var(--cond);font-size:9px;color:var(--muted)">persistency rate</div>
+          <div class="pc-rate-big" style="color:${rColor}">${rate.toFixed(1)}%</div>
+          <div style="font-family:var(--cond);font-size:9px;color:var(--muted)">persistency</div>
         </div>
       </div>
+
+      <!-- Persistency rate bar -->
       <div class="meter-track"><div class="meter-fill ${fillCls}" style="width:${fillW}%"></div></div>
       <div style="display:flex;justify-content:space-between;padding:2px 18px 10px;font-family:var(--mono);font-size:10px;color:var(--muted)">
         <span>0%</span>
-        <span style="color:var(--gold)">+${bonusPct}% bonus${rate>=70?'':' (need ≥70% to unlock)'}</span>
+        <span style="color:${bonus>0?'var(--gold)':'var(--muted)'}">${bonus>0?'+'+bonus+'% bonus':'no bonus'}</span>
         <span>100%</span>
       </div>
+
+      <!-- 10-policy unlock bar -->
+      <div style="padding:0 18px 12px;display:flex;align-items:center;gap:10px">
+        <div style="flex:1;background:var(--navy3);border-radius:4px;overflow:hidden;height:6px">
+          <div style="height:100%;width:${policyFill}%;background:${eligible?'var(--green)':'var(--gold)'};border-radius:4px;transition:width .4s"></div>
+        </div>
+        <span style="font-family:var(--mono);font-size:11px;white-space:nowrap;color:${eligible?'var(--green)':'var(--muted)'}">
+          ${count}/10${eligible?' ✓ unlocked':' — need '+needMore+' more'}
+        </span>
+      </div>
+
+      <!-- Stats row 1: good / chargebacks / bonus -->
       <div class="pc-stats">
         <div class="ps">
-          <div class="ps-lbl">Base (${fmtMonth(curMonth)})</div>
-          <div class="ps-val">${fmt(baseOwed)}</div>
+          <div class="ps-lbl">✓ GOOD</div>
+          <div class="ps-val" style="color:var(--green)">${good}</div>
         </div>
         <div class="ps">
-          <div class="ps-lbl">Bonus (+${bonusPct}%)</div>
+          <div class="ps-lbl">⚡ Chargebacks</div>
+          <div class="ps-val" style="color:${chargebacks>0?'var(--red)':'var(--muted)'}">${chargebacks}</div>
+        </div>
+        <div class="ps">
+          <div class="ps-lbl">Bonus (+${bonus}%)</div>
           <div class="ps-val" style="color:${bonusAmt>0?'var(--gold3)':'var(--muted)'}">${bonusAmt>0?fmt(bonusAmt):'—'}</div>
+        </div>
+      </div>
+      <!-- Stats row 2: base / total / status -->
+      <div class="pc-stats" style="border-top:1px solid var(--border)">
+        <div class="ps">
+          <div class="ps-lbl">Base Owed</div>
+          <div class="ps-val">${fmt(baseOwed)}</div>
         </div>
         <div class="ps">
           <div class="ps-lbl">Total Payout</div>
           <div class="ps-val" style="color:var(--green)">${fmt(totalOwed)}</div>
         </div>
+        <div class="ps">
+          <div class="ps-lbl">Bonus Status</div>
+          <div class="ps-val" style="font-size:10px;color:${eligible?'var(--green)':'var(--muted)'}">
+            ${eligible ? '🔓 Active' : '🔒 Locked'}
+          </div>
+        </div>
       </div>
-      <div class="pc-input-row">
-        <label>Persistency Rate</label>
-        <input class="pct-inp" type="number" min="0" max="100" step="0.1"
-          value="${rate}" oninput="setPersist('${key}',this.value)">
-        <span style="font-family:var(--mono);font-size:11px;color:var(--muted)">%</span>
-        ${bonusPct > 0
-          ? `<span style="margin-left:auto;font-family:var(--cond);font-size:9px;color:var(--gold)">+${bonusPct}% → ${fmt(bonusAmt)} extra</span>`
-          : `<span style="margin-left:auto;font-family:var(--cond);font-size:9px;color:var(--muted)">no bonus below 70%</span>`}
+
+      <div style="padding:9px 18px;border-top:1px solid var(--border);background:rgba(0,0,0,.12);font-family:var(--cond);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">
+        Chargebacks from any of the past 12 months count → Refresh after edits
       </div>
     </div>`;
   }).join('');
-}
-
-async function setPersist(role, val) {
-  const rate  = Math.min(100, Math.max(0, parseFloat(val) || 0));
-  const month = today().slice(0,7);
-  persistData[role] = { rate, month };
-  localStorage.setItem('ailPersist', JSON.stringify(persistData));
-  renderPersist();
-  renderCopOwed();
-  preview();
-  if (SHEET_URL) apiPost({ action:'updatePersist', role, rate, month }).catch(()=>{});
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -885,11 +941,12 @@ function renderCopOwed() {
   if (!copRate) return;
   const curMonth = today().slice(0,7);
   const ms = sales.filter(s => s.month === curMonth);
+  const lp = calcLocalPersist();
 
   const setterBase  = ms.filter(s=>s.role==='setter').reduce((a,s)=>a+s.baseOwed,0);
   const closerBase  = ms.filter(s=>s.role==='closer').reduce((a,s)=>a+s.baseOwed,0);
-  const sBonusPct   = getPersistBonus(getPersistRate('setter'));
-  const cBonusPct   = getPersistBonus(getPersistRate('closer'));
+  const sBonusPct   = lp.setter?.bonus || 0;
+  const cBonusPct   = lp.closer?.bonus || 0;
   const setterOwed  = setterBase * (1 + sBonusPct / 100);
   const closerOwed  = closerBase * (1 + cBonusPct / 100);
   const total       = setterOwed + closerOwed;
@@ -981,10 +1038,7 @@ function today() { return new Date().toISOString().split('T')[0]; }
 document.getElementById('iDate').value = today();
 // Show initial persist bonus label on submit form
 (function() {
-  const rate  = getPersistRate(selRole);
-  const bonus = getPersistBonus(rate);
-  document.getElementById('previewPFactor').textContent =
-    bonus > 0 ? `${rate}% persist → +${bonus}% bonus` : `${rate}% persist (no bonus <70%)`;
+  document.getElementById('previewPFactor').textContent = 'Loading persistency…';
 })();
 fetchRate();
 if (SHEET_URL) {
