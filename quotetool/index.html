@@ -158,6 +158,66 @@ body>*{position:relative;z-index:1}
 @media (max-width:1100px){.setup-hero{grid-template-columns:1fr}.setup-mini-grid,.hp-output-grid{grid-template-columns:1fr 1fr}}
 @media (max-width:760px){.setup-grid,.setup-fields,.hp-grid,.hp-methods,.hp-budget-grid,.setup-mini-grid,.hp-output-grid{grid-template-columns:1fr}.setup-title{font-size:30px}.setup-shell{padding:0}.setup-field.span-2{grid-column:span 1}}
 
+
+/* quote readability upgrade */
+.a71-addon-card{margin:12px 0 16px 0;border-radius:18px}
+.a71-addon-head{padding:12px 16px}
+.a71-addon-title{font-family:var(--cond);font-size:18px;letter-spacing:1px;text-transform:uppercase}
+.a71-addon-sub{font-size:12px}
+.a71-addon-body{padding:14px 16px}
+.a71-benefits{display:none!important}
+.a71-addon-grid{grid-template-columns:1fr!important}
+.a71-price-panel{padding:14px;gap:10px}
+.a71-price{font-size:24px}
+.quote-overview-shell{max-width:1320px;margin:14px auto 18px auto;padding:0 6px}
+.quote-overview{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:14px}
+.overview-card{background:linear-gradient(180deg,var(--navy2),var(--navy3));border:1px solid var(--border2);border-radius:18px;box-shadow:0 16px 36px rgba(0,0,0,.22);overflow:hidden}
+.overview-card-inner{padding:16px}
+.overview-hourpower .overview-card-inner{display:flex;flex-direction:column;gap:12px}
+.overview-kicker{font-family:var(--cond);font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--gold)}
+.overview-title{font-family:var(--cond);font-size:15px;letter-spacing:1px;text-transform:uppercase;color:var(--text);margin-top:2px}
+.overview-sub{font-size:12px;color:var(--text2);line-height:1.4}
+.overview-hour-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.overview-hour-tile{background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:14px;padding:12px}
+.overview-hour-tile strong{display:block;font-family:var(--cond);font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+.overview-hour-tile .amt{display:block;font-family:var(--mono);font-size:24px;color:var(--green)}
+.overview-hour-tile .mini{display:block;margin-top:4px;font-size:11px;color:var(--text2)}
+.overview-quote-card{position:relative}
+.overview-quote-card.platinum{border-color:rgba(255,255,255,.14)}
+.overview-quote-card.gold{border-color:rgba(201,168,76,.45);box-shadow:0 18px 42px rgba(201,168,76,.12)}
+.overview-quote-card.silver{border-color:rgba(154,165,185,.24)}
+.overview-tier-name{font-family:var(--cond);font-size:28px;letter-spacing:.8px;text-transform:uppercase;margin-bottom:14px}
+.overview-quote-card.gold .overview-tier-name{color:#ffd34d}
+.overview-quote-card.platinum .overview-tier-name{color:#e8e6e3}
+.overview-quote-card.silver .overview-tier-name{color:#a6adbb}
+.overview-quote-amount{font-family:var(--mono);font-size:40px;color:var(--text);line-height:1.05}
+.overview-quote-note{font-size:12px;color:var(--text2);margin-top:6px}
+.overview-quote-meta{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:grid;gap:8px}
+.overview-line{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--text2)}
+.overview-line strong{color:var(--gold3);font-family:var(--mono);font-weight:500}
+.overview-a71-toggle{margin-top:12px;padding:10px 12px;background:rgba(0,0,0,.18);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.overview-a71-toggle span{font-family:var(--cond);font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--gold)}
+.overview-a71-toggle input{accent-color:var(--gold);transform:scale(1.15)}
+.quote-active-banner{max-width:1320px;margin:0 auto 10px auto;padding:0 6px}
+.quote-active-chip{display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:999px;background:var(--navy2);border:1px solid var(--border2);font-family:var(--cond);font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--text2)}
+.quote-active-chip strong{color:var(--gold3)}
+.option-product-type-group{align-items:start}
+.option-product-type.foc,.option-product-type.income{padding:16px!important}
+.option-product-type-group-option{padding:12px}
+.option-pgs-title{width:auto;max-width:86%;height:44px;object-fit:contain;margin:0 auto 6px auto;display:block}
+.option-product-type-group-option .option-product-type{padding:12px!important;border-radius:14px!important}
+.option-face{font-size:24px!important;text-align:center;font-family:var(--mono)!important;min-height:62px}
+.option-face::placeholder{font-family:var(--cond)!important;letter-spacing:1px;font-size:18px;color:#6f86aa!important}
+.field-label{display:block;margin-bottom:8px;font-family:var(--cond);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text2);text-align:center}
+.death-from{font-family:var(--cond)!important;font-size:11px!important;letter-spacing:1px!important;text-transform:uppercase!important;color:var(--text2)!important;text-align:center!important;margin:6px 0}
+.option-face-total{font-size:18px!important;text-align:center}
+.mbd-premium{font-size:34px!important;text-align:center;padding:14px 12px!important}
+.addon-tier-total{margin-top:10px;text-align:center}
+.addon-tier-total span{font-size:20px}
+.option-button-clear{background:#b7547a!important;border:none!important;color:#fff!important;border-radius:10px!important;padding:12px 20px!important;font-family:var(--cond)!important;letter-spacing:1px!important}
+@media (max-width:1100px){.quote-overview{grid-template-columns:1fr 1fr}.overview-hourpower{grid-column:1/-1}}
+@media (max-width:760px){.quote-overview{grid-template-columns:1fr}.overview-hour-grid{grid-template-columns:1fr}.overview-tier-name{font-size:24px}.overview-quote-amount{font-size:34px}}
+
 </style>
 
 </head>
@@ -616,6 +676,74 @@ optionIncomeInputB.addEventListener('input', handleInputChangeB);
   </div>
 </div>
 
+
+<div class="quote-active-banner">
+  <div class="quote-active-chip">Now showing <strong id="activeQuoteLabel">Main quote</strong></div>
+</div>
+
+<div class="quote-overview-shell">
+  <div class="quote-overview">
+    <section class="overview-card overview-hourpower">
+      <div class="overview-card-inner">
+        <div>
+          <div class="overview-kicker">Hour Power</div>
+          <div class="overview-title">Simple budget view</div>
+          <div class="overview-sub">Use 1 hour or 2 hours a week as the money frame, then compare it against Platinum, Gold, and Silver.</div>
+        </div>
+        <div class="overview-hour-grid">
+          <div class="overview-hour-tile">
+            <strong>1 hour / week</strong>
+            <span class="amt" id="overviewHp1">$0.00</span>
+            <span class="mini">4 hours per month</span>
+          </div>
+          <div class="overview-hour-tile">
+            <strong>2 hours / week</strong>
+            <span class="amt" id="overviewHp2">$0.00</span>
+            <span class="mini">8 hours per month</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="overview-card overview-quote-card platinum">
+      <div class="overview-card-inner">
+        <div class="overview-tier-name">Platinum</div>
+        <div class="overview-quote-amount" id="overviewPlatinum">$0/mo</div>
+        <div class="overview-quote-note" id="overviewPlatinumNote">Base plan only</div>
+        <div class="overview-a71-toggle"><span>Add A71</span><input type="checkbox" id="overviewA71"></div>
+        <div class="overview-quote-meta">
+          <div class="overview-line"><span>Without A71</span><strong id="overviewPlatinumBase">$0/mo</strong></div>
+          <div class="overview-line"><span>Hour Power fit</span><strong id="overviewPlatinumHours">—</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="overview-card overview-quote-card gold">
+      <div class="overview-card-inner">
+        <div class="overview-tier-name">Gold</div>
+        <div class="overview-quote-amount" id="overviewGold">$0/mo</div>
+        <div class="overview-quote-note" id="overviewGoldNote">Base plan only</div>
+        <div class="overview-quote-meta">
+          <div class="overview-line"><span>Without A71</span><strong id="overviewGoldBase">$0/mo</strong></div>
+          <div class="overview-line"><span>Hour Power fit</span><strong id="overviewGoldHours">—</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="overview-card overview-quote-card silver">
+      <div class="overview-card-inner">
+        <div class="overview-tier-name">Silver</div>
+        <div class="overview-quote-amount" id="overviewSilver">$0/mo</div>
+        <div class="overview-quote-note" id="overviewSilverNote">Base plan only</div>
+        <div class="overview-quote-meta">
+          <div class="overview-line"><span>Without A71</span><strong id="overviewSilverBase">$0/mo</strong></div>
+          <div class="overview-line"><span>Hour Power fit</span><strong id="overviewSilverHours">—</strong></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
 <div class="option-bigboy-container piA no-slide" id="piA">
   <form id="optionMyFormA">
     <div class="hide-stats"><div class="option-stats-grid-container">
@@ -822,15 +950,15 @@ optionIncomeInputA.addEventListener('input', handleInputChange);
       <div id="platinumA" class="option-product-type-group-option" style="border-left: unset;">
         <div><img src="./files/PLATINUM.png" alt="PLATINUM" class="option-pgs-title" onclick="dimOthers(&#39;platinumA&#39;, &#39;goldA&#39;, &#39;silverA&#39;)"></div>
         <div class="option-product-type">
-          <input type="text" id="wlPlatinumInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="10" placeholder="VIDA ENTERA" autocomplete="off">
+          <span class="field-label">Whole Life</span><input type="text" id="wlPlatinumInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="10" placeholder="VIDA ENTERA" autocomplete="off">
         </div>
 <!-- HIDE IF SENIOR -->
 <span class="hide-senior" style="display: block;">
         <div class="option-product-type">
-          <input type="text" id="tenrcPlatinumInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="10" placeholder="INGRESO" autocomplete="off">
+          <span class="field-label">Income</span><input type="text" id="tenrcPlatinumInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="10" placeholder="INGRESO" autocomplete="off">
         </div>
         <div class="option-product-type">
-          <input type="text" id="adbPlatinumInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="9" placeholder="HIP/DEUDA" autocomplete="off">
+          <span class="field-label">Hip / Debt</span><input type="text" id="adbPlatinumInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="9" placeholder="HIP/DEUDA" autocomplete="off">
         </div>
 </span>
         <div class="option-product-type">
@@ -847,15 +975,15 @@ optionIncomeInputA.addEventListener('input', handleInputChange);
       <div id="goldA" class="option-product-type-group-option">
         <div><img src="./files/GOLD.png" alt="GOLD" class="option-pgs-title" onclick="dimOthers(&#39;goldA&#39;, &#39;platinumA&#39;, &#39;silverA&#39;)"></div>
         <div class="option-product-type">
-          <input type="text" id="wlGoldInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="10" placeholder="VIDA ENTERA" autocomplete="off">
+          <span class="field-label">Whole Life</span><input type="text" id="wlGoldInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="10" placeholder="VIDA ENTERA" autocomplete="off">
         </div>
 <!-- HIDE IF SENIOR -->
 <span class="hide-senior" style="display: block;">
         <div class="option-product-type">
-          <input type="text" id="tenrcGoldInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="10" placeholder="INGRESO" autocomplete="off">
+          <span class="field-label">Income</span><input type="text" id="tenrcGoldInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="10" placeholder="INGRESO" autocomplete="off">
         </div>
         <div class="option-product-type">
-          <input type="text" id="adbGoldInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="9" placeholder="HIP/DEUDA" autocomplete="off">
+          <span class="field-label">Hip / Debt</span><input type="text" id="adbGoldInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="9" placeholder="HIP/DEUDA" autocomplete="off">
         </div>
 </span>
         <div class="option-product-type">
@@ -872,15 +1000,15 @@ optionIncomeInputA.addEventListener('input', handleInputChange);
       <div id="silverA" class="option-product-type-group-option">
         <div><img src="./files/SILVER.png" alt="SILVER" class="option-pgs-title" onclick="dimOthers(&#39;silverA&#39;, &#39;goldA&#39;, &#39;platinumA&#39;)"></div>
         <div class="option-product-type">
-          <input type="text" id="wlSilverInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="10" placeholder="VIDA ENTERA" autocomplete="off">
+          <span class="field-label">Whole Life</span><input type="text" id="wlSilverInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="10" placeholder="VIDA ENTERA" autocomplete="off">
         </div>
 <!-- HIDE IF SENIOR -->
 <span class="hide-senior" style="display: block;">
         <div class="option-product-type">
-          <input type="text" id="tenrcSilverInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="10" placeholder="INGRESO" autocomplete="off">
+          <span class="field-label">Income</span><input type="text" id="tenrcSilverInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="10" placeholder="INGRESO" autocomplete="off">
         </div>
         <div class="option-product-type">
-          <input type="text" id="adbSilverInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="9" placeholder="HIP/DEUDA" autocomplete="off">
+          <span class="field-label">Hip / Debt</span><input type="text" id="adbSilverInputA" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxA&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxA&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;A&#39;)" maxlength="9" placeholder="HIP/DEUDA" autocomplete="off">
         </div>
 </span>
         <div class="option-product-type">
@@ -1043,15 +1171,15 @@ optionIncomeInputB.addEventListener('input', handleInputChangeB);
       <div id="platinumB" class="option-product-type-group-option" style="border-left: unset;">
         <div><img src="./files/PLATINUM.png" alt="PLATINUM" class="option-pgs-title" onclick="dimOthers(&#39;platinumB&#39;, &#39;goldB&#39;, &#39;silverB&#39;)"></div>
         <div class="option-product-type">
-          <input type="text" id="wlPlatinumInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="10" placeholder="VIDA ENTERA" autocomplete="off">
+          <span class="field-label">Whole Life</span><input type="text" id="wlPlatinumInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="10" placeholder="VIDA ENTERA" autocomplete="off">
         </div>
 <!-- HIDE IF SENIOR -->
 <span class="hide-senior" style="display: block;">
         <div class="option-product-type">
-          <input type="text" id="tenrcPlatinumInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="10" placeholder="INGRESO" autocomplete="off">
+          <span class="field-label">Income</span><input type="text" id="tenrcPlatinumInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="10" placeholder="INGRESO" autocomplete="off">
         </div>
         <div class="option-product-type">
-          <input type="text" id="adbPlatinumInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="9" placeholder="HIP/DEUDA" autocomplete="off">
+          <span class="field-label">Hip / Debt</span><input type="text" id="adbPlatinumInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="9" placeholder="HIP/DEUDA" autocomplete="off">
         </div>
 </span>
         <div class="option-product-type">
@@ -1068,15 +1196,15 @@ optionIncomeInputB.addEventListener('input', handleInputChangeB);
       <div id="goldB" class="option-product-type-group-option">
         <div><img src="./files/GOLD.png" alt="GOLD" class="option-pgs-title" onclick="dimOthers(&#39;goldB&#39;, &#39;platinumB&#39;, &#39;silverB&#39;)"></div>
         <div class="option-product-type">
-          <input type="text" id="wlGoldInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="10" placeholder="VIDA ENTERA" autocomplete="off">
+          <span class="field-label">Whole Life</span><input type="text" id="wlGoldInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="10" placeholder="VIDA ENTERA" autocomplete="off">
         </div>
 <!-- HIDE IF SENIOR -->
 <span class="hide-senior" style="display: block;">
         <div class="option-product-type">
-          <input type="text" id="tenrcGoldInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="10" placeholder="INGRESO" autocomplete="off">
+          <span class="field-label">Income</span><input type="text" id="tenrcGoldInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="10" placeholder="INGRESO" autocomplete="off">
         </div>
         <div class="option-product-type">
-          <input type="text" id="adbGoldInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="9" placeholder="HIP/DEUDA" autocomplete="off">
+          <span class="field-label">Hip / Debt</span><input type="text" id="adbGoldInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="9" placeholder="HIP/DEUDA" autocomplete="off">
         </div>
 </span>
         <div class="option-product-type">
@@ -1093,15 +1221,15 @@ optionIncomeInputB.addEventListener('input', handleInputChangeB);
       <div id="silverB" class="option-product-type-group-option">
         <div><img src="./files/SILVER.png" alt="SILVER" class="option-pgs-title" onclick="dimOthers(&#39;silverB&#39;, &#39;goldB&#39;, &#39;platinumB&#39;)"></div>
         <div class="option-product-type">
-          <input type="text" id="wlSilverInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="10" placeholder="VIDA ENTERA" autocomplete="off">
+          <span class="field-label">Whole Life</span><input type="text" id="wlSilverInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="10" placeholder="VIDA ENTERA" autocomplete="off">
         </div>
 <!-- HIDE IF SENIOR -->
 <span class="hide-senior" style="display: block;">
         <div class="option-product-type">
-          <input type="text" id="tenrcSilverInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="10" placeholder="INGRESO" autocomplete="off">
+          <span class="field-label">Income</span><input type="text" id="tenrcSilverInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="10" placeholder="INGRESO" autocomplete="off">
         </div>
         <div class="option-product-type">
-          <input type="text" id="adbSilverInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="9" placeholder="HIP/DEUDA" autocomplete="off">
+          <span class="field-label">Hip / Debt</span><input type="text" id="adbSilverInputB" class="option-face" oninput="checkBoxControl(&#39;autoPlanCheckboxB&#39;, &#39;false&#39;); checkBoxControl(&#39;autoCompleteCheckboxB&#39;, &#39;false&#39;)" onchange="formatThisInput(this.id); calculatePremium(&#39;B&#39;)" maxlength="9" placeholder="HIP/DEUDA" autocomplete="off">
         </div>
 </span>
         <div class="option-product-type">
@@ -1452,6 +1580,88 @@ function optionClearFaceAmounts(pi) {
     if(spouseBtn) spouseBtn.addEventListener('click', function(){ byId('setupQuoteFocus').value='B'; updateHourPower(); });
     syncSetupSummaries();
     applyHouseholdSetup('A');
+  });
+})();
+</script>
+
+
+<script>
+(function(){
+  function byId(id){ return document.getElementById(id); }
+  function cleanNum(v){ return Number(String(v || '').replace(/[^0-9.]/g,'')) || 0; }
+  function moneyMo(n){ return '$' + (Number(n)||0).toLocaleString(undefined,{maximumFractionDigits:0}) + '/mo'; }
+  function activePi(){
+    var spouseVisible = !(document.querySelector('.option-bigboy-container.piB')||{}).classList?.contains('household-hidden');
+    var piB = document.getElementById('piB');
+    if(spouseVisible && piB && getComputedStyle(piB).display !== 'none') return 'B';
+    return 'A';
+  }
+  function setText(id, txt){ var el=byId(id); if(el) el.textContent = txt; }
+  function syncOverviewToggle(){
+    var pi = activePi();
+    var src = byId('a71Enabled'+pi), ov = byId('overviewA71');
+    if(src && ov && ov.checked !== src.checked) ov.checked = src.checked;
+  }
+  function calcHourFit(amount){
+    var hourly = cleanNum((byId('hpHourlyValue')||{}).textContent);
+    if(!amount || !hourly) return '—';
+    var hrsMonth = amount / hourly;
+    return (hrsMonth/4).toFixed(2) + ' hrs/wk';
+  }
+  function updateOverview(){
+    var pi = activePi();
+    setText('activeQuoteLabel', pi === 'B' ? 'Spouse quote' : 'Main quote');
+    setText('overviewHp1', (byId('hpBudgetAmt1')||{}).textContent || '$0.00');
+    setText('overviewHp2', (byId('hpBudgetAmt2')||{}).textContent || '$0.00');
+    [['platinum','Platinum'],['gold','Gold'],['silver','Silver']].forEach(function(row){
+      var key=row[0], label=row[1];
+      var base = cleanNum((byId(key+'Result'+pi)||{}).textContent);
+      var total = cleanNum((byId(key+'AddonTotal'+pi)||{}).textContent) || base;
+      var enabled = !!((byId('a71Enabled'+pi)||{}).checked);
+      setText('overview'+label, moneyMo(total));
+      setText('overview'+label+'Base', moneyMo(base));
+      setText('overview'+label+'Hours', calcHourFit(total));
+      setText('overview'+label+'Note', enabled ? 'With A71 if selected' : 'Base plan only');
+    });
+    syncOverviewToggle();
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    var ov = byId('overviewA71');
+    if(ov){
+      ov.addEventListener('change', function(){
+        var pi = activePi();
+        var src = byId('a71Enabled'+pi);
+        if(src){ src.checked = ov.checked; src.dispatchEvent(new Event('change',{bubbles:true})); }
+      });
+    }
+    ['applyHouseholdSetup','jumpToQuotesBtn'].forEach(function(id){
+      var el = byId(id); if(el) el.addEventListener('click', function(){ setTimeout(updateOverview, 50); });
+    });
+    ['setupHoursPerWeek','setupHomeIncome','setupHourlyInput','setupQuoteFocus','setupIncludeB'].forEach(function(id){
+      var el = byId(id); if(el) el.addEventListener('input', function(){ setTimeout(updateOverview, 0); });
+      if(el) el.addEventListener('change', function(){ setTimeout(updateOverview, 0); });
+    });
+    setTimeout(updateOverview, 120);
+  });
+  var origRefreshAll = window.refreshAll;
+  if(typeof origRefreshAll === 'function'){
+    window.refreshAll = function(){
+      var out = origRefreshAll.apply(this, arguments);
+      setTimeout(updateOverview, 0);
+      return out;
+    }
+  } else {
+    window.addEventListener('load', function(){ setTimeout(updateOverview, 50); });
+  }
+  ['showPiA','showPiB'].forEach(function(fn){
+    var orig = window[fn];
+    if(typeof orig === 'function'){
+      window[fn] = function(){
+        var out = orig.apply(this, arguments);
+        setTimeout(updateOverview, 0);
+        return out;
+      }
+    }
   });
 })();
 </script>
