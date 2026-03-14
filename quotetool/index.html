@@ -54,7 +54,7 @@ button.ghost{background:#f6f8fc;color:var(--navy)}
 .editRow span{font-size:13px;font-weight:800;color:var(--navy)}
 .editRow input{text-align:right;font-weight:800}
 .mini{font-size:12px;color:var(--muted);text-align:center;margin-top:8px;min-height:18px}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:310px;margin:14px auto 0}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:310px;margin:14px auto 0}.actions3{grid-template-columns:1fr 1fr 1fr;max-width:420px}
 .divider{border-top:4px solid var(--navy);margin:10px -12px 8px}
 .bottom{padding:8px 10px 0;text-align:center;color:var(--navy)}
 .bottomLine{font-size:19px;line-height:1.32;margin:3px 0}
@@ -124,7 +124,7 @@ button.ghost{background:#f6f8fc;color:var(--navy)}
             <div class="editRow"><span>ADB</span><input data-input="adb" type="number" step="1000" min="0" max="500000" value="50000"></div>
           </div>
           <div class="mini" data-field="notes"></div>
-          <div class="actions"><button class="gold" data-action="auto">Auto Complete</button><button class="ghost" data-action="clear">Clear</button></div>
+          <div class="actions actions3"><button class="gold" data-action="auto">Auto Complete</button><button class="alt" data-action="autochg">Auto Change</button><button class="ghost" data-action="clear">Clear</button></div>
         </div>
         <div class="pane hidden" data-card="one" data-person="spouse">
           <div class="paneTitle">SPOUSE</div>
@@ -142,7 +142,7 @@ button.ghost{background:#f6f8fc;color:var(--navy)}
             <div class="editRow"><span>ADB</span><input data-input="adb" type="number" step="1000" min="0" max="500000" value="50000"></div>
           </div>
           <div class="mini" data-field="notes"></div>
-          <div class="actions"><button class="gold" data-action="auto">Auto Complete</button><button class="ghost" data-action="clear">Clear</button></div>
+          <div class="actions actions3"><button class="gold" data-action="auto">Auto Complete</button><button class="alt" data-action="autochg">Auto Change</button><button class="ghost" data-action="clear">Clear</button></div>
         </div>
       </div>
       <div class="divider"></div>
@@ -168,7 +168,7 @@ button.ghost{background:#f6f8fc;color:var(--navy)}
             <div class="editRow"><span>ADB</span><input data-input="adb" type="number" step="1000" min="0" max="500000" value="100000"></div>
           </div>
           <div class="mini" data-field="notes"></div>
-          <div class="actions"><button class="gold" data-action="auto">Auto Complete</button><button class="ghost" data-action="clear">Clear</button></div>
+          <div class="actions actions3"><button class="gold" data-action="auto">Auto Complete</button><button class="alt" data-action="autochg">Auto Change</button><button class="ghost" data-action="clear">Clear</button></div>
         </div>
         <div class="pane hidden" data-card="two" data-person="spouse">
           <div class="paneTitle">SPOUSE</div>
@@ -186,7 +186,7 @@ button.ghost{background:#f6f8fc;color:var(--navy)}
             <div class="editRow"><span>ADB</span><input data-input="adb" type="number" step="1000" min="0" max="500000" value="100000"></div>
           </div>
           <div class="mini" data-field="notes"></div>
-          <div class="actions"><button class="gold" data-action="auto">Auto Complete</button><button class="ghost" data-action="clear">Clear</button></div>
+          <div class="actions actions3"><button class="gold" data-action="auto">Auto Complete</button><button class="alt" data-action="autochg">Auto Change</button><button class="ghost" data-action="clear">Clear</button></div>
         </div>
       </div>
       <div class="divider"></div>
@@ -311,20 +311,19 @@ function findPermanentRate(age, sex, tob, face){
 }
 
 function getNextPermanentStep(age, sex, tob, face, currentMonthly){
-  const steps = [
-    { code:'PR', face:35000 },
-    { code:'EX', face:60000 },
-    { code:'SL', face:120000 }
-  ].filter(s => s.face > face && s.face <= 500000);
-  for(const step of steps){
-    const row = state.rates.find(r => r.plan_code===step.code && r.record_type==='rate' && r.age===age && r.sex===sex && r.tobacco===tob && (r.face_min==null || step.face>=r.face_min) && (r.face_max==null || step.face<=r.face_max));
+  const steps = [35000,60000,120000,150000,200000,250000,300000,400000,500000].filter(v => v > face && v <= 500000);
+  let best = null;
+  for(const stepFace of steps){
+    const row = findPermanentRate(age, sex, tob, stepFace);
     if(!row) continue;
-    const nextMonthly = permanentPremiumFromRow(row, step.face);
-    if(nextMonthly <= currentMonthly + 1.50){
-      return { code: step.code, face: step.face, monthly: nextMonthly, extra: nextMonthly - currentMonthly };
+    const nextMonthly = permanentPremiumFromRow(row, stepFace);
+    const extra = nextMonthly - currentMonthly;
+    if(extra <= Math.max(2.50, currentMonthly * 0.05)){
+      best = { code: row.effective_code, face: stepFace, monthly: nextMonthly, extra };
+      break;
     }
   }
-  return null;
+  return best;
 }
 
 function find10RCRate(age, sex, tob){
@@ -354,7 +353,7 @@ function priceCoverage(personInput, coverage){
       const samePriceStep = getNextPermanentStep(personInput.age, personInput.sex, personInput.tob, coverage.wl, currentMonthly);
       if(samePriceStep){
         const delta = samePriceStep.extra <= 0 ? 'same price' : `+${currency(samePriceStep.extra)}/mo`;
-        notes.push(`${money0(samePriceStep.face)} ${samePriceStep.code} nearly same price (${delta})`);
+        notes.push(`${money0(samePriceStep.face)} ${samePriceStep.code} available · use Auto Change (${delta})`);
       }
     } else {
       notes.push('No permanent rate found');
@@ -408,116 +407,150 @@ function calcDeathTotals(personInput, coverage){
   };
 }
 
+
 function paneBudgetShare(card, person){
-  const monthly = Number($('monthlyIncome').value || 0);
   const hourly = Number($('hourlyIncome').value || 0);
   const base = card==='one' ? hourly * 4 : hourly * 8;
-  if(!state.spouseIncluded || person==='main' && !getPane(card,'spouse')) return base;
+  if(!state.spouseIncluded) return base;
   return person==='main' ? base*0.55 : base*0.45;
 }
 
-function autoFill(card, person){
-  const input = getPersonInput(person);
-  let budget = paneBudgetShare(card, person);
-  let wlTarget;
-  if(card==='one'){
-    wlTarget = state.spouseIncluded ? 10000 : Math.max(20000, Math.min(35000, round1000(budget * 300)));
+function getRecommendedTargets(card, person){
+  const paneBudget = paneBudgetShare(card, person);
+  const householdMonthly = Number($('monthlyIncome').value || 0);
+  const incomeShare = !state.spouseIncluded ? 1 : (person==='main' ? 0.55 : 0.45);
+  const paneIncome = householdMonthly * incomeShare;
+
+  let minWL = 20000;
+  if(card === 'one'){
+    if(paneBudget >= 95) minWL = 25000;
+    if(paneBudget >= 125) minWL = 30000;
+    if(paneBudget >= 160) minWL = 35000;
   } else {
-    wlTarget = state.spouseIncluded ? 15000 : Math.max(25000, Math.min(45000, round1000(budget * 350)));
+    minWL = 25000;
+    if(paneBudget >= 150) minWL = 30000;
+    if(paneBudget >= 190) minWL = 35000;
+    if(paneBudget >= 245) minWL = 50000;
   }
-  wlTarget = round1000(wlTarget);
-  const minWL = state.spouseIncluded ? 10000 : 20000;
-  wlTarget = Math.max(minWL, wlTarget);
+  if(state.spouseIncluded) minWL = Math.max(card==='one' ? 15000 : 20000, Math.round(minWL * 0.75 / 1000) * 1000);
+  minWL = clamp(round1000(minWL), 10000, 500000);
 
-  let termTarget = round1000((Number($('monthlyIncome').value||0) * (card==='one'?6:12)) * (state.spouseIncluded ? (person==='main'?0.55:0.45) : 1));
-  if(termTarget < 10000) termTarget = 10000;
+  let termTarget = round1000(paneIncome * (card==='one' ? 6 : 12));
+  termTarget = clamp(termTarget, card==='one' ? 10000 : 20000, 500000);
 
-  let adbTarget = card==='one' ? 50000 : 100000;
-  if(input.age >= 60) adbTarget = card==='one' ? 25000 : 50000;
-  if(input.age >= 65) adbTarget = 0;
+  let adbTarget = 0;
+  if(card==='one'){
+    adbTarget = paneBudget >= 70 ? 50000 : 25000;
+    if(paneBudget >= 105) adbTarget = 75000;
+  } else {
+    adbTarget = paneBudget >= 120 ? 100000 : 50000;
+    if(paneBudget >= 175) adbTarget = 150000;
+  }
+  if(person==='spouse' && state.spouseIncluded) adbTarget = round1000(adbTarget * 0.75);
+  if(getPersonInput(person).age >= 60) adbTarget = Math.min(adbTarget, card==='one' ? 25000 : 50000);
+  if(getPersonInput(person).age >= 65) adbTarget = 0;
+  adbTarget = clamp(round1000(adbTarget), 0, 500000);
 
-  let best = { wl: wlTarget, term: termTarget, adb: adbTarget, diff: Infinity, monthly: 0 };
-  for(let wl = Math.min(wlTarget, 500000); wl >= 10000; wl -= 5000){
-    for(let term = Math.min(termTarget, 500000); term >= 0; term -= 5000){
-      for(let adb = Math.min(adbTarget, 500000); adb >= 0; adb -= 5000){
+  return { paneBudget, paneIncome, minWL, termTarget, adbTarget };
+}
+
+function buildPermanentOptions(age, sex, tob){
+  const rows = state.rates
+    .filter(r => ['WL','PR','EX','SL'].includes(r.plan_code) && r.record_type==='rate' && r.age===age && r.sex===sex && r.tobacco===tob)
+    .sort((a,b)=> (a.face_min||0)-(b.face_min||0));
+  const opts = [{face:0, monthly:0, code:'', row:null}];
+  for(const row of rows){
+    const minFace = Math.max(1000, Math.ceil((row.face_min || 1000)/1000)*1000);
+    const maxFaceRaw = row.face_max == null ? 500000 : Math.min(500000, Math.floor(row.face_max/1000)*1000);
+    const steps = new Set([minFace, maxFaceRaw]);
+    [20000,25000,30000,35000,40000,50000,60000,75000,100000,120000,150000,200000,250000,300000,400000,500000]
+      .forEach(v=> { if(v>=minFace && v<=maxFaceRaw) steps.add(v); });
+    for(const face of [...steps].sort((a,b)=>a-b)){
+      opts.push({face, monthly: permanentPremiumFromRow(row, face), code: row.plan_code, row});
+    }
+  }
+  const uniq = new Map();
+  for(const o of opts){
+    if(!uniq.has(o.face) || o.monthly < uniq.get(o.face).monthly) uniq.set(o.face, o);
+  }
+  return [...uniq.values()].sort((a,b)=>a.face-b.face);
+}
+
+function buildStepLadder(target){
+  const set = new Set([0]);
+  for(let x=10000;x<=Math.min(500000,target+60000);x+=5000) set.add(x);
+  [target-50000,target-25000,target-10000,target-5000,target,target+5000,target+10000,target+25000,target+50000]
+    .forEach(v=> { if(v>=0 && v<=500000) set.add(round1000(v)); });
+  [10000,20000,25000,30000,35000,50000,75000,100000,150000,200000,250000,300000,400000,500000]
+    .forEach(v=> { if(v<=500000) set.add(v); });
+  return [...set].filter(v=>v>=0&&v<=500000).sort((a,b)=>a-b);
+}
+
+function findBestAutoMix(card, person){
+  const input = getPersonInput(person);
+  const { paneBudget:budget, minWL, termTarget, adbTarget } = getRecommendedTargets(card, person);
+  const permOptions = buildPermanentOptions(input.age, input.sex, input.tob);
+  const termChoices = buildStepLadder(termTarget).filter(v => v <= 500000);
+  const adbChoices = buildStepLadder(adbTarget).filter(v => v <= 500000);
+
+  let best = { wl:minWL, term:0, adb:0, monthly:999999, score:Infinity };
+
+  for(const p of permOptions){
+    if(p.face !== 0 && p.face < minWL) continue;
+    const wl = p.face;
+    const wlMonthly = p.monthly;
+    if(wlMonthly > budget + 4) continue;
+
+    for(const term of termChoices){
+      if(term > 0 && !find10RCRate(input.age, input.sex, input.tob)) continue;
+      const withTerm = priceCoverage(input, { wl, term, adb:0 }).monthly;
+      if(withTerm > budget + 4) continue;
+
+      for(const adb of adbChoices){
+        if(adb > 0 && !findADBRate(input.age)) continue;
         const priced = priceCoverage(input, { wl, term, adb });
-        const diff = Math.abs(priced.monthly - budget);
-        const wlFloor = state.spouseIncluded ? 10000 : (card==='one' ? 20000 : 25000);
-        if(wl < wlFloor) continue;
-        if(priced.monthly <= budget + 2.50 && (diff < best.diff || (Math.abs(diff-best.diff)<0.001 && (wl+term+adb) > (best.wl+best.term+best.adb)))){
-          best = { wl, term, adb, diff, monthly: priced.monthly };
+        const over = Math.max(0, priced.monthly - budget);
+        const under = Math.max(0, budget - priced.monthly);
+
+        const wlShort = Math.max(0, minWL - wl) / 1000;
+        const termShort = Math.max(0, termTarget - term) / 1000;
+        const adbShort = Math.max(0, adbTarget - adb) / 1000;
+
+        const score =
+          over * 120 +
+          under * 18 +
+          wlShort * 75 +
+          termShort * 10 +
+          adbShort * 3 -
+          (wl/1000) * 1.5 -
+          (term/1000) * 0.45 -
+          (adb/1000) * 0.20;
+
+        if(score < best.score || (Math.abs(score - best.score) < 0.001 && priced.monthly > best.monthly)){
+          best = { wl, term, adb, monthly: priced.monthly, score };
         }
       }
     }
   }
+
+  return best;
+}
+
+function autoFill(card, person){
+  const best = findBestAutoMix(card, person);
   setCoverage(card, person, best);
   refreshAll();
 }
 
-function renderPane(card, person){
-  const pane = getPane(card, person);
-  if(!pane) return;
-  const personInput = getPersonInput(person);
+function autoChangePermanent(card, person){
+  const input = getPersonInput(person);
   const coverage = getCoverage(card, person);
-  const priced = priceCoverage(personInput, coverage);
-  const totals = calcDeathTotals(personInput, coverage);
-  pane.querySelector('[data-field="wlText"]').textContent = money0(coverage.wl);
-  pane.querySelector('[data-field="termText"]').textContent = money0(coverage.term);
-  pane.querySelector('[data-field="adbText"]').textContent = money0(coverage.adb);
-  pane.querySelector('[data-field="monthlyText"]').textContent = currency(priced.monthly);
-  pane.querySelector('[data-field="weeklyText"]').textContent = currency(priced.monthly / 4);
-  const a71Row = pane.querySelector('[data-field="a71Row"]');
-  a71Row.classList.toggle('hidden', !personInput.a71);
-  pane.querySelector('[data-field="a71Text"]').textContent = personInput.a71 ? 'ON' : 'OFF';
-  const notesEl = pane.querySelector('[data-field="notes"]');
-  notesEl.textContent = priced.notes.join(' · ');
-  notesEl.className = 'mini' + (priced.notes.some(x=>x.includes('No ') || x.includes('unavailable')) ? ' bad' : ' good');
-  return { priced, totals, coverage };
-}
-
-function renderBottom(card){
-  const entries = ['main'];
-  if(state.spouseIncluded) entries.push('spouse');
-  let monthly = 0, sickness = 0, accident = 0, car = 0, common = 0;
-  for(const p of entries){
-    const pane = renderPane(card,p);
-    if(!pane) continue;
-    monthly += pane.priced.monthly;
-    sickness += pane.totals.sickness;
-    accident += pane.totals.accident;
-    car += pane.totals.car;
-    common += pane.totals.common;
+  const priced = priceCoverage(input, coverage);
+  const suggestion = getNextPermanentStep(input.age, input.sex, input.tob, coverage.wl, priced.monthly);
+  if(suggestion){
+    setCoverage(card, person, { ...coverage, wl: suggestion.face });
   }
-  const target = card==='one' ? Number($('hourlyIncome').value||0) * 4 : Number($('hourlyIncome').value||0) * 8;
-  $(card+'Bottom').innerHTML = `
-    <div class="money">Monthly ${currency(monthly)}</div>
-    <div class="bottomLine">Weekly ${currency(monthly / 4)}</div>
-    <div class="small">Target budget ${currency(target)}</div>
-    <div class="bottomLine" style="margin-top:12px">Death from sickness: ${money0(sickness)}</div>
-    <div class="bottomLine">Death from accident: ${money0(accident)}</div>
-    <div class="bottomLine">Car accident death: ${money0(car)}</div>
-    <div class="bottomLine">Common carrier death: ${money0(common)}</div>
-  `;
-}
-
-function refreshAll(){
-  const monthly = Number($('monthlyIncome').value || 0);
-  const hourly = Number($('hourlyIncome').value || 0);
-  $('oneBudgetText').textContent = currency(hourly * 4);
-  $('twoBudgetText').textContent = currency(hourly * 8);
-
-  $('mainSummary').textContent = `MAIN (${ $('main_sex').value.toUpperCase() }) AGE: ${$('main_age').value} ${$('main_tob').value} ${$('main_a71').checked ? 'A71 ON' : 'A71 OFF'}`;
-  $('spSummary').textContent = state.spouseIncluded
-    ? `SPOUSE (${ $('sp_sex').value.toUpperCase() }) AGE: ${$('sp_age').value} ${$('sp_tob').value} ${$('sp_a71').checked ? 'A71 ON' : 'A71 OFF'}`
-    : 'SPOUSE NOT INCLUDED';
-
-  ['one','two'].forEach(card => {
-    const split = $(card+'Split');
-    split.classList.toggle('withSpouse', state.spouseIncluded);
-    const spousePane = getPane(card,'spouse');
-    spousePane.classList.toggle('hidden', !state.spouseIncluded);
-    renderBottom(card);
-  });
+  refreshAll();
 }
 
 $('spouseBtn').addEventListener('click', ()=>{
@@ -549,7 +582,11 @@ document.querySelectorAll('.pane').forEach(pane=>{
     inp.addEventListener('change', refreshAll);
   });
   pane.querySelector('[data-action="auto"]').addEventListener('click', ()=> autoFill(pane.dataset.card, pane.dataset.person));
-  pane.querySelector('[data-action="clear"]').addEventListener('click', ()=> { setCoverage(pane.dataset.card, pane.dataset.person, {wl:0,term:0,adb:0}); refreshAll(); });
+  pane.querySelector('[data-action="autochg"]').addEventListener('click', ()=> autoChangePermanent(pane.dataset.card, pane.dataset.person));
+  pane.querySelector('[data-action="clear"]').addEventListener('click', ()=> {
+    setCoverage(pane.dataset.card, pane.dataset.person, {wl:0,term:0,adb:0});
+    refreshAll();
+  });
 });
 
 loadRates().catch(err=>{
