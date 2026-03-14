@@ -67,6 +67,9 @@ button.ghost{background:#f6f8fc;color:var(--navy)}
 .cremRow.cremHidden{display:none!important}
 .bad{color:#a22727}
 .good{color:#1b5e20}
+.coverLine{font-size:25px;line-height:1.3;margin:4px 0;display:flex;align-items:baseline;justify-content:center;gap:10px}
+.coverLine small{font-size:16px;color:var(--muted)}
+.covPrice{font-size:14px;font-weight:700;color:var(--muted);background:#f0f4fa;border-radius:7px;padding:2px 8px;white-space:nowrap}
 @media (max-width:1230px){.layout{grid-template-columns:1fr}.leftRail:after{display:none}.card{min-height:auto}.infoBox{margin-top:18px}}
 </style>
 </head>
@@ -133,10 +136,10 @@ button.ghost{background:#f6f8fc;color:var(--navy)}
         <div class="pane" data-card="one" data-person="main">
           <div class="paneTitle">MAIN</div>
           <div class="cover">
-            <div class="coverLine">WL: <span data-field="wlText">$0</span></div>
-            <div class="coverLine">TERM: <span data-field="termText">$0</span></div>
-            <div class="coverLine">ACCIDENTAL: <span data-field="adbText">$0</span></div>
-            <div class="coverLine hidden" data-field="a71Row">A71: <span data-field="a71Text">ON</span></div>
+            <div class="coverLine">WL: <span data-field="wlText">$0</span><span class="covPrice" data-field="wlPrice"></span></div>
+            <div class="coverLine">TERM: <span data-field="termText">$0</span><span class="covPrice" data-field="termPrice"></span></div>
+            <div class="coverLine">ACCIDENTAL: <span data-field="adbText">$0</span><span class="covPrice" data-field="adbPrice"></span></div>
+            <div class="coverLine hidden" data-field="a71Row">A71: <span data-field="a71Text">ON</span><span class="covPrice" data-field="a71Price"></span></div>
             <div class="rateLine">Monthly <span data-field="monthlyText">$0.00</span></div>
             <div class="rateLine">Weekly <span data-field="weeklyText">$0.00</span></div>
           </div>
@@ -152,10 +155,10 @@ button.ghost{background:#f6f8fc;color:var(--navy)}
         <div class="pane hidden" data-card="one" data-person="spouse">
           <div class="paneTitle">SPOUSE</div>
           <div class="cover">
-            <div class="coverLine">WL: <span data-field="wlText">$0</span></div>
-            <div class="coverLine">TERM: <span data-field="termText">$0</span></div>
-            <div class="coverLine">ACCIDENTAL: <span data-field="adbText">$0</span></div>
-            <div class="coverLine hidden" data-field="a71Row">A71: <span data-field="a71Text">ON</span></div>
+            <div class="coverLine">WL: <span data-field="wlText">$0</span><span class="covPrice" data-field="wlPrice"></span></div>
+            <div class="coverLine">TERM: <span data-field="termText">$0</span><span class="covPrice" data-field="termPrice"></span></div>
+            <div class="coverLine">ACCIDENTAL: <span data-field="adbText">$0</span><span class="covPrice" data-field="adbPrice"></span></div>
+            <div class="coverLine hidden" data-field="a71Row">A71: <span data-field="a71Text">ON</span><span class="covPrice" data-field="a71Price"></span></div>
             <div class="rateLine">Monthly <span data-field="monthlyText">$0.00</span></div>
             <div class="rateLine">Weekly <span data-field="weeklyText">$0.00</span></div>
           </div>
@@ -180,10 +183,10 @@ button.ghost{background:#f6f8fc;color:var(--navy)}
         <div class="pane" data-card="two" data-person="main">
           <div class="paneTitle">MAIN</div>
           <div class="cover">
-            <div class="coverLine">WL: <span data-field="wlText">$0</span></div>
-            <div class="coverLine">TERM: <span data-field="termText">$0</span></div>
-            <div class="coverLine">ACCIDENTAL: <span data-field="adbText">$0</span></div>
-            <div class="coverLine hidden" data-field="a71Row">A71: <span data-field="a71Text">ON</span></div>
+            <div class="coverLine">WL: <span data-field="wlText">$0</span><span class="covPrice" data-field="wlPrice"></span></div>
+            <div class="coverLine">TERM: <span data-field="termText">$0</span><span class="covPrice" data-field="termPrice"></span></div>
+            <div class="coverLine">ACCIDENTAL: <span data-field="adbText">$0</span><span class="covPrice" data-field="adbPrice"></span></div>
+            <div class="coverLine hidden" data-field="a71Row">A71: <span data-field="a71Text">ON</span><span class="covPrice" data-field="a71Price"></span></div>
             <div class="rateLine">Monthly <span data-field="monthlyText">$0.00</span></div>
             <div class="rateLine">Weekly <span data-field="weeklyText">$0.00</span></div>
           </div>
@@ -199,10 +202,10 @@ button.ghost{background:#f6f8fc;color:var(--navy)}
         <div class="pane hidden" data-card="two" data-person="spouse">
           <div class="paneTitle">SPOUSE</div>
           <div class="cover">
-            <div class="coverLine">WL: <span data-field="wlText">$0</span></div>
-            <div class="coverLine">TERM: <span data-field="termText">$0</span></div>
-            <div class="coverLine">ACCIDENTAL: <span data-field="adbText">$0</span></div>
-            <div class="coverLine hidden" data-field="a71Row">A71: <span data-field="a71Text">ON</span></div>
+            <div class="coverLine">WL: <span data-field="wlText">$0</span><span class="covPrice" data-field="wlPrice"></span></div>
+            <div class="coverLine">TERM: <span data-field="termText">$0</span><span class="covPrice" data-field="termPrice"></span></div>
+            <div class="coverLine">ACCIDENTAL: <span data-field="adbText">$0</span><span class="covPrice" data-field="adbPrice"></span></div>
+            <div class="coverLine hidden" data-field="a71Row">A71: <span data-field="a71Text">ON</span><span class="covPrice" data-field="a71Price"></span></div>
             <div class="rateLine">Monthly <span data-field="monthlyText">$0.00</span></div>
             <div class="rateLine">Weekly <span data-field="weeklyText">$0.00</span></div>
           </div>
@@ -446,16 +449,17 @@ function priceCoverage(personInput, coverage){
   const notes=[];
   let monthly = 0;
   let annualTotal = 0;
+  let wlMonthly = 0, termMonthly = 0, adbMonthly = 0, a71Monthly = 0;
 
   if(coverage.wl > 0){
     const wlRow = findPermanentRate(personInput.age, personInput.sex, personInput.tob, coverage.wl);
     if(wlRow){
       const units = coverage.wl / 1000;
       const annual = units * wlRow.base_rate + wlRow.policy_fee_annual + wlRow.volume_adjustment_annual;
+      wlMonthly = annualToMonthly(annual);
       annualTotal += annual;
       notes.push(`${wlRow.effective_code} used for permanent`);
-      const currentMonthly = annualToMonthly(annual);
-      const samePriceStep = getNextPermanentStep(personInput.age, personInput.sex, personInput.tob, coverage.wl, currentMonthly);
+      const samePriceStep = getNextPermanentStep(personInput.age, personInput.sex, personInput.tob, coverage.wl, wlMonthly);
       if(samePriceStep){
         const delta = samePriceStep.extra <= 0 ? 'same price' : `+${currency(samePriceStep.extra)}/mo`;
         notes.push(`${money0(samePriceStep.face)} ${samePriceStep.code} available · use Auto Change (${delta})`);
@@ -470,6 +474,7 @@ function priceCoverage(personInput, coverage){
     if(termRow){
       const units = coverage.term / 1000;
       const annual = units * termRow.base_rate + termRow.policy_fee_annual + termRow.volume_adjustment_annual;
+      termMonthly = annualToMonthly(annual);
       annualTotal += annual;
     } else {
       notes.push('No 10RC rate found');
@@ -481,6 +486,7 @@ function priceCoverage(personInput, coverage){
     if(adbRow){
       const units = coverage.adb / 1000;
       const annual = units * adbRow.base_rate;
+      adbMonthly = annualToMonthly(annual);
       annualTotal += annual;
     } else {
       notes.push('ADB unavailable at this age');
@@ -488,15 +494,14 @@ function priceCoverage(personInput, coverage){
   }
 
   if(personInput.a71){
-    let a71m = 0;
-    if(personInput.age >= 18 && personInput.age <= 59) a71m = 20;
-    else if(personInput.age >= 60 && personInput.age <= 64) a71m = 22.5;
-    else if(personInput.age >= 65 && personInput.age <= 80) a71m = 35.25;
-    monthly += a71m;
+    if(personInput.age >= 18 && personInput.age <= 59) a71Monthly = 20;
+    else if(personInput.age >= 60 && personInput.age <= 64) a71Monthly = 22.5;
+    else if(personInput.age >= 65 && personInput.age <= 80) a71Monthly = 35.25;
+    monthly += a71Monthly;
   }
 
   monthly += annualToMonthly(annualTotal);
-  return { monthly, annualTotal, notes };
+  return { monthly, annualTotal, notes, wlMonthly, termMonthly, adbMonthly, a71Monthly };
 }
 
 function calcDeathTotals(personInput, coverage){
@@ -867,21 +872,38 @@ function renderPane(card, person){
   setCoverage(card, person, coverage);
   const priced = priceCoverage(input, coverage);
   const death = calcDeathTotals(input, coverage);
-  pane.querySelector('[data-field="wlText"]').textContent = money0(coverage.wl);
+
+  // Coverage face amounts
+  pane.querySelector('[data-field="wlText"]').textContent   = money0(coverage.wl);
   pane.querySelector('[data-field="termText"]').textContent = money0(coverage.term);
-  pane.querySelector('[data-field="adbText"]').textContent = money0(coverage.adb);
+  pane.querySelector('[data-field="adbText"]').textContent  = money0(coverage.adb);
+
+  // Per-component prices — show only when coverage > 0
+  const wlPriceEl   = pane.querySelector('[data-field="wlPrice"]');
+  const termPriceEl = pane.querySelector('[data-field="termPrice"]');
+  const adbPriceEl  = pane.querySelector('[data-field="adbPrice"]');
+  const a71PriceEl  = pane.querySelector('[data-field="a71Price"]');
+
+  if(wlPriceEl)   wlPriceEl.textContent   = coverage.wl   > 0 ? currency(priced.wlMonthly)+'/mo'   : '';
+  if(termPriceEl) termPriceEl.textContent = coverage.term > 0 ? currency(priced.termMonthly)+'/mo' : '';
+  if(adbPriceEl)  adbPriceEl.textContent  = coverage.adb  > 0 ? currency(priced.adbMonthly)+'/mo'  : '';
+  if(a71PriceEl)  a71PriceEl.textContent  = input.a71         ? currency(priced.a71Monthly)+'/mo'  : '';
+
+  // Totals
   pane.querySelector('[data-field="monthlyText"]').textContent = currency(priced.monthly);
-  pane.querySelector('[data-field="weeklyText"]').textContent = currency(priced.monthly / 4);
+  pane.querySelector('[data-field="weeklyText"]').textContent  = currency(priced.monthly / 4);
+
   const a71Row = pane.querySelector('[data-field="a71Row"]');
   a71Row.classList.toggle('hidden', !input.a71);
   pane.querySelector('[data-field="a71Text"]').textContent = input.a71 ? 'ON' : 'OFF';
+
   // Show/hide cremation checkbox — SSP only
   const cremCheckRow = pane.querySelector(`#crem_${card}_${person}`)?.closest('.inlineToggle');
   if(cremCheckRow) cremCheckRow.style.display = isSSPMode() ? 'flex' : 'none';
 
-  // In SSP mode hide TERM and ADB rows entirely — it's WL only
-  const termRow = pane.querySelector('[data-input="term"]')?.closest('.editRow');
-  const adbRow  = pane.querySelector('[data-input="adb"]')?.closest('.editRow');
+  // In SSP mode hide TERM and ADB rows — WL only
+  const termRow   = pane.querySelector('[data-input="term"]')?.closest('.editRow');
+  const adbRow    = pane.querySelector('[data-input="adb"]')?.closest('.editRow');
   const termCover = pane.querySelector('[data-field="termText"]')?.closest('.coverLine');
   const adbCover  = pane.querySelector('[data-field="adbText"]')?.closest('.coverLine');
   const sspOn = isSSPMode();
@@ -889,6 +911,7 @@ function renderPane(card, person){
   if(adbRow)    adbRow.style.display    = sspOn ? 'none' : '';
   if(termCover) termCover.style.display = sspOn ? 'none' : '';
   if(adbCover)  adbCover.style.display  = sspOn ? 'none' : '';
+
   pane.querySelector('[data-field="notes"]').innerHTML = priced.notes.join('<br>');
   const adbInput = pane.querySelector('[data-input="adb"]');
   const lockADB = input.age >= 55;
