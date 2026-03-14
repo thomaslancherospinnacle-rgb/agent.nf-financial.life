@@ -536,6 +536,77 @@ function findBestAutoMix(card, person){
   return best;
 }
 
+
+function renderPane(card, person){
+  const pane = getPane(card, person);
+  if(!pane) return;
+  const input = getPersonInput(person);
+  const coverage = getCoverage(card, person);
+  setCoverage(card, person, coverage);
+  const priced = priceCoverage(input, coverage);
+  const death = calcDeathTotals(input, coverage);
+  pane.querySelector('[data-field="wlText"]').textContent = money0(coverage.wl);
+  pane.querySelector('[data-field="termText"]').textContent = money0(coverage.term);
+  pane.querySelector('[data-field="adbText"]').textContent = money0(coverage.adb);
+  pane.querySelector('[data-field="monthlyText"]').textContent = currency(priced.monthly);
+  pane.querySelector('[data-field="weeklyText"]').textContent = currency(priced.monthly / 4);
+  const a71Row = pane.querySelector('[data-field="a71Row"]');
+  a71Row.classList.toggle('hidden', !input.a71);
+  pane.querySelector('[data-field="a71Text"]').textContent = input.a71 ? 'ON' : 'OFF';
+  pane.querySelector('[data-field="notes"]').innerHTML = priced.notes.join('<br>');
+  return { priced, death, coverage, input };
+}
+
+function renderBottom(card){
+  const bottom = $(card === 'one' ? 'oneBottom' : 'twoBottom');
+  const people = ['main'];
+  if(state.spouseIncluded) people.push('spouse');
+  let html = '';
+  people.forEach(person => {
+    const input = getPersonInput(person);
+    const coverage = getCoverage(card, person);
+    const death = calcDeathTotals(input, coverage);
+    html += `
+      <div style="margin-bottom:10px;">
+        <div class="paneTitle" style="font-size:18px;margin-bottom:4px;">${person === 'main' ? 'MAIN' : 'SPOUSE'}</div>
+        <div class="bottomLine">Death from sickness: ${money0(death.sickness)}</div>
+        <div class="bottomLine">Death from accident: ${money0(death.accident)}</div>
+        <div class="bottomLine">Car accident death: ${money0(death.car)}</div>
+        <div class="bottomLine">Common carrier death: ${money0(death.common)}</div>
+      </div>`;
+  });
+  bottom.innerHTML = html;
+}
+
+function refreshAll(){
+  const monthly = Number($('monthlyIncome').value || 0);
+  const hourly = Number($('hourlyIncome').value || 0);
+  $('oneBudgetText').textContent = currency(hourly * 4);
+  $('twoBudgetText').textContent = currency(hourly * 8);
+
+  const main = getPersonInput('main');
+  $('mainSummary').textContent = `MAIN (${main.sex.toUpperCase()}) AGE:${main.age} ${main.tob} ${main.a71 ? 'A71 ON' : 'A71 OFF'}`;
+
+  $('spouseGrid').classList.toggle('hidden', !state.spouseIncluded);
+  $('spouseBtn').textContent = state.spouseIncluded ? 'Remove spouse' : 'Add spouse';
+  const spouseOnePane = getPane('one','spouse');
+  const spouseTwoPane = getPane('two','spouse');
+  spouseOnePane.classList.toggle('hidden', !state.spouseIncluded);
+  spouseTwoPane.classList.toggle('hidden', !state.spouseIncluded);
+  if(state.spouseIncluded){
+    const sp = getPersonInput('spouse');
+    $('spSummary').textContent = `SPOUSE (${sp.sex.toUpperCase()}) AGE:${sp.age} ${sp.tob} ${sp.a71 ? 'A71 ON' : 'A71 OFF'}`;
+  } else {
+    $('spSummary').textContent = 'SPOUSE NOT INCLUDED';
+  }
+
+  ['one','two'].forEach(card => {
+    renderPane(card, 'main');
+    if(state.spouseIncluded) renderPane(card, 'spouse');
+    renderBottom(card);
+  });
+}
+
 function autoFill(card, person){
   const best = findBestAutoMix(card, person);
   setCoverage(card, person, best);
