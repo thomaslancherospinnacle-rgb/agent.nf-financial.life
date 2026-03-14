@@ -107,9 +107,11 @@ button.ghost{background:#f6f8fc;color:var(--navy)}
           <div>One Hour Budget Monthly: <strong id="oneBudgetText"></strong></div>
           <div>Two Hour Budget Monthly: <strong id="twoBudgetText"></strong></div>
           <div class="hidden" id="sspSummaryBox">
-            <div>Main dies → survivor SSI: <strong id="sspMainAfter"></strong> · monthly loss: <strong id="sspMainLoss"></strong></div>
-            <div>SSP term includes an added <strong>$2,500</strong> cremation / final-expense buffer.</div>
-            <div>Spouse dies → survivor SSI: <strong id="sspSpAfter"></strong> · monthly loss: <strong id="sspSpLoss"></strong></div>
+            <div>Combined SS income: <strong id="sspTotalIncome"></strong>/mo</div>
+            <div>Survivor keeps: <strong id="sspSurvivorKeeps"></strong>/mo (the higher check)</div>
+            <div style="color:#a22727;font-weight:800;">Monthly loss (either spouse dies): <strong id="sspMonthlyLoss"></strong></div>
+            <div style="color:#a22727;">Annual loss: <strong id="sspAnnualLoss"></strong>/yr — permanently</div>
+            <div style="margin-top:4px;font-size:11px;color:var(--muted);">SSP term covers this loss × selected months + $2,500 final expense</div>
           </div>
           <div id="csvStatus">Loading <strong>Rates.csv</strong>...</div>
         </div>
@@ -373,19 +375,30 @@ function getSSIValue(person){
 }
 
 function getSSPScenario(){
-  const mainSSI = getSSIValue('main');
+  const mainSSI  = getSSIValue('main');
   const spouseSSI = getSSIValue('spouse');
-  const total = mainSSI + spouseSSI;
-  const afterMainDies = Math.max(spouseSSI, mainSSI * 0.75);
-  const afterSpouseDies = Math.max(mainSSI, spouseSSI * 0.75);
-  const lossMainDies = Math.max(0, total - afterMainDies);
-  const lossSpouseDies = Math.max(0, total - afterSpouseDies);
+  const total     = mainSSI + spouseSSI;
+
+  // Federal law: survivor keeps only the HIGHER of the two checks.
+  // The LOWER check disappears permanently — regardless of who dies first.
+  // This is always the same dollar loss no matter which spouse goes first.
+  const monthlyLoss  = Math.min(mainSSI, spouseSSI);  // the check that vanishes
+  const survivorKeeps = Math.max(mainSSI, spouseSSI); // the check that stays
+  const annualLoss   = monthlyLoss * 12;
+
   return {
     mainSSI, spouseSSI, total,
-    afterMainDies, afterSpouseDies,
-    lossMainDies, lossSpouseDies,
-    mainWorthPitching: mainSSI * 0.75 > spouseSSI,
-    spouseWorthPitching: spouseSSI * 0.75 > mainSSI,
+    monthlyLoss,    // the one number that drives everything
+    survivorKeeps,
+    annualLoss,
+    // Legacy aliases so nothing else breaks
+    lossMainDies:   monthlyLoss,
+    lossSpouseDies: monthlyLoss,
+    afterMainDies:  survivorKeeps,
+    afterSpouseDies: survivorKeeps,
+    worthPitching:  monthlyLoss > 0,
+    mainWorthPitching:   monthlyLoss > 0,
+    spouseWorthPitching: monthlyLoss > 0,
   };
 }
 
@@ -615,12 +628,12 @@ function getRecommendedTargets(card, person){
   let targetWL, minWL;
 
   if(sspMode){
-    // SSP: fixed targets, age-bumped
-    const sspBase = card === 'one'
-      ? (person === 'main' ? 35000 : 15000)
-      : 70000;
-    targetWL = round5000(sspBase * ageMult);
-    minWL = sspBase;
+    // SSP is a senior pitch. WL anchors based on age.
+    // Training doc max WL for seniors = $34,000.
+    // Both spouses get meaningful permanent — covers funeral shock on top of income loss.
+    const sspWLBase = Math.min(34000, round5000(15000 * ageMult)); // scales with age, caps at 34k
+    targetWL = sspWLBase;
+    minWL = Math.min(15000, sspWLBase);
   } else if(card === 'one'){
     if(person === 'main'){
       // Anchors: $3k→15k, $5k→35k
@@ -653,10 +666,12 @@ function getRecommendedTargets(card, person){
   let termTarget = 0;
 
   if(sspMode){
-    const rawLoss = person === 'main' ? ssp.lossMainDies : ssp.lossSpouseDies;
-    termTarget = round1000(rawLoss * months + 2500);
-    if(person === 'main' && !ssp.mainWorthPitching) termTarget = 0;
-    if(person === 'spouse' && !ssp.spouseWorthPitching) termTarget = 0;
+    // The lower SS check disappears regardless of who dies — same loss, always.
+    // Term target = monthlyLoss × months selected + $2,500 final expense buffer.
+    // Both main and spouse get the same term target since it's the same event.
+    if(ssp.worthPitching){
+      termTarget = round1000(ssp.monthlyLoss * months + 2500);
+    }
   } else if(termTaper > 0){
     if(card === 'one'){
       if(person === 'main'){
@@ -925,10 +940,10 @@ function refreshAll(){
     const pair = getSSPMonthPair();
     $('oneHeaderText').textContent = `SSP ${pair.one} MONTHS`;
     $('twoHeaderText').textContent = `SSP ${pair.two} MONTHS`;
-    $('sspMainAfter').textContent = currency(ssp.afterMainDies);
-    $('sspMainLoss').textContent = currency(ssp.lossMainDies);
-    $('sspSpAfter').textContent = currency(ssp.afterSpouseDies);
-    $('sspSpLoss').textContent = currency(ssp.lossSpouseDies);
+    $('sspTotalIncome').textContent  = currency(ssp.total);
+    $('sspSurvivorKeeps').textContent = currency(ssp.survivorKeeps);
+    $('sspMonthlyLoss').textContent  = currency(ssp.monthlyLoss);
+    $('sspAnnualLoss').textContent   = currency(ssp.annualLoss);
   } else {
     $('oneHeaderText').textContent = 'ONE HOUR';
     $('twoHeaderText').textContent = 'TWO HOUR';
