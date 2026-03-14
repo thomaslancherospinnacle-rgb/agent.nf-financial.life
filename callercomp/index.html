@@ -785,19 +785,20 @@ function calcLocalPersist() {
   const cutoff = getRolling12Cutoff();
   const window = sales.filter(s => s.month && s.month >= cutoff);
   const result = {};
-  // Combined setter + closer count determines the unlock gate
+  // Single combined pool — setter/closer is the same person
   const totalPolicies = window.length;
+  const totalGood     = window.filter(s => s.status !== 'CHARGEBACK').length;
+  const chargebacks   = totalPolicies - totalGood;
   const eligible      = totalPolicies >= 10;
+  const combinedRate  = totalPolicies > 0
+    ? parseFloat(((totalGood / totalPolicies) * 100).toFixed(2)) : 0;
+  const combinedBonus = eligible ? getPersistBonus(combinedRate) : 0;
 
-  ['setter','closer'].forEach(role => {
-    const rows        = window.filter(s => s.role === role);
-    const count       = rows.length;
-    const good        = rows.filter(s => s.status !== 'CHARGEBACK').length;
-    const chargebacks = count - good;
-    const rate        = count > 0 ? parseFloat(((good / count) * 100).toFixed(2)) : 0;
-    const bonus       = eligible ? getPersistBonus(rate) : 0;
-    result[role]      = { count, good, chargebacks, eligible, rate, bonus, totalPolicies };
-  });
+  const shared = { totalPolicies, totalGood, chargebacks, eligible,
+                   rate: combinedRate, bonus: combinedBonus };
+  // Same object for both keys
+  result['setter'] = { ...shared, count: window.filter(s=>s.role==='setter').length };
+  result['closer'] = { ...shared, count: window.filter(s=>s.role==='closer').length };
   return result;
 }
 
@@ -811,101 +812,79 @@ function getRolling12Cutoff() {
 function renderPersist() {
   const curMonth = today().slice(0,7);
   const cutoff   = getRolling12Cutoff();
-  // Update subtitle with live window range
+
   const subEl = document.getElementById('persistSub');
   if (subEl) subEl.innerHTML = `Rolling 12-month window: <strong style="color:var(--gold2)">${fmtMonth(cutoff)}</strong> → <strong style="color:var(--gold2)">${fmtMonth(curMonth)}</strong> &nbsp;·&nbsp; Set rows to <strong style="color:#3dd68c">GOOD</strong> or <strong style="color:#f87171">CHARGEBACK</strong> in Sheets &nbsp;·&nbsp; Bonus unlocks after 10+ policies`;
-  // Use sheet-returned persistData or fall back to local calc
-  const pd = (persistData && persistData.setter)
-    ? persistData
-    : calcLocalPersist();
 
-  const roles = [
-    { key:'setter', label:'Setter', pct:'15%', pill:'setter' },
-    { key:'closer', label:'Closer', pct:'25%', pill:'closer' }
-  ];
+  // Same person — one combined pool
+  const raw = (persistData && (persistData.setter || persistData.closer))
+    ? (persistData.setter || persistData.closer)
+    : calcLocalPersist().setter;
 
-  document.getElementById('persistGrid').innerHTML = roles.map(({key,label,pct,pill}) => {
-    const p = pd[key] || { count:0, good:0, chargebacks:0, eligible:false, rate:0, bonus:0 };
-    const { count, good, eligible, rate, bonus } = p;
-    const chargebacks = p.chargebacks ?? (count - good);
-    const baseOwed    = sales.filter(s => s.month >= cutoff && s.role === key).reduce((a,s)=>a+s.baseOwed,0);
-    const bonusAmt    = baseOwed * (bonus / 100);
-    const totalOwed   = baseOwed + bonusAmt;
-    const fillW       = Math.min(rate, 100);
-    const fillCls     = rate>=90?'c3':rate>=70?'c2':rate>=50?'c1':'c0';
-    const rColor      = rate>=90?'var(--green)':rate>=70?'var(--gold2)':'var(--muted)';
-    const totalPolicies = p.totalPolicies ?? (count); // combined setter+closer from persist
-    const needMore    = Math.max(0, 10 - totalPolicies);
-    const policyFill  = Math.min((totalPolicies/10)*100, 100);
+  const totalPolicies = raw.totalPolicies || 0;
+  const totalGood     = raw.totalGood     || 0;
+  const chargebacks   = raw.chargebacks   || (totalPolicies - totalGood);
+  const eligible      = raw.eligible      || false;
+  const rate          = raw.rate          || 0;
+  const bonus         = raw.bonus         || 0;
 
-    return `<div class="pc">
+  const baseOwed  = sales.filter(s => s.month >= cutoff).reduce((a,s) => a + s.baseOwed, 0);
+  const bonusAmt  = baseOwed * (bonus / 100);
+  const totalOwed = baseOwed + bonusAmt;
+  const needMore  = Math.max(0, 10 - totalPolicies);
+  const policyFill= Math.min((totalPolicies / 10) * 100, 100);
+  const fillCls   = rate>=90?'c3':rate>=70?'c2':rate>=50?'c1':'c0';
+  const rColor    = rate>=90?'var(--green)':rate>=70?'var(--gold2)':'var(--muted)';
+
+  document.getElementById('persistGrid').innerHTML = `
+    <div class="pc" style="grid-column:1/-1">
       <div class="pc-head">
         <div>
-          <div class="pc-name">Call Center <span class="pill ${pill}">${label}</span></div>
-          <div class="pc-role">${pct} of advance · rolling 12 months</div>
+          <div class="pc-name">Call Center &nbsp;<span class="pill setter">setter</span>&nbsp;<span class="pill closer">closer</span></div>
+          <div class="pc-role">Same person — combined persistency · rolling 12 months</div>
         </div>
         <div style="text-align:right">
           <div class="pc-rate-big" style="color:${rColor}">${rate.toFixed(1)}%</div>
-          <div style="font-family:var(--cond);font-size:9px;color:var(--muted)">persistency</div>
+          <div style="font-family:var(--cond);font-size:9px;color:var(--muted)">persistency rate</div>
         </div>
       </div>
 
-      <!-- Persistency rate bar -->
-      <div class="meter-track"><div class="meter-fill ${fillCls}" style="width:${fillW}%"></div></div>
+      <div class="meter-track"><div class="meter-fill ${fillCls}" style="width:${Math.min(rate,100)}%"></div></div>
       <div style="display:flex;justify-content:space-between;padding:2px 18px 10px;font-family:var(--mono);font-size:10px;color:var(--muted)">
         <span>0%</span>
-        <span style="color:${bonus>0?'var(--gold)':'var(--muted)'}">${bonus>0?'+'+bonus+'% bonus':'no bonus'}</span>
+        <span style="color:${bonus>0?'var(--gold)':'var(--muted)'}">${bonus>0?'+'+bonus+'% bonus':'no bonus — need ≥70%'}</span>
         <span>100%</span>
       </div>
 
-      <!-- 10-policy unlock bar -->
-      <div style="padding:0 18px 12px;display:flex;align-items:center;gap:10px">
+      <div style="padding:0 18px 14px;display:flex;align-items:center;gap:10px">
         <div style="flex:1;background:var(--navy3);border-radius:4px;overflow:hidden;height:6px">
           <div style="height:100%;width:${policyFill}%;background:${eligible?'var(--green)':'var(--gold)'};border-radius:4px;transition:width .4s"></div>
         </div>
         <span style="font-family:var(--mono);font-size:11px;white-space:nowrap;color:${eligible?'var(--green)':'var(--muted)'}">
-          ${totalPolicies}/10 combined${eligible?' ✓ unlocked':' — need '+needMore+' more'}
+          ${totalPolicies}/10${eligible?' ✓ unlocked':' — need '+needMore+' more'}
         </span>
       </div>
 
-      <!-- Stats row 1: good / chargebacks / bonus -->
       <div class="pc-stats">
-        <div class="ps">
-          <div class="ps-lbl">✓ GOOD</div>
-          <div class="ps-val" style="color:var(--green)">${good}</div>
-        </div>
-        <div class="ps">
-          <div class="ps-lbl">⚡ Chargebacks</div>
-          <div class="ps-val" style="color:${chargebacks>0?'var(--red)':'var(--muted)'}">${chargebacks}</div>
-        </div>
-        <div class="ps">
-          <div class="ps-lbl">Bonus (+${bonus}%)</div>
-          <div class="ps-val" style="color:${bonusAmt>0?'var(--gold3)':'var(--muted)'}">${bonusAmt>0?fmt(bonusAmt):'—'}</div>
-        </div>
+        <div class="ps"><div class="ps-lbl">✓ GOOD</div><div class="ps-val" style="color:var(--green)">${totalGood}</div></div>
+        <div class="ps"><div class="ps-lbl">⚡ Chargebacks</div><div class="ps-val" style="color:${chargebacks>0?'var(--red)':'var(--muted)'}">${chargebacks}</div></div>
+        <div class="ps"><div class="ps-lbl">Total Policies</div><div class="ps-val">${totalPolicies}</div></div>
       </div>
-      <!-- Stats row 2: base / total / status -->
       <div class="pc-stats" style="border-top:1px solid var(--border)">
-        <div class="ps">
-          <div class="ps-lbl">Base Owed</div>
-          <div class="ps-val">${fmt(baseOwed)}</div>
-        </div>
-        <div class="ps">
-          <div class="ps-lbl">Total Payout</div>
-          <div class="ps-val" style="color:var(--green)">${fmt(totalOwed)}</div>
-        </div>
-        <div class="ps">
-          <div class="ps-lbl">Bonus Status</div>
-          <div class="ps-val" style="font-size:10px;color:${eligible?'var(--green)':'var(--muted)'}">
-            ${eligible ? '🔓 Active' : '🔒 Locked'}
-          </div>
-        </div>
+        <div class="ps"><div class="ps-lbl">Base Owed (12mo)</div><div class="ps-val">${fmt(baseOwed)}</div></div>
+        <div class="ps"><div class="ps-lbl">Bonus (+${bonus}%)</div><div class="ps-val" style="color:${bonusAmt>0?'var(--gold3)':'var(--muted)'}">${bonusAmt>0?fmt(bonusAmt):'—'}</div></div>
+        <div class="ps"><div class="ps-lbl">Total Payout</div><div class="ps-val" style="color:var(--green)">${fmt(totalOwed)}</div></div>
+      </div>
+      <div class="pc-stats" style="border-top:1px solid var(--border)">
+        <div class="ps"><div class="ps-lbl">Bonus Status</div><div class="ps-val" style="font-size:10px;color:${eligible?'var(--green)':'var(--muted)'}">${eligible?'🔓 Active':'🔒 Locked'}</div></div>
+        <div class="ps"><div class="ps-lbl">Bonus %</div><div class="ps-val" style="color:${bonus>0?'var(--gold)':'var(--muted)'}">${bonus>0?'+'+bonus+'%':'—'}</div></div>
+        <div class="ps"><div class="ps-lbl">COP Payout</div><div class="ps-val" style="font-size:10px;color:var(--gold2)">${copRate?fmtCOP(totalOwed*copRate):'—'}</div></div>
       </div>
 
       <div style="padding:9px 18px;border-top:1px solid var(--border);background:rgba(0,0,0,.12);font-family:var(--cond);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">
-        Chargebacks from any of the past 12 months count → Refresh after edits
+        Chargebacks from any of the past 12 months count · Refresh after edits
       </div>
     </div>`;
-  }).join('');
 }
 
 // ═══════════════════════════════════════════════════════════
