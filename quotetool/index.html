@@ -1119,10 +1119,41 @@ $('hourlyIncome').addEventListener('input', ()=>{
   refreshAll();
 });
 
-['main_age','main_sex','main_tob','main_a71','sp_age','sp_sex','sp_tob','sp_a71','sspMode','mainSSI','spSSI','sspStartMonths',
- 'crem_one_main','crem_one_spouse','crem_two_main','crem_two_spouse'].forEach(id=>{
+['main_age','main_sex','main_tob','main_a71','sp_age','sp_sex','sp_tob','sp_a71'].forEach(id=>{
   $(id)?.addEventListener('input', refreshAll);
   $(id)?.addEventListener('change', refreshAll);
+});
+
+// SSP-specific inputs — re-run autoFill for both cards so WL snaps to correct values
+['sspMode','mainSSI','spSSI','sspStartMonths'].forEach(id=>{
+  $(id)?.addEventListener('change', ()=>{
+    if(isSSPMode()){
+      autoFillCard('one');
+      autoFillCard('two');
+    } else {
+      refreshAll();
+    }
+  });
+  $(id)?.addEventListener('input', ()=>{
+    if(isSSPMode()){
+      autoFillCard('one');
+      autoFillCard('two');
+    } else {
+      refreshAll();
+    }
+  });
+});
+
+// Cremation checkboxes — in SSP mode, re-run autoFillCard so WL recalculates immediately
+// (refreshAll alone only redraws; it doesn't push the new WL into the input fields)
+[['crem_one_main','one'],['crem_one_spouse','one'],['crem_two_main','two'],['crem_two_spouse','two']].forEach(([id, card])=>{
+  $(id)?.addEventListener('change', ()=>{
+    if(isSSPMode()){
+      autoFillCard(card);
+    } else {
+      refreshAll();
+    }
+  });
 });
 
 document.querySelectorAll('.pane').forEach(pane=>{
