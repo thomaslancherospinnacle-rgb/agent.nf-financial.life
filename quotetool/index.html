@@ -107,11 +107,18 @@ button.ghost{background:#f6f8fc;color:var(--navy)}
           <div>One Hour Budget Monthly: <strong id="oneBudgetText"></strong></div>
           <div>Two Hour Budget Monthly: <strong id="twoBudgetText"></strong></div>
           <div class="hidden" id="sspSummaryBox">
-            <div>Combined SS income: <strong id="sspTotalIncome"></strong>/mo</div>
-            <div>Survivor keeps: <strong id="sspSurvivorKeeps"></strong>/mo (the higher check)</div>
-            <div style="color:#a22727;font-weight:800;">Monthly loss (either spouse dies): <strong id="sspMonthlyLoss"></strong></div>
-            <div style="color:#a22727;">Annual loss: <strong id="sspAnnualLoss"></strong>/yr — permanently</div>
-            <div style="margin-top:4px;font-size:11px;color:var(--muted);">SSP term covers this loss × selected months + $2,500 final expense</div>
+            <div style="font-weight:800;margin-bottom:4px;">Combined SS: <strong id="sspTotalIncome"></strong>/mo</div>
+            <div style="border-left:3px solid var(--gold);padding-left:8px;margin:4px 0">
+              <div style="font-size:12px;font-weight:800;color:var(--navy);">IF MAIN DIES → Spouse's options:</div>
+              <div style="font-size:12px;">Keep her own: <strong id="sspSpouseOwn"></strong> &nbsp;|&nbsp; Take 75% of main's: <strong id="sspSpouse75"></strong></div>
+              <div style="font-size:12px;">She keeps: <strong id="sspSpouseKeeps"></strong> &nbsp;→&nbsp; <span style="color:#a22727;font-weight:800;">Loss: <strong id="sspLossIfMainDies"></strong>/mo · <strong id="sspLossIfMainDiesAnnual"></strong>/yr</span></div>
+            </div>
+            <div style="border-left:3px solid var(--gold);padding-left:8px;margin:4px 0">
+              <div style="font-size:12px;font-weight:800;color:var(--navy);">IF SPOUSE DIES → Main's options:</div>
+              <div style="font-size:12px;">Keep his own: <strong id="sspMainOwn"></strong> &nbsp;|&nbsp; Take 75% of spouse's: <strong id="sspMain75"></strong></div>
+              <div style="font-size:12px;">He keeps: <strong id="sspMainKeeps"></strong> &nbsp;→&nbsp; <span style="color:#a22727;font-weight:800;">Loss: <strong id="sspLossIfSpouseDies"></strong>/mo · <strong id="sspLossIfSpouseDiesAnnual"></strong>/yr</span></div>
+            </div>
+            <div style="margin-top:4px;font-size:11px;color:var(--muted);">Term = scenario loss × months + $2,500 final expense. WL max $34,000.</div>
           </div>
           <div id="csvStatus">Loading <strong>Rates.csv</strong>...</div>
         </div>
@@ -375,30 +382,57 @@ function getSSIValue(person){
 }
 
 function getSSPScenario(){
-  const mainSSI  = getSSIValue('main');
+  const mainSSI   = getSSIValue('main');
   const spouseSSI = getSSIValue('spouse');
   const total     = mainSSI + spouseSSI;
 
-  // Federal law: survivor keeps only the HIGHER of the two checks.
-  // The LOWER check disappears permanently — regardless of who dies first.
-  // This is always the same dollar loss no matter which spouse goes first.
-  const monthlyLoss  = Math.min(mainSSI, spouseSSI);  // the check that vanishes
-  const survivorKeeps = Math.max(mainSSI, spouseSSI); // the check that stays
-  const annualLoss   = monthlyLoss * 12;
+  /*
+    CORRECT FEDERAL LAW MATH
+    ─────────────────────────────────────────────────────────────────
+    When a spouse dies, the survivor has a choice:
+      Option A: Keep their OWN Social Security check (full amount)
+      Option B: Take the deceased spouse's benefit at 75% (survivor benefit)
+    The survivor picks whichever is HIGHER.
+
+    Scenario 1 — MAIN dies:
+      Spouse's options:
+        A) Keep her own:         spouseSSI
+        B) Take 75% of main's:  mainSSI × 0.75
+      She picks: max(spouseSSI, mainSSI × 0.75)
+      Monthly loss = total − what she keeps
+
+    Scenario 2 — SPOUSE dies:
+      Main's options:
+        A) Keep his own:          mainSSI
+        B) Take 75% of spouse's: spouseSSI × 0.75
+      He picks: max(mainSSI, spouseSSI × 0.75)
+      Monthly loss = total − what he keeps
+
+    The two scenarios produce DIFFERENT loss amounts.
+    Each pane (MAIN / SPOUSE) covers the scenario where THAT person dies.
+    ─────────────────────────────────────────────────────────────────
+  */
+
+  // If MAIN dies — what does the spouse keep?
+  const spouseKeepsIfMainDies  = Math.max(spouseSSI, mainSSI * 0.75);
+  const lossIfMainDies         = Math.max(0, total - spouseKeepsIfMainDies);
+
+  // If SPOUSE dies — what does the main keep?
+  const mainKeepsIfSpouseDies  = Math.max(mainSSI, spouseSSI * 0.75);
+  const lossIfSpouseDies       = Math.max(0, total - mainKeepsIfSpouseDies);
 
   return {
     mainSSI, spouseSSI, total,
-    monthlyLoss,    // the one number that drives everything
-    survivorKeeps,
-    annualLoss,
-    // Legacy aliases so nothing else breaks
-    lossMainDies:   monthlyLoss,
-    lossSpouseDies: monthlyLoss,
-    afterMainDies:  survivorKeeps,
-    afterSpouseDies: survivorKeeps,
-    worthPitching:  monthlyLoss > 0,
-    mainWorthPitching:   monthlyLoss > 0,
-    spouseWorthPitching: monthlyLoss > 0,
+    // Per-death scenario losses
+    lossIfMainDies,          // drives MAIN pane term target
+    lossIfSpouseDies,        // drives SPOUSE pane term target
+    spouseKeepsIfMainDies,
+    mainKeepsIfSpouseDies,
+    // Display helpers
+    worthPitching: lossIfMainDies > 0 || lossIfSpouseDies > 0,
+    // Legacy aliases
+    lossMainDies:   lossIfMainDies,
+    lossSpouseDies: lossIfSpouseDies,
   };
 }
 
@@ -666,11 +700,12 @@ function getRecommendedTargets(card, person){
   let termTarget = 0;
 
   if(sspMode){
-    // The lower SS check disappears regardless of who dies — same loss, always.
-    // Term target = monthlyLoss × months selected + $2,500 final expense buffer.
-    // Both main and spouse get the same term target since it's the same event.
-    if(ssp.worthPitching){
-      termTarget = round1000(ssp.monthlyLoss * months + 2500);
+    // MAIN pane  = "if main dies" → covers the SPOUSE's income loss
+    // SPOUSE pane = "if spouse dies" → covers the MAIN's income loss
+    // Term = that specific monthly loss × months selected + $2,500 final expense
+    const scenarioLoss = person === 'main' ? ssp.lossIfMainDies : ssp.lossIfSpouseDies;
+    if(scenarioLoss > 0){
+      termTarget = round1000(scenarioLoss * months + 2500);
     }
   } else if(termTaper > 0){
     if(card === 'one'){
@@ -940,10 +975,17 @@ function refreshAll(){
     const pair = getSSPMonthPair();
     $('oneHeaderText').textContent = `SSP ${pair.one} MONTHS`;
     $('twoHeaderText').textContent = `SSP ${pair.two} MONTHS`;
-    $('sspTotalIncome').textContent  = currency(ssp.total);
-    $('sspSurvivorKeeps').textContent = currency(ssp.survivorKeeps);
-    $('sspMonthlyLoss').textContent  = currency(ssp.monthlyLoss);
-    $('sspAnnualLoss').textContent   = currency(ssp.annualLoss);
+    $('sspTotalIncome').textContent          = currency(ssp.total);
+    $('sspSpouseOwn').textContent            = currency(ssp.spouseSSI);
+    $('sspSpouse75').textContent             = currency(ssp.mainSSI * 0.75);
+    $('sspSpouseKeeps').textContent          = currency(ssp.spouseKeepsIfMainDies);
+    $('sspLossIfMainDies').textContent       = currency(ssp.lossIfMainDies);
+    $('sspLossIfMainDiesAnnual').textContent = currency(ssp.lossIfMainDies * 12);
+    $('sspMainOwn').textContent             = currency(ssp.mainSSI);
+    $('sspMain75').textContent              = currency(ssp.spouseSSI * 0.75);
+    $('sspMainKeeps').textContent           = currency(ssp.mainKeepsIfSpouseDies);
+    $('sspLossIfSpouseDies').textContent      = currency(ssp.lossIfSpouseDies);
+    $('sspLossIfSpouseDiesAnnual').textContent= currency(ssp.lossIfSpouseDies * 12);
   } else {
     $('oneHeaderText').textContent = 'ONE HOUR';
     $('twoHeaderText').textContent = 'TWO HOUR';
