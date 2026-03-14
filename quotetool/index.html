@@ -641,16 +641,23 @@ function paneBudgetShare(card, person){
 */
 
 function getAgeMult(age){
-  // Continuous: 1.0 at age 35, +1.5% per year above 35, capped at 2.0
-  return Math.min(2.0, 1.0 + Math.max(0, age - 35) * 0.015);
+  // Age multiplier for WL FLOOR only — not the target ceiling.
+  // Keeps floors realistic without blowing past budget.
+  // 18–34: 1.0, 35–44: 1.0, 45–54: 1.15, 55–64: 1.25, 65+: 1.35
+  if(age >= 65) return 1.35;
+  if(age >= 55) return 1.25;
+  if(age >= 45) return 1.15;
+  return 1.0;
 }
 
 function getAgeTermTaper(age){
-  // Continuous: 1.0 at age 35, falls linearly, hits 0 around age 80
-  // At 45 → 0.78, at 55 → 0.56 ... but we want harder falloff
-  // 1.0 at ≤35, 0.75 at 45, 0.40 at 55, 0 at 65+
-  if(age >= 65) return 0;
-  return clamp(1.0 - Math.max(0, age - 35) * 0.025, 0, 1.0);
+  // How many months of income replacement is realistic at this age?
+  // Returns a multiplier on the base term months.
+  // Under 45: full. 45–54: reduced. 55+: minimum only (3 months floor).
+  if(age >= 65) return 0.20;  // barely any term — mostly WL
+  if(age >= 55) return 0.30;  // ~3 months floor territory
+  if(age >= 45) return 0.70;
+  return 1.0;
 }
 
 function getRecommendedTargets(card, person){
@@ -663,104 +670,66 @@ function getRecommendedTargets(card, person){
   const ssp = getSSPScenario();
   const months = getCardSSPMonths(card);
   const sspMode = isSSPMode();
+  const grace = income >= 6000 ? 8 : 4;
 
-  // ── WL ────────────────────────────────────────────────────────────────
-  let targetWL, minWL;
-
+  // SSP: WL = loss*months + optional cremation. Nothing else.
   if(sspMode){
-    // SSP is purely: WL = (monthly loss for this scenario × months) + optional $2,500 cremation
-    // That's it. No term. No ADB. No income. No age scaling.
-    // MAIN pane  = main dies → spouse loses income → WL covers that loss
-    // SPOUSE pane = spouse dies → main loses income → WL covers that loss
     const scenarioLoss = person === 'main' ? ssp.lossIfMainDies : ssp.lossIfSpouseDies;
-    const cremId = `crem_${card}_${person}`;
-    const cremBonus = $(`${cremId}`)?.checked ? 2500 : 0;
-    const rawWL = scenarioLoss * months + cremBonus;
-    // Cap at $34,999 per AIL senior WL limit
-    targetWL = Math.min(34999, Math.max(1000, round1000(rawWL)));
-    minWL = targetWL; // exact target, no flex
-  } else if(card === 'one'){
+    const cremBonus = $(`crem_${card}_${person}`)?.checked ? 2500 : 0;
+    const targetWL = Math.min(34999, Math.max(1000, round1000(scenarioLoss * months + cremBonus)));
+    return { paneBudget, grace, minWL: targetWL, targetWL, termTarget: 0, adbTarget: 0, sspMode, sspMonths: months };
+  }
+
+  // WL
+  let targetWL, minWL;
+  if(card === 'one'){
     if(person === 'main'){
-      // Anchors: $3k→15k, $5k→35k
-      // base 15k + income growth: each $1k above $3k adds $10k, capped at income×7
-      const base = 15000;
-      const growthBonus = Math.max(0, income - 3000) * 10;
-      const incomeMax = income * 7;
-      targetWL = round5000(Math.min(incomeMax, base + growthBonus) * ageMult);
-      minWL = 15000;
+      const raw = Math.min(35000, 15000 + Math.max(0, income - 3000) * 10);
+      targetWL = round5000(raw);
+      minWL = 25000;
     } else {
-      // Spouse one-hour: stays at 15k until income is strong enough to justify more
-      // Grows slowly: 15k at $5k income, 20k at $7k, 25k at $9k
-      const spouseBase = 15000 + Math.max(0, income - 5000) * 2.5;
-      targetWL = round5000(Math.min(spouseBase, 35000) * ageMult);
+      targetWL = round5000(Math.min(35000, 15000 + Math.max(0, income - 5000) * 2.5));
       minWL = 15000;
     }
   } else {
-    // TWO HOUR: income × 14 × ageMult
-    // At $5k: 5000×14=70k ✓
-    targetWL = round5000(income * 14 * ageMult);
-    minWL = round5000(70000 * ageMult);  // floor scales with age too
+    targetWL = Math.min(100000, round5000(income * 14));
+    minWL = Math.min(targetWL, round5000(Math.max(25000, 70000 * Math.min(ageMult, 1.25))));
   }
-
-  // Floor can never exceed target
   minWL = Math.min(minWL, targetWL);
-  // Absolute minimum $5k
   minWL = Math.max(5000, minWL);
 
-  // ── TERM ──────────────────────────────────────────────────────────────
+  // TERM — min 3 months always, spouse one-hour = 0
   let termTarget = 0;
-
-  if(sspMode){
-    termTarget = 0; // SSP = WL only. Term is never used in SSP mode.
-  } else if(termTaper > 0){
-    if(card === 'one'){
+  if(age < 65){
+    if(card === 'one' && person === 'main'){
+      const baseMonths = clamp(6 + Math.max(0, income - 3000) / 1000 * 3, 6, 12);
+      termTarget = round1000(income * Math.max(3, baseMonths * termTaper));
+    } else if(card === 'two'){
       if(person === 'main'){
-        // Smooth: $3k→6mo=18k, $5k→12mo=60k
-        // termMonths = 6 + (income-3000)/1000 × 3, capped at 12
-        const termMonths = clamp(6 + Math.max(0, income - 3000) / 1000 * 3, 6, 12);
-        termTarget = round1000(income * termMonths * termTaper);
-      }
-      // spouse one-hour: 0 always
-    } else {
-      if(person === 'main'){
-        termTarget = round1000(income * 18 * termTaper);
+        termTarget = round1000(income * Math.max(3, 18 * termTaper));
       } else if(state.spouseIncluded){
-        // Flat 3 months at $5k = 15k, grows slightly with income
-        const spouseTermMonths = clamp(3 + Math.max(0, income - 5000) / 1000, 3, 6);
-        termTarget = round1000(income * spouseTermMonths * termTaper);
+        termTarget = round1000(income * clamp(3 + Math.max(0, income - 5000) / 1000, 3, 6) * termTaper);
       }
     }
   }
 
-  // ── ADB ───────────────────────────────────────────────────────────────
+  // ADB — only eligible after WL>=25k AND term>=6mo, filled last
   let adbTarget = 0;
-
-  if(!sspMode && age < 55){
+  if(age < 55){
     if(card === 'two'){
-      const adbMult = person === 'main' ? 10 : (state.spouseIncluded ? 9 : 10);
-      adbTarget = round1000(income * adbMult * (age >= 45 ? 0.80 : 1.0));
+      const m = person === 'main' ? 10 : (state.spouseIncluded ? 9 : 10);
+      adbTarget = round1000(income * m * (age >= 45 ? 0.8 : 1.0));
+      if(personInputHasA71(person)) adbTarget = Math.max(0, adbTarget - 50000);
+      if(income < 8000) adbTarget = Math.min(adbTarget, 100000);
+    } else if(card === 'one' && person === 'main' && income >= 6000){
+      adbTarget = 25000;
+      if(personInputHasA71(person)) adbTarget = Math.max(0, adbTarget - 50000);
     }
-    if(personInputHasA71(person)) adbTarget = Math.max(0, adbTarget - 50000);
-    if(income < 8000) adbTarget = Math.min(adbTarget, 100000);
   }
-  // SSP mode: no ADB ever — WL only
 
-  adbTarget = Math.max(0, adbTarget);
-
-  const allowExtraTerm = !sspMode && (card === 'two' || (card === 'one' && person === 'main' && income > 6000));
-  const allowExtraADB  = !sspMode && card === 'two' && income >= 7000 && age < 55;
-
-  return {
-    paneBudget,
-    minWL,
-    targetWL: Math.max(minWL, targetWL),
-    termTarget: Math.max(0, termTarget),
-    adbTarget,
-    sspMode,
-    sspMonths: months,
-    allowExtraTerm,
-    allowExtraADB,
-  };
+  return { paneBudget, grace, minWL, targetWL: Math.max(minWL, targetWL),
+           termTarget: Math.max(0, termTarget), adbTarget: Math.max(0, adbTarget),
+           sspMode, sspMonths: months };
 }
 
 function personInputHasA71(person){
@@ -789,105 +758,88 @@ function buildPermanentOptions(age, sex, tob){
   return [...uniq.values()].sort((a,b)=>a.face-b.face);
 }
 
-function buildStepLadder(target){
-  const set = new Set([0]);
-  for(let x=10000;x<=Math.min(500000,target+60000);x+=5000) set.add(x);
-  [target-50000,target-25000,target-10000,target-5000,target,target+5000,target+10000,target+25000,target+50000]
-    .forEach(v=> { if(v>=0 && v<=500000) set.add(round1000(v)); });
-  [10000,20000,25000,30000,35000,50000,75000,100000,150000,200000,250000,300000,400000,500000]
-    .forEach(v=> { if(v<=500000) set.add(v); });
-  return [...set].filter(v=>v>=0&&v<=500000).sort((a,b)=>a-b);
-}
-
+/*
+  WATERFALL FILL — strict sequential, no scoring loop
+  1. Lock WL  (highest face <= targetWL that leaves room for min term)
+  2. Lock TERM (highest amount <= termTarget that fits remaining)
+  3. Lock ADB  (only if WL>=25k AND term>=6mo income AND budget left)
+  Budget ceiling = budget + grace ($4 under $6k/mo income, $8 over $6k)
+*/
 function findBestAutoMix(card, person, budgetOverride){
   const input = getPersonInput(person);
   const age = input.age;
   const targets = getRecommendedTargets(card, person);
-  const { minWL, targetWL, termTarget, adbTarget, sspMode, allowExtraTerm, allowExtraADB } = targets;
-  // Use injected budget (household-aware) if provided, otherwise fall back to pane estimate
-  const budget = (budgetOverride !== undefined && budgetOverride !== null)
+  const { minWL, targetWL, termTarget, adbTarget, sspMode, grace } = targets;
+  const income = Number($('monthlyIncome').value || 0);
+  const rawBudget = (budgetOverride !== undefined && budgetOverride !== null)
     ? budgetOverride : targets.paneBudget;
-  const householdMonthly = Number($('monthlyIncome').value || 0);
-  const permOptions = buildPermanentOptions(input.age, input.sex, input.tob)
-    .filter(o => o.face === 0 || o.face >= minWL);
-  const termChoices = (termTarget > 0 || allowExtraTerm) ? buildStepLadder(termTarget).filter(v => v <= 500000) : [0];
-  const adbChoices = (adbTarget > 0 || allowExtraADB) ? buildStepLadder(adbTarget).filter(v => v <= 500000) : [0];
+  const ceiling = rawBudget + grace;
 
-  let best = { wl:minWL, term:0, adb:0, monthly:999999, score:Infinity };
+  if(sspMode) return { wl: targetWL, term: 0, adb: 0 };
 
-  for(const p of permOptions){
-    const wl = p.face;
-    if(wl < minWL) continue;
-    const wlMonthly = priceCoverage(input, { wl, term:0, adb:0 }).monthly;
-    if(wlMonthly > budget + 4) continue;
+  const permOptions = buildPermanentOptions(input.age, input.sex, input.tob);
 
-    for(const term of termChoices){
-      if(term > 0 && !find10RCRate(input.age, input.sex, input.tob)) continue;
-      const withTerm = priceCoverage(input, { wl, term, adb:0 }).monthly;
-      if(withTerm > budget + 4) continue;
+  // Pre-calc cost of 3 months term to reserve budget space for it
+  let minTermCost = 0;
+  const termRow = find10RCRate(input.age, input.sex, input.tob);
+  if(termTarget > 0 && termRow){
+    const minTerm = round1000(income * 3);
+    const u = minTerm / 1000;
+    minTermCost = annualToMonthly(u * termRow.base_rate + termRow.policy_fee_annual + termRow.volume_adjustment_annual);
+  }
 
-      for(const adb of adbChoices){
-        if(adb > 0 && !findADBRate(input.age)) continue;
-        const priced = priceCoverage(input, { wl, term, adb });
-        const wlShort  = Math.max(0, targetWL  - wl)   / 1000;
-        const termShort = Math.max(0, termTarget - term) / 1000;
-        const adbShort  = Math.max(0, adbTarget  - adb)  / 1000;
-        const wlOver   = Math.max(0, wl   - targetWL)   / 1000;
-        const termOver  = Math.max(0, term  - termTarget) / 1000;
-        const adbOver   = Math.max(0, adb   - adbTarget)  / 1000;
+  // STEP 1: WL — highest face <= targetWL that fits, leaving room for min term
+  const wlCeiling = ceiling - (termTarget > 0 ? minTermCost : 0);
+  let chosenWL = 0;
+  const wlCandidates = [...permOptions]
+    .filter(o => o.face >= minWL && o.face <= targetWL)
+    .sort((a,b) => b.face - a.face);
+  for(const opt of wlCandidates){
+    const cost = priceCoverage(input, { wl: opt.face, term: 0, adb: 0 }).monthly;
+    if(cost <= wlCeiling){ chosenWL = opt.face; break; }
+  }
+  // Fallback: max WL that fits at all
+  if(!chosenWL){
+    for(const opt of [...permOptions].sort((a,b) => b.face - a.face)){
+      if(opt.face < 1000) continue;
+      const cost = priceCoverage(input, { wl: opt.face, term: 0, adb: 0 }).monthly;
+      if(cost <= wlCeiling){ chosenWL = opt.face; break; }
+    }
+  }
+  if(!chosenWL) return { wl: 0, term: 0, adb: 0 };
 
-        // $4/mo grace zone — optimizer can use this room freely for WL
-        const GRACE = 4.0;
-        const overBudget  = Math.max(0, priced.monthly - (budget + GRACE));
-        const underBudget = Math.max(0, budget - priced.monthly);
+  const wlCost = priceCoverage(input, { wl: chosenWL, term: 0, adb: 0 }).monthly;
+  let remaining = ceiling - wlCost;
 
-        // Budget penalties: quadratic over-budget sting, mild under-budget nudge
-        const overPen  = overBudget * 400 + overBudget * overBudget * 0.6;
-        const underPen = underBudget * (sspMode ? 5 : 8);
+  // STEP 2: TERM — highest amount <= termTarget that fits remaining budget
+  let chosenTerm = 0;
+  if(termTarget > 0 && remaining > 0 && termRow){
+    const minTerm = round1000(income * 3);
+    const termSteps = new Set([minTerm, termTarget]);
+    for(let t = minTerm; t <= termTarget; t += 1000) termSteps.add(round1000(t));
+    for(const t of [...termSteps].sort((a,b)=>b-a)){
+      if(t < minTerm) continue;
+      const u = t / 1000;
+      const cost = annualToMonthly(u * termRow.base_rate + termRow.policy_fee_annual + termRow.volume_adjustment_annual);
+      if(cost <= remaining){ chosenTerm = t; remaining -= cost; break; }
+    }
+  }
 
-        // WL miss weight rises continuously with age
-        // At age 18: 52, age 35: 75, age 45: 90, age 55: 105
-        const wlMissW = 52 + (age - 18) * 1.35;
-
-        // Term miss weight falls continuously with age (term less critical as WL grows)
-        // At age 18: 16, age 35: 12, age 45: 9, age 55: 5, age 65+: 0
-        const termMissW = termTarget > 0
-          ? Math.max(0, 16 - (age - 18) * 0.2)
-          : 0;
-
-        // ADB: always lowest priority — just a sprinkle
-        const adbMissW = adbTarget > 0 ? 2.5 : 0;
-
-        // Overshoot penalties — we'd rather miss slightly than waste budget
-        const wlOverPen   = wlOver   * 5;    // more WL than target is mildly ok
-        const termOverPen  = termOver  * (card === 'one' ? 28 : 7);
-        const adbOverPen   = adbOver   * (card === 'one' ? 22 : 6);
-
-        // Hard penalty for adding coverage that has a zero target
-        const unwantedTerm = (term > 0 && termTarget === 0) ? term / 1000 * 60 : 0;
-        const unwantedADB  = (adb  > 0 && adbTarget  === 0) ? adb  / 1000 * 50 : 0;
-
-        // WL bonus: gently rewards maximising permanent coverage
-        const wlBonus = (Math.min(wl, targetWL) / 1000) * (age >= 45 ? 1.0 : 0.55);
-
-        const score =
-          overPen + underPen +
-          wlShort  * wlMissW   +
-          termShort * termMissW  +
-          adbShort  * adbMissW   +
-          wlOverPen + termOverPen + adbOverPen +
-          unwantedTerm + unwantedADB +
-          (wl < minWL ? 99999 : 0) -
-          wlBonus;
-
-        if(score < best.score || (Math.abs(score - best.score) < 0.001 && priced.monthly > best.monthly)){
-          best = { wl, term, adb, monthly: priced.monthly, score };
-        }
+  // STEP 3: ADB — only after WL>=25k AND term>=6mo income
+  let chosenADB = 0;
+  const wlGate   = chosenWL >= 25000;
+  const termGate = termTarget === 0 || chosenTerm >= round1000(income * 6);
+  if(adbTarget > 0 && wlGate && termGate && remaining > 0 && age < 55){
+    const adbRow = findADBRate(input.age);
+    if(adbRow){
+      for(const a of [adbTarget, 50000, 40000, 25000].filter(v => v > 0 && v <= Math.max(adbTarget, 25000))){
+        const cost = annualToMonthly((a / 1000) * adbRow.base_rate);
+        if(cost <= remaining){ chosenADB = a; break; }
       }
     }
   }
 
-  return best;
+  return { wl: chosenWL, term: chosenTerm, adb: chosenADB };
 }
 
 function renderPane(card, person){
