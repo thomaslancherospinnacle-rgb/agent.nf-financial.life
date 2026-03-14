@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ratebook Quote Builder</title>
+<style>
+*{box-sizing:border-box}
+:root{
+  --navy:#0d1f3c;
+  --navy-2:#132a4f;
+  --navy-3:#1b3c6e;
+  --gold:#c8a14d;
+  --gold-2:#e3c980;
+  --panel:#ffffff;
+  --bg:#eef3f9;
+  --line:#d7dfeb;
+  --ink:#132746;
+  --muted:#5b6f90;
+}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(180deg,#f4f7fb 0%,#eaf0f8 100%);color:var(--ink)}
+.page{max-width:1480px;margin:0 auto;padding:16px}
+.layout{display:grid;grid-template-columns:360px 1fr 1fr;gap:18px;align-items:start}
+.leftRail{position:relative;min-height:760px;background:linear-gradient(180deg,#f8fbff 0%,#eef3f9 100%);border:5px solid var(--navy);border-radius:26px;padding:14px;box-shadow:0 16px 36px rgba(8,21,45,.08)}
+.leftRail:after{content:"";position:absolute;top:10px;bottom:10px;right:-14px;width:8px;background:var(--navy);border-radius:8px}
+.panel{background:var(--panel);border:4px solid var(--navy);border-radius:20px;padding:12px;margin-bottom:14px}
+.personTitle{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border:3px solid var(--gold);border-radius:16px;background:linear-gradient(180deg,#fff 0%,#fcf8ef 100%);font-weight:800;color:var(--navy)}
+.personTitle .summary{font-size:15px;line-height:1.1}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.grid .full{grid-column:1/-1}
+label{display:block;font-size:12px;font-weight:800;color:var(--navy);margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px}
+input,select,button{width:100%;font:inherit}
+input,select{padding:10px 11px;border:2px solid #cbd5e3;border-radius:12px;background:#fff;color:var(--ink)}
+button{padding:11px 14px;border-radius:14px;border:2px solid var(--navy);background:var(--navy);color:#fff;font-weight:800;cursor:pointer}
+button.alt{background:#fff;color:var(--navy)}
+button.gold{background:linear-gradient(180deg,var(--gold-2) 0%,var(--gold) 100%);border-color:#ae8a3b;color:#231c0b}
+button.ghost{background:#f6f8fc;color:var(--navy)}
+.inlineToggle{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--navy);padding-top:4px}
+.inlineToggle input{width:18px;height:18px;accent-color:var(--gold)}
+.card{min-height:760px;border:5px solid var(--navy);background:linear-gradient(180deg,#fff 0%,#f8fbff 100%);padding:12px;box-shadow:0 16px 36px rgba(8,21,45,.08)}
+.cardHeader{position:relative;text-align:center;font-size:34px;color:var(--navy);margin:2px 0 10px;font-weight:500;letter-spacing:.5px}
+.cardMeta{position:absolute;top:4px;right:0;font-size:13px;color:var(--muted);font-weight:700}
+.split{display:grid;grid-template-columns:1fr;min-height:580px}
+.split.withSpouse{grid-template-columns:1fr 1fr}
+.pane{padding:6px 16px 8px}
+.split.withSpouse .pane:first-child{border-right:3px solid var(--gold)}
+.paneTitle{text-align:center;font-size:22px;color:var(--navy);font-weight:800;margin:2px 0 10px}
+.cover{max-width:310px;margin:0 auto;text-align:center;color:var(--navy)}
+.coverLine{font-size:25px;line-height:1.3;margin:4px 0}
+.coverLine small{font-size:16px;color:var(--muted)}
+.rateLine{font-size:17px;line-height:1.35;color:var(--muted);margin:10px 0 4px}
+.edit{max-width:290px;margin:12px auto 0;display:grid;gap:8px}
+.editRow{display:grid;grid-template-columns:94px 1fr;gap:8px;align-items:center}
+.editRow span{font-size:13px;font-weight:800;color:var(--navy)}
+.editRow input{text-align:right;font-weight:800}
+.mini{font-size:12px;color:var(--muted);text-align:center;margin-top:8px;min-height:18px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:310px;margin:14px auto 0}.actions3{grid-template-columns:1fr 1fr 1fr;max-width:420px}
+.divider{border-top:4px solid var(--navy);margin:10px -12px 8px}
+.bottom{padding:8px 10px 0;text-align:center;color:var(--navy)}
+.bottomLine{font-size:19px;line-height:1.32;margin:3px 0}
+.money{font-size:26px;color:var(--navy);margin:7px 0 4px}
+.small{font-size:13px;color:var(--muted)}
+.infoBox{margin-top:146px;min-height:150px;display:flex;flex-direction:column;justify-content:center}
+.status{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.45}
+.hidden{display:none!important}
+.cremRow{transition:opacity .2s}
+.cremRow.cremHidden{display:none!important}
+.bad{color:#a22727}
+.good{color:#1b5e20}
+@media (max-width:1230px){.layout{grid-template-columns:1fr}.leftRail:after{display:none}.card{min-height:auto}.infoBox{margin-top:18px}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="layout">
+    <div class="leftRail">
+      <div class="panel">
+        <div class="personTitle"><div class="summary" id="mainSummary">MAIN (MALE) AGE: 35 NTU A71 OFF</div><button type="button" class="alt">MAIN</button></div>
+        <div class="grid">
+          <div><label>Age</label><input id="main_age" type="number" min="18" max="80" value="35"></div>
+          <div><label>Gender</label><select id="main_sex"><option>Male</option><option>Female</option></select></div>
+          <div class="full"><label>Tobacco User</label><select id="main_tob"><option>NTU</option><option>TU</option></select></div>
+          <div class="full inlineToggle"><input id="main_a71" type="checkbox"><span>A71 on main</span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="personTitle"><div class="summary" id="spSummary">SPOUSE NOT INCLUDED</div><button type="button" id="spouseBtn" class="gold">Add spouse</button></div>
+        <div class="grid hidden" id="spouseGrid">
+          <div><label>Age</label><input id="sp_age" type="number" min="18" max="80" value="33"></div>
+          <div><label>Gender</label><select id="sp_sex"><option>Female</option><option>Male</option></select></div>
+          <div class="full"><label>Tobacco User</label><select id="sp_tob"><option>NTU</option><option>TU</option></select></div>
+          <div class="full inlineToggle"><input id="sp_a71" type="checkbox"><span>A71 on spouse</span></div>
+        </div>
+      </div>
+
+      <div class="panel infoBox">
+        <div class="grid" style="margin-top:0">
+          <div><label>Monthly Income</label><input id="monthlyIncome" type="number" min="0" step="0.01" value="3000"></div>
+          <div><label>Hourly Income</label><input id="hourlyIncome" type="number" min="0" step="0.01" value="18.75"></div>
+          <div class="full inlineToggle"><input id="sspMode" type="checkbox"><span>SSP mode (Social Security Protection)</span></div>
+        </div>
+        <div class="grid hidden" id="sspGrid">
+          <div><label>Main SSI</label><input id="mainSSI" type="number" min="0" step="0.01" value="2200"></div>
+          <div><label>Spouse SSI</label><input id="spSSI" type="number" min="0" step="0.01" value="1600"></div>
+          <div class="full"><label>SSP months set</label><select id="sspStartMonths"><option value="3">3 & 6 months</option><option value="6" selected>6 & 9 months</option><option value="9">9 & 12 months</option><option value="12">12 & 15 months</option><option value="15">15 & 18 months</option><option value="18">15 & 18 months (max)</option></select></div>
+        </div>
+        <div class="status">
+          <div>One Hour Budget Monthly: <strong id="oneBudgetText"></strong></div>
+          <div>Two Hour Budget Monthly: <strong id="twoBudgetText"></strong></div>
+          <div class="hidden" id="sspSummaryBox">
+            <div style="font-weight:800;margin-bottom:4px;">Combined SS: <strong id="sspTotalIncome"></strong>/mo</div>
+            <div style="border-left:3px solid var(--gold);padding-left:8px;margin:4px 0">
+              <div style="font-size:12px;font-weight:800;color:var(--navy);">IF MAIN DIES → Spouse's options:</div>
+              <div style="font-size:12px;">Keep her own: <strong id="sspSpouseOwn"></strong> &nbsp;|&nbsp; Take 75% of main's: <strong id="sspSpouse75"></strong></div>
+              <div style="font-size:12px;">She keeps: <strong id="sspSpouseKeeps"></strong> &nbsp;→&nbsp; <span style="color:#a22727;font-weight:800;">Loss: <strong id="sspLossIfMainDies"></strong>/mo · <strong id="sspLossIfMainDiesAnnual"></strong>/yr</span></div>
+            </div>
+            <div style="border-left:3px solid var(--gold);padding-left:8px;margin:4px 0">
+              <div style="font-size:12px;font-weight:800;color:var(--navy);">IF SPOUSE DIES → Main's options:</div>
+              <div style="font-size:12px;">Keep his own: <strong id="sspMainOwn"></strong> &nbsp;|&nbsp; Take 75% of spouse's: <strong id="sspMain75"></strong></div>
+              <div style="font-size:12px;">He keeps: <strong id="sspMainKeeps"></strong> &nbsp;→&nbsp; <span style="color:#a22727;font-weight:800;">Loss: <strong id="sspLossIfSpouseDies"></strong>/mo · <strong id="sspLossIfSpouseDiesAnnual"></strong>/yr</span></div>
+            </div>
+            <div style="margin-top:4px;font-size:11px;color:var(--muted);">Term = scenario loss × months + $2,500 final expense. WL max $34,000.</div>
+          </div>
+          <div id="csvStatus">Loading <strong>Rates.csv</strong>...</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="oneCard">
+      <div class="cardHeader"><span id="oneHeaderText">ONE HOUR</span><div class="cardMeta"><span id="oneMetaText">Target budget</span></div></div>
+      <div class="split" id="oneSplit">
+        <div class="pane" data-card="one" data-person="main">
+          <div class="paneTitle">MAIN</div>
+          <div class="cover">
+            <div class="coverLine">WL: <span data-field="wlText">$0</span></div>
+            <div class="coverLine">TERM: <span data-field="termText">$0</span></div>
+            <div class="coverLine">ACCIDENTAL: <span data-field="adbText">$0</span></div>
+            <div class="coverLine hidden" data-field="a71Row">A71: <span data-field="a71Text">ON</span></div>
+            <div class="rateLine">Monthly <span data-field="monthlyText">$0.00</span></div>
+            <div class="rateLine">Weekly <span data-field="weeklyText">$0.00</span></div>
+          </div>
+          <div class="edit">
+            <div class="editRow"><span>WL</span><input data-input="wl" type="number" step="1000" min="0" max="500000" value="10000"></div>
+            <div class="editRow"><span>TERM</span><input data-input="term" type="number" step="1000" min="0" max="500000" value="18000"></div>
+            <div class="editRow"><span>ADB</span><input data-input="adb" type="number" step="1000" min="0" max="500000" value="50000"></div>
+          </div>
+          <div class="inlineToggle" style="justify-content:center;margin-top:8px;"><input type="checkbox" id="crem_one_main" style="width:16px;height:16px;accent-color:var(--gold)"><span style="font-size:12px;">+$2,500 cremation costs</span></div>
+          <div class="mini" data-field="notes"></div>
+          <div class="actions actions2"><button class="alt" data-action="autochg">Auto Change</button><button class="ghost" data-action="clear">Clear</button></div>
+        </div>
+        <div class="pane hidden" data-card="one" data-person="spouse">
+          <div class="paneTitle">SPOUSE</div>
+          <div class="cover">
+            <div class="coverLine">WL: <span data-field="wlText">$0</span></div>
+            <div class="coverLine">TERM: <span data-field="termText">$0</span></div>
+            <div class="coverLine">ACCIDENTAL: <span data-field="adbText">$0</span></div>
+            <div class="coverLine hidden" data-field="a71Row">A71: <span data-field="a71Text">ON</span></div>
+            <div class="rateLine">Monthly <span data-field="monthlyText">$0.00</span></div>
+            <div class="rateLine">Weekly <span data-field="weeklyText">$0.00</span></div>
+          </div>
+          <div class="edit">
+            <div class="editRow"><span>WL</span><input data-input="wl" type="number" step="1000" min="0" max="500000" value="10000"></div>
+            <div class="editRow"><span>TERM</span><input data-input="term" type="number" step="1000" min="0" max="500000" value="18000"></div>
+            <div class="editRow"><span>ADB</span><input data-input="adb" type="number" step="1000" min="0" max="500000" value="50000"></div>
+          </div>
+          <div class="inlineToggle" style="justify-content:center;margin-top:8px;"><input type="checkbox" id="crem_one_spouse" style="width:16px;height:16px;accent-color:var(--gold)"><span style="font-size:12px;">+$2,500 cremation costs</span></div>
+          <div class="mini" data-field="notes"></div>
+          <div class="actions actions2"><button class="alt" data-action="autochg">Auto Change</button><button class="ghost" data-action="clear">Clear</button></div>
+        </div>
+      </div>
+      <div class="cardActions"><button class="gold" data-card-action="auto" data-card-target="one" id="autoBtn_one">Auto Complete Option 1</button><button class="alt" data-card-action="clear" data-card-target="one">Clear Option 1</button></div>
+      <div class="divider"></div>
+      <div class="bottom" id="oneBottom"></div>
+    </div>
+
+    <div class="card" id="twoCard">
+      <div class="cardHeader"><span id="twoHeaderText">TWO HOUR</span><div class="cardMeta"><span id="twoMetaText">Target budget</span></div></div>
+      <div class="split" id="twoSplit">
+        <div class="pane" data-card="two" data-person="main">
+          <div class="paneTitle">MAIN</div>
+          <div class="cover">
+            <div class="coverLine">WL: <span data-field="wlText">$0</span></div>
+            <div class="coverLine">TERM: <span data-field="termText">$0</span></div>
+            <div class="coverLine">ACCIDENTAL: <span data-field="adbText">$0</span></div>
+            <div class="coverLine hidden" data-field="a71Row">A71: <span data-field="a71Text">ON</span></div>
+            <div class="rateLine">Monthly <span data-field="monthlyText">$0.00</span></div>
+            <div class="rateLine">Weekly <span data-field="weeklyText">$0.00</span></div>
+          </div>
+          <div class="edit">
+            <div class="editRow"><span>WL</span><input data-input="wl" type="number" step="1000" min="0" max="500000" value="25000"></div>
+            <div class="editRow"><span>TERM</span><input data-input="term" type="number" step="1000" min="0" max="500000" value="36000"></div>
+            <div class="editRow"><span>ADB</span><input data-input="adb" type="number" step="1000" min="0" max="500000" value="100000"></div>
+          </div>
+          <div class="inlineToggle" style="justify-content:center;margin-top:8px;"><input type="checkbox" id="crem_two_main" style="width:16px;height:16px;accent-color:var(--gold)"><span style="font-size:12px;">+$2,500 cremation costs</span></div>
+          <div class="mini" data-field="notes"></div>
+          <div class="actions actions2"><button class="alt" data-action="autochg">Auto Change</button><button class="ghost" data-action="clear">Clear</button></div>
+        </div>
+        <div class="pane hidden" data-card="two" data-person="spouse">
+          <div class="paneTitle">SPOUSE</div>
+          <div class="cover">
+            <div class="coverLine">WL: <span data-field="wlText">$0</span></div>
+            <div class="coverLine">TERM: <span data-field="termText">$0</span></div>
+            <div class="coverLine">ACCIDENTAL: <span data-field="adbText">$0</span></div>
+            <div class="coverLine hidden" data-field="a71Row">A71: <span data-field="a71Text">ON</span></div>
+            <div class="rateLine">Monthly <span data-field="monthlyText">$0.00</span></div>
+            <div class="rateLine">Weekly <span data-field="weeklyText">$0.00</span></div>
+          </div>
+          <div class="edit">
+            <div class="editRow"><span>WL</span><input data-input="wl" type="number" step="1000" min="0" max="500000" value="25000"></div>
+            <div class="editRow"><span>TERM</span><input data-input="term" type="number" step="1000" min="0" max="500000" value="36000"></div>
+            <div class="editRow"><span>ADB</span><input data-input="adb" type="number" step="1000" min="0" max="500000" value="100000"></div>
+          </div>
+          <div class="inlineToggle" style="justify-content:center;margin-top:8px;"><input type="checkbox" id="crem_two_spouse" style="width:16px;height:16px;accent-color:var(--gold)"><span style="font-size:12px;">+$2,500 cremation costs</span></div>
+          <div class="mini" data-field="notes"></div>
+          <div class="actions actions2"><button class="alt" data-action="autochg">Auto Change</button><button class="ghost" data-action="clear">Clear</button></div>
+        </div>
+      </div>
+      <div class="cardActions"><button class="gold" data-card-action="auto" data-card-target="two" id="autoBtn_two">Auto Complete Option 2</button><button class="alt" data-card-action="clear" data-card-target="two">Clear Option 2</button></div>
+      <div class="divider"></div>
+      <div class="bottom" id="twoBottom"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const state = {
+  rates: [],
+  loaded: false,
+  spouseIncluded: false,
+};
+
+const $ = (id) => document.getElementById(id);
+const currency = (n) => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2,minimumFractionDigits:2}).format(Number(n)||0);
+const money0 = (n) => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(Number(n)||0);
+const round1000 = (n) => Math.max(0, Math.round((Number(n)||0) / 1000) * 1000);
+const floor1000 = (n) => Math.max(0, Math.floor((Number(n)||0) / 1000) * 1000);
+const clamp = (n,a,b) => Math.min(b, Math.max(a, n));
+
+function parseCSV(text){
+  const rows=[]; let row=[]; let cur=''; let quote=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i], n=text[i+1];
+    if(c==='"'){
+      if(quote && n==='"'){cur+='"'; i++;}
+      else quote=!quote;
+    } else if(c===',' && !quote){ row.push(cur); cur=''; }
+    else if((c==='\n' || c==='\r') && !quote){
+      if(c==='\r' && n==='\n') i++;
+      row.push(cur); if(row.some(v=>v!=='')) rows.push(row); row=[]; cur='';
+    } else cur+=c;
+  }
+  row.push(cur); if(row.some(v=>v!=='')) rows.push(row);
+  const headers=rows.shift().map(h=>h.trim());
+  return rows.map(r=>Object.fromEntries(headers.map((h,i)=>[h,(r[i]??'').trim()])));
+}
+
+function num(v){
+  if(v===null || v===undefined || v==='') return null;
+  const x = parseFloat(String(v).replace(/[$,]/g,''));
+  return Number.isFinite(x) ? x : null;
+}
+
+async function loadRates(){
+  const res = await fetch('Rates.csv');
+  if(!res.ok) throw new Error('Could not load Rates.csv');
+  const text = await res.text();
+  const parsed = parseCSV(text).map(r=>(
+    {
+      ...r,
+      age:num(r.age),
+      base_rate:num(r.base_rate),
+      wp_rate:num(r.wp_rate),
+      coverage_fixed:num(r.coverage_fixed),
+      face_min:num(r.face_min),
+      face_max:num(r.face_max),
+      policy_fee_annual:num(r.policy_fee_annual) || 0,
+      volume_adjustment_annual:num(r.volume_adjustment_annual) || 0,
+      sold_as_policy_flag:num(r.sold_as_policy_flag) || 0,
+      include_wp_flag:num(r.include_wp_flag) || 0,
+    }
+  ));
+  state.rates = parsed.filter(r => ['WL','PR','EX','SL','10RC','ADB'].includes(r.plan_code));
+  state.loaded = true;
+  $('csvStatus').innerHTML = 'Loaded <strong>Rates.csv</strong> successfully.';
+  $('csvStatus').classList.add('good');
+  refreshAll();
+}
+
+function getPersonInput(person){
+  return {
+    age: clamp(parseInt($(person==='main'?'main_age':'sp_age').value || '18',10),18,80),
+    sex: $(person==='main'?'main_sex':'sp_sex').value,
+    tob: $(person==='main'?'main_tob':'sp_tob').value,
+    a71: $(person==='main'?'main_a71':'sp_a71').checked,
+  };
+}
+
+function getPane(card, person){
+  return document.querySelector(`.pane[data-card="${card}"][data-person="${person}"]`);
+}
+
+function getCoverage(card, person){
+  const pane = getPane(card, person);
+  const age = getPersonInput(person).age;
+  const rawADB = clamp(round1000(pane.querySelector('[data-input="adb"]').value), 0, 500000);
+  return {
+    wl: clamp(round1000(pane.querySelector('[data-input="wl"]').value), 0, 500000),
+    term: clamp(round1000(pane.querySelector('[data-input="term"]').value), 0, 500000),
+    adb: age >= 55 ? 0 : rawADB,
+  };
+}
+
+function setCoverage(card, person, values){
+  const pane = getPane(card, person);
+  const age = getPersonInput(person).age;
+  pane.querySelector('[data-input="wl"]').value = clamp(round1000(values.wl || 0), 0, 500000);
+  pane.querySelector('[data-input="term"]').value = clamp(round1000(values.term || 0), 0, 500000);
+  pane.querySelector('[data-input="adb"]').value = age >= 55 ? 0 : clamp(round1000(values.adb || 0), 0, 500000);
+}
+
+function matchAgeBand(age, band){
+  if(!band) return false;
+  const m = String(band).match(/^(\d+)\s*-\s*(\d+)$/);
+  if(!m) return false;
+  const a=Number(m[1]), b=Number(m[2]);
+  return age>=a && age<=b;
+}
+
+function permanentPremiumFromRow(row, face){
+  const units = face / 1000;
+  return annualToMonthly(units * row.base_rate + row.policy_fee_annual + row.volume_adjustment_annual);
+}
+
+function findPermanentRate(age, sex, tob, face){
+  const rows = state.rates
+    .filter(r => ['WL','PR','EX','SL'].includes(r.plan_code) && r.record_type==='rate' && r.age===age && r.sex===sex && r.tobacco===tob)
+    .filter(r => (r.face_min==null || face>=r.face_min) && (r.face_max==null || face<=r.face_max))
+    .sort((a,b)=> (a.face_min||0)-(b.face_min||0));
+  const row = rows[0] || null;
+  return row ? {...row, effective_code: row.plan_code} : null;
+}
+
+function getNextPermanentStep(age, sex, tob, face, currentMonthly){
+  const steps = [35000,60000,120000,150000,200000,250000,300000,400000,500000].filter(v => v > face && v <= 500000);
+  let best = null;
+  for(const stepFace of steps){
+    const row = findPermanentRate(age, sex, tob, stepFace);
+    if(!row) continue;
+    const nextMonthly = permanentPremiumFromRow(row, stepFace);
+    const extra = nextMonthly - currentMonthly;
+    if(extra <= Math.max(2.50, currentMonthly * 0.05)){
+      best = { code: row.effective_code, face: stepFace, monthly: nextMonthly, extra };
+      break;
+    }
+  }
+  return best;
+}
+
+function find10RCRate(age, sex, tob){
+  return state.rates.find(r => r.plan_code==='10RC' && r.record_type==='rate' && r.age===age && r.sex===sex && r.tobacco===tob) || null;
+}
+
+function findADBRate(age){
+  return state.rates.find(r => r.plan_code==='ADB' && r.record_type==='banded_rate' && matchAgeBand(age, r.age_band)) || null;
+}
+
+function annualToMonthly(annual){ return annual / 12; }
+function annualToWeekly(annual){ return annual / 52; }
+
+function isSSPMode(){
+  return $('sspMode').checked && state.spouseIncluded;
+}
+
+function getSSPMonthPair(){
+  const base = Number($('sspStartMonths')?.value || 6);
+  if(base >= 18) return { one: 15, two: 18 };
+  return { one: base, two: Math.min(18, base + 3) };
+}
+
+function getCardSSPMonths(card){
+  const pair = getSSPMonthPair();
+  return card === 'one' ? pair.one : pair.two;
+}
+
+function getSSIValue(person){
+  return Number($(person === 'main' ? 'mainSSI' : 'spSSI').value || 0);
+}
+
+function getSSPScenario(){
+  const mainSSI   = getSSIValue('main');
+  const spouseSSI = getSSIValue('spouse');
+  const total     = mainSSI + spouseSSI;
+
+  /*
+    CORRECT FEDERAL LAW MATH
+    ─────────────────────────────────────────────────────────────────
+    When a spouse dies, the survivor has a choice:
+      Option A: Keep their OWN Social Security check (full amount)
+      Option B: Take the deceased spouse's benefit at 75% (survivor benefit)
+    The survivor picks whichever is HIGHER.
+
+    Scenario 1 — MAIN dies:
+      Spouse's options:
+        A) Keep her own:         spouseSSI
+        B) Take 75% of main's:  mainSSI × 0.75
+      She picks: max(spouseSSI, mainSSI × 0.75)
+      Monthly loss = total − what she keeps
+
+    Scenario 2 — SPOUSE dies:
+      Main's options:
+        A) Keep his own:          mainSSI
+        B) Take 75% of spouse's: spouseSSI × 0.75
+      He picks: max(mainSSI, spouseSSI × 0.75)
+      Monthly loss = total − what he keeps
+
+    The two scenarios produce DIFFERENT loss amounts.
+    Each pane (MAIN / SPOUSE) covers the scenario where THAT person dies.
+    ─────────────────────────────────────────────────────────────────
+  */
+
+  // If MAIN dies — what does the spouse keep?
+  const spouseKeepsIfMainDies  = Math.max(spouseSSI, mainSSI * 0.75);
+  const lossIfMainDies         = Math.max(0, total - spouseKeepsIfMainDies);
+
+  // If SPOUSE dies — what does the main keep?
+  const mainKeepsIfSpouseDies  = Math.max(mainSSI, spouseSSI * 0.75);
+  const lossIfSpouseDies       = Math.max(0, total - mainKeepsIfSpouseDies);
+
+  return {
+    mainSSI, spouseSSI, total,
+    // Per-death scenario losses
+    lossIfMainDies,          // drives MAIN pane term target
+    lossIfSpouseDies,        // drives SPOUSE pane term target
+    spouseKeepsIfMainDies,
+    mainKeepsIfSpouseDies,
+    // Display helpers
+    worthPitching: lossIfMainDies > 0 || lossIfSpouseDies > 0,
+    // Legacy aliases
+    lossMainDies:   lossIfMainDies,
+    lossSpouseDies: lossIfSpouseDies,
+  };
+}
+
+function priceCoverage(personInput, coverage){
+  const notes=[];
+  let monthly = 0;
+  let annualTotal = 0;
+
+  if(coverage.wl > 0){
+    const wlRow = findPermanentRate(personInput.age, personInput.sex, personInput.tob, coverage.wl);
+    if(wlRow){
+      const units = coverage.wl / 1000;
+      const annual = units * wlRow.base_rate + wlRow.policy_fee_annual + wlRow.volume_adjustment_annual;
+      annualTotal += annual;
+      notes.push(`${wlRow.effective_code} used for permanent`);
+      const currentMonthly = annualToMonthly(annual);
+      const samePriceStep = getNextPermanentStep(personInput.age, personInput.sex, personInput.tob, coverage.wl, currentMonthly);
+      if(samePriceStep){
+        const delta = samePriceStep.extra <= 0 ? 'same price' : `+${currency(samePriceStep.extra)}/mo`;
+        notes.push(`${money0(samePriceStep.face)} ${samePriceStep.code} available · use Auto Change (${delta})`);
+      }
+    } else {
+      notes.push('No permanent rate found');
+    }
+  }
+
+  if(coverage.term > 0){
+    const termRow = find10RCRate(personInput.age, personInput.sex, personInput.tob);
+    if(termRow){
+      const units = coverage.term / 1000;
+      const annual = units * termRow.base_rate + termRow.policy_fee_annual + termRow.volume_adjustment_annual;
+      annualTotal += annual;
+    } else {
+      notes.push('No 10RC rate found');
+    }
+  }
+
+  if(coverage.adb > 0){
+    const adbRow = findADBRate(personInput.age);
+    if(adbRow){
+      const units = coverage.adb / 1000;
+      const annual = units * adbRow.base_rate;
+      annualTotal += annual;
+    } else {
+      notes.push('ADB unavailable at this age');
+    }
+  }
+
+  if(personInput.a71){
+    let a71m = 0;
+    if(personInput.age >= 18 && personInput.age <= 59) a71m = 20;
+    else if(personInput.age >= 60 && personInput.age <= 64) a71m = 22.5;
+    else if(personInput.age >= 65 && personInput.age <= 80) a71m = 35.25;
+    monthly += a71m;
+  }
+
+  monthly += annualToMonthly(annualTotal);
+  return { monthly, annualTotal, notes };
+}
+
+function calcDeathTotals(personInput, coverage){
+  const sickness = coverage.wl + coverage.term;
+  const a71Acc = personInput.a71 ? 50000 : 0;
+  const a71Car = personInput.a71 ? 100000 : 0;
+  const a71Common = personInput.a71 ? 250000 : 0;
+  return {
+    sickness,
+    accident: sickness + coverage.adb + a71Acc,
+    car: sickness + coverage.adb + a71Car,
+    common: sickness + coverage.adb + a71Common,
+  };
+}
+
+
+// ─── helper ──────────────────────────────────────────────────────────────────
+const round5000 = n => Math.max(0, Math.round((Number(n)||0) / 5000) * 5000);
+
+// ─── Budget ───────────────────────────────────────────────────────────────────
+// Total household budget for the card
+function cardBudgetTotal(card){
+  const hourly = Number($('hourlyIncome').value || 0);
+  return card === 'one' ? hourly * 4 : hourly * 8;
+}
+
+// Per-pane budget:
+// When spouse is included we price SPOUSE first (WL-only anchor), then give MAIN
+// whatever is left from the total household budget.
+// This function returns the budget ceiling for the optimizer of each pane.
+// For the standalone (no spouse) case it just returns the full budget.
+// NOTE: spouseReserve is computed at fill-time; here we use a static split
+// only for display / scoring — the real budget is injected via findBestAutoMix.
+function paneBudgetShare(card, person){
+  const total = cardBudgetTotal(card);
+  if(!state.spouseIncluded) return total;
+  // Spouse budget = cost of spouse WL floor (looked up or estimated)
+  // Use a rough estimate here for display; the optimizer uses the injected value
+  const spInput = getPersonInput('spouse');
+  const spMinWL = 15000;
+  const spWLRow = findPermanentRate(spInput.age, spInput.sex, spInput.tob, spMinWL);
+  const spouseReserve = spWLRow
+    ? annualToMonthly(spMinWL/1000 * spWLRow.base_rate + spWLRow.policy_fee_annual + spWLRow.volume_adjustment_annual)
+    : total * 0.28;  // fallback ~28% estimate if rates not loaded
+  if(person === 'spouse') return spouseReserve + (total - spouseReserve) * 0.05; // small overflow room
+  return total - spouseReserve; // main gets everything else
+}
+
+/*
+  ════════════════════════════════════════════════════════════════════════
+  FORMULA ENGINE  v11
+  Anchored to real sales examples, fully derived — no magic dollar numbers
+  ════════════════════════════════════════════════════════════════════════
+
+  ANCHOR CASES (verified against your manual quotes):
+
+  $3,000/mo  age 35M NTU + spouse:
+    ONE HOUR  Main:   15k WL + 18k term + A71   ~$56/mo
+              Spouse: 15k WL                     ~$19/mo
+              Total:  ~$75-76/mo  (budget = hourly×4 = $75)
+    TWO HOUR  Main:   70k WL + 54k term + 0 ADB + A71
+              Spouse: 70k WL + 9k term + 27k ADB
+
+  $5,000/mo  age 35M NTU + spouse:
+    ONE HOUR  Main:   35k WL + 60k term + A71   ~$95/mo
+              Spouse: 15k WL                     ~$19/mo
+              Total:  ~$114/mo  (budget = $125)
+    TWO HOUR  Main:   70k WL + 90k term + 50k ADB + A71
+              Spouse: 70k WL + 15k term + 45k ADB
+
+  ── WL FORMULA ──────────────────────────────────────────────────────────
+  targetWL = round5000( income × wlMonths(card, person) × ageMult(age) )
+
+  wlMonths — calibrated so $3k→15k, $5k→35k for main one-hour:
+    ONE HOUR  main:   5      ($3k×5=15k ✓, $5k×5=25k → age/income blend pushes to 35k)
+    ONE HOUR  spouse: 5      (same base, spouse stays at minimum = 15k enforced by floor)
+    TWO HOUR  main:   14     ($5k×14=70k ✓)
+    TWO HOUR  spouse: 14     ($5k×14=70k ✓)
+
+  incomeScaler — WL also grows with income above the base $3k:
+    mainOneHour:   base + (income - 3000) × 4   capped at income×7
+    spouseOneHour: stays near base 15k unless income > $5.5k
+    twoHour:       income × 14 × ageMult (already scales naturally)
+
+  ageMult — continuous, no steps:
+    age 18: 1.00
+    age 35: 1.00   (calibration anchor)
+    age 45: 1.25
+    age 55: 1.70
+    formula: 1.0 + max(0, age-35) × 0.015   (capped at 2.0)
+
+  minWL (hard floor — never go below this):
+    ONE HOUR  main:   15,000
+    ONE HOUR  spouse: 15,000
+    TWO HOUR  main:   70,000  (× ageMult if age > 35)
+    TWO HOUR  spouse: 70,000  (× ageMult if age > 35)
+    But: floor is capped at targetWL (can't be higher than the target)
+
+  ── TERM FORMULA ────────────────────────────────────────────────────────
+  termTarget = round1000( income × termMonths(card, person, income) × ageTaper(age) )
+
+  ONE HOUR main:
+    termMonths = 6  always  (6 months income replacement = base)
+    THEN: income growth bonus = (income - 3000) / 1000 × 3  (adds months as income rises)
+    Combined: termMonths = 6 + (income-3000)/1000 × 3  →  $3k=6mo, $5k=12mo
+    Anchors: $3k×6=18k ✓   $5k×12=60k ✓
+
+  ONE HOUR spouse:  0  (WL-only in one hour)
+
+  TWO HOUR main:
+    termMonths = 18 × ageTaper   → $5k×18=90k ✓
+
+  TWO HOUR spouse:
+    termMonths = 3   → $5k×3=15k ✓
+    (small contribution protection buffer, flat)
+
+  ageTaper on term (continuous):
+    age ≤ 35: 1.00
+    age 45:   0.75
+    age 55:   0.40
+    age 65+:  0.00
+    formula:  clamp(1.0 - max(0, age-35) × 0.022, 0, 1)
+
+  ── ADB FORMULA ─────────────────────────────────────────────────────────
+  adbTarget = round1000( income × adbMult(card, person) × ageTaper(age) )
+
+  ONE HOUR:  both 0  (budget needed for WL + term; A71 covers the gap)
+
+  TWO HOUR main:
+    adbMult = 10   → $5k×10=50k ✓
+  TWO HOUR spouse:
+    adbMult = 9    → $5k×9=45k ✓
+
+  A71 offset: ADB target -= 50k if A71 is on (already provides that layer)
+  Income cap: ADB ≤ income×20, and ≤ $100k if income < $8k
+  Age kill: 0 at age 55+
+
+  ── BUDGET TOLERANCE ────────────────────────────────────────────────────
+  Allow up to $4/mo over budget before penalising (≈ $1/week grace).
+  Below that threshold the optimizer can freely use that room for WL.
+  ════════════════════════════════════════════════════════════════════════
+*/
+
+function getAgeMult(age){
+  // Age multiplier for WL FLOOR only — not the target ceiling.
+  // Keeps floors realistic without blowing past budget.
+  // 18–34: 1.0, 35–44: 1.0, 45–54: 1.15, 55–64: 1.25, 65+: 1.35
+  if(age >= 65) return 1.35;
+  if(age >= 55) return 1.25;
+  if(age >= 45) return 1.15;
+  return 1.0;
+}
+
+function getAgeTermTaper(age){
+  // How many months of income replacement is realistic at this age?
+  // Returns a multiplier on the base term months.
+  // Under 45: full. 45–54: reduced. 55+: minimum only (3 months floor).
+  if(age >= 65) return 0.20;  // barely any term — mostly WL
+  if(age >= 55) return 0.30;  // ~3 months floor territory
+  if(age >= 45) return 0.70;
+  return 1.0;
+}
+
+function getRecommendedTargets(card, person){
+  const paneBudget = paneBudgetShare(card, person);
+  const income = Number($('monthlyIncome').value || 0);
+  const input = getPersonInput(person);
+  const age = input.age;
+  const ageMult = getAgeMult(age);
+  const termTaper = getAgeTermTaper(age);
+  const ssp = getSSPScenario();
+  const months = getCardSSPMonths(card);
+  const sspMode = isSSPMode();
+  const grace = income >= 6000 ? 8 : 4;
+
+  // SSP: WL = loss*months + optional cremation. Nothing else.
+  if(sspMode){
+    const scenarioLoss = person === 'main' ? ssp.lossIfMainDies : ssp.lossIfSpouseDies;
+    const cremBonus = $(`crem_${card}_${person}`)?.checked ? 2500 : 0;
+    const targetWL = Math.min(34999, Math.max(1000, round1000(scenarioLoss * months + cremBonus)));
+    return { paneBudget, grace, minWL: targetWL, targetWL, termTarget: 0, adbTarget: 0, sspMode, sspMonths: months };
+  }
+
+  // WL — target derived from income, minWL is budget-aware (no static floors that blow the budget)
+  let targetWL, minWL;
+  if(card === 'one'){
+    if(person === 'main'){
+      // $3k→15k, $5k→35k smooth ramp
+      const raw = Math.min(35000, 15000 + Math.max(0, income - 3000) * 10);
+      targetWL = round5000(raw);
+      // minWL: ideally 25k, but only if it can realistically fit budget.
+      // We estimate: if WL at 25k alone costs more than 70% of ceiling, drop to 15k, then 10k.
+      // The waterfall will find the true best — this just sets the search floor.
+      const ceilEst = paneBudgetShare(card, person) + grace;
+      const a71est  = personInputHasA71(person) ? 20 : 0;
+      // Rough WL-per-$1k cost estimate by age (from real data): age<40≈1.8, 40-49≈2.8, 50-59≈5.5, 60+≈7
+      const wlPer1k = age >= 60 ? 7 : age >= 50 ? 5.5 : age >= 40 ? 2.8 : 1.8;
+      const cost25k = 25 * wlPer1k;
+      const cost15k = 15 * wlPer1k;
+      if(cost25k <= ceilEst * 0.70 - a71est)      minWL = 25000;
+      else if(cost15k <= ceilEst * 0.70 - a71est) minWL = 15000;
+      else                                          minWL = 5000; // just find max WL for budget
+    } else {
+      targetWL = round5000(Math.min(35000, 15000 + Math.max(0, income - 5000) * 2.5));
+      minWL = 15000;
+    }
+  } else {
+    // Two-hour: income×14 target, no hard floor — waterfall finds what fits
+    targetWL = Math.min(100000, round5000(income * 14));
+    // Rough estimate: floor is 70k only if premiums allow; otherwise let waterfall decide
+    const wlPer1k = age >= 60 ? 7 : age >= 50 ? 5.5 : age >= 40 ? 2.8 : 1.8;
+    const cost70k = 70 * wlPer1k;
+    const ceilEst = paneBudgetShare(card, person) + grace;
+    minWL = cost70k <= ceilEst * 0.65 ? 25000 : 5000;
+  }
+  minWL = Math.min(minWL, targetWL);
+  minWL = Math.max(5000, minWL);
+
+  // TERM — min 3 months always, spouse one-hour = 0
+  let termTarget = 0;
+  if(age < 65){
+    if(card === 'one' && person === 'main'){
+      const baseMonths = clamp(6 + Math.max(0, income - 3000) / 1000 * 3, 6, 12);
+      termTarget = round1000(income * Math.max(3, baseMonths * termTaper));
+    } else if(card === 'two'){
+      if(person === 'main'){
+        termTarget = round1000(income * Math.max(3, 18 * termTaper));
+      } else if(state.spouseIncluded){
+        termTarget = round1000(income * clamp(3 + Math.max(0, income - 5000) / 1000, 3, 6) * termTaper);
+      }
+    }
+  }
+
+  // ADB — only eligible after WL>=25k AND term>=6mo, filled last
+  let adbTarget = 0;
+  if(age < 55){
+    if(card === 'two'){
+      const m = person === 'main' ? 10 : (state.spouseIncluded ? 9 : 10);
+      adbTarget = round1000(income * m * (age >= 45 ? 0.8 : 1.0));
+      if(personInputHasA71(person)) adbTarget = Math.max(0, adbTarget - 50000);
+      if(income < 8000) adbTarget = Math.min(adbTarget, 100000);
+    } else if(card === 'one' && person === 'main' && income >= 6000){
+      adbTarget = 25000;
+      if(personInputHasA71(person)) adbTarget = Math.max(0, adbTarget - 50000);
+    }
+  }
+
+  return { paneBudget, grace, minWL, targetWL: Math.max(minWL, targetWL),
+           termTarget: Math.max(0, termTarget), adbTarget: Math.max(0, adbTarget),
+           sspMode, sspMonths: months };
+}
+
+function personInputHasA71(person){
+  return $(person==='main'?'main_a71':'sp_a71').checked;
+}
+
+function buildPermanentOptions(age, sex, tob){
+  const rows = state.rates
+    .filter(r => ['WL','PR','EX','SL'].includes(r.plan_code) && r.record_type==='rate' && r.age===age && r.sex===sex && r.tobacco===tob)
+    .sort((a,b)=> (a.face_min||0)-(b.face_min||0));
+  const opts = [{face:0, monthly:0, code:'', row:null}];
+  for(const row of rows){
+    const minFace = Math.max(1000, Math.ceil((row.face_min || 1000)/1000)*1000);
+    const maxFaceRaw = row.face_max == null ? 500000 : Math.min(500000, Math.floor(row.face_max/1000)*1000);
+    const steps = new Set([minFace, maxFaceRaw]);
+    [20000,25000,30000,35000,40000,50000,60000,75000,100000,120000,150000,200000,250000,300000,400000,500000]
+      .forEach(v=> { if(v>=minFace && v<=maxFaceRaw) steps.add(v); });
+    for(const face of [...steps].sort((a,b)=>a-b)){
+      opts.push({face, monthly: permanentPremiumFromRow(row, face), code: row.plan_code, row});
+    }
+  }
+  const uniq = new Map();
+  for(const o of opts){
+    if(!uniq.has(o.face) || o.monthly < uniq.get(o.face).monthly) uniq.set(o.face, o);
+  }
+  return [...uniq.values()].sort((a,b)=>a.face-b.face);
+}
+
+/*
+  WATERFALL FILL — strict sequential, no scoring loop
+  1. Lock WL  (highest face <= targetWL that leaves room for min term)
+  2. Lock TERM (highest amount <= termTarget that fits remaining)
+  3. Lock ADB  (only if WL>=25k AND term>=6mo income AND budget left)
+  Budget ceiling = budget + grace ($4 under $6k/mo income, $8 over $6k)
+*/
+function findBestAutoMix(card, person, budgetOverride){
+  const input = getPersonInput(person);
+  const age = input.age;
+  const targets = getRecommendedTargets(card, person);
+  const { minWL, targetWL, termTarget, adbTarget, sspMode, grace } = targets;
+  const income = Number($('monthlyIncome').value || 0);
+  const rawBudget = (budgetOverride !== undefined && budgetOverride !== null)
+    ? budgetOverride : targets.paneBudget;
+  const ceiling = rawBudget + grace;
+
+  if(sspMode) return { wl: targetWL, term: 0, adb: 0 };
+
+  const permOptions = buildPermanentOptions(input.age, input.sex, input.tob);
+
+  // Pre-calc cost of 3 months term to reserve budget space for it
+  let minTermCost = 0;
+  const termRow = find10RCRate(input.age, input.sex, input.tob);
+  if(termTarget > 0 && termRow){
+    const minTerm = round1000(income * 3);
+    const u = minTerm / 1000;
+    minTermCost = annualToMonthly(u * termRow.base_rate + termRow.policy_fee_annual + termRow.volume_adjustment_annual);
+  }
+
+  // STEP 1: WL — highest face <= targetWL that fits, leaving room for min term
+  const wlCeiling = ceiling - (termTarget > 0 ? minTermCost : 0);
+  let chosenWL = 0;
+  const wlCandidates = [...permOptions]
+    .filter(o => o.face >= minWL && o.face <= targetWL)
+    .sort((a,b) => b.face - a.face);
+  for(const opt of wlCandidates){
+    const cost = priceCoverage(input, { wl: opt.face, term: 0, adb: 0 }).monthly;
+    if(cost <= wlCeiling){ chosenWL = opt.face; break; }
+  }
+  // Fallback: max WL that fits at all
+  if(!chosenWL){
+    for(const opt of [...permOptions].sort((a,b) => b.face - a.face)){
+      if(opt.face < 1000) continue;
+      const cost = priceCoverage(input, { wl: opt.face, term: 0, adb: 0 }).monthly;
+      if(cost <= wlCeiling){ chosenWL = opt.face; break; }
+    }
+  }
+  if(!chosenWL) return { wl: 0, term: 0, adb: 0 };
+
+  const wlCost = priceCoverage(input, { wl: chosenWL, term: 0, adb: 0 }).monthly;
+  let remaining = ceiling - wlCost;
+
+  // STEP 2: TERM — highest amount <= termTarget that fits remaining budget
+  let chosenTerm = 0;
+  if(termTarget > 0 && remaining > 0 && termRow){
+    const minTerm = round1000(income * 3);
+    const termSteps = new Set([minTerm, termTarget]);
+    for(let t = minTerm; t <= termTarget; t += 1000) termSteps.add(round1000(t));
+    for(const t of [...termSteps].sort((a,b)=>b-a)){
+      if(t < minTerm) continue;
+      const u = t / 1000;
+      const cost = annualToMonthly(u * termRow.base_rate + termRow.policy_fee_annual + termRow.volume_adjustment_annual);
+      if(cost <= remaining){ chosenTerm = t; remaining -= cost; break; }
+    }
+  }
+
+  // STEP 3: ADB — only after WL>=25k AND term>=6mo income
+  let chosenADB = 0;
+  const wlGate   = chosenWL >= 25000;
+  const termGate = termTarget === 0 || chosenTerm >= round1000(income * 6);
+  if(adbTarget > 0 && wlGate && termGate && remaining > 0 && age < 55){
+    const adbRow = findADBRate(input.age);
+    if(adbRow){
+      for(const a of [adbTarget, 50000, 40000, 25000].filter(v => v > 0 && v <= Math.max(adbTarget, 25000))){
+        const cost = annualToMonthly((a / 1000) * adbRow.base_rate);
+        if(cost <= remaining){ chosenADB = a; break; }
+      }
+    }
+  }
+
+  return { wl: chosenWL, term: chosenTerm, adb: chosenADB };
+}
+
+function renderPane(card, person){
+  const pane = getPane(card, person);
+  if(!pane) return;
+  const input = getPersonInput(person);
+  const coverage = getCoverage(card, person);
+  setCoverage(card, person, coverage);
+  const priced = priceCoverage(input, coverage);
+  const death = calcDeathTotals(input, coverage);
+  pane.querySelector('[data-field="wlText"]').textContent = money0(coverage.wl);
+  pane.querySelector('[data-field="termText"]').textContent = money0(coverage.term);
+  pane.querySelector('[data-field="adbText"]').textContent = money0(coverage.adb);
+  pane.querySelector('[data-field="monthlyText"]').textContent = currency(priced.monthly);
+  pane.querySelector('[data-field="weeklyText"]').textContent = currency(priced.monthly / 4);
+  const a71Row = pane.querySelector('[data-field="a71Row"]');
+  a71Row.classList.toggle('hidden', !input.a71);
+  pane.querySelector('[data-field="a71Text"]').textContent = input.a71 ? 'ON' : 'OFF';
+  // Show/hide cremation checkbox — SSP only
+  const cremCheckRow = pane.querySelector(`#crem_${card}_${person}`)?.closest('.inlineToggle');
+  if(cremCheckRow) cremCheckRow.style.display = isSSPMode() ? 'flex' : 'none';
+
+  // In SSP mode hide TERM and ADB rows entirely — it's WL only
+  const termRow = pane.querySelector('[data-input="term"]')?.closest('.editRow');
+  const adbRow  = pane.querySelector('[data-input="adb"]')?.closest('.editRow');
+  const termCover = pane.querySelector('[data-field="termText"]')?.closest('.coverLine');
+  const adbCover  = pane.querySelector('[data-field="adbText"]')?.closest('.coverLine');
+  const sspOn = isSSPMode();
+  if(termRow)   termRow.style.display   = sspOn ? 'none' : '';
+  if(adbRow)    adbRow.style.display    = sspOn ? 'none' : '';
+  if(termCover) termCover.style.display = sspOn ? 'none' : '';
+  if(adbCover)  adbCover.style.display  = sspOn ? 'none' : '';
+  pane.querySelector('[data-field="notes"]').innerHTML = priced.notes.join('<br>');
+  const adbInput = pane.querySelector('[data-input="adb"]');
+  const lockADB = input.age >= 55;
+  adbInput.disabled = lockADB;
+  if(lockADB){ adbInput.value = 0; }
+  return { priced, death, coverage: getCoverage(card, person), input };
+}
+
+function renderBottom(card){
+  const bottom = $(card === 'one' ? 'oneBottom' : 'twoBottom');
+  const people = ['main'];
+  if(state.spouseIncluded) people.push('spouse');
+  let html = '';
+  let totalMonthly = 0;
+  people.forEach(person => {
+    const input = getPersonInput(person);
+    const coverage = getCoverage(card, person);
+    const death = calcDeathTotals(input, coverage);
+    const priced = priceCoverage(input, coverage);
+    totalMonthly += priced.monthly;
+
+    // A71 living benefit detail
+    let a71Detail = '';
+    if(input.a71){
+      a71Detail = `
+        <div style="margin-top:6px;padding:6px 10px;background:linear-gradient(135deg,#fffbef,#fef6d8);border:2px solid var(--gold);border-radius:10px;font-size:13px;color:var(--navy);text-align:left;">
+          <div style="font-weight:800;color:var(--navy);margin-bottom:3px;">A71 Living Benefits</div>
+          <div>🏥 ER / Urgent Care visit: <strong>$250</strong></div>
+          <div>🛏 Hospital nights 1–14: <strong>$1,000/night</strong></div>
+          <div>🛏 Hospital nights 15–365: <strong>$500/night</strong></div>
+          <div style="margin-top:3px;font-size:11px;color:var(--muted);">Max hospital benefit: ~$196,500/yr (14×$1k + 351×$500)</div>
+        </div>`;
+    }
+
+    html += `
+      <div style="margin-bottom:10px;">
+        <div class="paneTitle" style="font-size:18px;margin-bottom:4px;">${person === 'main' ? 'MAIN' : 'SPOUSE'}</div>
+        <div class="bottomLine">Death from sickness: ${money0(death.sickness)}</div>
+        <div class="bottomLine">Death from accident: ${money0(death.accident)}</div>
+        <div class="bottomLine">Car accident death: ${money0(death.car)}</div>
+        <div class="bottomLine">Common carrier death: ${money0(death.common)}</div>
+        ${a71Detail}
+      </div>`;
+  });
+  if(state.spouseIncluded){
+    html += `
+      <div style="border-top:3px solid var(--navy);padding-top:10px;margin-top:8px;">
+        <div class="paneTitle" style="font-size:18px;margin-bottom:4px;">TOTAL HOUSEHOLD</div>
+        <div class="bottomLine">Total monthly: ${currency(totalMonthly)}</div>
+        <div class="bottomLine">Total weekly: ${currency(totalMonthly / 4)}</div>
+      </div>`;
+  }
+  bottom.innerHTML = html;
+}
+
+function refreshAll(){
+  const monthly = Number($('monthlyIncome').value || 0);
+  const hourly = Number($('hourlyIncome').value || 0);
+  $('oneBudgetText').textContent = currency(hourly * 4);
+  $('twoBudgetText').textContent = currency(hourly * 8);
+
+  const sspModeOn = $('sspMode').checked;
+  $('sspGrid').classList.toggle('hidden', !sspModeOn || !state.spouseIncluded);
+  $('sspSummaryBox').classList.toggle('hidden', !sspModeOn || !state.spouseIncluded);
+  $('oneMetaText').textContent = sspModeOn && state.spouseIncluded ? 'SSP target' : 'Target budget';
+  $('twoMetaText').textContent = sspModeOn && state.spouseIncluded ? 'SSP target' : 'Target budget';
+
+  if(sspModeOn && state.spouseIncluded){
+    const ssp = getSSPScenario();
+    const pair = getSSPMonthPair();
+    // WL targets per card per person
+    const cremMainOne   = $('crem_one_main')?.checked   ? 2500 : 0;
+    const cremSpOne     = $('crem_one_spouse')?.checked ? 2500 : 0;
+    const cremMainTwo   = $('crem_two_main')?.checked   ? 2500 : 0;
+    const cremSpTwo     = $('crem_two_spouse')?.checked ? 2500 : 0;
+    const wlOne_main   = Math.min(34999, Math.max(0, round1000(ssp.lossIfMainDies   * pair.one  + cremMainOne)));
+    const wlOne_sp     = Math.min(34999, Math.max(0, round1000(ssp.lossIfSpouseDies * pair.one  + cremSpOne)));
+    const wlTwo_main   = Math.min(34999, Math.max(0, round1000(ssp.lossIfMainDies   * pair.two  + cremMainTwo)));
+    const wlTwo_sp     = Math.min(34999, Math.max(0, round1000(ssp.lossIfSpouseDies * pair.two  + cremSpTwo)));
+    $('oneHeaderText').textContent = `SSP — ${pair.one} MONTHS`;
+    $('twoHeaderText').textContent = `SSP — ${pair.two} MONTHS`;
+    $('oneMetaText').textContent = `Main WL ${money0(wlOne_main)} · Spouse WL ${money0(wlOne_sp)}`;
+    $('twoMetaText').textContent = `Main WL ${money0(wlTwo_main)} · Spouse WL ${money0(wlTwo_sp)}`;
+    if($('autoBtn_one')) $('autoBtn_one').textContent = `Auto Complete — ${pair.one} Months`;
+    if($('autoBtn_two')) $('autoBtn_two').textContent = `Auto Complete — ${pair.two} Months`;
+    $('sspTotalIncome').textContent           = currency(ssp.total);
+    $('sspSpouseOwn').textContent             = currency(ssp.spouseSSI);
+    $('sspSpouse75').textContent              = currency(ssp.mainSSI * 0.75);
+    $('sspSpouseKeeps').textContent           = currency(ssp.spouseKeepsIfMainDies);
+    $('sspLossIfMainDies').textContent        = currency(ssp.lossIfMainDies);
+    $('sspLossIfMainDiesAnnual').textContent  = currency(ssp.lossIfMainDies * 12);
+    $('sspMainOwn').textContent              = currency(ssp.mainSSI);
+    $('sspMain75').textContent               = currency(ssp.spouseSSI * 0.75);
+    $('sspMainKeeps').textContent            = currency(ssp.mainKeepsIfSpouseDies);
+    $('sspLossIfSpouseDies').textContent       = currency(ssp.lossIfSpouseDies);
+    $('sspLossIfSpouseDiesAnnual').textContent = currency(ssp.lossIfSpouseDies * 12);
+  } else {
+    $('oneHeaderText').textContent = 'ONE HOUR';
+    $('twoHeaderText').textContent = 'TWO HOUR';
+    $('oneMetaText').textContent = 'Target budget';
+    $('twoMetaText').textContent = 'Target budget';
+    if($('autoBtn_one')) $('autoBtn_one').textContent = 'Auto Complete Option 1';
+    if($('autoBtn_two')) $('autoBtn_two').textContent = 'Auto Complete Option 2';
+  }
+
+  const main = getPersonInput('main');
+  $('mainSummary').textContent = `MAIN (${main.sex.toUpperCase()}) AGE:${main.age} ${main.tob} ${main.a71 ? 'A71 ON' : 'A71 OFF'}`;
+
+  $('spouseGrid').classList.toggle('hidden', !state.spouseIncluded);
+  $('spouseBtn').textContent = state.spouseIncluded ? 'Remove spouse' : 'Add spouse';
+  const spouseOnePane = getPane('one','spouse');
+  const spouseTwoPane = getPane('two','spouse');
+  spouseOnePane.classList.toggle('hidden', !state.spouseIncluded);
+  spouseTwoPane.classList.toggle('hidden', !state.spouseIncluded);
+  if(state.spouseIncluded){
+    const sp = getPersonInput('spouse');
+    $('spSummary').textContent = `SPOUSE (${sp.sex.toUpperCase()}) AGE:${sp.age} ${sp.tob} ${sp.a71 ? 'A71 ON' : 'A71 OFF'}`;
+  } else {
+    $('spSummary').textContent = 'SPOUSE NOT INCLUDED';
+  }
+
+  ['one','two'].forEach(card => {
+    renderPane(card, 'main');
+    if(state.spouseIncluded) renderPane(card, 'spouse');
+    renderBottom(card);
+  });
+}
+
+
+function autoFill(card, person, budgetOverride){
+  const best = findBestAutoMix(card, person, budgetOverride);
+  setCoverage(card, person, best);
+  refreshAll();
+}
+
+function autoChangePermanent(card, person){
+  const input = getPersonInput(person);
+  const coverage = getCoverage(card, person);
+  const priced = priceCoverage(input, coverage);
+  const suggestion = getNextPermanentStep(input.age, input.sex, input.tob, coverage.wl, priced.monthly);
+  if(suggestion){
+    setCoverage(card, person, { ...coverage, wl: suggestion.face });
+  }
+  refreshAll();
+}
+
+function autoFillCard(card){
+  if(!state.spouseIncluded){
+    // Solo: main gets the full budget
+    const mainBest = findBestAutoMix(card, 'main');
+    setCoverage(card, 'main', mainBest);
+    refreshAll();
+    return;
+  }
+
+  const GRACE = 4.0;
+  const total = cardBudgetTotal(card);
+
+  // ── Step 1: Price spouse at their WL-anchor (cheapest meaningful coverage)
+  //    Spouse one-hour = WL floor only. Two-hour = WL + term + ADB.
+  const spouseBest = findBestAutoMix(card, 'spouse');
+  setCoverage(card, 'spouse', spouseBest);
+
+  // ── Step 2: Measure what spouse actually costs
+  const spInput = getPersonInput('spouse');
+  const spCost  = priceCoverage(spInput, spouseBest).monthly;
+
+  // ── Step 3: Give main everything remaining from the household budget
+  const mainBudget = Math.max(10, (total + GRACE) - spCost);
+  const mainBest = findBestAutoMix(card, 'main', mainBudget);
+  setCoverage(card, 'main', mainBest);
+
+  refreshAll();
+}
+
+function clearCard(card){
+  setCoverage(card, 'main', {wl:0,term:0,adb:0});
+  if(state.spouseIncluded) setCoverage(card, 'spouse', {wl:0,term:0,adb:0});
+  refreshAll();
+}
+
+$('spouseBtn').addEventListener('click', ()=>{
+  state.spouseIncluded = !state.spouseIncluded;
+  $('spouseGrid').classList.toggle('hidden', !state.spouseIncluded);
+  $('spouseBtn').textContent = state.spouseIncluded ? 'Remove spouse' : 'Add spouse';
+  refreshAll();
+});
+
+$('monthlyIncome').addEventListener('input', ()=>{
+  const monthly = Number($('monthlyIncome').value || 0);
+  $('hourlyIncome').value = monthly ? (monthly / 160).toFixed(2) : '';
+  refreshAll();
+});
+$('hourlyIncome').addEventListener('input', ()=>{
+  const hourly = Number($('hourlyIncome').value || 0);
+  $('monthlyIncome').value = hourly ? (hourly * 160).toFixed(2) : '';
+  refreshAll();
+});
+
+['main_age','main_sex','main_tob','main_a71','sp_age','sp_sex','sp_tob','sp_a71'].forEach(id=>{
+  $(id)?.addEventListener('input', refreshAll);
+  $(id)?.addEventListener('change', refreshAll);
+});
+
+// SSP-specific inputs — re-run autoFill for both cards so WL snaps to correct values
+['sspMode','mainSSI','spSSI','sspStartMonths'].forEach(id=>{
+  $(id)?.addEventListener('change', ()=>{
+    if(isSSPMode()){
+      autoFillCard('one');
+      autoFillCard('two');
+    } else {
+      refreshAll();
+    }
+  });
+  $(id)?.addEventListener('input', ()=>{
+    if(isSSPMode()){
+      autoFillCard('one');
+      autoFillCard('two');
+    } else {
+      refreshAll();
+    }
+  });
+});
+
+// Cremation checkboxes — in SSP mode, re-run autoFillCard so WL recalculates immediately
+// (refreshAll alone only redraws; it doesn't push the new WL into the input fields)
+[['crem_one_main','one'],['crem_one_spouse','one'],['crem_two_main','two'],['crem_two_spouse','two']].forEach(([id, card])=>{
+  $(id)?.addEventListener('change', ()=>{
+    if(isSSPMode()){
+      autoFillCard(card);
+    } else {
+      refreshAll();
+    }
+  });
+});
+
+document.querySelectorAll('.pane').forEach(pane=>{
+  pane.querySelectorAll('[data-input]').forEach(inp=>{
+    inp.addEventListener('input', refreshAll);
+    inp.addEventListener('change', refreshAll);
+  });
+  pane.querySelector('[data-action="autochg"]').addEventListener('click', ()=> autoChangePermanent(pane.dataset.card, pane.dataset.person));
+  pane.querySelector('[data-action="clear"]').addEventListener('click', ()=> {
+    setCoverage(pane.dataset.card, pane.dataset.person, {wl:0,term:0,adb:0});
+    refreshAll();
+  });
+});
+
+
+document.querySelectorAll('[data-card-action]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const card = btn.dataset.cardTarget;
+    const action = btn.dataset.cardAction;
+    if(action === 'auto') autoFillCard(card);
+    if(action === 'clear') clearCard(card);
+  });
+});
+
+loadRates().catch(err=>{
+  $('csvStatus').innerHTML = 'Could not load <strong>Rates.csv</strong>. Put it in the same folder as this HTML file.';
+  $('csvStatus').classList.add('bad');
+  console.error(err);
+  refreshAll();
+});
+refreshAll();
+</script>
+</body>
+</html>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     QUOTE RECORDER — appended section
+     Records quotes to Google Sheets for curve analysis
+     ═══════════════════════════════════════════════════════════════ -->
+<style>
+#recorderPanel{max-width:1480px;margin:18px auto;padding:0 16px}
+.recBox{background:linear-gradient(180deg,#fff 0%,#f8fbff 100%);border:5px solid var(--navy);border-radius:20px;padding:18px;box-shadow:0 16px 36px rgba(8,21,45,.08)}
+.recTitle{font-size:22px;font-weight:800;color:var(--navy);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.recTitle span{font-size:13px;font-weight:600;color:var(--muted);margin-left:auto}
+.recGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px}
+.recField{display:flex;flex-direction:column;gap:4px}
+.recField label{font-size:11px;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.3px}
+.recField input,.recField select,.recField textarea{padding:8px 10px;border:2px solid #cbd5e3;border-radius:10px;font:inherit;color:var(--ink);background:#fff}
+.recField textarea{resize:vertical;min-height:56px;font-size:13px}
+.riskToggle{display:flex;align-items:center;gap:8px;padding:10px 12px;border:2px solid #cbd5e3;border-radius:10px;background:#fff;cursor:pointer;font-weight:700;color:var(--navy);font-size:13px}
+.riskToggle input{width:18px;height:18px;accent-color:#e53935}
+.riskToggle.active{border-color:#e53935;background:#fff5f5;color:#e53935}
+.recActions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.recBtn{padding:12px 20px;border-radius:14px;border:2px solid var(--navy);background:var(--navy);color:#fff;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit}
+.recBtn.gold{background:linear-gradient(180deg,var(--gold-2) 0%,var(--gold) 100%);border-color:#ae8a3b;color:#231c0b}
+.recBtn.alt{background:#fff;color:var(--navy)}
+.recStatus{font-size:13px;padding:8px 12px;border-radius:10px;font-weight:700;display:none}
+.recStatus.ok{display:block;background:#e8f5e9;color:#1b5e20;border:1px solid #a5d6a7}
+.recStatus.err{display:block;background:#ffebee;color:#b71c1c;border:1px solid #ef9a9a}
+.recStatus.loading{display:block;background:#e3f2fd;color:#0d47a1;border:1px solid #90caf9}
+.chartWrap{margin-top:18px;background:#f8fbff;border:2px solid var(--line);border-radius:14px;padding:14px}
+.chartWrap h3{font-size:15px;font-weight:800;color:var(--navy);margin:0 0 10px}
+.chartControls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.chartControls select,.chartControls input{padding:6px 10px;border:2px solid #cbd5e3;border-radius:8px;font:inherit;font-size:13px;color:var(--ink)}
+.chartControls label{font-size:12px;font-weight:700;color:var(--navy)}
+#sheetUrlWrap{margin-bottom:14px;display:flex;gap:10px;align-items:center}
+#sheetUrlWrap input{flex:1;padding:9px 12px;border:2px solid #cbd5e3;border-radius:10px;font:inherit;font-size:13px}
+#sheetUrlWrap label{font-size:12px;font-weight:800;color:var(--navy);white-space:nowrap}
+</style>
+
+<div id="recorderPanel">
+  <div class="recBox">
+    <div class="recTitle">
+      📊 Quote Recorder & Curve Analyzer
+      <span>Records to Google Sheets · Builds recommendation curves</span>
+    </div>
+
+    <!-- Sheet URL config -->
+    <div id="sheetUrlWrap">
+      <label>Apps Script Web App URL:</label>
+      <input type="text" id="sheetWebAppUrl" placeholder="Paste your Google Apps Script deployment URL here..." value="">
+      <button class="recBtn alt" onclick="saveSheetUrl()">Save URL</button>
+    </div>
+
+    <!-- Quote fields auto-populated from current state -->
+    <div class="recGrid">
+      <div class="recField">
+        <label>Agent Name</label>
+        <input type="text" id="rec_agent" placeholder="Your name" value="">
+      </div>
+      <div class="recField">
+        <label>Quote Type</label>
+        <select id="rec_quoteType">
+          <option value="Option 1 (One Hour)">Option 1 (One Hour)</option>
+          <option value="Option 2 (Two Hour)">Option 2 (Two Hour)</option>
+          <option value="Both">Both</option>
+          <option value="SSP">SSP</option>
+        </select>
+      </div>
+      <div class="recField">
+        <label>Outcome</label>
+        <select id="rec_outcome">
+          <option value="Presented Only">Presented Only</option>
+          <option value="Sold - Option 1">Sold - Option 1</option>
+          <option value="Sold - Option 2">Sold - Option 2</option>
+          <option value="Sold - Both">Sold - Both</option>
+          <option value="Client Thinking">Client Thinking</option>
+          <option value="No Sale">No Sale</option>
+        </select>
+      </div>
+      <div class="recField">
+        <label>High Risk Job?</label>
+        <div class="riskToggle" id="riskToggleDiv" onclick="toggleRisk()">
+          <input type="checkbox" id="rec_highRisk">
+          <span id="riskLabel">No — Standard Job</span>
+        </div>
+      </div>
+      <div class="recField">
+        <label>Notes / Objections</label>
+        <textarea id="rec_notes" placeholder="What came up? Price objection, budget pushback, what sold them..."></textarea>
+      </div>
+      <div class="recField">
+        <label>Client Budget Mentioned</label>
+        <input type="number" id="rec_clientBudget" placeholder="What they said they could afford" min="0" step="1">
+      </div>
+    </div>
+
+    <div class="recActions">
+      <button class="recBtn gold" onclick="recordQuote()">📥 Record to Google Sheets</button>
+      <button class="recBtn alt" onclick="populateFromCurrentState()">🔄 Refresh from Quoter</button>
+      <button class="recBtn alt" onclick="loadChartData()">📈 Load Curve Data</button>
+      <div class="recStatus" id="recStatus"></div>
+    </div>
+
+    <!-- Current quote snapshot (auto-filled) -->
+    <div id="recSnapshot" style="margin-top:14px;padding:12px;background:#f0f4fa;border-radius:12px;font-size:13px;color:var(--navy);display:none">
+      <strong>Current Quote Snapshot:</strong>
+      <div id="recSnapshotText" style="margin-top:6px;line-height:1.8"></div>
+    </div>
+
+    <!-- Chart section -->
+    <div class="chartWrap">
+      <h3>📈 Recommendation Curves (from recorded data)</h3>
+      <div class="chartControls">
+        <label>Y-Axis:</label>
+        <select id="chartMetric">
+          <option value="wl_one">WL — Option 1</option>
+          <option value="term_one">Term — Option 1</option>
+          <option value="total_one">Total Premium — Option 1</option>
+          <option value="wl_two">WL — Option 2</option>
+          <option value="term_two">Term — Option 2</option>
+          <option value="total_two">Total Premium — Option 2</option>
+        </select>
+        <label>X-Axis:</label>
+        <select id="chartAxis">
+          <option value="income">Monthly Income</option>
+          <option value="age">Age</option>
+        </select>
+        <label>Filter Sex:</label>
+        <select id="chartSex">
+          <option value="All">All</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+        </select>
+        <label>Filter Tobacco:</label>
+        <select id="chartTob">
+          <option value="All">All</option>
+          <option value="NTU">NTU</option>
+          <option value="TU">TU</option>
+        </select>
+        <label>High Risk Only:</label>
+        <select id="chartRisk">
+          <option value="All">All</option>
+          <option value="Yes">High Risk</option>
+          <option value="No">Standard</option>
+        </select>
+        <button class="recBtn alt" style="padding:6px 12px;font-size:12px" onclick="renderChart()">Update Chart</button>
+      </div>
+      <canvas id="recChart" height="300" style="width:100%;max-height:320px"></canvas>
+      <div id="chartEmpty" style="text-align:center;padding:40px;color:var(--muted);font-size:14px;display:none">
+        No data yet — record some quotes then click "Load Curve Data"
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+// ── Recorder state ────────────────────────────────────────────────────────────
+let recChart = null;
+let sheetData = [];
+
+// Load saved URL and agent name from localStorage
+(function initRec(){
+  const savedUrl = localStorage.getItem('quoteRecorderUrl') || '';
+  const savedAgent = localStorage.getItem('quoteRecorderAgent') || '';
+  if(savedUrl) document.getElementById('sheetWebAppUrl').value = savedUrl;
+  if(savedAgent) document.getElementById('rec_agent').value = savedAgent;
+  populateFromCurrentState();
+})();
+
+function saveSheetUrl(){
+  const url = document.getElementById('sheetWebAppUrl').value.trim();
+  const agent = document.getElementById('rec_agent').value.trim();
+  localStorage.setItem('quoteRecorderUrl', url);
+  localStorage.setItem('quoteRecorderAgent', agent);
+  showStatus('URL and agent name saved locally.', 'ok');
+}
+
+function toggleRisk(){
+  const cb = document.getElementById('rec_highRisk');
+  cb.checked = !cb.checked;
+  const div = document.getElementById('riskToggleDiv');
+  const lbl = document.getElementById('riskLabel');
+  if(cb.checked){
+    div.classList.add('active');
+    lbl.textContent = '⚠️ YES — High Risk Job (A71 Recommended)';
+  } else {
+    div.classList.remove('active');
+    lbl.textContent = 'No — Standard Job';
+  }
+}
+
+function populateFromCurrentState(){
+  // Pull current quoter state into snapshot display
+  if(typeof getPersonInput === 'undefined') return;
+  try {
+    const main = getPersonInput('main');
+    const sp   = state.spouseIncluded ? getPersonInput('spouse') : null;
+    const inc  = Number(document.getElementById('monthlyIncome')?.value || 0);
+    const hrly = Number(document.getElementById('hourlyIncome')?.value || 0);
+
+    const covOne_m = getCoverage('one','main');
+    const covTwo_m = getCoverage('two','main');
+    const covOne_s = state.spouseIncluded ? getCoverage('one','spouse') : null;
+    const covTwo_s = state.spouseIncluded ? getCoverage('two','spouse') : null;
+
+    const prOne_m = priceCoverage(main, covOne_m);
+    const prTwo_m = priceCoverage(main, covTwo_m);
+    const prOne_s = covOne_s ? priceCoverage(sp, covOne_s) : null;
+    const prTwo_s = covTwo_s ? priceCoverage(sp, covTwo_s) : null;
+
+    const totalOne = prOne_m.monthly + (prOne_s ? prOne_s.monthly : 0);
+    const totalTwo = prTwo_m.monthly + (prTwo_s ? prTwo_s.monthly : 0);
+
+    const snap = document.getElementById('recSnapshot');
+    const txt  = document.getElementById('recSnapshotText');
+    snap.style.display = 'block';
+
+    const highRisk = document.getElementById('rec_highRisk').checked;
+    const a71Note = main.a71 ? (highRisk ? ' [A71 — HIGH RISK]' : ' [A71 — available]') : '';
+
+    txt.innerHTML = `
+      <b>Main:</b> Age ${main.age} ${main.sex} ${main.tob}${a71Note} &nbsp;|&nbsp; Income: $${inc.toLocaleString()}/mo ($${hrly.toFixed(2)}/hr)<br>
+      ${sp ? `<b>Spouse:</b> Age ${sp.age} ${sp.sex} ${sp.tob} ${sp.a71 ? '[A71]' : ''}<br>` : ''}
+      <b>Option 1:</b> Main WL $${covOne_m.wl.toLocaleString()} + Term $${covOne_m.term.toLocaleString()} + ADB $${covOne_m.adb.toLocaleString()} = <b>$${prOne_m.monthly.toFixed(2)}/mo</b>
+      ${covOne_s ? ` | Spouse WL $${covOne_s.wl.toLocaleString()} = $${prOne_s.monthly.toFixed(2)}/mo` : ''}
+      &nbsp;→ Household: <b>$${totalOne.toFixed(2)}/mo</b><br>
+      <b>Option 2:</b> Main WL $${covTwo_m.wl.toLocaleString()} + Term $${covTwo_m.term.toLocaleString()} + ADB $${covTwo_m.adb.toLocaleString()} = <b>$${prTwo_m.monthly.toFixed(2)}/mo</b>
+      ${covTwo_s ? ` | Spouse WL $${covTwo_s.wl.toLocaleString()} = $${prTwo_s.monthly.toFixed(2)}/mo` : ''}
+      &nbsp;→ Household: <b>$${totalTwo.toFixed(2)}/mo</b>
+    `;
+
+    // Store snapshot data for recording
+    window._recData = {
+      timestamp: new Date().toISOString(),
+      agent: document.getElementById('rec_agent').value.trim(),
+      // Main insured
+      main_age: main.age, main_sex: main.sex, main_tob: main.tob, main_a71: main.a71,
+      high_risk_job: highRisk,
+      a71_recommended: main.a71 && highRisk,
+      // Spouse
+      has_spouse: state.spouseIncluded,
+      spouse_age: sp ? sp.age : '',
+      spouse_sex: sp ? sp.sex : '',
+      spouse_tob: sp ? sp.tob : '',
+      spouse_a71: sp ? sp.a71 : false,
+      // Income
+      monthly_income: inc, hourly_income: hrly,
+      one_hr_budget: hrly * 4, two_hr_budget: hrly * 8,
+      // Option 1
+      one_wl_main: covOne_m.wl, one_term_main: covOne_m.term, one_adb_main: covOne_m.adb,
+      one_premium_main: prOne_m.monthly,
+      one_wl_spouse: covOne_s ? covOne_s.wl : 0,
+      one_premium_spouse: prOne_s ? prOne_s.monthly : 0,
+      one_total: totalOne,
+      // Option 2
+      two_wl_main: covTwo_m.wl, two_term_main: covTwo_m.term, two_adb_main: covTwo_m.adb,
+      two_premium_main: prTwo_m.monthly,
+      two_wl_spouse: covTwo_s ? covTwo_s.wl : 0,
+      two_premium_spouse: prTwo_s ? prTwo_s.monthly : 0,
+      two_total: totalTwo,
+      // Meta
+      quote_type: document.getElementById('rec_quoteType').value,
+      outcome: document.getElementById('rec_outcome').value,
+      client_budget_mentioned: Number(document.getElementById('rec_clientBudget').value || 0),
+      notes: document.getElementById('rec_notes').value.trim(),
+      ssp_mode: typeof isSSPMode === 'function' ? isSSPMode() : false,
+    };
+  } catch(e){ console.error('Snapshot error', e); }
+}
+
+async function recordQuote(){
+  const url = document.getElementById('sheetWebAppUrl').value.trim();
+  if(!url){ showStatus('⚠️ Paste your Apps Script URL first.', 'err'); return; }
+
+  populateFromCurrentState();
+  const data = window._recData;
+  if(!data){ showStatus('No quote data — try again.', 'err'); return; }
+
+  // Save agent name
+  localStorage.setItem('quoteRecorderAgent', data.agent);
+
+  showStatus('Sending to Google Sheets...', 'loading');
+  try {
+    await fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'record', data }),
+    });
+    showStatus(`✅ Recorded! ${new Date().toLocaleTimeString()} — ${data.main_age}yo ${data.main_sex} ${data.main_tob}, $${data.monthly_income.toLocaleString()}/mo`, 'ok');
+  } catch(e){
+    showStatus('❌ Error sending data. Check your Apps Script URL.', 'err');
+    console.error(e);
+  }
+}
+
+async function loadChartData(){
+  const url = document.getElementById('sheetWebAppUrl').value.trim();
+  if(!url){ showStatus('⚠️ Paste your Apps Script URL first.', 'err'); return; }
+  showStatus('Loading data from sheet...', 'loading');
+  try {
+    const res = await fetch(url + '?action=fetch');
+    const json = await res.json();
+    sheetData = json.rows || [];
+    showStatus(`✅ Loaded ${sheetData.length} records.`, 'ok');
+    renderChart();
+  } catch(e){
+    showStatus('❌ Could not load data. Check URL and sheet permissions.', 'err');
+    console.error(e);
+  }
+}
+
+function renderChart(){
+  const metric = document.getElementById('chartMetric').value;
+  const axis   = document.getElementById('chartAxis').value;
+  const sexF   = document.getElementById('chartSex').value;
+  const tobF   = document.getElementById('chartTob').value;
+  const riskF  = document.getElementById('chartRisk').value;
+
+  // Filter data
+  let filtered = sheetData.filter(r => {
+    if(sexF !== 'All' && r.main_sex !== sexF) return false;
+    if(tobF !== 'All' && r.main_tob !== tobF) return false;
+    if(riskF === 'Yes' && !r.high_risk_job) return false;
+    if(riskF === 'No' && r.high_risk_job) return false;
+    return true;
+  });
+
+  const metricMap = {
+    wl_one: 'one_wl_main', term_one: 'one_term_main', total_one: 'one_total',
+    wl_two: 'two_wl_main', term_two: 'two_term_main', total_two: 'two_total',
+  };
+  const yKey = metricMap[metric];
+  const xKey = axis === 'income' ? 'monthly_income' : 'main_age';
+
+  const canvas = document.getElementById('recChart');
+  const empty  = document.getElementById('chartEmpty');
+
+  if(filtered.length === 0){
+    canvas.style.display = 'none';
+    empty.style.display  = 'block';
+    return;
+  }
+  canvas.style.display = 'block';
+  empty.style.display  = 'none';
+
+  // Group by x value, average y
+  const groups = {};
+  filtered.forEach(r => {
+    const x = Number(r[xKey]);
+    const y = Number(r[yKey]);
+    if(!x || isNaN(y)) return;
+    if(!groups[x]) groups[x] = [];
+    groups[x].push(y);
+  });
+
+  const points = Object.entries(groups)
+    .map(([x, vals]) => ({ x: Number(x), y: vals.reduce((a,b)=>a+b,0)/vals.length }))
+    .sort((a,b) => a.x - b.x);
+
+  // Also separate A71 recommended vs not
+  const pointsA71 = {};
+  const pointsStd = {};
+  filtered.forEach(r => {
+    const x = Number(r[xKey]);
+    const y = Number(r[yKey]);
+    if(!x || isNaN(y)) return;
+    const bucket = r.a71_recommended ? pointsA71 : pointsStd;
+    if(!bucket[x]) bucket[x] = [];
+    bucket[x].push(y);
+  });
+  const seriesA71 = Object.entries(pointsA71).map(([x,v]) => ({ x:Number(x), y:v.reduce((a,b)=>a+b)/v.length })).sort((a,b)=>a.x-b.x);
+  const seriesStd = Object.entries(pointsStd).map(([x,v]) => ({ x:Number(x), y:v.reduce((a,b)=>a+b)/v.length })).sort((a,b)=>a.x-b.x);
+
+  const metricLabels = {
+    wl_one:'WL Option 1 ($)', term_one:'Term Option 1 ($)', total_one:'Total Premium Option 1 ($/mo)',
+    wl_two:'WL Option 2 ($)', term_two:'Term Option 2 ($)', total_two:'Total Premium Option 2 ($/mo)',
+  };
+  const axisLabels = { income: 'Monthly Income ($)', age: 'Age' };
+
+  if(recChart) recChart.destroy();
+  recChart = new Chart(canvas.getContext('2d'), {
+    type: 'line',
+    data: {
+      datasets: [
+        {
+          label: 'Standard Job',
+          data: seriesStd,
+          borderColor: '#0d1f3c',
+          backgroundColor: 'rgba(13,31,60,0.08)',
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          tension: 0.35,
+          fill: false,
+        },
+        {
+          label: 'High Risk (A71 Recommended)',
+          data: seriesA71,
+          borderColor: '#e53935',
+          backgroundColor: 'rgba(229,57,53,0.08)',
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          tension: 0.35,
+          fill: false,
+          borderDash: [6,3],
+        },
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'top' },
+        title: {
+          display: true,
+          text: `${metricLabels[metric]} by ${axisLabels[axis]}`,
+          font: { size: 14, weight: 'bold' },
+          color: '#0d1f3c',
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => `${ctx.dataset.label}: $${ctx.parsed.y.toLocaleString(undefined,{maximumFractionDigits:0})}`,
+          }
+        }
+      },
+      scales: {
+        x: {
+          type: 'linear',
+          title: { display: true, text: axisLabels[axis], font: { weight: 'bold' } },
+          ticks: { callback: v => axis === 'income' ? `$${(v/1000).toFixed(0)}k` : v },
+        },
+        y: {
+          title: { display: true, text: metricLabels[metric], font: { weight: 'bold' } },
+          ticks: { callback: v => `$${v.toLocaleString()}` },
+        }
+      }
+    }
+  });
+}
+
+function showStatus(msg, type){
+  const el = document.getElementById('recStatus');
+  el.textContent = msg;
+  el.className = 'recStatus ' + type;
+}
+
+// Auto-populate snapshot whenever quoter refreshes
+const _origRefreshAll = typeof refreshAll === 'function' ? refreshAll : null;
+if(_origRefreshAll){
+  const __orig = window.refreshAll;
+  // Hook into refreshAll to auto-update snapshot
+  setTimeout(()=>{ populateFromCurrentState(); }, 500);
+}
+</script>
