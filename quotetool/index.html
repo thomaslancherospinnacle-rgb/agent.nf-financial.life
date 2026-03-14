@@ -63,6 +63,8 @@ button.ghost{background:#f6f8fc;color:var(--navy)}
 .infoBox{margin-top:146px;min-height:150px;display:flex;flex-direction:column;justify-content:center}
 .status{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.45}
 .hidden{display:none!important}
+.cremRow{transition:opacity .2s}
+.cremRow.cremHidden{display:none!important}
 .bad{color:#a22727}
 .good{color:#1b5e20}
 @media (max-width:1230px){.layout{grid-template-columns:1fr}.leftRail:after{display:none}.card{min-height:auto}.infoBox{margin-top:18px}}
@@ -666,12 +668,17 @@ function getRecommendedTargets(card, person){
   let targetWL, minWL;
 
   if(sspMode){
-    // SSP is a senior pitch. WL anchors based on age.
-    // Training doc max WL for seniors = $34,000.
-    // Both spouses get meaningful permanent — covers funeral shock on top of income loss.
-    const sspWLBase = Math.min(34000, round5000(15000 * ageMult)); // scales with age, caps at 34k
-    targetWL = sspWLBase;
-    minWL = Math.min(15000, sspWLBase);
+    // SSP is purely: WL = (monthly loss for this scenario × months) + optional $2,500 cremation
+    // That's it. No term. No ADB. No income. No age scaling.
+    // MAIN pane  = main dies → spouse loses income → WL covers that loss
+    // SPOUSE pane = spouse dies → main loses income → WL covers that loss
+    const scenarioLoss = person === 'main' ? ssp.lossIfMainDies : ssp.lossIfSpouseDies;
+    const cremId = `crem_${card}_${person}`;
+    const cremBonus = $(`${cremId}`)?.checked ? 2500 : 0;
+    const rawWL = scenarioLoss * months + cremBonus;
+    // Cap at $34,999 per AIL senior WL limit
+    targetWL = Math.min(34999, Math.max(1000, round1000(rawWL)));
+    minWL = targetWL; // exact target, no flex
   } else if(card === 'one'){
     if(person === 'main'){
       // Anchors: $3k→15k, $5k→35k
@@ -704,14 +711,7 @@ function getRecommendedTargets(card, person){
   let termTarget = 0;
 
   if(sspMode){
-    // MAIN pane  = insuring main's life → covers SPOUSE's income loss if main dies
-    // SPOUSE pane = insuring spouse's life → covers MAIN's income loss if spouse dies
-    const scenarioLoss = person === 'main' ? ssp.lossIfMainDies : ssp.lossIfSpouseDies;
-    const cremId = `crem_${card}_${person}`;
-    const cremBonus = $(cremId)?.checked ? 2500 : 0;
-    if(scenarioLoss > 0){
-      termTarget = round1000(scenarioLoss * months + cremBonus);
-    }
+    termTarget = 0; // SSP = WL only. Term is never used in SSP mode.
   } else if(termTaper > 0){
     if(card === 'one'){
       if(person === 'main'){
@@ -740,17 +740,15 @@ function getRecommendedTargets(card, person){
       const adbMult = person === 'main' ? 10 : (state.spouseIncluded ? 9 : 10);
       adbTarget = round1000(income * adbMult * (age >= 45 ? 0.80 : 1.0));
     }
-    // ONE HOUR: 0 — WL+term fills budget; A71 covers the accidental layer
     if(personInputHasA71(person)) adbTarget = Math.max(0, adbTarget - 50000);
     if(income < 8000) adbTarget = Math.min(adbTarget, 100000);
-  } else if(sspMode && age < 55){
-    adbTarget = card === 'two' ? round1000(income * 5) : 0;
   }
+  // SSP mode: no ADB ever — WL only
 
   adbTarget = Math.max(0, adbTarget);
 
-  const allowExtraTerm = card === 'two' || (card === 'one' && person === 'main' && income > 6000);
-  const allowExtraADB  = card === 'two' && income >= 7000 && age < 55;
+  const allowExtraTerm = !sspMode && (card === 'two' || (card === 'one' && person === 'main' && income > 6000));
+  const allowExtraADB  = !sspMode && card === 'two' && income >= 7000 && age < 55;
 
   return {
     paneBudget,
@@ -908,18 +906,20 @@ function renderPane(card, person){
   const a71Row = pane.querySelector('[data-field="a71Row"]');
   a71Row.classList.toggle('hidden', !input.a71);
   pane.querySelector('[data-field="a71Text"]').textContent = input.a71 ? 'ON' : 'OFF';
-  // Cremation indicator — show in cover when checked
-  const cremId = `crem_${card}_${person}`;
-  const cremChecked = $(`${cremId}`)?.checked || false;
-  let cremLine = pane.querySelector('.cremLine');
-  if(!cremLine){
-    cremLine = document.createElement('div');
-    cremLine.className = 'coverLine cremLine';
-    cremLine.style.fontSize = '14px';
-    cremLine.style.color = 'var(--gold)';
-    pane.querySelector('.cover').appendChild(cremLine);
-  }
-  cremLine.textContent = cremChecked ? '+ $2,500 Cremation' : '';
+  // Show/hide cremation checkbox — SSP only
+  const cremCheckRow = pane.querySelector(`#crem_${card}_${person}`)?.closest('.inlineToggle');
+  if(cremCheckRow) cremCheckRow.style.display = isSSPMode() ? 'flex' : 'none';
+
+  // In SSP mode hide TERM and ADB rows entirely — it's WL only
+  const termRow = pane.querySelector('[data-input="term"]')?.closest('.editRow');
+  const adbRow  = pane.querySelector('[data-input="adb"]')?.closest('.editRow');
+  const termCover = pane.querySelector('[data-field="termText"]')?.closest('.coverLine');
+  const adbCover  = pane.querySelector('[data-field="adbText"]')?.closest('.coverLine');
+  const sspOn = isSSPMode();
+  if(termRow)   termRow.style.display   = sspOn ? 'none' : '';
+  if(adbRow)    adbRow.style.display    = sspOn ? 'none' : '';
+  if(termCover) termCover.style.display = sspOn ? 'none' : '';
+  if(adbCover)  adbCover.style.display  = sspOn ? 'none' : '';
   pane.querySelector('[data-field="notes"]').innerHTML = priced.notes.join('<br>');
   const adbInput = pane.querySelector('[data-input="adb"]');
   const lockADB = input.age >= 55;
@@ -990,33 +990,32 @@ function refreshAll(){
   if(sspModeOn && state.spouseIncluded){
     const ssp = getSSPScenario();
     const pair = getSSPMonthPair();
-    // Card headers: show months + the calculated term amount for context
+    // WL targets per card per person
     const cremMainOne   = $('crem_one_main')?.checked   ? 2500 : 0;
     const cremSpOne     = $('crem_one_spouse')?.checked ? 2500 : 0;
     const cremMainTwo   = $('crem_two_main')?.checked   ? 2500 : 0;
     const cremSpTwo     = $('crem_two_spouse')?.checked ? 2500 : 0;
-    const termOne_main   = ssp.lossIfMainDies   > 0 ? round1000(ssp.lossIfMainDies   * pair.one + cremMainOne) : 0;
-    const termOne_sp     = ssp.lossIfSpouseDies > 0 ? round1000(ssp.lossIfSpouseDies * pair.one + cremSpOne)   : 0;
-    const termTwo_main   = ssp.lossIfMainDies   > 0 ? round1000(ssp.lossIfMainDies   * pair.two + cremMainTwo) : 0;
-    const termTwo_sp     = ssp.lossIfSpouseDies > 0 ? round1000(ssp.lossIfSpouseDies * pair.two + cremSpTwo)   : 0;
+    const wlOne_main   = Math.min(34999, Math.max(0, round1000(ssp.lossIfMainDies   * pair.one  + cremMainOne)));
+    const wlOne_sp     = Math.min(34999, Math.max(0, round1000(ssp.lossIfSpouseDies * pair.one  + cremSpOne)));
+    const wlTwo_main   = Math.min(34999, Math.max(0, round1000(ssp.lossIfMainDies   * pair.two  + cremMainTwo)));
+    const wlTwo_sp     = Math.min(34999, Math.max(0, round1000(ssp.lossIfSpouseDies * pair.two  + cremSpTwo)));
     $('oneHeaderText').textContent = `SSP — ${pair.one} MONTHS`;
     $('twoHeaderText').textContent = `SSP — ${pair.two} MONTHS`;
-    $('oneMetaText').textContent = `Main ${money0(termOne_main)} · Spouse ${money0(termOne_sp)}`;
-    $('twoMetaText').textContent = `Main ${money0(termTwo_main)} · Spouse ${money0(termTwo_sp)}`;
-    // Button labels
+    $('oneMetaText').textContent = `Main WL ${money0(wlOne_main)} · Spouse WL ${money0(wlOne_sp)}`;
+    $('twoMetaText').textContent = `Main WL ${money0(wlTwo_main)} · Spouse WL ${money0(wlTwo_sp)}`;
     if($('autoBtn_one')) $('autoBtn_one').textContent = `Auto Complete — ${pair.one} Months`;
     if($('autoBtn_two')) $('autoBtn_two').textContent = `Auto Complete — ${pair.two} Months`;
-    $('sspTotalIncome').textContent          = currency(ssp.total);
-    $('sspSpouseOwn').textContent            = currency(ssp.spouseSSI);
-    $('sspSpouse75').textContent             = currency(ssp.mainSSI * 0.75);
-    $('sspSpouseKeeps').textContent          = currency(ssp.spouseKeepsIfMainDies);
-    $('sspLossIfMainDies').textContent       = currency(ssp.lossIfMainDies);
-    $('sspLossIfMainDiesAnnual').textContent = currency(ssp.lossIfMainDies * 12);
-    $('sspMainOwn').textContent             = currency(ssp.mainSSI);
-    $('sspMain75').textContent              = currency(ssp.spouseSSI * 0.75);
-    $('sspMainKeeps').textContent           = currency(ssp.mainKeepsIfSpouseDies);
-    $('sspLossIfSpouseDies').textContent      = currency(ssp.lossIfSpouseDies);
-    $('sspLossIfSpouseDiesAnnual').textContent= currency(ssp.lossIfSpouseDies * 12);
+    $('sspTotalIncome').textContent           = currency(ssp.total);
+    $('sspSpouseOwn').textContent             = currency(ssp.spouseSSI);
+    $('sspSpouse75').textContent              = currency(ssp.mainSSI * 0.75);
+    $('sspSpouseKeeps').textContent           = currency(ssp.spouseKeepsIfMainDies);
+    $('sspLossIfMainDies').textContent        = currency(ssp.lossIfMainDies);
+    $('sspLossIfMainDiesAnnual').textContent  = currency(ssp.lossIfMainDies * 12);
+    $('sspMainOwn').textContent              = currency(ssp.mainSSI);
+    $('sspMain75').textContent               = currency(ssp.spouseSSI * 0.75);
+    $('sspMainKeeps').textContent            = currency(ssp.mainKeepsIfSpouseDies);
+    $('sspLossIfSpouseDies').textContent       = currency(ssp.lossIfSpouseDies);
+    $('sspLossIfSpouseDiesAnnual').textContent = currency(ssp.lossIfSpouseDies * 12);
   } else {
     $('oneHeaderText').textContent = 'ONE HOUR';
     $('twoHeaderText').textContent = 'TWO HOUR';
