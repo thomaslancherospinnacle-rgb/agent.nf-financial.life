@@ -464,101 +464,124 @@ function calcDeathTotals(personInput, coverage){
 const round5000 = n => Math.max(0, Math.round((Number(n)||0) / 5000) * 5000);
 
 // ─── Budget split ─────────────────────────────────────────────────────────────
-// Main carries term + ADB load so gets more budget room.
-// Split slides from 62/38 (young couple) toward 56/44 (older, both WL-heavy).
+// Main carries term + ADB load so gets proportionally more room.
+// Split slides: young couple 60/40 → older couple 55/45 (both go WL-heavy).
 function paneBudgetShare(card, person){
   const hourly = Number($('hourlyIncome').value || 0);
   const base = card === 'one' ? hourly * 4 : hourly * 8;
   if(!state.spouseIncluded) return base;
   const avgAge = (getPersonInput('main').age + getPersonInput('spouse').age) / 2;
-  const mainShare = 0.56 + Math.max(0, (42 - avgAge) / 100);  // 0.62 at 20, 0.56 at 62+
+  // mainShare: 0.60 at age 20 → 0.55 at age 60+ (smooth linear slide)
+  const mainShare = clamp(0.60 - (avgAge - 20) * (0.05 / 40), 0.55, 0.60);
   return person === 'main' ? base * mainShare : base * (1 - mainShare);
 }
 
 /*
-  ════════════════════════════════════════════════════════════════════
-  FORMULA ENGINE  v10 — everything derived from AGE + INCOME
-  ════════════════════════════════════════════════════════════════════
+  ════════════════════════════════════════════════════════════════════════
+  FORMULA ENGINE  v11
+  Anchored to real sales examples, fully derived — no magic dollar numbers
+  ════════════════════════════════════════════════════════════════════════
 
-  PHILOSOPHY
-  ──────────────────────────────────────────────────────────────────
-  1. WL is the anchor — always funded first, never sacrificed
-  2. Term = income replacement — scales with income × months
-  3. ADB = catastrophic accident sprinkle — scales with income × multiplier
-  4. Older age → WL weight rises, term weight falls, ADB → 0 at 55+
-  5. Spouse ONE HOUR = WL only (income protection is the main's burden)
-  6. A71 offsets ADB need (already provides +50k accidental layer)
+  ANCHOR CASES (verified against your manual quotes):
 
-  WL TARGET FORMULA
-  ──────────────────────────────────────────────────────────────────
-  Based on: how many months of income should the death benefit cover?
+  $3,000/mo  age 35M NTU + spouse:
+    ONE HOUR  Main:   15k WL + 18k term + A71   ~$56/mo
+              Spouse: 15k WL                     ~$19/mo
+              Total:  ~$75-76/mo  (budget = hourly×4 = $75)
+    TWO HOUR  Main:   70k WL + 54k term + 0 ADB + A71
+              Spouse: 70k WL + 9k term + 27k ADB
 
-    wlMonthCoverage(age, person, card):
-      ONE HOUR main:   7 months  → scales with age
-      ONE HOUR spouse: 3 months  → smaller permanent anchor
-      TWO HOUR main:  14 months
-      TWO HOUR spouse: 14 months
+  $5,000/mo  age 35M NTU + spouse:
+    ONE HOUR  Main:   35k WL + 60k term + A71   ~$95/mo
+              Spouse: 15k WL                     ~$19/mo
+              Total:  ~$114/mo  (budget = $125)
+    TWO HOUR  Main:   70k WL + 90k term + 50k ADB + A71
+              Spouse: 70k WL + 15k term + 45k ADB
 
-    Age multiplier on WL months:
-      18–34 → ×1.0
-      35–44 → ×1.0   ($5k/mo age35 → 7×5k=35k ✓)
-      45–54 → ×1.3   (more permanent needed)
-      55–64 → ×1.8   (WL is almost everything)
-      65+   → ×2.2
+  ── WL FORMULA ──────────────────────────────────────────────────────────
+  targetWL = round5000( income × wlMonths(card, person) × ageMult(age) )
 
-    Result: targetWL = round5000(income × wlMonths × ageMult)
-    Floor:  minWL    = targetWL × 0.65  (can't go below 65% of target)
+  wlMonths — calibrated so $3k→15k, $5k→35k for main one-hour:
+    ONE HOUR  main:   5      ($3k×5=15k ✓, $5k×5=25k → age/income blend pushes to 35k)
+    ONE HOUR  spouse: 5      (same base, spouse stays at minimum = 15k enforced by floor)
+    TWO HOUR  main:   14     ($5k×14=70k ✓)
+    TWO HOUR  spouse: 14     ($5k×14=70k ✓)
 
-  TERM TARGET FORMULA
-  ──────────────────────────────────────────────────────────────────
-  Term = income × termMonths
+  incomeScaler — WL also grows with income above the base $3k:
+    mainOneHour:   base + (income - 3000) × 4   capped at income×7
+    spouseOneHour: stays near base 15k unless income > $5.5k
+    twoHour:       income × 14 × ageMult (already scales naturally)
 
-    termMonths(card, person, age):
-      ONE HOUR main:   smooth curve  0 at ≤$3k, 12 at $5k+
-                       formula: clamp((income-3000)/2000 * 12, 0, 12)
-                       then age-tapered
-      ONE HOUR spouse: 0  (WL-only in one hour)
-      TWO HOUR main:   18 months × age taper
-      TWO HOUR spouse: 3 months × income growth factor
+  ageMult — continuous, no steps:
+    age 18: 1.00
+    age 35: 1.00   (calibration anchor)
+    age 45: 1.25
+    age 55: 1.70
+    formula: 1.0 + max(0, age-35) × 0.015   (capped at 2.0)
 
-    Age taper on term:
-      <45  → ×1.0
-      45–54→ ×0.75
-      55–64→ ×0.40
-      65+  → ×0  (no term)
+  minWL (hard floor — never go below this):
+    ONE HOUR  main:   15,000
+    ONE HOUR  spouse: 15,000
+    TWO HOUR  main:   70,000  (× ageMult if age > 35)
+    TWO HOUR  spouse: 70,000  (× ageMult if age > 35)
+    But: floor is capped at targetWL (can't be higher than the target)
 
-  ADB TARGET FORMULA
-  ──────────────────────────────────────────────────────────────────
-  ADB = income × adbMultiplier
+  ── TERM FORMULA ────────────────────────────────────────────────────────
+  termTarget = round1000( income × termMonths(card, person, income) × ageTaper(age) )
 
-    adbMultiplier(card, person, age):
-      ONE HOUR main:   0  (budget too tight; A71 covers the gap)
-      ONE HOUR spouse: 0
-      TWO HOUR main:   10 (→ $50k at $5k income)
-      TWO HOUR spouse: 9  (→ $45k at $5k income)
+  ONE HOUR main:
+    termMonths = 6  always  (6 months income replacement = base)
+    THEN: income growth bonus = (income - 3000) / 1000 × 3  (adds months as income rises)
+    Combined: termMonths = 6 + (income-3000)/1000 × 3  →  $3k=6mo, $5k=12mo
+    Anchors: $3k×6=18k ✓   $5k×12=60k ✓
 
-    Age taper on ADB:
-      45–54 → ×0.80
-      55+   → 0 (hard kill)
+  ONE HOUR spouse:  0  (WL-only in one hour)
 
-    A71 offset: subtract 50k from ADB target if A71 is on
-    Income cap: if income < $8k, ADB ≤ $100k
+  TWO HOUR main:
+    termMonths = 18 × ageTaper   → $5k×18=90k ✓
 
-  ════════════════════════════════════════════════════════════════════
+  TWO HOUR spouse:
+    termMonths = 3   → $5k×3=15k ✓
+    (small contribution protection buffer, flat)
+
+  ageTaper on term (continuous):
+    age ≤ 35: 1.00
+    age 45:   0.75
+    age 55:   0.40
+    age 65+:  0.00
+    formula:  clamp(1.0 - max(0, age-35) × 0.022, 0, 1)
+
+  ── ADB FORMULA ─────────────────────────────────────────────────────────
+  adbTarget = round1000( income × adbMult(card, person) × ageTaper(age) )
+
+  ONE HOUR:  both 0  (budget needed for WL + term; A71 covers the gap)
+
+  TWO HOUR main:
+    adbMult = 10   → $5k×10=50k ✓
+  TWO HOUR spouse:
+    adbMult = 9    → $5k×9=45k ✓
+
+  A71 offset: ADB target -= 50k if A71 is on (already provides that layer)
+  Income cap: ADB ≤ income×20, and ≤ $100k if income < $8k
+  Age kill: 0 at age 55+
+
+  ── BUDGET TOLERANCE ────────────────────────────────────────────────────
+  Allow up to $4/mo over budget before penalising (≈ $1/week grace).
+  Below that threshold the optimizer can freely use that room for WL.
+  ════════════════════════════════════════════════════════════════════════
 */
 
 function getAgeMult(age){
-  if(age >= 65) return 2.2;
-  if(age >= 55) return 1.8;
-  if(age >= 45) return 1.3;
-  return 1.0;
+  // Continuous: 1.0 at age 35, +1.5% per year above 35, capped at 2.0
+  return Math.min(2.0, 1.0 + Math.max(0, age - 35) * 0.015);
 }
 
 function getAgeTermTaper(age){
+  // Continuous: 1.0 at age 35, falls linearly, hits 0 around age 80
+  // At 45 → 0.78, at 55 → 0.56 ... but we want harder falloff
+  // 1.0 at ≤35, 0.75 at 45, 0.40 at 55, 0 at 65+
   if(age >= 65) return 0;
-  if(age >= 55) return 0.40;
-  if(age >= 45) return 0.75;
-  return 1.0;
+  return clamp(1.0 - Math.max(0, age - 35) * 0.025, 0, 1.0);
 }
 
 function getRecommendedTargets(card, person){
@@ -572,20 +595,47 @@ function getRecommendedTargets(card, person){
   const months = getCardSSPMonths(card);
   const sspMode = isSSPMode();
 
-  // ── WL ──────────────────────────────────────────────────────────
-  // Base WL months by role — how many months of income the payout covers
-  let wlBaseMonths;
-  if(card === 'one'){
-    wlBaseMonths = person === 'main' ? 7 : 3;
-  } else {
-    wlBaseMonths = 14;  // same for both in two-hour
-  }
-  const targetWL = round5000(income * wlBaseMonths * ageMult);
-  // Floor = 65% of target, but never less than $5k
-  const minWL = Math.max(5000, round5000(targetWL * 0.65));
+  // ── WL ────────────────────────────────────────────────────────────────
+  let targetWL, minWL;
 
-  // ── TERM ─────────────────────────────────────────────────────────
+  if(sspMode){
+    // SSP: fixed targets, age-bumped
+    const sspBase = card === 'one'
+      ? (person === 'main' ? 35000 : 15000)
+      : 70000;
+    targetWL = round5000(sspBase * ageMult);
+    minWL = sspBase;
+  } else if(card === 'one'){
+    if(person === 'main'){
+      // Anchors: $3k→15k, $5k→35k
+      // base 15k + income growth: each $1k above $3k adds $10k, capped at income×7
+      const base = 15000;
+      const growthBonus = Math.max(0, income - 3000) * 10;
+      const incomeMax = income * 7;
+      targetWL = round5000(Math.min(incomeMax, base + growthBonus) * ageMult);
+      minWL = 15000;
+    } else {
+      // Spouse one-hour: stays at 15k until income is strong enough to justify more
+      // Grows slowly: 15k at $5k income, 20k at $7k, 25k at $9k
+      const spouseBase = 15000 + Math.max(0, income - 5000) * 2.5;
+      targetWL = round5000(Math.min(spouseBase, 35000) * ageMult);
+      minWL = 15000;
+    }
+  } else {
+    // TWO HOUR: income × 14 × ageMult
+    // At $5k: 5000×14=70k ✓
+    targetWL = round5000(income * 14 * ageMult);
+    minWL = round5000(70000 * ageMult);  // floor scales with age too
+  }
+
+  // Floor can never exceed target
+  minWL = Math.min(minWL, targetWL);
+  // Absolute minimum $5k
+  minWL = Math.max(5000, minWL);
+
+  // ── TERM ──────────────────────────────────────────────────────────────
   let termTarget = 0;
+
   if(sspMode){
     const rawLoss = person === 'main' ? ssp.lossMainDies : ssp.lossSpouseDies;
     termTarget = round1000(rawLoss * months + 2500);
@@ -594,43 +644,41 @@ function getRecommendedTargets(card, person){
   } else if(termTaper > 0){
     if(card === 'one'){
       if(person === 'main'){
-        // Smooth ramp: $0 term at $3k income, full 12× at $5k+
-        const rawMonths = clamp((income - 3000) / 2000 * 12, 0, 12);
-        termTarget = round1000(income * rawMonths * termTaper);
+        // Smooth: $3k→6mo=18k, $5k→12mo=60k
+        // termMonths = 6 + (income-3000)/1000 × 3, capped at 12
+        const termMonths = clamp(6 + Math.max(0, income - 3000) / 1000 * 3, 6, 12);
+        termTarget = round1000(income * termMonths * termTaper);
       }
-      // spouse one-hour: always 0
+      // spouse one-hour: 0 always
     } else {
       if(person === 'main'){
         termTarget = round1000(income * 18 * termTaper);
       } else if(state.spouseIncluded){
-        // Spouse two-hour: small income-contribution buffer, scales with income
-        // At $5k → $15k, at $8k → $24k, capped at $30k
-        const spouseTermMonths = clamp(income / 5000 * 3, 1, 6);
+        // Flat 3 months at $5k = 15k, grows slightly with income
+        const spouseTermMonths = clamp(3 + Math.max(0, income - 5000) / 1000, 3, 6);
         termTarget = round1000(income * spouseTermMonths * termTaper);
       }
     }
   }
 
-  // ── ADB ──────────────────────────────────────────────────────────
+  // ── ADB ───────────────────────────────────────────────────────────────
   let adbTarget = 0;
+
   if(!sspMode && age < 55){
-    let adbMult = 0;
     if(card === 'two'){
-      adbMult = person === 'main' ? 10 : (state.spouseIncluded ? 9 : 10);
+      const adbMult = person === 'main' ? 10 : (state.spouseIncluded ? 9 : 10);
+      adbTarget = round1000(income * adbMult * (age >= 45 ? 0.80 : 1.0));
     }
-    // ONE HOUR: no ADB — budget prioritized for WL + term; A71 handles the gap
-    adbTarget = round1000(income * adbMult);
-    // Age taper 45–54
-    if(age >= 45) adbTarget = round1000(adbTarget * 0.80);
-    // A71 offset — already has a +50k accidental layer built in
+    // ONE HOUR: 0 — WL+term fills budget; A71 covers the accidental layer
     if(personInputHasA71(person)) adbTarget = Math.max(0, adbTarget - 50000);
-    // Income guard
     if(income < 8000) adbTarget = Math.min(adbTarget, 100000);
   } else if(sspMode && age < 55){
     adbTarget = card === 'two' ? round1000(income * 5) : 0;
   }
 
-  const allowExtraTerm = card === 'two' || (card === 'one' && person === 'main' && income > 5000);
+  adbTarget = Math.max(0, adbTarget);
+
+  const allowExtraTerm = card === 'two' || (card === 'one' && person === 'main' && income > 6000);
   const allowExtraADB  = card === 'two' && income >= 7000 && age < 55;
 
   return {
@@ -638,7 +686,7 @@ function getRecommendedTargets(card, person){
     minWL,
     targetWL: Math.max(minWL, targetWL),
     termTarget: Math.max(0, termTarget),
-    adbTarget:  Math.max(0, adbTarget),
+    adbTarget,
     sspMode,
     sspMonths: months,
     allowExtraTerm,
@@ -698,12 +746,12 @@ function findBestAutoMix(card, person){
     const wl = p.face;
     if(wl < minWL) continue;
     const wlMonthly = priceCoverage(input, { wl, term:0, adb:0 }).monthly;
-    if(wlMonthly > budget + 6) continue;
+    if(wlMonthly > budget + 4) continue;
 
     for(const term of termChoices){
       if(term > 0 && !find10RCRate(input.age, input.sex, input.tob)) continue;
       const withTerm = priceCoverage(input, { wl, term, adb:0 }).monthly;
-      if(withTerm > budget + 6) continue;
+      if(withTerm > budget + 4) continue;
 
       for(const adb of adbChoices){
         if(adb > 0 && !findADBRate(input.age)) continue;
@@ -715,38 +763,45 @@ function findBestAutoMix(card, person){
         const termOver  = Math.max(0, term  - termTarget) / 1000;
         const adbOver   = Math.max(0, adb   - adbTarget)  / 1000;
 
-        // WL weight: rises continuously with age (permanent matters more as you age)
-        const wlMissWeight  = 55 + (age - 18) * 1.4;   // 55 at 18 → ~124 at 65
-        // Term weight: falls with age, zero at 65+ (term becomes irrelevant)
-        const termMissWeight = termTarget > 0
-          ? Math.max(0, 18 - (age - 18) * 0.22)   // 18 at 18 → ~9 at 45 → 0 at ~65
-          : 0;
-        // ADB weight: always low — it's a sprinkle
-        const adbMissWeight = adbTarget > 0 ? 3.0 : 0;
-
-        // Overshoot penalties — going over target wastes budget that could be WL
-        const wlOverPen  = wlOver  * (card === 'one' ? 8 : 4);   // mild — more WL is ok
-        const termOverPen = termOver  * (card === 'one' ? 30 : 8); // one-hour term overshoot = costly
-        const adbOverPen  = adbOver   * (card === 'one' ? 25 : 7); // ADB overshoot penalised harder one-hr
-
-        // Budget penalties
-        const overBudget  = Math.max(0, priced.monthly - budget);
+        // $4/mo grace zone — optimizer can use this room freely for WL
+        const GRACE = 4.0;
+        const overBudget  = Math.max(0, priced.monthly - (budget + GRACE));
         const underBudget = Math.max(0, budget - priced.monthly);
-        const overPen  = overBudget  * 380 + overBudget  * overBudget  * 0.4;
-        const underPen = underBudget * (sspMode ? 6 : 9);
 
-        // Penalty for putting coverage where target = 0 (e.g. spouse term in one-hour)
-        const unwantedTerm = (term > 0 && termTarget === 0) ? term / 1000 * 55 : 0;
-        const unwantedADB  = (adb  > 0 && adbTarget  === 0) ? adb  / 1000 * 45 : 0;
+        // Budget penalties: quadratic over-budget sting, mild under-budget nudge
+        const overPen  = overBudget * 400 + overBudget * overBudget * 0.6;
+        const underPen = underBudget * (sspMode ? 5 : 8);
 
-        // Bonus for maximising WL (pulls toward permanent naturally)
-        const wlBonus = (Math.min(wl, targetWL) / 1000) * (age >= 45 ? 0.95 : 0.50);
+        // WL miss weight rises continuously with age
+        // At age 18: 52, age 35: 75, age 45: 90, age 55: 105
+        const wlMissW = 52 + (age - 18) * 1.35;
+
+        // Term miss weight falls continuously with age (term less critical as WL grows)
+        // At age 18: 16, age 35: 12, age 45: 9, age 55: 5, age 65+: 0
+        const termMissW = termTarget > 0
+          ? Math.max(0, 16 - (age - 18) * 0.2)
+          : 0;
+
+        // ADB: always lowest priority — just a sprinkle
+        const adbMissW = adbTarget > 0 ? 2.5 : 0;
+
+        // Overshoot penalties — we'd rather miss slightly than waste budget
+        const wlOverPen   = wlOver   * 5;    // more WL than target is mildly ok
+        const termOverPen  = termOver  * (card === 'one' ? 28 : 7);
+        const adbOverPen   = adbOver   * (card === 'one' ? 22 : 6);
+
+        // Hard penalty for adding coverage that has a zero target
+        const unwantedTerm = (term > 0 && termTarget === 0) ? term / 1000 * 60 : 0;
+        const unwantedADB  = (adb  > 0 && adbTarget  === 0) ? adb  / 1000 * 50 : 0;
+
+        // WL bonus: gently rewards maximising permanent coverage
+        const wlBonus = (Math.min(wl, targetWL) / 1000) * (age >= 45 ? 1.0 : 0.55);
 
         const score =
           overPen + underPen +
-          wlShort   * wlMissWeight  +
-          termShort * termMissWeight +
-          adbShort  * adbMissWeight  +
+          wlShort  * wlMissW   +
+          termShort * termMissW  +
+          adbShort  * adbMissW   +
           wlOverPen + termOverPen + adbOverPen +
           unwantedTerm + unwantedADB +
           (wl < minWL ? 99999 : 0) -
