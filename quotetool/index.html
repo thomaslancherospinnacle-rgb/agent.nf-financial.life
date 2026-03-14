@@ -470,8 +470,6 @@ function paneBudgetShare(card, person){
 function getRecommendedTargets(card, person){
   const paneBudget = paneBudgetShare(card, person);
   const householdMonthly = Number($('monthlyIncome').value || 0);
-  const incomeShare = !state.spouseIncluded ? 1 : (person==='main' ? 0.55 : 0.45);
-  const paneIncome = householdMonthly * incomeShare;
   const input = getPersonInput(person);
   const ssp = getSSPScenario();
   const months = getCardSSPMonths(card);
@@ -494,14 +492,14 @@ function getRecommendedTargets(card, person){
   }
   if(input.age >= 55){
     targetWL += card === 'one' ? 5000 : 10000;
-  }
-  if(input.age >= 55){
-    minWL += card === 'one' ? (person === 'main' ? 5000 : 5000) : 10000;
+    minWL += card === 'one' ? 5000 : 10000;
     targetWL = Math.max(targetWL, minWL);
   }
 
   let termTarget = 0;
   let adbTarget = 0;
+  let allowExtraTerm = false;
+  let allowExtraADB = false;
 
   if(sspMode){
     const rawLoss = person === 'main' ? ssp.lossMainDies : ssp.lossSpouseDies;
@@ -509,16 +507,41 @@ function getRecommendedTargets(card, person){
     if(person === 'main' && !ssp.mainWorthPitching) termTarget = 0;
     if(person === 'spouse' && !ssp.spouseWorthPitching) termTarget = 0;
     adbTarget = input.age >= 55 ? 0 : (card === 'two' ? 25000 : 0);
-  } else {
-    if(card === 'one'){
-      termTarget = person==='main' ? round1000(householdMonthly * 6) : 0;
-      adbTarget = 0;
-      if(paneBudget >= 95) adbTarget = person==='main' ? 40000 : 0;
-      if(input.age >= 45) adbTarget = Math.min(adbTarget, 25000);
+    allowExtraTerm = false;
+    allowExtraADB = false;
+  } else if(card === 'one'){
+    if(state.spouseIncluded){
+      if(person === 'main'){
+        termTarget = householdMonthly >= 6000 ? round1000(householdMonthly * 6) : 0;
+        adbTarget = householdMonthly >= 6500 && input.age < 45 ? 25000 : 0;
+        allowExtraTerm = householdMonthly >= 6500;
+        allowExtraADB = householdMonthly >= 7000 && input.age < 45;
+      } else {
+        termTarget = 0;
+        adbTarget = 0;
+        allowExtraTerm = false;
+        allowExtraADB = false;
+      }
     } else {
-      termTarget = person==='main' ? round1000(householdMonthly * 18) : (state.spouseIncluded ? 15000 : 0);
-      adbTarget = person==='main' ? 50000 : (state.spouseIncluded ? 45000 : 25000);
-      if(input.age >= 45) adbTarget = Math.min(adbTarget, person==='main' ? 50000 : 30000);
+      termTarget = householdMonthly >= 5500 ? round1000(householdMonthly * 6) : 0;
+      adbTarget = householdMonthly >= 6500 && input.age < 45 ? 25000 : 0;
+      allowExtraTerm = householdMonthly >= 6000;
+      allowExtraADB = householdMonthly >= 7000 && input.age < 45;
+    }
+  } else {
+    if(person === 'main'){
+      termTarget = round1000(householdMonthly * 18);
+      adbTarget = input.age >= 55 ? 0 : 50000;
+      allowExtraTerm = true;
+      allowExtraADB = householdMonthly >= 7000 && input.age < 55;
+    } else {
+      termTarget = state.spouseIncluded ? 15000 : 0;
+      adbTarget = state.spouseIncluded && input.age < 55 ? 45000 : 0;
+      allowExtraTerm = householdMonthly >= 7000;
+      allowExtraADB = householdMonthly >= 8000 && input.age < 55;
+    }
+    if(input.age >= 45){
+      adbTarget = Math.min(adbTarget, person==='main' ? 50000 : 30000);
     }
   }
 
@@ -528,13 +551,14 @@ function getRecommendedTargets(card, person){
 
   if(input.age >= 55){
     adbTarget = 0;
+    allowExtraADB = false;
   }
-  if(Number($('monthlyIncome').value || 0) < 8000){
+  if(householdMonthly < 8000){
     adbTarget = Math.min(adbTarget, 100000);
   }
   adbTarget = Math.max(0, adbTarget);
 
-  return { paneBudget, minWL, targetWL, termTarget, adbTarget, sspMode, sspMonths: months };
+  return { paneBudget, minWL, targetWL, termTarget, adbTarget, sspMode, sspMonths: months, allowExtraTerm, allowExtraADB };
 }
 
 function personInputHasA71(person){
@@ -575,11 +599,11 @@ function buildStepLadder(target){
 
 function findBestAutoMix(card, person){
   const input = getPersonInput(person);
-  const { paneBudget:budget, minWL, targetWL, termTarget, adbTarget, sspMode } = getRecommendedTargets(card, person);
+  const { paneBudget:budget, minWL, targetWL, termTarget, adbTarget, sspMode, allowExtraTerm, allowExtraADB } = getRecommendedTargets(card, person);
   const permOptions = buildPermanentOptions(input.age, input.sex, input.tob)
     .filter(o => o.face === 0 || o.face >= minWL);
-  const termChoices = buildStepLadder(termTarget).filter(v => v <= 500000);
-  const adbChoices = buildStepLadder(adbTarget).filter(v => v <= 500000);
+  const termChoices = (termTarget > 0 || allowExtraTerm) ? buildStepLadder(termTarget).filter(v => v <= 500000) : [0];
+  const adbChoices = (adbTarget > 0 || allowExtraADB) ? buildStepLadder(adbTarget).filter(v => v <= 500000) : [0];
 
   let best = { wl:minWL, term:0, adb:0, monthly:999999, score:Infinity };
 
