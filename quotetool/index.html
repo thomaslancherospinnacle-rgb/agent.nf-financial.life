@@ -463,17 +463,33 @@ function calcDeathTotals(personInput, coverage){
 // ─── helper ──────────────────────────────────────────────────────────────────
 const round5000 = n => Math.max(0, Math.round((Number(n)||0) / 5000) * 5000);
 
-// ─── Budget split ─────────────────────────────────────────────────────────────
-// Main carries term + ADB load so gets proportionally more room.
-// Split slides: young couple 60/40 → older couple 55/45 (both go WL-heavy).
-function paneBudgetShare(card, person){
+// ─── Budget ───────────────────────────────────────────────────────────────────
+// Total household budget for the card
+function cardBudgetTotal(card){
   const hourly = Number($('hourlyIncome').value || 0);
-  const base = card === 'one' ? hourly * 4 : hourly * 8;
-  if(!state.spouseIncluded) return base;
-  const avgAge = (getPersonInput('main').age + getPersonInput('spouse').age) / 2;
-  // mainShare: 0.60 at age 20 → 0.55 at age 60+ (smooth linear slide)
-  const mainShare = clamp(0.60 - (avgAge - 20) * (0.05 / 40), 0.55, 0.60);
-  return person === 'main' ? base * mainShare : base * (1 - mainShare);
+  return card === 'one' ? hourly * 4 : hourly * 8;
+}
+
+// Per-pane budget:
+// When spouse is included we price SPOUSE first (WL-only anchor), then give MAIN
+// whatever is left from the total household budget.
+// This function returns the budget ceiling for the optimizer of each pane.
+// For the standalone (no spouse) case it just returns the full budget.
+// NOTE: spouseReserve is computed at fill-time; here we use a static split
+// only for display / scoring — the real budget is injected via findBestAutoMix.
+function paneBudgetShare(card, person){
+  const total = cardBudgetTotal(card);
+  if(!state.spouseIncluded) return total;
+  // Spouse budget = cost of spouse WL floor (looked up or estimated)
+  // Use a rough estimate here for display; the optimizer uses the injected value
+  const spInput = getPersonInput('spouse');
+  const spMinWL = 15000;
+  const spWLRow = findPermanentRate(spInput.age, spInput.sex, spInput.tob, spMinWL);
+  const spouseReserve = spWLRow
+    ? annualToMonthly(spMinWL/1000 * spWLRow.base_rate + spWLRow.policy_fee_annual + spWLRow.volume_adjustment_annual)
+    : total * 0.28;  // fallback ~28% estimate if rates not loaded
+  if(person === 'spouse') return spouseReserve + (total - spouseReserve) * 0.05; // small overflow room
+  return total - spouseReserve; // main gets everything else
 }
 
 /*
@@ -730,10 +746,14 @@ function buildStepLadder(target){
   return [...set].filter(v=>v>=0&&v<=500000).sort((a,b)=>a-b);
 }
 
-function findBestAutoMix(card, person){
+function findBestAutoMix(card, person, budgetOverride){
   const input = getPersonInput(person);
   const age = input.age;
-  const { paneBudget:budget, minWL, targetWL, termTarget, adbTarget, sspMode, allowExtraTerm, allowExtraADB } = getRecommendedTargets(card, person);
+  const targets = getRecommendedTargets(card, person);
+  const { minWL, targetWL, termTarget, adbTarget, sspMode, allowExtraTerm, allowExtraADB } = targets;
+  // Use injected budget (household-aware) if provided, otherwise fall back to pane estimate
+  const budget = (budgetOverride !== undefined && budgetOverride !== null)
+    ? budgetOverride : targets.paneBudget;
   const householdMonthly = Number($('monthlyIncome').value || 0);
   const permOptions = buildPermanentOptions(input.age, input.sex, input.tob)
     .filter(o => o.face === 0 || o.face >= minWL);
@@ -937,8 +957,9 @@ function refreshAll(){
   });
 }
 
-function autoFill(card, person){
-  const best = findBestAutoMix(card, person);
+
+function autoFill(card, person, budgetOverride){
+  const best = findBestAutoMix(card, person, budgetOverride);
   setCoverage(card, person, best);
   refreshAll();
 }
@@ -955,8 +976,31 @@ function autoChangePermanent(card, person){
 }
 
 function autoFillCard(card){
-  autoFill(card, 'main');
-  if(state.spouseIncluded) autoFill(card, 'spouse');
+  if(!state.spouseIncluded){
+    // Solo: main gets the full budget
+    const mainBest = findBestAutoMix(card, 'main');
+    setCoverage(card, 'main', mainBest);
+    refreshAll();
+    return;
+  }
+
+  const GRACE = 4.0;
+  const total = cardBudgetTotal(card);
+
+  // ── Step 1: Price spouse at their WL-anchor (cheapest meaningful coverage)
+  //    Spouse one-hour = WL floor only. Two-hour = WL + term + ADB.
+  const spouseBest = findBestAutoMix(card, 'spouse');
+  setCoverage(card, 'spouse', spouseBest);
+
+  // ── Step 2: Measure what spouse actually costs
+  const spInput = getPersonInput('spouse');
+  const spCost  = priceCoverage(spInput, spouseBest).monthly;
+
+  // ── Step 3: Give main everything remaining from the household budget
+  const mainBudget = Math.max(10, (total + GRACE) - spCost);
+  const mainBest = findBestAutoMix(card, 'main', mainBudget);
+  setCoverage(card, 'main', mainBest);
+
   refreshAll();
 }
 
