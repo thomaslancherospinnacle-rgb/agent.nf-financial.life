@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quote Calibration Analysis</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
+:root{
+  --bg:#0a0e1a;--bg2:#0f1525;--bg3:#161d30;--border:#1e2a42;
+  --gold:#c8a14d;--gold2:#e3c980;
+  --blue:#4a9eff;--green:#3ecf8e;--red:#ff5f6d;--orange:#ff9f43;--purple:#a78bfa;--cyan:#22d3ee;
+  --text:#e8edf5;--muted:#6b7fa3;
+  --mono:'DM Mono',monospace;--head:'Syne',sans-serif;--body:'DM Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh;padding:20px}
+
+/* header */
+.hdr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
+  margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.hdr h1{font-family:var(--head);font-size:26px;font-weight:800;letter-spacing:-.5px;
+  background:linear-gradient(135deg,var(--gold2),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hdr .sub{font-size:12px;color:var(--muted);font-family:var(--mono);margin-top:3px}
+.hdr-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.hdr-right input{width:300px;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);
+  border-radius:9px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none}
+.hdr-right input:focus{border-color:var(--gold)}
+.btn{padding:8px 14px;border-radius:9px;border:1px solid var(--border);background:var(--bg3);
+  color:var(--text);font-family:var(--body);font-size:12px;font-weight:600;cursor:pointer;transition:border-color .15s}
+.btn:hover{border-color:var(--gold);color:var(--gold2)}
+.btn.primary{background:var(--gold);border-color:var(--gold);color:#1a1200;font-weight:700}
+.btn.primary:hover{background:var(--gold2)}
+#fileInput{display:none}
+#fetchStatus{font-family:var(--mono);font-size:11px;color:var(--muted)}
+
+/* filter bar */
+.filterBar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+  margin-bottom:18px;padding:12px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:12px}
+.filterBar label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+.filterBar select{padding:6px 10px;background:var(--bg3);border:1px solid var(--border);
+  border-radius:8px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none;cursor:pointer}
+.filterBar select:focus{border-color:var(--gold)}
+.sep{width:1px;height:24px;background:var(--border)}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:18px}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:12px 14px}
+.stat .val{font-family:var(--head);font-size:24px;font-weight:800;color:var(--gold2);line-height:1}
+.stat .lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:4px;font-family:var(--mono)}
+
+/* layout */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px}
+.grid1{margin-bottom:14px}
+@media(max-width:860px){.grid2,.grid3{grid-template-columns:1fr}}
+
+/* card */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.35}
+.card-title{font-family:var(--head);font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px}
+.card-sub{font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:14px}
+.chart-wrap{position:relative;height:240px}
+.chart-wrap.tall{height:290px}
+.chart-wrap.short{height:190px}
+
+/* insight */
+.insight{margin-top:12px;padding:10px 13px;background:var(--bg3);border:1px solid var(--border);
+  border-left:3px solid var(--gold);border-radius:9px;font-size:12px;color:var(--text);line-height:1.65}
+.insight strong{color:var(--gold2)}
+.insight.warn{border-left-color:var(--red)}
+.insight.ok{border-left-color:var(--green)}
+
+/* table */
+.tbl{width:100%;border-collapse:collapse;font-size:11px;font-family:var(--mono)}
+.tbl th{background:var(--bg3);color:var(--muted);font-size:10px;text-transform:uppercase;
+  letter-spacing:.4px;padding:7px 9px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+.tbl td{padding:7px 9px;border-bottom:1px solid var(--border);color:var(--text);white-space:nowrap}
+.tbl tr:hover td{background:var(--bg3)}
+.tbl .r{text-align:right}
+.badge{display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:700}
+.b-yes{background:rgba(62,207,142,.15);color:var(--green)}
+.b-no{background:rgba(107,127,163,.1);color:var(--muted)}
+.b-over{background:rgba(255,95,109,.15);color:var(--red)}
+.b-ok{background:rgba(62,207,142,.1);color:var(--green)}
+.b-warn{background:rgba(255,159,67,.15);color:var(--orange)}
+
+/* empty state */
+.empty{text-align:center;padding:50px 20px;color:var(--muted);font-family:var(--mono);font-size:13px}
+.empty .ico{font-size:36px;margin-bottom:10px}
+
+/* legend pill */
+.legend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.lpill{display:flex;align-items:center;gap:5px;font-size:11px;font-family:var(--mono);color:var(--muted)}
+.ldot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div>
+    <h1>Quote Calibration</h1>
+    <div class="sub">groups by age bracket · income range · tobacco · A71 · married status</div>
+  </div>
+  <div class="hdr-right">
+    <input id="gsUrl" type="text" placeholder="Apps Script URL…">
+    <button class="btn primary" onclick="fetchFromSheet()">⚡ Live</button>
+    <label class="btn" for="fileInput">📂 CSV <input type="file" id="fileInput" accept=".csv"></label>
+    <span id="fetchStatus"></span>
+  </div>
+</div>
+
+<!-- Filter bar — all filters are dynamic based on data present -->
+<div class="filterBar">
+  <label>Group X by</label>
+  <select id="f-xaxis" onchange="buildAll()">
+    <option value="income_bracket">Income Bracket</option>
+    <option value="age_bracket">Age Bracket</option>
+  </select>
+  <div class="sep"></div>
+  <label>Split lines by</label>
+  <select id="f-split" onchange="buildAll()">
+    <option value="age_bracket">Age Bracket</option>
+    <option value="income_bracket">Income Bracket</option>
+    <option value="tob">Tobacco</option>
+    <option value="married">Married</option>
+    <option value="a71">A71</option>
+    <option value="none">None</option>
+  </select>
+  <div class="sep"></div>
+  <label>Filter Tob</label>
+  <select id="f-tob" onchange="buildAll()"><option value="All">All</option></select>
+  <label>Filter A71</label>
+  <select id="f-a71" onchange="buildAll()"><option value="All">All</option></select>
+  <label>Filter Married</label>
+  <select id="f-married" onchange="buildAll()"><option value="All">All</option></select>
+  <label>Option</label>
+  <select id="f-opt" onchange="buildAll()">
+    <option value="1">Option 1</option>
+    <option value="2">Option 2</option>
+  </select>
+</div>
+
+<!-- Stats -->
+<div class="stats">
+  <div class="stat"><div class="val" id="s-rows">—</div><div class="lbl">Total Rows</div></div>
+  <div class="stat"><div class="val" id="s-groups">—</div><div class="lbl">Data Groups</div></div>
+  <div class="stat"><div class="val" id="s-ages">—</div><div class="lbl">Age Range</div></div>
+  <div class="stat"><div class="val" id="s-inc">—</div><div class="lbl">Income Range</div></div>
+  <div class="stat"><div class="val" id="s-married">—</div><div class="lbl">Married</div></div>
+  <div class="stat"><div class="val" id="s-a71">—</div><div class="lbl">A71 On</div></div>
+  <div class="stat"><div class="val" id="s-over">—</div><div class="lbl">Over Budget</div></div>
+</div>
+
+<!-- Charts -->
+<div class="grid2">
+  <div class="card">
+    <div class="card-title">WL Coverage</div>
+    <div class="card-sub" id="sub-wl">grouped avg WL face amount</div>
+    <div class="chart-wrap tall"><canvas id="c-wl"></canvas></div>
+    <div class="insight" id="ins-wl">—</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Term Coverage</div>
+    <div class="card-sub" id="sub-term">grouped avg term face amount</div>
+    <div class="chart-wrap tall"><canvas id="c-term"></canvas></div>
+    <div class="insight" id="ins-term">—</div>
+  </div>
+</div>
+
+<div class="grid2">
+  <div class="card">
+    <div class="card-title">WL Multiple <span style="color:var(--muted);font-size:11px;font-family:var(--mono)">× monthly income</span></div>
+    <div class="card-sub">how many times income is the WL? ideal = 5–7× Opt1</div>
+    <div class="chart-wrap"><canvas id="c-wlx"></canvas></div>
+    <div class="insight" id="ins-wlx">—</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Term Multiple <span style="color:var(--muted);font-size:11px;font-family:var(--mono)">months of income</span></div>
+    <div class="card-sub">how many months of income does term cover? target = 6–12 Opt1</div>
+    <div class="chart-wrap"><canvas id="c-termx"></canvas></div>
+    <div class="insight" id="ins-termx">—</div>
+  </div>
+</div>
+
+<div class="grid2">
+  <div class="card">
+    <div class="card-title">Total Premium</div>
+    <div class="card-sub">household total vs budget ceiling — grouped</div>
+    <div class="chart-wrap"><canvas id="c-prem"></canvas></div>
+    <div class="insight" id="ins-prem">—</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Budget Utilization %</div>
+    <div class="card-sub">actual / budget — 100% = perfect, >100% = over grace</div>
+    <div class="chart-wrap"><canvas id="c-util"></canvas></div>
+    <div class="insight" id="ins-util">—</div>
+  </div>
+</div>
+
+<div class="grid2">
+  <div class="card">
+    <div class="card-title">ADB Coverage</div>
+    <div class="card-sub">accidental death benefit — when and how much</div>
+    <div class="chart-wrap short"><canvas id="c-adb"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Opt1 vs Opt2 Total Premium</div>
+    <div class="card-sub">should scale ~2× across all groups</div>
+    <div class="chart-wrap short"><canvas id="c-1v2"></canvas></div>
+    <div class="insight" id="ins-1v2">—</div>
+  </div>
+</div>
+
+<!-- Raw table -->
+<div class="grid1">
+  <div class="card">
+    <div class="card-title">All Recorded Quotes</div>
+    <div class="card-sub">full raw data — filtered by controls above</div>
+    <div style="overflow-x:auto"><table class="tbl" id="rawTbl">
+      <thead><tr>
+        <th>Age</th><th>Tob</th><th>A71</th><th>Married</th><th>Income</th>
+        <th>Bud1</th><th>O1 WL</th><th>O1 Term</th><th>O1 ADB</th><th>O1 Prem</th><th>O1 Tot</th><th>Δ</th>
+        <th>O2 WL</th><th>O2 Term</th><th>O2 Prem</th><th>O2 Tot</th><th>Δ</th>
+        <th>WL×</th><th>Term×</th>
+      </tr></thead>
+      <tbody id="rawBody"></tbody>
+    </table></div>
+    <div class="empty" id="emptyMsg" style="display:none"><div class="ico">📊</div>No data — load a CSV or connect Google Sheets</div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+//  DATA ENGINE
+// ═══════════════════════════════════════════════════════════════════
+
+const SEED = `Timestamp,Main Age,Main Sex,Main Tob,Main A71,High Risk Job,A71 Recommended,Has Spouse,Spouse Age,Spouse Sex,Spouse Tob,Spouse A71,Monthly Income,Hourly Income,Budget Opt1,Budget Opt2,Opt1 WL Main,Opt1 Term Main,Opt1 ADB Main,Opt1 Prem Main,Opt1 WL Spouse,Opt1 Prem Spouse,Opt1 Total,Opt2 WL Main,Opt2 Term Main,Opt2 ADB Main,Opt2 Prem Main,Opt2 WL Spouse,Opt2 Prem Spouse,Opt2 Total,SSP Mode
+2026-03-14T20:09:40.292Z,35,Male,NTU,Yes,Yes,Yes,,33,Female,NTU,No,3000,18.75,75,150,15000,15000,0,55.56,15000,22.14,77.7,40000,36000,50000,104.42,35000,44.98,149.4,No
+2026-03-14T20:12:48.136Z,18,Male,NTU,Yes,Yes,Yes,,,,,,2560,16,64,128,74000,0,0,67.67,0,0,67.67,200000,0,0,131.92,0,0,131.92,No
+2026-03-14T20:16:13.898Z,43,Male,NTU,Yes,Yes,Yes,,40,Female,NTU,No,6000,37.5,150,300,35000,20000,0,118.67,20000,39.33,158,75000,72000,100000,231.84,44000,75.31,307.15,No
+2026-03-14T20:18:45.513Z,50,Male,NTU,Yes,Yes,Yes,,46,Female,NTU,No,6000,37.5,150,300,15000,34000,0,119.18,15000,37.9,157.08,45000,72000,50000,262.51,18000,45.48,307.99,No
+2026-03-14T20:23:19.224Z,35,Male,NTU,No,No,No,,33,Female,NTU,No,8000,50,200,400,120000,48000,25000,158.51,38000,48.83,207.34,200000,96000,50000,268.22,150000,131.46,399.68,No
+2026-03-14T20:27:43.146Z,45,Male,NTU,Yes,Yes,Yes,,45,Female,NTU,No,10000,62.5,250,500,43000,60000,25000,182.44,35000,72.92,255.36,120000,60000,50000,299.53,120000,206.67,506.2,No
+2026-03-14T20:29:33.853Z,24,Male,TU,Yes,Yes,Yes,,22,Female,NTU,No,4000,25,100,200,35000,48000,0,83.49,20000,17.78,101.27,120000,72000,50000,159.93,60000,45.67,205.61,No`;
+
+let ALL_ROWS = [];  // processed rows, never filtered
+let charts = {};
+
+// ── Bracket definitions — dynamic, always cover the data ─────────────────────
+function ageBracket(age) {
+  if (age < 25) return '18–24';
+  if (age < 30) return '25–29';
+  if (age < 35) return '30–34';
+  if (age < 40) return '35–39';
+  if (age < 45) return '40–44';
+  if (age < 50) return '45–49';
+  if (age < 55) return '50–54';
+  if (age < 60) return '55–59';
+  return '60+';
+}
+
+function incBracket(inc) {
+  if (inc < 2500)  return '<$2.5k';
+  if (inc < 3500)  return '$2.5–3.5k';
+  if (inc < 4500)  return '$3.5–4.5k';
+  if (inc < 5500)  return '$4.5–5.5k';
+  if (inc < 7000)  return '$5.5–7k';
+  if (inc < 9000)  return '$7–9k';
+  if (inc < 12000) return '$9–12k';
+  return '$12k+';
+}
+
+// Canonical sort order for brackets so charts read left→right correctly
+const AGE_ORDER = ['18–24','25–29','30–34','35–39','40–44','45–49','50–54','55–59','60+'];
+const INC_ORDER = ['<$2.5k','$2.5–3.5k','$3.5–4.5k','$4.5–5.5k','$5.5–7k','$7–9k','$9–12k','$12k+'];
+
+function bracketOrder(key) {
+  return key === 'age_bracket' ? AGE_ORDER : INC_ORDER;
+}
+
+function n(v) { return parseFloat(String(v).replace(/[$,]/g,'')) || 0; }
+
+function parseCSV(txt) {
+  const lines = txt.trim().split(/\r?\n/);
+  const hdrs  = lines[0].split(',').map(h => h.trim());
+  return lines.slice(1).filter(l => l.trim()).map(l => {
+    const v = l.split(','); const o = {};
+    hdrs.forEach((h,i) => o[h] = (v[i]||'').trim());
+    return o;
+  });
+}
+
+function cook(raw) {
+  return raw.map(r => {
+    const inc     = n(r['Monthly Income']);
+    const hrly    = n(r['Hourly Income']);
+    const bud1    = n(r['Budget Opt1']);
+    const bud2    = n(r['Budget Opt2']);
+    const o1wl    = n(r['Opt1 WL Main']);
+    const o1term  = n(r['Opt1 Term Main']);
+    const o1adb   = n(r['Opt1 ADB Main']);
+    const o1prem  = n(r['Opt1 Prem Main']);
+    const o1spwl  = n(r['Opt1 WL Spouse']);
+    const o1spprem= n(r['Opt1 Prem Spouse']);
+    const o1tot   = n(r['Opt1 Total']);
+    const o2wl    = n(r['Opt2 WL Main']);
+    const o2term  = n(r['Opt2 Term Main']);
+    const o2adb   = n(r['Opt2 ADB Main']);
+    const o2prem  = n(r['Opt2 Prem Main']);
+    const o2spwl  = n(r['Opt2 WL Spouse']);
+    const o2spprem= n(r['Opt2 Prem Spouse']);
+    const o2tot   = n(r['Opt2 Total']);
+    const age     = n(r['Main Age']);
+    const married = !!(r['Spouse Age'] && r['Spouse Age'] !== '') ||
+                    r['Married']==='Yes' || r['Has Spouse']==='Yes';
+    const grace   = inc >= 6000 ? 8 : 4;
+    return {
+      age, sex: r['Main Sex']||'', tob: r['Main Tob']||'',
+      a71: r['Main A71']==='Yes', highRisk: r['High Risk Job']==='Yes',
+      married, spAge: n(r['Spouse Age']),
+      inc, hrly, bud1, bud2,
+      o1wl, o1term, o1adb, o1prem, o1spwl, o1spprem, o1tot,
+      o2wl, o2term, o2adb, o2prem, o2spwl, o2spprem, o2tot,
+      grace,
+      diff1: o1tot - bud1,
+      diff2: o2tot - bud2,
+      wlx:   inc > 0 ? o1wl / inc : 0,
+      termx: inc > 0 ? o1term / inc : 0,
+      wlx2:  inc > 0 ? o2wl / inc : 0,
+      termx2:inc > 0 ? o2term / inc : 0,
+      age_bracket:    ageBracket(age),
+      income_bracket: incBracket(inc),
+    };
+  });
+}
+
+// ── Filtering ─────────────────────────────────────────────────────────────────
+function getFilters() {
+  return {
+    tob:     document.getElementById('f-tob').value,
+    a71:     document.getElementById('f-a71').value,
+    married: document.getElementById('f-married').value,
+    opt:     document.getElementById('f-opt').value,
+    xaxis:   document.getElementById('f-xaxis').value,
+    split:   document.getElementById('f-split').value,
+  };
+}
+
+function applyFilters(rows) {
+  const f = getFilters();
+  return rows.filter(r => {
+    if (f.tob     !== 'All' && r.tob !== f.tob) return false;
+    if (f.a71     !== 'All' && (r.a71 ? 'Yes' : 'No') !== f.a71) return false;
+    if (f.married !== 'All' && (r.married ? 'Yes' : 'No') !== f.married) return false;
+    return true;
+  });
+}
+
+// ── Grouping engine ───────────────────────────────────────────────────────────
+// Returns: { labels[], series: [{name, values[], color}] }
+// Each value is avg of `metric` for rows in that x-group AND split-group
+function groupBy(rows, xKey, splitKey, metric) {
+  const xOrder = bracketOrder(xKey);
+  // Get x labels that actually exist in data, in bracket order
+  const xSet   = new Set(rows.map(r => r[xKey]));
+  const xLabels = xOrder.filter(x => xSet.has(x));
+
+  if (splitKey === 'none') {
+    const vals = xLabels.map(x => {
+      const g = rows.filter(r => r[xKey] === x);
+      return g.length ? avg(g, metric) : null;
+    });
+    return { labels: xLabels, series: [{ name: 'All', values: vals, color: '#c8a14d' }] };
+  }
+
+  // Get distinct split values, sorted
+  const splitVals = [...new Set(rows.map(r => splitLabel(r, splitKey)))].sort();
+  const palette   = makePalette(splitVals.length);
+
+  const series = splitVals.map((sv, i) => {
+    const vals = xLabels.map(x => {
+      const g = rows.filter(r => r[xKey] === x && splitLabel(r, splitKey) === sv);
+      return g.length ? avg(g, metric) : null;
+    });
+    return { name: sv, values: vals, color: palette[i], count: rows.filter(r => splitLabel(r,splitKey)===sv).length };
+  });
+
+  return { labels: xLabels, series };
+}
+
+function splitLabel(r, key) {
+  if (key === 'age_bracket')    return r.age_bracket;
+  if (key === 'income_bracket') return r.income_bracket;
+  if (key === 'tob')    return r.tob || 'Unknown';
+  if (key === 'married') return r.married ? 'Married' : 'Single';
+  if (key === 'a71')     return r.a71 ? 'A71 On' : 'A71 Off';
+  return 'All';
+}
+
+function avg(arr, key) {
+  const vals = arr.map(r => r[key]).filter(v => v !== null && v !== undefined);
+  return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
+}
+
+// ── Colour palette — generates n distinct colours ─────────────────────────────
+function makePalette(n) {
+  const base = ['#c8a14d','#4a9eff','#3ecf8e','#ff5f6d','#a78bfa','#ff9f43','#22d3ee','#f472b6','#84cc16'];
+  if (n <= base.length) return base.slice(0, n);
+  const extra = [];
+  for (let i = 0; i < n; i++) extra.push(`hsl(${Math.round(i * 360/n)},70%,60%)`);
+  return extra;
+}
+
+// ── Chart defaults ────────────────────────────────────────────────────────────
+Chart.defaults.color = '#6b7fa3';
+Chart.defaults.borderColor = '#1e2a42';
+Chart.defaults.font.family = "'DM Mono', monospace";
+Chart.defaults.font.size = 11;
+
+const BASE = {
+  responsive: true, maintainAspectRatio: false,
+  plugins: {
+    legend: { labels: { usePointStyle:true, padding:12, font:{size:11} } },
+    tooltip: { backgroundColor:'#0f1525', borderColor:'#1e2a42', borderWidth:1,
+      titleColor:'#e8edf5', bodyColor:'#9bafc8', padding:10 },
+  },
+  scales: {
+    x: { grid:{ color:'#1a2236' }, ticks:{ color:'#6b7fa3' } },
+    y: { grid:{ color:'#1a2236' }, ticks:{ color:'#6b7fa3' } },
+  }
+};
+
+function kill(id) { if(charts[id]) { charts[id].destroy(); delete charts[id]; } }
+
+function lineChart(id, grouped, yFmt, refLine) {
+  kill(id);
+  const datasets = grouped.series.map(s => ({
+    label: s.name,
+    data: s.values,
+    borderColor: s.color,
+    backgroundColor: s.color + '22',
+    pointBackgroundColor: s.color,
+    pointRadius: 5, pointHoverRadius: 7,
+    tension: 0.35, spanGaps: true, fill: false,
+    borderWidth: 2,
+  }));
+  if (refLine) datasets.push({
+    label: refLine.label,
+    data: grouped.labels.map(() => refLine.val),
+    borderColor: '#ffffff33', borderDash: [5,4],
+    pointRadius: 0, fill: false, borderWidth: 1,
+  });
+  charts[id] = new Chart(document.getElementById(id), {
+    type: 'line',
+    data: { labels: grouped.labels, datasets },
+    options: { ...BASE, plugins: { ...BASE.plugins,
+      tooltip: { ...BASE.plugins.tooltip,
+        callbacks: { label: ctx => `${ctx.dataset.label}: ${yFmt(ctx.parsed.y)}` }
+      }
+    },
+    scales: { x: BASE.scales.x, y: { ...BASE.scales.y, ticks: { callback: yFmt } } } }
+  });
+}
+
+function barChart(id, grouped, yFmt, stacked) {
+  kill(id);
+  const datasets = grouped.series.map(s => ({
+    label: s.name,
+    data: s.values,
+    backgroundColor: s.color + 'bb',
+    borderColor: s.color,
+    borderWidth: 1,
+  }));
+  charts[id] = new Chart(document.getElementById(id), {
+    type: 'bar',
+    data: { labels: grouped.labels, datasets },
+    options: { ...BASE,
+      scales: {
+        x: { ...BASE.scales.x, stacked: !!stacked },
+        y: { ...BASE.scales.y, stacked: !!stacked, ticks: { callback: yFmt } }
+      },
+      plugins: { ...BASE.plugins,
+        tooltip: { ...BASE.plugins.tooltip,
+          callbacks: { label: ctx => `${ctx.dataset.label}: ${yFmt(ctx.parsed.y)}` }
+        }
+      }
+    }
+  });
+}
+
+function fmt$k(v) { return v == null ? '—' : '$'+(v/1000).toFixed(0)+'k'; }
+function fmtX(v)  { return v == null ? '—' : v.toFixed(1)+'×'; }
+function fmtMo(v) { return v == null ? '—' : v.toFixed(1)+'mo'; }
+function fmt$(v)  { return v == null ? '—' : '$'+Number(v).toFixed(0); }
+function fmtPct(v){ return v == null ? '—' : (v*100).toFixed(0)+'%'; }
+
+// ── Build all charts + table ──────────────────────────────────────────────────
+function buildAll() {
+  const f   = getFilters();
+  const opt = f.opt;
+  const rows = applyFilters(ALL_ROWS);
+
+  // Dynamic filter dropdowns — populate from actual data
+  populateFilterOptions(ALL_ROWS);
+
+  // Stats
+  if (ALL_ROWS.length) {
+    const ages = ALL_ROWS.map(r=>r.age);
+    const incs = ALL_ROWS.map(r=>r.inc);
+    const groups = new Set(rows.map(r => r[f.xaxis]));
+    document.getElementById('s-rows').textContent    = rows.length;
+    document.getElementById('s-groups').textContent  = groups.size;
+    document.getElementById('s-ages').textContent    = Math.min(...ages)+'–'+Math.max(...ages);
+    document.getElementById('s-inc').textContent     = '$'+(Math.min(...incs)/1000).toFixed(1)+'k–$'+(Math.max(...incs)/1000).toFixed(0)+'k';
+    document.getElementById('s-married').textContent = rows.filter(r=>r.married).length;
+    document.getElementById('s-a71').textContent     = rows.filter(r=>r.a71).length+'/'+rows.length;
+    const over = rows.filter(r => opt==='1' ? r.diff1 > r.grace : r.diff2 > r.grace);
+    document.getElementById('s-over').textContent = over.length ? over.length+' ⚠️' : 'None ✓';
+  }
+
+  const wlKey   = opt==='1' ? 'o1wl'   : 'o2wl';
+  const termKey = opt==='1' ? 'o1term' : 'o2term';
+  const adbKey  = opt==='1' ? 'o1adb'  : 'o2adb';
+  const totKey  = opt==='1' ? 'o1tot'  : 'o2tot';
+  const budKey  = opt==='1' ? 'bud1'   : 'bud2';
+  const wlxKey  = opt==='1' ? 'wlx'    : 'wlx2';
+  const termxKey= opt==='1' ? 'termx'  : 'termx2';
+
+  const sub = `Opt${opt} · grouped by ${f.xaxis==='age_bracket'?'age':'income'} · split by ${f.split}`;
+  document.getElementById('sub-wl').textContent   = sub;
+  document.getElementById('sub-term').textContent = sub;
+
+  // ── WL chart ────────────────────────────────────────────────────
+  const gWL = groupBy(rows, f.xaxis, f.split, wlKey);
+  lineChart('c-wl', gWL, fmt$k);
+  insight('ins-wl', gWL, wlKey, rows, fmt$k,
+    'WL should grow with income. Flat lines = formula not scaling. Diverging lines = the split variable changes coverage.');
+
+  // ── Term chart ──────────────────────────────────────────────────
+  const gTerm = groupBy(rows, f.xaxis, f.split, termKey);
+  lineChart('c-term', gTerm, fmt$k);
+  insight('ins-term', gTerm, termKey, rows, fmt$k,
+    'Term should rise with income. Watch for zeroes — those are rows where budget was too tight for term.');
+
+  // ── WL multiple ─────────────────────────────────────────────────
+  const gWLx = groupBy(rows, f.xaxis, f.split, wlxKey);
+  lineChart('c-wlx', gWLx, fmtX, { label:'Target 7×', val: 7 });
+  insight('ins-wlx', gWLx, wlxKey, rows, fmtX,
+    'Should hover around 5–7× for Opt1. High spikes = budget went mostly to WL. Low = term/ADB eating the budget.');
+
+  // ── Term multiple ───────────────────────────────────────────────
+  const gTermx = groupBy(rows, f.xaxis, f.split, termxKey);
+  lineChart('c-termx', gTermx, fmtMo, { label: opt==='1' ? 'Target 9mo' : 'Target 15mo', val: opt==='1' ? 9 : 15 });
+  insight('ins-termx', gTermx, termxKey, rows, fmtMo,
+    'Months of income replaced. Target: 6–12mo Opt1, 12–18mo Opt2. Drops at higher age = correct (age taper).');
+
+  // ── Premium ─────────────────────────────────────────────────────
+  const gPrem = groupBy(rows, f.xaxis, f.split, totKey);
+  const gBud  = groupBy(rows, f.xaxis, 'none', budKey);
+  const premDs = gPrem.series.map(s => ({
+    label: s.name, data: s.values,
+    borderColor: s.color, backgroundColor: s.color+'22',
+    pointRadius: 5, tension: 0.35, spanGaps: true, fill: false, borderWidth:2,
+  }));
+  premDs.push({
+    label: 'Budget ceiling',
+    data: gBud.series[0].values,
+    borderColor: '#ffffff44', borderDash:[5,4],
+    pointRadius:0, fill:false, borderWidth:1,
+  });
+  kill('c-prem');
+  charts['c-prem'] = new Chart(document.getElementById('c-prem'), {
+    type:'line', data:{ labels:gPrem.labels, datasets:premDs },
+    options:{ ...BASE, scales:{ x:BASE.scales.x, y:{ ...BASE.scales.y, ticks:{callback:fmt$} } },
+      plugins:{ ...BASE.plugins, tooltip:{...BASE.plugins.tooltip,
+        callbacks:{label:ctx=>`${ctx.dataset.label}: ${fmt$(ctx.parsed.y)}`}}}},
+  });
+  const overCount = rows.filter(r => opt==='1' ? r.diff1 > r.grace : r.diff2 > r.grace).length;
+  document.getElementById('ins-prem').innerHTML =
+    overCount === 0
+      ? `<span style="color:var(--green)">✓ All rows within budget grace</span>`
+      : `<strong style="color:var(--red)">${overCount} row${overCount>1?'s':''} over grace limit</strong> — formula is overshooting for those groups.`;
+  document.getElementById('ins-prem').className = 'insight ' + (overCount ? 'warn' : 'ok');
+
+  // ── Budget utilization % ────────────────────────────────────────
+  const utilKey = opt==='1' ? '_util1' : '_util2';
+  // Compute utilization ratio per row and store temporarily
+  const rowsUtil = rows.map(r => ({
+    ...r,
+    _util1: r.bud1 > 0 ? r.o1tot / r.bud1 : null,
+    _util2: r.bud2 > 0 ? r.o2tot / r.bud2 : null,
+  }));
+  const gUtil = groupBy(rowsUtil, f.xaxis, f.split, utilKey);
+  lineChart('c-util', gUtil, fmtPct, { label:'100% (budget)', val:1 });
+  const avgUtil = avg(rowsUtil, utilKey);
+  document.getElementById('ins-util').innerHTML =
+    `Average utilization: <strong>${avgUtil ? (avgUtil*100).toFixed(0)+'%' : '—'}</strong>. ` +
+    `>100% = over budget ceiling. Ideal range: 95–105%.`;
+
+  // ── ADB ─────────────────────────────────────────────────────────
+  const gADB = groupBy(rows, f.xaxis, f.split, adbKey);
+  barChart('c-adb', gADB, fmt$k);
+
+  // ── Opt1 vs Opt2 ────────────────────────────────────────────────
+  const g1 = groupBy(rows, f.xaxis, 'none', 'o1tot');
+  const g2 = groupBy(rows, f.xaxis, 'none', 'o2tot');
+  kill('c-1v2');
+  charts['c-1v2'] = new Chart(document.getElementById('c-1v2'), {
+    type:'bar',
+    data:{ labels:g1.labels, datasets:[
+      { label:'Opt1 Total', data:g1.series[0].values, backgroundColor:'#c8a14d99', borderColor:'#c8a14d', borderWidth:1 },
+      { label:'Opt2 Total', data:g2.series[0].values, backgroundColor:'#4a9eff77', borderColor:'#4a9eff', borderWidth:1 },
+    ]},
+    options:{ ...BASE, scales:{ x:BASE.scales.x, y:{ ...BASE.scales.y, ticks:{callback:fmt$} } } }
+  });
+  // Ratio insight
+  const ratios = g1.labels.map((_,i) => {
+    const v1 = g1.series[0].values[i], v2 = g2.series[0].values[i];
+    return (v1 && v2) ? v2/v1 : null;
+  }).filter(v=>v);
+  const avgRatio = ratios.length ? ratios.reduce((a,b)=>a+b)/ratios.length : null;
+  document.getElementById('ins-1v2').innerHTML = avgRatio
+    ? `Avg Opt2/Opt1 ratio: <strong>${avgRatio.toFixed(2)}×</strong>. Target is ~2× (two hours of wage = two budgets). ` +
+      (Math.abs(avgRatio - 2) < 0.3 ? '<span style="color:var(--green)">✓ On target</span>' : '<span style="color:var(--orange)">⚠ Drifting from 2×</span>')
+    : '—';
+
+  // ── Raw table ────────────────────────────────────────────────────
+  buildTable(rows, opt);
+}
+
+function insight(id, grouped, metric, rows, fmt, hint) {
+  // Find group with highest average and lowest
+  let highest = null, lowest = null;
+  grouped.series.forEach(s => {
+    s.values.forEach((v, i) => {
+      if (v == null) return;
+      if (!highest || v > highest.val) highest = { val:v, label: grouped.labels[i], series: s.name };
+      if (!lowest  || v < lowest.val)  lowest  = { val:v, label: grouped.labels[i], series: s.name };
+    });
+  });
+  const el = document.getElementById(id);
+  if (!highest) { el.textContent = 'Not enough data yet.'; return; }
+  el.innerHTML = `Highest: <strong>${fmt(highest.val)}</strong> @ ${highest.label}${grouped.series.length>1?' ('+highest.series+')':''} · ` +
+    `Lowest: <strong>${fmt(lowest.val)}</strong> @ ${lowest.label}${grouped.series.length>1?' ('+lowest.series+')':''}. ${hint}`;
+  el.className = 'insight';
+}
+
+function buildTable(rows, opt) {
+  const body = document.getElementById('rawBody');
+  const empty = document.getElementById('emptyMsg');
+  if (!rows.length) { body.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display = 'none';
+  const sorted = [...rows].sort((a,b)=>a.inc-b.inc||a.age-b.age);
+  const grace  = r => opt==='1' ? r.grace : r.grace;
+  body.innerHTML = sorted.map(r => {
+    const d1 = r.diff1, d2 = r.diff2, g = r.grace;
+    return `<tr>
+      <td>${r.age}<span style="color:var(--muted);margin-left:4px">${r.age_bracket}</span></td>
+      <td>${r.tob}</td>
+      <td><span class="badge ${r.a71?'b-yes':'b-no'}">${r.a71?'A71':'—'}</span></td>
+      <td><span class="badge ${r.married?'b-yes':'b-no'}">${r.married?'✓':'—'}</span></td>
+      <td class="r">$${r.inc.toLocaleString()}<br><span style="color:var(--muted);font-size:10px">${r.income_bracket}</span></td>
+      <td class="r">$${r.bud1}</td>
+      <td class="r">${fmt$k(r.o1wl)}</td><td class="r">${fmt$k(r.o1term)}</td><td class="r">${fmt$k(r.o1adb)}</td>
+      <td class="r">$${r.o1prem}</td><td class="r">$${r.o1tot}</td>
+      <td class="r"><span class="badge ${d1>g?'b-over':d1>0?'b-warn':'b-ok'}">${d1>0?'+':''}$${d1.toFixed(1)}</span></td>
+      <td class="r">${fmt$k(r.o2wl)}</td><td class="r">${fmt$k(r.o2term)}</td>
+      <td class="r">$${r.o2prem}</td><td class="r">$${r.o2tot}</td>
+      <td class="r"><span class="badge ${d2>g?'b-over':d2>0?'b-warn':'b-ok'}">${d2>0?'+':''}$${d2.toFixed(1)}</span></td>
+      <td class="r">${r.wlx.toFixed(1)}×</td><td class="r">${r.termx.toFixed(1)}×</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Populate filter dropdowns from actual data ────────────────────────────────
+let filtersPopulated = false;
+function populateFilterOptions(rows) {
+  if (filtersPopulated) return;
+  filtersPopulated = true;
+  const tobs    = [...new Set(rows.map(r=>r.tob).filter(Boolean))].sort();
+  const tobSel  = document.getElementById('f-tob');
+  tobs.forEach(t => { const o=document.createElement('option'); o.value=t; o.textContent=t; tobSel.appendChild(o); });
+  ['Yes','No'].forEach(v => {
+    ['f-a71','f-married'].forEach(id => {
+      const o=document.createElement('option'); o.value=v; o.textContent=v;
+      document.getElementById(id).appendChild(o);
+    });
+  });
+}
+
+// ── Data loading ──────────────────────────────────────────────────────────────
+function load(raw) {
+  ALL_ROWS = cook(raw);
+  filtersPopulated = false;
+  buildAll();
+}
+
+document.getElementById('fileInput').addEventListener('change', e => {
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ev => { load(parseCSV(ev.target.result)); setStatus(`✅ ${ALL_ROWS.length} rows from CSV`, 'ok'); };
+  r.readAsText(f);
+});
+
+// ── Restore URL ───────────────────────────────────────────────────────────────
+(()=>{ const u=localStorage.getItem('recUrl')||localStorage.getItem('quoteRecorderUrl')||''; if(u) document.getElementById('gsUrl').value=u; })();
+
+async function fetchFromSheet() {
+  const url = document.getElementById('gsUrl').value.trim();
+  if(!url) { setStatus('Paste Apps Script URL first','err'); return; }
+  localStorage.setItem('recUrl', url);
+  setStatus('Fetching…','wait');
+  try {
+    const res  = await fetch(url);
+    const json = await res.json();
+    if(!json.rows||!json.rows.length) { setStatus('No rows yet','err'); return; }
+    // Normalise key names from sheet (column headers) → same as CSV parse
+    const mapped = json.rows.map(r => ({
+      'Main Age':         r['Main Age'],
+      'Main Sex':         r['Main Sex'],
+      'Main Tob':         r['Main Tob'],
+      'Main A71':         r['Main A71'],
+      'High Risk Job':    r['High Risk Job'],
+      'Spouse Age':       r['Spouse Age'],
+      'Married':          r['Married'],
+      'Monthly Income':   r['Monthly Income'],
+      'Hourly Income':    r['Hourly Income'],
+      'Budget Opt1':      r['Budget Opt1'],
+      'Budget Opt2':      r['Budget Opt2'],
+      'Opt1 WL Main':     r['Opt1 WL Main'],
+      'Opt1 Term Main':   r['Opt1 Term Main'],
+      'Opt1 ADB Main':    r['Opt1 ADB Main'],
+      'Opt1 Prem Main':   r['Opt1 Prem Main'],
+      'Opt1 WL Spouse':   r['Opt1 WL Spouse'],
+      'Opt1 Prem Spouse': r['Opt1 Prem Spouse'],
+      'Opt1 Total':       r['Opt1 Total'],
+      'Opt2 WL Main':     r['Opt2 WL Main'],
+      'Opt2 Term Main':   r['Opt2 Term Main'],
+      'Opt2 ADB Main':    r['Opt2 ADB Main'],
+      'Opt2 Prem Main':   r['Opt2 Prem Main'],
+      'Opt2 WL Spouse':   r['Opt2 WL Spouse'],
+      'Opt2 Prem Spouse': r['Opt2 Prem Spouse'],
+      'Opt2 Total':       r['Opt2 Total'],
+      'SSP Mode':         r['SSP Mode'],
+    }));
+    load(mapped);
+    setStatus(`✅ ${ALL_ROWS.length} rows · ${new Date().toLocaleTimeString()}`, 'ok');
+  } catch(e) {
+    setStatus('❌ Fetch failed — re-deploy Apps Script with doGet added','err');
+    console.error(e);
+  }
+}
+
+function setStatus(msg, type) {
+  const el = document.getElementById('fetchStatus');
+  el.textContent = msg;
+  el.style.color = type==='ok'?'#3ecf8e':type==='err'?'#ff5f6d':'#4a9eff';
+}
+
+// Boot
+load(parseCSV(SEED));
+</script>
+</body>
+</html>
