@@ -1199,62 +1199,71 @@ async function recRecord(){
   if(!url){ recMsg('Paste your Apps Script URL first','err'); return; }
   localStorage.setItem('recUrl', url);
 
-  // Snapshot current quoter state
   let d;
   try {
-    const main = getPersonInput('main');
-    const sp   = state.spouseIncluded ? getPersonInput('spouse') : null;
-    const inc  = Number(document.getElementById('monthlyIncome').value||0);
-    const hrly = Number(document.getElementById('hourlyIncome').value||0);
+    const main     = getPersonInput('main');
+    const married  = state.spouseIncluded;
+    const sp       = married ? getPersonInput('spouse') : null;
+    const inc      = Number(document.getElementById('monthlyIncome').value||0);
+    const hrly     = Number(document.getElementById('hourlyIncome').value||0);
     const highRisk = document.getElementById('recRisk').checked;
 
+    // getCoverage reads DOM inputs — safe whether spouse pane visible or not
     const cov1m = getCoverage('one','main');
     const cov2m = getCoverage('two','main');
-    const cov1s = sp ? getCoverage('one','spouse') : null;
-    const cov2s = sp ? getCoverage('two','spouse') : null;
+    const cov1s = married ? getCoverage('one','spouse') : {wl:0,term:0,adb:0};
+    const cov2s = married ? getCoverage('two','spouse') : {wl:0,term:0,adb:0};
 
     const pr1m = priceCoverage(main, cov1m);
     const pr2m = priceCoverage(main, cov2m);
-    const pr1s = cov1s ? priceCoverage(sp, cov1s) : null;
-    const pr2s = cov2s ? priceCoverage(sp, cov2s) : null;
+    const pr1s = married ? priceCoverage(sp, cov1s) : {monthly:0};
+    const pr2s = married ? priceCoverage(sp, cov2s) : {monthly:0};
 
     d = {
       ts: new Date().toISOString(),
       // Main
       main_age: main.age, main_sex: main.sex, main_tob: main.tob,
-      main_a71: main.a71 ? 'Yes' : 'No',
-      high_risk: highRisk ? 'Yes' : 'No',
-      a71_rec: (main.a71 && highRisk) ? 'Yes' : 'No',
+      main_a71:  main.a71   ? 'Yes' : 'No',
+      high_risk: highRisk   ? 'Yes' : 'No',
+      a71_rec:  (main.a71 && highRisk) ? 'Yes' : 'No',
       // Spouse
-      spouse: sp ? 'Yes' : 'No',
-      sp_age: sp ? sp.age : '',
-      sp_sex: sp ? sp.sex : '',
-      sp_tob: sp ? sp.tob : '',
-      sp_a71: sp ? (sp.a71 ? 'Yes' : 'No') : '',
-      // Income
+      married:   married    ? 'Yes' : 'No',
+      sp_age:    sp ? sp.age  : '',
+      sp_sex:    sp ? sp.sex  : '',
+      sp_tob:    sp ? sp.tob  : '',
+      sp_a71:    sp ? (sp.a71 ? 'Yes' : 'No') : '',
+      // Income & budgets
       income: inc,
       hourly: hrly,
-      bud1: +(hrly*4).toFixed(2),
-      bud2: +(hrly*8).toFixed(2),
-      // Option 1
-      o1_wl_m:   cov1m.wl,
-      o1_term_m: cov1m.term,
-      o1_adb_m:  cov1m.adb,
-      o1_prem_m: +pr1m.monthly.toFixed(2),
-      o1_wl_s:   cov1s ? cov1s.wl : 0,
-      o1_prem_s: pr1s ? +pr1s.monthly.toFixed(2) : 0,
-      o1_total:  +((pr1m.monthly)+(pr1s?pr1s.monthly:0)).toFixed(2),
-      // Option 2
-      o2_wl_m:   cov2m.wl,
-      o2_term_m: cov2m.term,
-      o2_adb_m:  cov2m.adb,
-      o2_prem_m: +pr2m.monthly.toFixed(2),
-      o2_wl_s:   cov2s ? cov2s.wl : 0,
-      o2_prem_s: pr2s ? +pr2s.monthly.toFixed(2) : 0,
-      o2_total:  +((pr2m.monthly)+(pr2s?pr2s.monthly:0)).toFixed(2),
+      bud1:   +(hrly*4).toFixed(2),
+      bud2:   +(hrly*8).toFixed(2),
+      // Option 1 — Main
+      o1_wl_m:    cov1m.wl,
+      o1_term_m:  cov1m.term,
+      o1_adb_m:   cov1m.adb,
+      o1_prem_m:  +pr1m.monthly.toFixed(2),
+      // Option 1 — Spouse
+      o1_wl_s:    cov1s.wl,
+      o1_term_s:  cov1s.term,
+      o1_adb_s:   cov1s.adb,
+      o1_prem_s:  +pr1s.monthly.toFixed(2),
+      // Option 1 — Household total
+      o1_total:   +(pr1m.monthly + pr1s.monthly).toFixed(2),
+      // Option 2 — Main
+      o2_wl_m:    cov2m.wl,
+      o2_term_m:  cov2m.term,
+      o2_adb_m:   cov2m.adb,
+      o2_prem_m:  +pr2m.monthly.toFixed(2),
+      // Option 2 — Spouse
+      o2_wl_s:    cov2s.wl,
+      o2_term_s:  cov2s.term,
+      o2_adb_s:   cov2s.adb,
+      o2_prem_s:  +pr2s.monthly.toFixed(2),
+      // Option 2 — Household total
+      o2_total:   +(pr2m.monthly + pr2s.monthly).toFixed(2),
       ssp: isSSPMode() ? 'Yes' : 'No',
     };
-  } catch(e){ recMsg('Could not read quoter state: '+e.message,'err'); return; }
+  } catch(e){ recMsg('Error reading quoter: '+e.message,'err'); return; }
 
   recMsg('Sending…','wait');
   try {
@@ -1263,7 +1272,10 @@ async function recRecord(){
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({action:'record', data:d}),
     });
-    recMsg(`✅ Saved — Age ${d.main_age} ${d.main_sex} ${d.main_tob} $${d.income.toLocaleString()}/mo`,'ok');
+    const tag = d.married === 'Yes'
+      ? `Age ${d.main_age}+${d.sp_age} Married`
+      : `Age ${d.main_age} ${d.main_sex}`;
+    recMsg(`✅ Saved — ${tag} $${d.income.toLocaleString()}/mo`,'ok');
   } catch(e){ recMsg('❌ Fetch failed — check URL','err'); }
 }
 
