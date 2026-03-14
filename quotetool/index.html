@@ -119,9 +119,9 @@ button.ghost{background:#f6f8fc;color:var(--navy)}
             <div class="rateLine">Weekly <span data-field="weeklyText">$0.00</span></div>
           </div>
           <div class="edit">
-            <div class="editRow"><span>WL</span><input data-input="wl" type="number" step="1000" min="0" value="10000"></div>
-            <div class="editRow"><span>TERM</span><input data-input="term" type="number" step="1000" min="0" value="18000"></div>
-            <div class="editRow"><span>ADB</span><input data-input="adb" type="number" step="1000" min="0" value="50000"></div>
+            <div class="editRow"><span>WL</span><input data-input="wl" type="number" step="1000" min="0" max="500000" value="10000"></div>
+            <div class="editRow"><span>TERM</span><input data-input="term" type="number" step="1000" min="0" max="500000" value="18000"></div>
+            <div class="editRow"><span>ADB</span><input data-input="adb" type="number" step="1000" min="0" max="500000" value="50000"></div>
           </div>
           <div class="mini" data-field="notes"></div>
           <div class="actions"><button class="gold" data-action="auto">Auto Complete</button><button class="ghost" data-action="clear">Clear</button></div>
@@ -137,9 +137,9 @@ button.ghost{background:#f6f8fc;color:var(--navy)}
             <div class="rateLine">Weekly <span data-field="weeklyText">$0.00</span></div>
           </div>
           <div class="edit">
-            <div class="editRow"><span>WL</span><input data-input="wl" type="number" step="1000" min="0" value="10000"></div>
-            <div class="editRow"><span>TERM</span><input data-input="term" type="number" step="1000" min="0" value="18000"></div>
-            <div class="editRow"><span>ADB</span><input data-input="adb" type="number" step="1000" min="0" value="50000"></div>
+            <div class="editRow"><span>WL</span><input data-input="wl" type="number" step="1000" min="0" max="500000" value="10000"></div>
+            <div class="editRow"><span>TERM</span><input data-input="term" type="number" step="1000" min="0" max="500000" value="18000"></div>
+            <div class="editRow"><span>ADB</span><input data-input="adb" type="number" step="1000" min="0" max="500000" value="50000"></div>
           </div>
           <div class="mini" data-field="notes"></div>
           <div class="actions"><button class="gold" data-action="auto">Auto Complete</button><button class="ghost" data-action="clear">Clear</button></div>
@@ -163,9 +163,9 @@ button.ghost{background:#f6f8fc;color:var(--navy)}
             <div class="rateLine">Weekly <span data-field="weeklyText">$0.00</span></div>
           </div>
           <div class="edit">
-            <div class="editRow"><span>WL</span><input data-input="wl" type="number" step="1000" min="0" value="25000"></div>
-            <div class="editRow"><span>TERM</span><input data-input="term" type="number" step="1000" min="0" value="36000"></div>
-            <div class="editRow"><span>ADB</span><input data-input="adb" type="number" step="1000" min="0" value="100000"></div>
+            <div class="editRow"><span>WL</span><input data-input="wl" type="number" step="1000" min="0" max="500000" value="25000"></div>
+            <div class="editRow"><span>TERM</span><input data-input="term" type="number" step="1000" min="0" max="500000" value="36000"></div>
+            <div class="editRow"><span>ADB</span><input data-input="adb" type="number" step="1000" min="0" max="500000" value="100000"></div>
           </div>
           <div class="mini" data-field="notes"></div>
           <div class="actions"><button class="gold" data-action="auto">Auto Complete</button><button class="ghost" data-action="clear">Clear</button></div>
@@ -181,9 +181,9 @@ button.ghost{background:#f6f8fc;color:var(--navy)}
             <div class="rateLine">Weekly <span data-field="weeklyText">$0.00</span></div>
           </div>
           <div class="edit">
-            <div class="editRow"><span>WL</span><input data-input="wl" type="number" step="1000" min="0" value="25000"></div>
-            <div class="editRow"><span>TERM</span><input data-input="term" type="number" step="1000" min="0" value="36000"></div>
-            <div class="editRow"><span>ADB</span><input data-input="adb" type="number" step="1000" min="0" value="100000"></div>
+            <div class="editRow"><span>WL</span><input data-input="wl" type="number" step="1000" min="0" max="500000" value="25000"></div>
+            <div class="editRow"><span>TERM</span><input data-input="term" type="number" step="1000" min="0" max="500000" value="36000"></div>
+            <div class="editRow"><span>ADB</span><input data-input="adb" type="number" step="1000" min="0" max="500000" value="100000"></div>
           </div>
           <div class="mini" data-field="notes"></div>
           <div class="actions"><button class="gold" data-action="auto">Auto Complete</button><button class="ghost" data-action="clear">Clear</button></div>
@@ -275,17 +275,17 @@ function getPane(card, person){
 function getCoverage(card, person){
   const pane = getPane(card, person);
   return {
-    wl: round1000(pane.querySelector('[data-input="wl"]').value),
-    term: round1000(pane.querySelector('[data-input="term"]').value),
-    adb: round1000(pane.querySelector('[data-input="adb"]').value),
+    wl: clamp(round1000(pane.querySelector('[data-input="wl"]').value), 0, 500000),
+    term: clamp(round1000(pane.querySelector('[data-input="term"]').value), 0, 500000),
+    adb: clamp(round1000(pane.querySelector('[data-input="adb"]').value), 0, 500000),
   };
 }
 
 function setCoverage(card, person, values){
   const pane = getPane(card, person);
-  pane.querySelector('[data-input="wl"]').value = round1000(values.wl || 0);
-  pane.querySelector('[data-input="term"]').value = round1000(values.term || 0);
-  pane.querySelector('[data-input="adb"]').value = round1000(values.adb || 0);
+  pane.querySelector('[data-input="wl"]').value = clamp(round1000(values.wl || 0), 0, 500000);
+  pane.querySelector('[data-input="term"]').value = clamp(round1000(values.term || 0), 0, 500000);
+  pane.querySelector('[data-input="adb"]').value = clamp(round1000(values.adb || 0), 0, 500000);
 }
 
 function matchAgeBand(age, band){
@@ -296,11 +296,35 @@ function matchAgeBand(age, band){
   return age>=a && age<=b;
 }
 
-function findWLRate(age, sex, tob, face){
-  const code = face >= 120000 ? 'SL' : face >= 60000 ? 'EX' : face >= 15100 ? 'PR' : 'WL';
-  const rows = state.rates.filter(r => r.plan_code===code && r.record_type==='rate' && r.age===age && r.sex===sex && r.tobacco===tob);
-  const row = rows.find(r => (r.face_min==null || face>=r.face_min) && (r.face_max==null || face<=r.face_max));
-  return row ? {...row, effective_code: code} : null;
+function permanentPremiumFromRow(row, face){
+  const units = face / 1000;
+  return annualToMonthly(units * row.base_rate + row.policy_fee_annual + row.volume_adjustment_annual);
+}
+
+function findPermanentRate(age, sex, tob, face){
+  const rows = state.rates
+    .filter(r => ['WL','PR','EX','SL'].includes(r.plan_code) && r.record_type==='rate' && r.age===age && r.sex===sex && r.tobacco===tob)
+    .filter(r => (r.face_min==null || face>=r.face_min) && (r.face_max==null || face<=r.face_max))
+    .sort((a,b)=> (a.face_min||0)-(b.face_min||0));
+  const row = rows[0] || null;
+  return row ? {...row, effective_code: row.plan_code} : null;
+}
+
+function getNextPermanentStep(age, sex, tob, face, currentMonthly){
+  const steps = [
+    { code:'PR', face:35000 },
+    { code:'EX', face:60000 },
+    { code:'SL', face:120000 }
+  ].filter(s => s.face > face && s.face <= 500000);
+  for(const step of steps){
+    const row = state.rates.find(r => r.plan_code===step.code && r.record_type==='rate' && r.age===age && r.sex===sex && r.tobacco===tob && (r.face_min==null || step.face>=r.face_min) && (r.face_max==null || step.face<=r.face_max));
+    if(!row) continue;
+    const nextMonthly = permanentPremiumFromRow(row, step.face);
+    if(nextMonthly <= currentMonthly + 1.50){
+      return { code: step.code, face: step.face, monthly: nextMonthly, extra: nextMonthly - currentMonthly };
+    }
+  }
+  return null;
 }
 
 function find10RCRate(age, sex, tob){
@@ -320,14 +344,20 @@ function priceCoverage(personInput, coverage){
   let annualTotal = 0;
 
   if(coverage.wl > 0){
-    const wlRow = findWLRate(personInput.age, personInput.sex, personInput.tob, coverage.wl);
+    const wlRow = findPermanentRate(personInput.age, personInput.sex, personInput.tob, coverage.wl);
     if(wlRow){
       const units = coverage.wl / 1000;
       const annual = units * wlRow.base_rate + wlRow.policy_fee_annual + wlRow.volume_adjustment_annual;
       annualTotal += annual;
-      notes.push(`${wlRow.effective_code} used for WL`);
+      notes.push(`${wlRow.effective_code} used for permanent`);
+      const currentMonthly = annualToMonthly(annual);
+      const samePriceStep = getNextPermanentStep(personInput.age, personInput.sex, personInput.tob, coverage.wl, currentMonthly);
+      if(samePriceStep){
+        const delta = samePriceStep.extra <= 0 ? 'same price' : `+${currency(samePriceStep.extra)}/mo`;
+        notes.push(`${money0(samePriceStep.face)} ${samePriceStep.code} nearly same price (${delta})`);
+      }
     } else {
-      notes.push('No WL rate found');
+      notes.push('No permanent rate found');
     }
   }
 
@@ -407,9 +437,9 @@ function autoFill(card, person){
   if(input.age >= 65) adbTarget = 0;
 
   let best = { wl: wlTarget, term: termTarget, adb: adbTarget, diff: Infinity, monthly: 0 };
-  for(let wl = wlTarget; wl >= 10000; wl -= 5000){
-    for(let term = termTarget; term >= 0; term -= 1000){
-      for(let adb = adbTarget; adb >= 0; adb -= 1000){
+  for(let wl = Math.min(wlTarget, 500000); wl >= 10000; wl -= 5000){
+    for(let term = Math.min(termTarget, 500000); term >= 0; term -= 5000){
+      for(let adb = Math.min(adbTarget, 500000); adb >= 0; adb -= 5000){
         const priced = priceCoverage(input, { wl, term, adb });
         const diff = Math.abs(priced.monthly - budget);
         const wlFloor = state.spouseIncluded ? 10000 : (card==='one' ? 20000 : 25000);
@@ -441,7 +471,7 @@ function renderPane(card, person){
   pane.querySelector('[data-field="a71Text"]').textContent = personInput.a71 ? 'ON' : 'OFF';
   const notesEl = pane.querySelector('[data-field="notes"]');
   notesEl.textContent = priced.notes.join(' · ');
-  notesEl.className = 'mini' + (priced.notes.some(x=>x.includes('No ') || x.includes('unavailable')) ? ' bad' : '');
+  notesEl.className = 'mini' + (priced.notes.some(x=>x.includes('No ') || x.includes('unavailable')) ? ' bad' : ' good');
   return { priced, totals, coverage };
 }
 
