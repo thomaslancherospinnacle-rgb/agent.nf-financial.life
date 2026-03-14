@@ -96,17 +96,28 @@ button.ghost{background:#f6f8fc;color:var(--navy)}
         <div class="grid" style="margin-top:0">
           <div><label>Monthly Income</label><input id="monthlyIncome" type="number" min="0" step="0.01" value="3000"></div>
           <div><label>Hourly Income</label><input id="hourlyIncome" type="number" min="0" step="0.01" value="18.75"></div>
+          <div class="full inlineToggle"><input id="sspMode" type="checkbox"><span>SSP mode (Social Security Protection)</span></div>
+        </div>
+        <div class="grid hidden" id="sspGrid">
+          <div><label>Main SSI</label><input id="mainSSI" type="number" min="0" step="0.01" value="2200"></div>
+          <div><label>Spouse SSI</label><input id="spSSI" type="number" min="0" step="0.01" value="1600"></div>
+          <div class="full"><label>SSP months set</label><select id="sspStartMonths"><option value="3">3 & 6 months</option><option value="6" selected>6 & 9 months</option><option value="9">9 & 12 months</option><option value="12">12 & 15 months</option><option value="15">15 & 18 months</option><option value="18">15 & 18 months (max)</option></select></div>
         </div>
         <div class="status">
           <div>One Hour Budget Monthly: <strong id="oneBudgetText"></strong></div>
           <div>Two Hour Budget Monthly: <strong id="twoBudgetText"></strong></div>
+          <div class="hidden" id="sspSummaryBox">
+            <div>Main dies → survivor SSI: <strong id="sspMainAfter"></strong> · monthly loss: <strong id="sspMainLoss"></strong></div>
+            <div>SSP term includes an added <strong>$2,500</strong> cremation / final-expense buffer.</div>
+            <div>Spouse dies → survivor SSI: <strong id="sspSpAfter"></strong> · monthly loss: <strong id="sspSpLoss"></strong></div>
+          </div>
           <div id="csvStatus">Loading <strong>Rates.csv</strong>...</div>
         </div>
       </div>
     </div>
 
     <div class="card" id="oneCard">
-      <div class="cardHeader">ONE HOUR<div class="cardMeta">Target budget</div></div>
+      <div class="cardHeader"><span id="oneHeaderText">ONE HOUR</span><div class="cardMeta"><span id="oneMetaText">Target budget</span></div></div>
       <div class="split" id="oneSplit">
         <div class="pane" data-card="one" data-person="main">
           <div class="paneTitle">MAIN</div>
@@ -151,7 +162,7 @@ button.ghost{background:#f6f8fc;color:var(--navy)}
     </div>
 
     <div class="card" id="twoCard">
-      <div class="cardHeader">TWO HOUR<div class="cardMeta">Target budget</div></div>
+      <div class="cardHeader"><span id="twoHeaderText">TWO HOUR</span><div class="cardMeta"><span id="twoMetaText">Target budget</span></div></div>
       <div class="split" id="twoSplit">
         <div class="pane" data-card="two" data-person="main">
           <div class="paneTitle">MAIN</div>
@@ -276,18 +287,21 @@ function getPane(card, person){
 
 function getCoverage(card, person){
   const pane = getPane(card, person);
+  const age = getPersonInput(person).age;
+  const rawADB = clamp(round1000(pane.querySelector('[data-input="adb"]').value), 0, 500000);
   return {
     wl: clamp(round1000(pane.querySelector('[data-input="wl"]').value), 0, 500000),
     term: clamp(round1000(pane.querySelector('[data-input="term"]').value), 0, 500000),
-    adb: clamp(round1000(pane.querySelector('[data-input="adb"]').value), 0, 500000),
+    adb: age >= 55 ? 0 : rawADB,
   };
 }
 
 function setCoverage(card, person, values){
   const pane = getPane(card, person);
+  const age = getPersonInput(person).age;
   pane.querySelector('[data-input="wl"]').value = clamp(round1000(values.wl || 0), 0, 500000);
   pane.querySelector('[data-input="term"]').value = clamp(round1000(values.term || 0), 0, 500000);
-  pane.querySelector('[data-input="adb"]').value = clamp(round1000(values.adb || 0), 0, 500000);
+  pane.querySelector('[data-input="adb"]').value = age >= 55 ? 0 : clamp(round1000(values.adb || 0), 0, 500000);
 }
 
 function matchAgeBand(age, band){
@@ -338,6 +352,42 @@ function findADBRate(age){
 
 function annualToMonthly(annual){ return annual / 12; }
 function annualToWeekly(annual){ return annual / 52; }
+
+function isSSPMode(){
+  return $('sspMode').checked && state.spouseIncluded;
+}
+
+function getSSPMonthPair(){
+  const base = Number($('sspStartMonths')?.value || 6);
+  if(base >= 18) return { one: 15, two: 18 };
+  return { one: base, two: Math.min(18, base + 3) };
+}
+
+function getCardSSPMonths(card){
+  const pair = getSSPMonthPair();
+  return card === 'one' ? pair.one : pair.two;
+}
+
+function getSSIValue(person){
+  return Number($(person === 'main' ? 'mainSSI' : 'spSSI').value || 0);
+}
+
+function getSSPScenario(){
+  const mainSSI = getSSIValue('main');
+  const spouseSSI = getSSIValue('spouse');
+  const total = mainSSI + spouseSSI;
+  const afterMainDies = Math.max(spouseSSI, mainSSI * 0.75);
+  const afterSpouseDies = Math.max(mainSSI, spouseSSI * 0.75);
+  const lossMainDies = Math.max(0, total - afterMainDies);
+  const lossSpouseDies = Math.max(0, total - afterSpouseDies);
+  return {
+    mainSSI, spouseSSI, total,
+    afterMainDies, afterSpouseDies,
+    lossMainDies, lossSpouseDies,
+    mainWorthPitching: mainSSI * 0.75 > spouseSSI,
+    spouseWorthPitching: spouseSSI * 0.75 > mainSSI,
+  };
+}
 
 function priceCoverage(personInput, coverage){
   const notes=[];
@@ -423,58 +473,72 @@ function getRecommendedTargets(card, person){
   const incomeShare = !state.spouseIncluded ? 1 : (person==='main' ? 0.55 : 0.45);
   const paneIncome = householdMonthly * incomeShare;
   const input = getPersonInput(person);
+  const ssp = getSSPScenario();
+  const months = getCardSSPMonths(card);
+  const sspMode = isSSPMode();
 
-  let minWL = 25000;
-  if(paneIncome <= 2500) minWL = 20000;
-  else if(paneIncome <= 4500) minWL = 25000;
-  else if(paneIncome <= 6500) minWL = 30000;
-  else minWL = 35000;
+  let minWL = 20000;
+  let targetWL = 30000;
 
-  if(card === 'two'){
-    minWL += 5000;
-    if(paneIncome >= 8000) minWL += 10000;
-  }
-
-  if(state.spouseIncluded){
-    minWL = Math.max(card==='one' ? 15000 : 20000, round1000(minWL * 0.8));
-  }
-  minWL = clamp(round1000(minWL), 10000, 500000);
-
-  let termMonths = card==='one' ? 6 : 12;
-  if(paneIncome < 2500) termMonths = card==='one' ? 5 : 10;
-  let termTarget = round1000(paneIncome * termMonths);
-  termTarget = clamp(termTarget, card==='one' ? 10000 : 20000, 500000);
-
-  let annualIncomeTarget = round1000(paneIncome * 12);
-  let includedA71 = input.a71 ? 50000 : 0;
-  let desiredAccidental = Math.max(0, annualIncomeTarget - includedA71);
-
-  if(minWL >= 25000){
-    desiredAccidental = Math.min(desiredAccidental, 100000);
-  }
-  if(paneIncome < 8000){
-    desiredAccidental = Math.min(desiredAccidental, 100000);
+  if(card === 'one'){
+    minWL = person === 'main' ? 35000 : (state.spouseIncluded ? 15000 : 20000);
+    targetWL = minWL;
   } else {
-    desiredAccidental = Math.min(desiredAccidental, 150000);
+    minWL = person === 'main' ? 70000 : (state.spouseIncluded ? 70000 : 50000);
+    targetWL = minWL;
   }
 
-  if(input.age >= 60) desiredAccidental = Math.min(desiredAccidental, 50000);
-  if(input.age >= 65) desiredAccidental = 0;
+  if(input.age >= 45){
+    minWL = Math.max(minWL, card === 'one' ? (person === 'main' ? 35000 : 15000) : 70000);
+    targetWL = Math.max(targetWL, minWL);
+  }
+  if(input.age >= 55){
+    targetWL += card === 'one' ? 5000 : 10000;
+  }
+  if(input.age >= 55){
+    minWL += card === 'one' ? (person === 'main' ? 5000 : 5000) : 10000;
+    targetWL = Math.max(targetWL, minWL);
+  }
 
+  let termTarget = 0;
   let adbTarget = 0;
-  const coreEstimate = priceCoverage(input, { wl:minWL, term:termTarget, adb:0 }).monthly;
-  const a71Monthly = input.a71 ? (input.age <= 59 ? 20 : input.age <= 64 ? 22.5 : 35.25) : 0;
-  const remainingForAdb = paneBudget - coreEstimate - a71Monthly;
 
-  if(remainingForAdb >= 4 && desiredAccidental > 0){
-    adbTarget = desiredAccidental;
-  } else if(remainingForAdb >= 2 && desiredAccidental >= 50000){
-    adbTarget = 50000;
+  if(sspMode){
+    const rawLoss = person === 'main' ? ssp.lossMainDies : ssp.lossSpouseDies;
+    termTarget = round1000(rawLoss * months + 2500);
+    if(person === 'main' && !ssp.mainWorthPitching) termTarget = 0;
+    if(person === 'spouse' && !ssp.spouseWorthPitching) termTarget = 0;
+    adbTarget = input.age >= 55 ? 0 : (card === 'two' ? 25000 : 0);
+  } else {
+    if(card === 'one'){
+      termTarget = person==='main' ? round1000(householdMonthly * 6) : 0;
+      adbTarget = 0;
+      if(paneBudget >= 95) adbTarget = person==='main' ? 40000 : 0;
+      if(input.age >= 45) adbTarget = Math.min(adbTarget, 25000);
+    } else {
+      termTarget = person==='main' ? round1000(householdMonthly * 18) : (state.spouseIncluded ? 15000 : 0);
+      adbTarget = person==='main' ? 50000 : (state.spouseIncluded ? 45000 : 25000);
+      if(input.age >= 45) adbTarget = Math.min(adbTarget, person==='main' ? 50000 : 30000);
+    }
   }
 
-  adbTarget = clamp(round1000(adbTarget), 0, 500000);
+  if(personInputHasA71(person)){
+    adbTarget = Math.max(0, adbTarget - 50000);
+  }
 
-  return { paneBudget, paneIncome, minWL, termTarget, adbTarget };
+  if(input.age >= 55){
+    adbTarget = 0;
+  }
+  if(Number($('monthlyIncome').value || 0) < 8000){
+    adbTarget = Math.min(adbTarget, 100000);
+  }
+  adbTarget = Math.max(0, adbTarget);
+
+  return { paneBudget, minWL, targetWL, termTarget, adbTarget, sspMode, sspMonths: months };
+}
+
+function personInputHasA71(person){
+  return $(person==='main'?'main_a71':'sp_a71').checked;
 }
 
 function buildPermanentOptions(age, sex, tob){
@@ -511,23 +575,24 @@ function buildStepLadder(target){
 
 function findBestAutoMix(card, person){
   const input = getPersonInput(person);
-  const { paneBudget:budget, minWL, termTarget, adbTarget } = getRecommendedTargets(card, person);
-  const permOptions = buildPermanentOptions(input.age, input.sex, input.tob);
+  const { paneBudget:budget, minWL, targetWL, termTarget, adbTarget, sspMode } = getRecommendedTargets(card, person);
+  const permOptions = buildPermanentOptions(input.age, input.sex, input.tob)
+    .filter(o => o.face === 0 || o.face >= minWL);
   const termChoices = buildStepLadder(termTarget).filter(v => v <= 500000);
   const adbChoices = buildStepLadder(adbTarget).filter(v => v <= 500000);
 
   let best = { wl:minWL, term:0, adb:0, monthly:999999, score:Infinity };
 
   for(const p of permOptions){
-    if(p.face !== 0 && p.face < minWL) continue;
     const wl = p.face;
-    const wlMonthly = p.monthly;
-    if(wlMonthly > budget + 4) continue;
+    if(wl < minWL) continue;
+    const wlMonthly = priceCoverage(input, { wl, term:0, adb:0 }).monthly;
+    if(wlMonthly > budget + 6) continue;
 
     for(const term of termChoices){
       if(term > 0 && !find10RCRate(input.age, input.sex, input.tob)) continue;
       const withTerm = priceCoverage(input, { wl, term, adb:0 }).monthly;
-      if(withTerm > budget + 4) continue;
+      if(withTerm > budget + 6) continue;
 
       for(const adb of adbChoices){
         if(adb > 0 && !findADBRate(input.age)) continue;
@@ -535,20 +600,21 @@ function findBestAutoMix(card, person){
         const over = Math.max(0, priced.monthly - budget);
         const under = Math.max(0, budget - priced.monthly);
 
-        const wlShort = Math.max(0, minWL - wl) / 1000;
+        const wlShort = Math.max(0, targetWL - wl) / 1000;
         const termShort = Math.max(0, termTarget - term) / 1000;
         const adbShort = Math.max(0, adbTarget - adb) / 1000;
-
+        const ageWLBonus = input.age >= 45 ? (wl/1000) * 0.9 : 0;
         const score =
-          over * 120 +
-          under * 16 +
-          wlShort * 90 +
-          termShort * 12 +
-          adbShort * 8 +
-          (adb > 100000 && (Number($('monthlyIncome').value || 0) < 8000)) * 220 -
-          (wl/1000) * 1.2 -
-          (term/1000) * 0.40 -
-          (Math.min(adb,100000)/1000) * 0.10;
+          over * 300 +
+          under * (sspMode ? 10 : 14) +
+          wlShort * (input.age >= 45 ? 90 : 70) +
+          termShort * (sspMode ? 14 : 9) +
+          adbShort * 4 +
+          (adb > 100000 && (Number($('monthlyIncome').value || 0) < 8000) ? 500 : 0) +
+          (wl < minWL ? 99999 : 0) -
+          ageWLBonus -
+          (wl/1000) * (input.age >= 45 ? 0.8 : 0.45) -
+          (term/1000) * (sspMode ? 0.35 : 0.15);
 
         if(score < best.score || (Math.abs(score - best.score) < 0.001 && priced.monthly > best.monthly)){
           best = { wl, term, adb, monthly: priced.monthly, score };
@@ -559,7 +625,6 @@ function findBestAutoMix(card, person){
 
   return best;
 }
-
 
 function renderPane(card, person){
   const pane = getPane(card, person);
@@ -578,7 +643,11 @@ function renderPane(card, person){
   a71Row.classList.toggle('hidden', !input.a71);
   pane.querySelector('[data-field="a71Text"]').textContent = input.a71 ? 'ON' : 'OFF';
   pane.querySelector('[data-field="notes"]').innerHTML = priced.notes.join('<br>');
-  return { priced, death, coverage, input };
+  const adbInput = pane.querySelector('[data-input="adb"]');
+  const lockADB = input.age >= 55;
+  adbInput.disabled = lockADB;
+  if(lockADB){ adbInput.value = 0; }
+  return { priced, death, coverage: getCoverage(card, person), input };
 }
 
 function renderBottom(card){
@@ -618,6 +687,26 @@ function refreshAll(){
   const hourly = Number($('hourlyIncome').value || 0);
   $('oneBudgetText').textContent = currency(hourly * 4);
   $('twoBudgetText').textContent = currency(hourly * 8);
+
+  const sspModeOn = $('sspMode').checked;
+  $('sspGrid').classList.toggle('hidden', !sspModeOn || !state.spouseIncluded);
+  $('sspSummaryBox').classList.toggle('hidden', !sspModeOn || !state.spouseIncluded);
+  $('oneMetaText').textContent = sspModeOn && state.spouseIncluded ? 'SSP target' : 'Target budget';
+  $('twoMetaText').textContent = sspModeOn && state.spouseIncluded ? 'SSP target' : 'Target budget';
+
+  if(sspModeOn && state.spouseIncluded){
+    const ssp = getSSPScenario();
+    const pair = getSSPMonthPair();
+    $('oneHeaderText').textContent = `SSP ${pair.one} MONTHS`;
+    $('twoHeaderText').textContent = `SSP ${pair.two} MONTHS`;
+    $('sspMainAfter').textContent = currency(ssp.afterMainDies);
+    $('sspMainLoss').textContent = currency(ssp.lossMainDies);
+    $('sspSpAfter').textContent = currency(ssp.afterSpouseDies);
+    $('sspSpLoss').textContent = currency(ssp.lossSpouseDies);
+  } else {
+    $('oneHeaderText').textContent = 'ONE HOUR';
+    $('twoHeaderText').textContent = 'TWO HOUR';
+  }
 
   const main = getPersonInput('main');
   $('mainSummary').textContent = `MAIN (${main.sex.toUpperCase()}) AGE:${main.age} ${main.tob} ${main.a71 ? 'A71 ON' : 'A71 OFF'}`;
@@ -689,7 +778,7 @@ $('hourlyIncome').addEventListener('input', ()=>{
   refreshAll();
 });
 
-['main_age','main_sex','main_tob','main_a71','sp_age','sp_sex','sp_tob','sp_a71'].forEach(id=>{
+['main_age','main_sex','main_tob','main_a71','sp_age','sp_sex','sp_tob','sp_a71','sspMode','mainSSI','spSSI','sspStartMonths'].forEach(id=>{
   $(id).addEventListener('input', refreshAll);
   $(id).addEventListener('change', refreshAll);
 });
@@ -726,4 +815,3 @@ refreshAll();
 </script>
 </body>
 </html>
-
