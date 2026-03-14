@@ -1,1600 +1,534 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>AIL Quote Tool</title>
-<link rel="icon" href="./files/favicon.ico" type="image/x-icon">
-<link rel="stylesheet" type="text/css" href="./files/style.css">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ratebook Quote Builder</title>
 <style>
+*{box-sizing:border-box}
 :root{
-  --navy:#0a1628;
-  --navy2:#0f1f3d;
-  --navy3:#162847;
-  --navy4:#1e3358;
-  --navy5:#254070;
-  --gold:#c9a84c;
-  --gold2:#e2c06a;
-  --gold3:#f0d48a;
-  --gold-dim:rgba(201,168,76,0.12);
-  --gold-glow:rgba(201,168,76,0.18);
-  --border:rgba(201,168,76,0.12);
-  --border2:rgba(201,168,76,0.22);
-  --text:#eef2f8;
-  --text2:#a8b8d0;
-  --muted:#5a7090;
-  --green:#3dd68c;
-  --green-bg:rgba(61,214,140,0.10);
-  --red:#f87171;
-  --font:'Barlow',sans-serif;
-  --display:'Playfair Display',serif;
-  --cond:'Barlow Condensed',sans-serif;
-  --mono:'JetBrains Mono',monospace;
-  --r:10px;
+  --navy:#0d1f3c;
+  --navy-2:#132a4f;
+  --navy-3:#1b3c6e;
+  --gold:#c8a14d;
+  --gold-2:#e3c980;
+  --panel:#ffffff;
+  --bg:#eef3f9;
+  --line:#d7dfeb;
+  --ink:#132746;
+  --muted:#5b6f90;
 }
-html,body{background:var(--navy)!important;color:var(--text)!important;font-family:var(--font)!important;min-height:100%;}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(201,168,76,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
-body>*{position:relative;z-index:1}
-.header{position:sticky!important;top:0;z-index:50;background:linear-gradient(180deg,var(--navy),var(--navy2))!important;border-bottom:1px solid var(--border2)!important;backdrop-filter:blur(10px);padding:12px 20px!important;box-shadow:0 10px 30px rgba(0,0,0,.28)}
-.header::before{content:'AIL QUOTE TOOL';display:block;width:max-content;margin:0 auto 10px auto;font-family:var(--cond);font-size:12px;font-weight:700;letter-spacing:2px;color:var(--gold);text-transform:uppercase}
-.logo{max-height:44px!important;filter:drop-shadow(0 4px 12px rgba(0,0,0,.35))}
-#fullscreenBtn{background:var(--navy3)!important;border:1px solid var(--border2)!important;border-radius:8px!important;padding:8px!important;margin-left:10px}
-#fullscreenBtn img{filter:invert(88%) sepia(26%) saturate(417%) hue-rotate(352deg) brightness(94%) contrast(88%)}
-.option-bigboy-container,.button-goto-grid,.option-stats-grid-container,.option-group,.option-product-type,.option-product-type-group-option{background:transparent!important}
-.button-goto-grid{background:var(--navy2)!important;border:1px solid var(--border2)!important;border-radius:12px!important;padding:10px 14px!important;margin:18px auto!important;max-width:1320px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
-.button-goto-primary,.button-goto-spouse,.button-goto,.hide-stats.button-goto{background:var(--navy3)!important;border:1px solid var(--border2)!important;border-radius:8px!important;color:var(--text2)!important;font-family:var(--cond)!important;font-size:12px!important;font-weight:700!important;letter-spacing:.8px!important;text-transform:uppercase!important;transition:all .15s ease!important}
-.button-goto-primary:hover,.button-goto-spouse:hover,.button-goto:hover{border-color:var(--gold)!important;color:var(--gold)!important;box-shadow:0 0 0 2px var(--gold-dim)}
-.option-stats-grid-container{max-width:1320px;margin:0 auto!important;background:var(--navy2)!important;border:1px solid var(--border2)!important;border-radius:14px!important;box-shadow:0 18px 40px rgba(0,0,0,.22)!important;overflow:hidden}
-.option-stats-grid-item{background:transparent!important}
-.option-stats-left-column{padding:18px!important}
-.option-text,.option-drop,.option-face{background:var(--navy3)!important;border:1px solid var(--border2)!important;border-radius:10px!important;color:var(--text)!important;font-family:var(--font)!important;box-shadow:none!important}
-.option-text::placeholder,.option-face::placeholder{color:var(--muted)!important}
-.option-text:focus,.option-drop:focus,.option-face:focus{outline:none!important;border-color:var(--gold)!important;box-shadow:0 0 0 2px var(--gold-dim)!important}
-.option-drop option{background:var(--navy2);color:var(--text)}
-.label,.show-premium,.death-from,.product-sub-title,.product-sub-sub-title{color:var(--text2)!important}
-.option-average-premium-item,.mbd-premium,.option-face-total{font-family:var(--mono)!important}
-.option-average-premium-item{color:var(--gold3)!important}
-.option-stats-middle-column-top{font-family:var(--cond)!important;font-size:11px!important;letter-spacing:1.4px!important;text-transform:uppercase!important;color:var(--gold)!important}
-.option-stats-middle-column-bottom{background:var(--gold-dim)!important}
-.option-group{max-width:1320px;margin:0 auto 30px auto!important}
-.option-product-type-group{gap:14px!important}
-.option-product-type{background:var(--navy2)!important;border:1px solid var(--border)!important;border-radius:12px!important;box-shadow:0 12px 30px rgba(0,0,0,.18)!important}
-.option-product-type-group-option{background:var(--navy2)!important;border:1px solid var(--border)!important;border-radius:16px!important;margin-top:14px!important;overflow:hidden;box-shadow:0 14px 34px rgba(0,0,0,.2)!important}
-.option-product-type-group-option:hover{border-color:var(--border2)!important}
-.option-pgs-title{filter:drop-shadow(0 6px 16px rgba(0,0,0,.35));padding-top:16px}
-.product-title{font-family:var(--cond)!important;font-size:13px!important;font-weight:700!important;letter-spacing:1px!important;text-transform:uppercase!important;color:var(--gold)!important}
-.product-sub-title{font-family:var(--font)!important;font-size:13px!important}
-.product-sub-sub-title{font-family:var(--mono)!important;font-size:11px!important;color:var(--muted)!important;text-transform:uppercase!important;letter-spacing:.8px}
-.edit-button{background:var(--navy3)!important;border:1px solid var(--border2)!important;border-radius:999px!important;padding:5px!important;margin:0 4px!important}
-.option-face-total,.mbd-premium{background:var(--navy3)!important;border:1px solid var(--border)!important;border-radius:10px!important;padding:10px 12px!important;color:var(--gold3)!important}
-.mbd-premium{font-size:24px!important;font-weight:600!important;letter-spacing:.4px}
-.show-senior label,.hide-senior label{color:var(--text2)!important}
-.option-button-clear{background:#b7547a!important;border:none!important;color:#fff!important;border-radius:10px!important;padding:12px 20px!important;font-family:var(--cond)!important;letter-spacing:1px!important}
-.setup-shell{max-width:1320px;margin:24px auto 18px auto;padding:0 6px}
-.setup-hero{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:stretch}
-.setup-card,.hourpower-card,.setup-mini-card{background:linear-gradient(180deg,var(--navy2),var(--navy3));border:1px solid var(--border2);border-radius:20px;box-shadow:0 18px 40px rgba(0,0,0,.24)}
-.setup-card{padding:24px}
-.setup-eyebrow{font-family:var(--cond);font-size:12px;letter-spacing:1.8px;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
-.setup-title{font-family:var(--display);font-size:38px;line-height:1.05;margin:0 0 10px 0;color:var(--text)}
-.setup-sub{color:var(--text2);font-size:14px;line-height:1.45;max-width:64ch;margin-bottom:18px}
-.setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.setup-person{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:18px;padding:16px}
-.setup-person-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
-.setup-person-title{font-family:var(--cond);font-size:16px;letter-spacing:1px;text-transform:uppercase;color:var(--gold)}
-.setup-pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border2);padding:7px 11px;border-radius:999px;background:var(--gold-dim);font-family:var(--cond);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gold2)}
-.setup-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.setup-field{display:flex;flex-direction:column;gap:6px}
-.setup-field.span-2{grid-column:span 2}
-.setup-field label{font-family:var(--cond);font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--text2)}
-.setup-input,.setup-select{width:100%;background:var(--navy)!important;border:1px solid var(--border2)!important;border-radius:12px!important;color:var(--text)!important;padding:12px 13px;font-family:var(--font)!important;font-size:15px;box-sizing:border-box}
-.setup-input::placeholder{color:var(--muted)}
-.setup-input:focus,.setup-select:focus{outline:none;border-color:var(--gold)!important;box-shadow:0 0 0 2px var(--gold-dim)}
-.setup-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:rgba(0,0,0,.18);border:1px solid var(--border);border-radius:14px}
-.setup-toggle strong{display:block;font-family:var(--cond);font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--gold)}
-.setup-toggle span{display:block;font-size:12px;color:var(--text2)}
-.setup-toggle input{accent-color:var(--gold);transform:scale(1.15)}
-.setup-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
-.setup-btn{appearance:none;border:none;border-radius:14px;padding:13px 18px;font-family:var(--cond);font-size:13px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .15s ease}
-.setup-btn.primary{background:linear-gradient(180deg,var(--gold2),var(--gold));color:#101722;box-shadow:0 12px 28px rgba(201,168,76,.22)}
-.setup-btn.secondary{background:var(--navy4);border:1px solid var(--border2);color:var(--text2)}
-.setup-btn:hover{transform:translateY(-1px)}
-.hourpower-card{padding:22px;display:flex;flex-direction:column;gap:16px}
-.hp-title{font-family:var(--display);font-size:28px;color:var(--text);margin:0}
-.hp-sub{font-size:13px;color:var(--text2);line-height:1.45}
-.hp-methods{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.hp-radio{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--border);border-radius:14px;background:rgba(0,0,0,.18);cursor:pointer}
-.hp-radio input{accent-color:var(--gold)}
-.hp-radio span{font-family:var(--cond);font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--text)}
-.hp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.hp-output-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.hp-stat{padding:14px;border-radius:16px;background:linear-gradient(180deg,var(--navy3),var(--navy4));border:1px solid var(--border)}
-.hp-kicker{font-family:var(--cond);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:8px}
-.hp-value{font-family:var(--mono);font-size:28px;color:var(--gold3)}
-.hp-note{font-size:12px;color:var(--text2);margin-top:5px}
-.hp-budget-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.hp-budget{padding:16px;border-radius:16px;background:rgba(0,0,0,.18);border:1px solid var(--border);transition:all .15s ease}
-.hp-budget.active{border-color:var(--gold2);box-shadow:0 0 0 2px var(--gold-dim)}
-.hp-budget strong{display:block;font-family:var(--cond);font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--gold)}
-.hp-budget .amt{display:block;margin-top:8px;font-family:var(--mono);font-size:24px;color:var(--green)}
-.hp-budget .mini{display:block;margin-top:6px;font-size:12px;color:var(--text2)}
-.setup-mini-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:16px}
-.setup-mini-card{padding:14px 16px}
-.setup-mini-card .label{display:block;font-family:var(--cond);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:8px}
-.setup-mini-card .value{display:block;font-family:var(--mono);font-size:20px;color:var(--gold3)}
-.household-hidden{display:none!important}
-
-/* ===================== QUOTE OVERVIEW REWRITE ===================== */
-.quote-overview-shell{max-width:1320px;margin:14px auto 18px auto;padding:0 6px}
-
-/* Mode switch */
-.overview-topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px}
-.overview-eyebrow{font-family:var(--cond);font-size:13px;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold)}
-.mode-switch{display:inline-flex;background:var(--navy2);border:1px solid var(--border2);border-radius:16px;padding:6px;gap:6px;box-shadow:0 10px 24px rgba(0,0,0,.2)}
-.mode-btn{appearance:none;border:none;background:transparent;color:var(--text2);padding:12px 20px;border-radius:12px;font-family:var(--cond);font-size:12px;letter-spacing:1.2px;text-transform:uppercase;cursor:pointer;transition:all .18s ease;font-weight:700}
-.mode-btn.active{background:linear-gradient(180deg,var(--gold2),var(--gold));color:#101722;box-shadow:0 8px 20px rgba(201,168,76,.25)}
-.a71-master-toggle{display:inline-flex;align-items:center;padding:10px 16px;background:var(--navy2);border:1px solid var(--border2);border-radius:14px;font-family:var(--cond);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text2)}
-
-.overview-panel{display:none}
-.overview-panel.active{display:block}
-
-/* ---- RECOMMENDED PANEL ---- */
-.rec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.rec-card{border-radius:20px;overflow:hidden;border:1px solid var(--border);background:linear-gradient(160deg,var(--navy2),var(--navy3));box-shadow:0 16px 40px rgba(0,0,0,.24);position:relative;transition:transform .15s ease,box-shadow .15s ease}
-.rec-card:hover{transform:translateY(-2px);box-shadow:0 24px 50px rgba(0,0,0,.32)}
-.rec-card.tier-platinum{border-color:rgba(200,200,220,.2)}
-.rec-card.tier-gold{border-color:rgba(201,168,76,.4);box-shadow:0 20px 50px rgba(201,168,76,.1)}
-.rec-card.tier-silver{border-color:rgba(160,170,190,.22)}
-.rec-card-top{padding:20px 20px 16px 20px;border-bottom:1px solid var(--border)}
-.rec-tier-badge{font-family:var(--cond);font-size:26px;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;line-height:1}
-.tier-platinum .rec-tier-badge{color:#cdd4e0}
-.tier-gold .rec-tier-badge{color:#ffd34d}
-.tier-silver .rec-tier-badge{color:#a6adbb}
-.rec-total-amount{font-family:var(--mono);font-size:42px;line-height:1;color:var(--text);margin:10px 0 4px 0}
-.rec-total-note{font-size:12px;color:var(--text2)}
-.rec-card-body{padding:16px 20px}
-.rec-breakdown{display:grid;gap:8px;margin-bottom:14px}
-.rec-line{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--text2)}
-.rec-line strong{font-family:var(--mono);font-size:13px;color:var(--gold3);font-weight:400}
-.rec-divider{border:none;border-top:1px solid var(--border);margin:4px 0}
-.rec-coverage{padding:14px;border-radius:14px;background:rgba(0,0,0,.2);border:1px solid var(--border)}
-.rec-coverage-kicker{font-family:var(--cond);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
-.rec-coverage-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.rec-cov-item label{display:block;font-family:var(--cond);font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
-.rec-cov-item span{font-family:var(--mono);font-size:14px;color:var(--text)}
-.rec-a71-row{margin-top:10px;padding:10px 12px;background:var(--gold-dim);border:1px solid var(--border2);border-radius:10px;display:flex;justify-content:space-between;font-family:var(--cond);font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:var(--gold)}
-.rec-a71-row strong{font-family:var(--mono);color:var(--green);font-weight:400;font-size:13px;letter-spacing:0;text-transform:none}
-.rec-apply-btn{width:100%;margin-top:14px;padding:12px;border:none;border-radius:12px;font-family:var(--cond);font-size:12px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .15s ease;font-weight:700}
-.tier-platinum .rec-apply-btn{background:rgba(200,200,220,.1);color:#cdd4e0;border:1px solid rgba(200,200,220,.2)}
-.tier-gold .rec-apply-btn{background:linear-gradient(180deg,var(--gold2),var(--gold));color:#101722;box-shadow:0 8px 20px rgba(201,168,76,.2)}
-.tier-silver .rec-apply-btn{background:rgba(160,170,190,.1);color:#a6adbb;border:1px solid rgba(160,170,190,.2)}
-.rec-apply-btn:hover{transform:translateY(-1px);filter:brightness(1.1)}
-.rec-no-budget{padding:40px;text-align:center;font-family:var(--cond);letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-size:13px;grid-column:1/-1;background:var(--navy2);border-radius:20px;border:1px solid var(--border)}
-.rec-no-budget span{display:block;margin-top:8px;font-family:var(--mono);font-size:32px;color:var(--border2)}
-
-/* ---- HOUR POWER PANEL ---- */
-.hp-panel-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.hp-panel-card{border-radius:20px;border:1px solid var(--border);background:linear-gradient(160deg,var(--navy2),var(--navy3));box-shadow:0 16px 40px rgba(0,0,0,.24);display:flex;flex-direction:column;overflow:hidden}
-.hp-panel-card.one-hour{border-color:rgba(61,214,140,.2)}
-.hp-panel-card.two-hour{border-color:rgba(201,168,76,.32)}
-.hp-card-head{display:flex;justify-content:space-between;align-items:flex-start;padding:16px 18px 12px 18px;border-bottom:1px solid var(--border)}
-.hp-panel-kicker{font-family:var(--cond);font-size:11px;letter-spacing:1.4px;text-transform:uppercase;margin-bottom:4px}
-.one-hour .hp-panel-kicker{color:var(--green)}
-.two-hour .hp-panel-kicker{color:var(--gold)}
-.hp-panel-hours{font-family:var(--display);font-size:20px;color:var(--text);line-height:1.1}
-.hp-budget-bar{display:flex;flex-wrap:wrap;border-bottom:1px solid var(--border)}
-.hp-budget-item{flex:1;min-width:80px;padding:9px 12px;border-right:1px solid var(--border)}
-.hp-budget-item:last-child{border-right:none}
-.hp-bi-label{display:block;font-family:var(--cond);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
-.hp-bi-val{display:block;font-family:var(--mono);font-size:14px;color:var(--gold3)}
-.hp-bi-val.one{color:var(--green)}
-.hp-bi-val.two{color:var(--gold3)}
-.hp-bi-val.red{color:var(--red)}
-.hp-cov-table{flex:1;display:flex;flex-direction:column}
-.hp-cov-thead{display:grid;background:rgba(0,0,0,.22);border-bottom:1px solid var(--border)}
-.hp-cov-th{padding:6px 10px;font-family:var(--cond);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:right}
-.hp-cov-th:first-child{text-align:left;color:var(--gold)}
-.hp-cov-tr{display:grid;border-bottom:1px solid rgba(255,255,255,.03)}
-.hp-cov-tr:hover{background:rgba(255,255,255,.02)}
-.hp-cov-tr.muted .hp-cov-td.val{color:var(--muted)}
-.hp-cov-tr.green .hp-cov-td.val{color:var(--green)}
-.hp-cov-td{padding:8px 10px;font-size:13px}
-.hp-cov-td.label{font-family:var(--cond);font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--text2);display:flex;align-items:center}
-.hp-cov-td.val{font-family:var(--mono);font-size:13px;color:var(--text2);text-align:right}
-.hp-edit-cell{padding:2px 4px!important}
-.hp-edit-input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;text-align:right;padding:5px 8px;box-sizing:border-box;outline:none;transition:border-color .12s}
-.hp-edit-input:focus{border-color:var(--gold);background:rgba(201,168,76,.06);color:var(--gold2)}
-.hp-edit-input::placeholder{color:var(--muted);font-size:11px}
-.hp-cov-tr.green .hp-edit-input{border-color:rgba(61,214,140,.2)}
-.hp-cov-tr.green .hp-edit-input:focus{border-color:var(--green);background:rgba(61,214,140,.06);color:var(--green)}
-.hp-cov-divider{padding:5px 10px;font-family:var(--cond);font-size:9px;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold);background:rgba(201,168,76,.05);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
-.hp-cost-footer{padding:11px 14px;background:rgba(0,0,0,.18);border-top:1px solid var(--border);display:flex;flex-direction:column;gap:3px}
-.hp-cost-line{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--text2)}
-.hp-cost-line strong{font-family:var(--mono);font-size:15px;color:var(--text)}
-.hp-cost-line.muted{font-size:11px;color:var(--muted)}
-.hp-apply-btn{margin:12px 14px 14px 14px;padding:13px;border:none;border-radius:12px;font-family:var(--cond);font-size:12px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;font-weight:700;transition:all .15s ease}
-.one-hour .hp-apply-btn{background:rgba(61,214,140,.12);color:var(--green);border:1px solid rgba(61,214,140,.28)}
-.two-hour .hp-apply-btn{background:linear-gradient(180deg,var(--gold2),var(--gold));color:#101722;box-shadow:0 8px 20px rgba(201,168,76,.2)}
-.hp-apply-btn:hover{filter:brightness(1.12);transform:translateY(-1px)}
-.hp-no-income{grid-column:1/-1;padding:40px;text-align:center;font-family:var(--cond);font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);background:var(--navy2);border-radius:20px;border:1px solid var(--border)}
-
-/* Quote active chip */
-.quote-active-banner{max-width:1320px;margin:0 auto 10px auto;padding:0 6px}
-.quote-active-chip{display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:999px;background:var(--navy2);border:1px solid var(--border2);font-family:var(--cond);font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--text2)}
-.quote-active-chip strong{color:var(--gold3)}
-
-/* A71 card */
-.a71-addon-card{margin:12px 0 16px 0;background:var(--navy2);border:1px solid var(--border2);border-radius:18px;overflow:hidden;box-shadow:0 16px 36px rgba(0,0,0,.22)}
-.a71-addon-head{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);gap:10px}
-.a71-addon-title{font-family:var(--cond);font-size:18px;letter-spacing:1px;text-transform:uppercase;color:var(--text)}
-.a71-addon-sub{font-size:12px;color:var(--text2);margin-top:2px}
-.a71-addon-badge{font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;background:var(--green-bg);color:var(--green);border:1px solid rgba(61,214,140,.2);border-radius:999px;padding:6px 10px;white-space:nowrap}
-.a71-addon-body{padding:14px 16px}
-.a71-addon-grid{display:grid;grid-template-columns:1fr!important;gap:18px}
-.a71-price-panel{padding:14px;gap:10px;background:linear-gradient(180deg,var(--navy3),var(--navy4));border:1px solid var(--border2);border-radius:14px;display:flex;flex-direction:column;gap:12px}
-.a71-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:rgba(0,0,0,.16);border:1px solid var(--border);border-radius:12px}
-.a71-toggle-left{display:flex;flex-direction:column;gap:3px}
-.a71-toggle-left strong{font-family:var(--cond);font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--gold)}
-.a71-toggle-left span{font-size:12px;color:var(--text2)}
-.a71-toggle input{accent-color:var(--gold);transform:scale(1.15)}
-.a71-price{font-family:var(--mono);font-size:24px;color:var(--green);line-height:1}
-.a71-price-note,.a71-household-total,.a71-availability{font-size:12px;color:var(--text2)}
-.a71-household-total strong,.a71-availability strong{color:var(--gold3);font-family:var(--mono)}
-.a71-rate-band{padding:10px 12px;background:var(--gold-dim);border:1px solid var(--border);border-radius:10px;font-family:var(--mono);font-size:12px;color:var(--gold2)}
-.addon-tier-total{margin-top:8px;padding:8px 10px;border:1px dashed var(--border2);border-radius:10px;background:rgba(0,0,0,.14);font-family:var(--cond);font-size:11px;letter-spacing:.9px;text-transform:uppercase;color:var(--gold);text-align:center}
-.addon-tier-total span{display:block;margin-top:4px;font-family:var(--mono);font-size:20px;color:var(--green);letter-spacing:0}
-.hide-stats{display:none}
-@media(max-width:1100px){.rec-grid,.hp-panel-grid{grid-template-columns:1fr 1fr}.setup-hero{grid-template-columns:1fr}}
-@media(max-width:760px){.rec-grid,.hp-panel-grid{grid-template-columns:1fr}.setup-grid,.setup-fields,.hp-grid,.hp-methods,.hp-budget-grid,.setup-mini-grid,.hp-output-grid{grid-template-columns:1fr}.setup-title{font-size:30px}}
-
-/* existing form styles preserved */
-.field-label{display:block;margin-bottom:8px;font-family:var(--cond);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text2);text-align:center}
-.death-from{font-family:var(--cond)!important;font-size:11px!important;letter-spacing:1px!important;text-transform:uppercase!important;color:var(--text2)!important;text-align:center!important;margin:6px 0}
-.option-face-total{font-size:18px!important;text-align:center}
-.mbd-premium{font-size:34px!important;text-align:center;padding:14px 12px!important}
-.option-face{font-size:24px!important;text-align:center;font-family:var(--mono)!important;min-height:62px}
-.option-face::placeholder{font-family:var(--cond)!important;letter-spacing:1px;font-size:18px;color:#6f86aa!important}
-.option-pgs-title{width:auto;max-width:86%;height:44px;object-fit:contain;margin:0 auto 6px auto;display:block}
-.option-product-type-group-option .option-product-type{padding:12px!important;border-radius:14px!important}
-.option-product-type.foc,.option-product-type.income{padding:16px!important}
-
-/* A71 status chip (in rec card header) */
-.a71-status-chip{font-family:var(--cond);font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border-radius:999px;font-weight:700;white-space:nowrap}
-.a71-status-chip.on{background:rgba(61,214,140,.15);color:var(--green);border:1px solid rgba(61,214,140,.3)}
-.a71-status-chip.off{background:rgba(248,113,113,.1);color:var(--red);border:1px solid rgba(248,113,113,.25)}
-
-/* Per-insured coverage block inside rec card */
-.cov-insured-block{display:flex;flex-direction:column;gap:2px}
-.cov-person-label{font-family:var(--cond);font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
-
-/* A71 benefits strip */
-.a71-benefits-strip{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
-.a71-benefit-pill{font-family:var(--cond);font-size:10px;letter-spacing:.6px;text-transform:uppercase;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text2);white-space:nowrap}
-.a71-benefit-pill.adb-pill{background:rgba(61,214,140,.07);border-color:rgba(61,214,140,.2);color:var(--green)}
-
-
-/* Setup summary A71 chip */
-.summary-a71-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;font-family:var(--cond);font-size:11px;letter-spacing:.8px;text-transform:uppercase;font-weight:700}
-.summary-a71-chip.on{background:rgba(61,214,140,.12);color:var(--green);border:1px solid rgba(61,214,140,.25)}
-.summary-a71-chip.off{background:rgba(248,113,113,.08);color:var(--red);border:1px solid rgba(248,113,113,.2)}
-
-/* Setup per-person A71 toggle */
-.setup-a71-toggle{display:inline-flex;align-items:center;gap:10px;padding:11px 14px;border-radius:12px;background:var(--navy);border:1px solid rgba(61,214,140,.25);cursor:pointer;width:100%;box-sizing:border-box;transition:all .15s}
-.setup-a71-toggle input{accent-color:var(--gold);transform:scale(1.2);cursor:pointer;flex-shrink:0}
-.sat-on{font-family:var(--cond);font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--green)}
-.sat-off{font-family:var(--cond);font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:none}
-.setup-a71-toggle:has(input:not(:checked)){border-color:var(--border2)}
-.setup-a71-toggle:has(input:not(:checked)) .sat-on{display:none}
-.setup-a71-toggle:has(input:not(:checked)) .sat-off{display:inline}
-
-/* Quote editor */
-.qe-shell{max-width:1320px;margin:0 auto 30px auto;padding:0 6px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.qe-card{background:linear-gradient(160deg,var(--navy2),var(--navy3));border:1px solid var(--border2);border-radius:18px;overflow:hidden;box-shadow:0 14px 34px rgba(0,0,0,.22)}
-.qe-card.tier-platinum{border-color:rgba(200,200,220,.18)}
-.qe-card.tier-gold{border-color:rgba(201,168,76,.4);box-shadow:0 18px 40px rgba(201,168,76,.1)}
-.qe-card.tier-silver{border-color:rgba(160,170,190,.2)}
-.qe-head{padding:14px 16px 10px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-.qe-tier-name{font-family:var(--cond);font-size:22px;letter-spacing:1px;text-transform:uppercase}
-.tier-platinum .qe-tier-name{color:#cdd4e0}
-.tier-gold .qe-tier-name{color:#ffd34d}
-.tier-silver .qe-tier-name{color:#a6adbb}
-.qe-total{font-family:var(--mono);font-size:26px;color:var(--text)}
-.qe-body{padding:14px 16px;display:flex;flex-direction:column;gap:10px}
-.qe-person-block{background:rgba(0,0,0,.18);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-.qe-person-head{padding:8px 12px;background:rgba(0,0,0,.2);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-.qe-person-name{font-family:var(--cond);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gold)}
-.qe-person-prem{font-family:var(--mono);font-size:13px;color:var(--green)}
-.qe-fields{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)}
-.qe-field{background:var(--navy3);padding:9px 10px}
-.qe-field label{display:block;font-family:var(--cond);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
-.qe-field label em{font-style:normal;font-family:var(--mono);font-size:9px;color:rgba(201,168,76,.5);letter-spacing:0;text-transform:none;float:right}
-.qe-field input{width:100%;background:transparent;border:none;color:var(--text);font-family:var(--mono);font-size:15px;outline:none;padding:0}
-.qe-field input:focus{color:var(--gold2)}
-.qe-field.fixed{background:rgba(201,168,76,.05)}
-.qe-field.fixed label{color:rgba(61,214,140,.7)}
-.qe-field.fixed input{color:var(--muted);cursor:default}
-.qe-field.full{grid-column:span 2}
-.qe-death-block{padding:8px 10px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:4px 10px}
-.qe-death-item label{display:block;font-family:var(--cond);font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
-.qe-death-item span{font-family:var(--mono);font-size:12px;color:var(--text2)}
-.qe-a71-row{padding:6px 10px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:rgba(61,214,140,.04)}
-.qe-a71-label{font-family:var(--cond);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--green)}
-.qe-a71-val{font-family:var(--mono);font-size:12px;color:var(--green)}
-.qe-footer{padding:10px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-.qe-clear-btn{appearance:none;background:rgba(183,84,122,.12);color:#f472b6;border-radius:8px;padding:7px 12px;font-family:var(--cond);font-size:10px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:1px solid rgba(183,84,122,.22)}
-.qe-status{font-size:11px;color:var(--muted);font-family:var(--cond);letter-spacing:.5px;text-transform:uppercase}
-@media(max-width:900px){.qe-shell{grid-template-columns:1fr 1fr}}
-@media(max-width:600px){.qe-shell{grid-column:1fr}}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(180deg,#f4f7fb 0%,#eaf0f8 100%);color:var(--ink)}
+.page{max-width:1480px;margin:0 auto;padding:16px}
+.layout{display:grid;grid-template-columns:360px 1fr 1fr;gap:18px;align-items:start}
+.leftRail{position:relative;min-height:760px;background:linear-gradient(180deg,#f8fbff 0%,#eef3f9 100%);border:5px solid var(--navy);border-radius:26px;padding:14px;box-shadow:0 16px 36px rgba(8,21,45,.08)}
+.leftRail:after{content:"";position:absolute;top:10px;bottom:10px;right:-14px;width:8px;background:var(--navy);border-radius:8px}
+.panel{background:var(--panel);border:4px solid var(--navy);border-radius:20px;padding:12px;margin-bottom:14px}
+.personTitle{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border:3px solid var(--gold);border-radius:16px;background:linear-gradient(180deg,#fff 0%,#fcf8ef 100%);font-weight:800;color:var(--navy)}
+.personTitle .summary{font-size:15px;line-height:1.1}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.grid .full{grid-column:1/-1}
+label{display:block;font-size:12px;font-weight:800;color:var(--navy);margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px}
+input,select,button{width:100%;font:inherit}
+input,select{padding:10px 11px;border:2px solid #cbd5e3;border-radius:12px;background:#fff;color:var(--ink)}
+button{padding:11px 14px;border-radius:14px;border:2px solid var(--navy);background:var(--navy);color:#fff;font-weight:800;cursor:pointer}
+button.alt{background:#fff;color:var(--navy)}
+button.gold{background:linear-gradient(180deg,var(--gold-2) 0%,var(--gold) 100%);border-color:#ae8a3b;color:#231c0b}
+button.ghost{background:#f6f8fc;color:var(--navy)}
+.inlineToggle{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--navy);padding-top:4px}
+.inlineToggle input{width:18px;height:18px;accent-color:var(--gold)}
+.card{min-height:760px;border:5px solid var(--navy);background:linear-gradient(180deg,#fff 0%,#f8fbff 100%);padding:12px;box-shadow:0 16px 36px rgba(8,21,45,.08)}
+.cardHeader{position:relative;text-align:center;font-size:34px;color:var(--navy);margin:2px 0 10px;font-weight:500;letter-spacing:.5px}
+.cardMeta{position:absolute;top:4px;right:0;font-size:13px;color:var(--muted);font-weight:700}
+.split{display:grid;grid-template-columns:1fr;min-height:580px}
+.split.withSpouse{grid-template-columns:1fr 1fr}
+.pane{padding:6px 16px 8px}
+.split.withSpouse .pane:first-child{border-right:3px solid var(--gold)}
+.paneTitle{text-align:center;font-size:22px;color:var(--navy);font-weight:800;margin:2px 0 10px}
+.cover{max-width:310px;margin:0 auto;text-align:center;color:var(--navy)}
+.coverLine{font-size:25px;line-height:1.3;margin:4px 0}
+.coverLine small{font-size:16px;color:var(--muted)}
+.rateLine{font-size:17px;line-height:1.35;color:var(--muted);margin:10px 0 4px}
+.edit{max-width:290px;margin:12px auto 0;display:grid;gap:8px}
+.editRow{display:grid;grid-template-columns:94px 1fr;gap:8px;align-items:center}
+.editRow span{font-size:13px;font-weight:800;color:var(--navy)}
+.editRow input{text-align:right;font-weight:800}
+.mini{font-size:12px;color:var(--muted);text-align:center;margin-top:8px;min-height:18px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:310px;margin:14px auto 0}
+.divider{border-top:4px solid var(--navy);margin:10px -12px 8px}
+.bottom{padding:8px 10px 0;text-align:center;color:var(--navy)}
+.bottomLine{font-size:19px;line-height:1.32;margin:3px 0}
+.money{font-size:26px;color:var(--navy);margin:7px 0 4px}
+.small{font-size:13px;color:var(--muted)}
+.infoBox{margin-top:146px;min-height:150px;display:flex;flex-direction:column;justify-content:center}
+.status{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.45}
+.hidden{display:none!important}
+.bad{color:#a22727}
+.good{color:#1b5e20}
+@media (max-width:1230px){.layout{grid-template-columns:1fr}.leftRail:after{display:none}.card{min-height:auto}.infoBox{margin-top:18px}}
 </style>
 </head>
-<body style="margin:auto;padding:auto;overflow:auto;">
+<body>
+<div class="page">
+  <div class="layout">
+    <div class="leftRail">
+      <div class="panel">
+        <div class="personTitle"><div class="summary" id="mainSummary">MAIN (MALE) AGE: 35 NTU A71 OFF</div><button type="button" class="alt">MAIN</button></div>
+        <div class="grid">
+          <div><label>Age</label><input id="main_age" type="number" min="18" max="80" value="35"></div>
+          <div><label>Gender</label><select id="main_sex"><option>Male</option><option>Female</option></select></div>
+          <div class="full"><label>Tobacco User</label><select id="main_tob"><option>NTU</option><option>TU</option></select></div>
+          <div class="full inlineToggle"><input id="main_a71" type="checkbox"><span>A71 on main</span></div>
+        </div>
+      </div>
 
-<div class="header" style="height:unset;justify-content:center;align-items:center;">
-  <div class="piA"><div class="option-stats-grid-container" style="display:none">
-    <div class="option-stats-grid-item option-stats-left-column">
-      <input type="text" id="optionNameInputA" class="option-text" placeholder="Nombre" autocomplete="off">
-      <select id="optionAgeInputA" class="option-drop" oninput="calculatePremium('A')" onchange="calculatePremium('A'); toggleSeniorShowHide('A')" autocomplete="off">
-        <script>for(var i=18;i<=80;i++){document.write('<option value="'+i+'"'+(i===30?' selected':'')+'>'+i+'</option>');}</script>
-      </select>
-      <select id="optionSexInputA" class="option-drop" onchange="calculatePremium('A')" autocomplete="off">
-        <option value="male" selected>MASCULINO</option><option value="female">FEMENINO</option>
-      </select>
-      <select id="optionTobInputA" class="option-drop" onchange="calculatePremium('A')" autocomplete="off">
-        <option value="ntu" selected>NTU</option><option value="tu">TU</option>
-      </select>
-      <input type="text" id="optionIncomeInputA" class="option-text" placeholder="Ingreso Mensual" maxlength="7" autocomplete="off" oninput="lockAutoComplete('A'); optionFormatCurrency(this)" onchange="calculatePremium('A'); updateOptionAveragePremium(this.value)">
-      <input type="checkbox" id="autoPlanCheckboxA" class="option-checkbox" onchange="lockAutoComplete('A'); calculatePremium('A')" disabled>
-      <label class="label" style="margin-right:10px">Plan Automático</label>
-      <input type="checkbox" id="autoCompleteCheckboxA" class="option-checkbox" onchange="calculatePremium('A')" style="margin-left:10px" checked>
-      <label class="label">Completar Automáticamente</label>
+      <div class="panel">
+        <div class="personTitle"><div class="summary" id="spSummary">SPOUSE NOT INCLUDED</div><button type="button" id="spouseBtn" class="gold">Add spouse</button></div>
+        <div class="grid hidden" id="spouseGrid">
+          <div><label>Age</label><input id="sp_age" type="number" min="18" max="80" value="33"></div>
+          <div><label>Gender</label><select id="sp_sex"><option>Female</option><option>Male</option></select></div>
+          <div class="full"><label>Tobacco User</label><select id="sp_tob"><option>NTU</option><option>TU</option></select></div>
+          <div class="full inlineToggle"><input id="sp_a71" type="checkbox"><span>A71 on spouse</span></div>
+        </div>
+      </div>
+
+      <div class="panel infoBox">
+        <div class="grid" style="margin-top:0">
+          <div><label>Monthly Income</label><input id="monthlyIncome" type="number" min="0" step="0.01" value="3000"></div>
+          <div><label>Hourly Income</label><input id="hourlyIncome" type="number" min="0" step="0.01" value="18.75"></div>
+        </div>
+        <div class="status">
+          <div>One Hour Budget Monthly: <strong id="oneBudgetText"></strong></div>
+          <div>Two Hour Budget Monthly: <strong id="twoBudgetText"></strong></div>
+          <div id="csvStatus">Loading <strong>Rates.csv</strong>...</div>
+        </div>
+      </div>
     </div>
-    <div class="option-stats-grid-item option-stats-middle-column-top">La Mayoría Aparta</div>
-    <div class="option-stats-grid-item option-stats-middle-column-bottom"><span id="optionAveragePremiumA" class="option-average-premium-item"></span></div>
-  </div></div>
-  <div class="piB" style="display:none"><div class="option-stats-grid-container" style="display:none">
-    <div class="option-stats-grid-item option-stats-left-column">
-      <input type="text" id="optionNameInputB" class="option-text" placeholder="Nombre" autocomplete="off">
-      <select id="optionAgeInputB" class="option-drop" oninput="calculatePremium('B')" onchange="calculatePremium('B'); toggleSeniorShowHide('B')" autocomplete="off">
-        <script>for(var i=18;i<=80;i++){document.write('<option value="'+i+'"'+(i===30?' selected':'')+'>'+i+'</option>');}</script>
-      </select>
-      <select id="optionSexInputB" class="option-drop" onchange="calculatePremium('B')" autocomplete="off">
-        <option value="male">MASCULINO</option><option value="female" selected>FEMENINO</option>
-      </select>
-      <select id="optionTobInputB" class="option-drop" onchange="calculatePremium('B')" autocomplete="off">
-        <option value="ntu" selected>NTU</option><option value="tu">TU</option>
-      </select>
-      <input type="text" id="optionIncomeInputB" class="option-text" placeholder="Ingreso Mensual" maxlength="7" autocomplete="off" oninput="lockAutoComplete('B'); optionFormatCurrency(this)" onblur="clearJunk(this); calculatePremium('B'); updateOptionAveragePremiumB(this.value)">
-      <input type="checkbox" id="autoPlanCheckboxB" class="option-checkbox" onchange="lockAutoComplete('B'); calculatePremium('B')" disabled>
-      <label class="label" style="margin-right:10px">Plan Automático</label>
-      <input type="checkbox" id="autoCompleteCheckboxB" class="option-checkbox" onchange="calculatePremium('B')" style="margin-left:10px" checked>
-      <label class="label">Completar Automáticamente</label>
+
+    <div class="card" id="oneCard">
+      <div class="cardHeader">ONE HOUR<div class="cardMeta">Target budget</div></div>
+      <div class="split" id="oneSplit">
+        <div class="pane" data-card="one" data-person="main">
+          <div class="paneTitle">MAIN</div>
+          <div class="cover">
+            <div class="coverLine">WL: <span data-field="wlText">$0</span></div>
+            <div class="coverLine">TERM: <span data-field="termText">$0</span></div>
+            <div class="coverLine">ACCIDENTAL: <span data-field="adbText">$0</span></div>
+            <div class="coverLine hidden" data-field="a71Row">A71: <span data-field="a71Text">ON</span></div>
+            <div class="rateLine">Monthly <span data-field="monthlyText">$0.00</span></div>
+            <div class="rateLine">Weekly <span data-field="weeklyText">$0.00</span></div>
+          </div>
+          <div class="edit">
+            <div class="editRow"><span>WL</span><input data-input="wl" type="number" step="1000" min="0" value="10000"></div>
+            <div class="editRow"><span>TERM</span><input data-input="term" type="number" step="1000" min="0" value="18000"></div>
+            <div class="editRow"><span>ADB</span><input data-input="adb" type="number" step="1000" min="0" value="50000"></div>
+          </div>
+          <div class="mini" data-field="notes"></div>
+          <div class="actions"><button class="gold" data-action="auto">Auto Complete</button><button class="ghost" data-action="clear">Clear</button></div>
+        </div>
+        <div class="pane hidden" data-card="one" data-person="spouse">
+          <div class="paneTitle">SPOUSE</div>
+          <div class="cover">
+            <div class="coverLine">WL: <span data-field="wlText">$0</span></div>
+            <div class="coverLine">TERM: <span data-field="termText">$0</span></div>
+            <div class="coverLine">ACCIDENTAL: <span data-field="adbText">$0</span></div>
+            <div class="coverLine hidden" data-field="a71Row">A71: <span data-field="a71Text">ON</span></div>
+            <div class="rateLine">Monthly <span data-field="monthlyText">$0.00</span></div>
+            <div class="rateLine">Weekly <span data-field="weeklyText">$0.00</span></div>
+          </div>
+          <div class="edit">
+            <div class="editRow"><span>WL</span><input data-input="wl" type="number" step="1000" min="0" value="10000"></div>
+            <div class="editRow"><span>TERM</span><input data-input="term" type="number" step="1000" min="0" value="18000"></div>
+            <div class="editRow"><span>ADB</span><input data-input="adb" type="number" step="1000" min="0" value="50000"></div>
+          </div>
+          <div class="mini" data-field="notes"></div>
+          <div class="actions"><button class="gold" data-action="auto">Auto Complete</button><button class="ghost" data-action="clear">Clear</button></div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="bottom" id="oneBottom"></div>
     </div>
-    <div class="option-stats-grid-item option-stats-middle-column-top">La Mayoría Aparta</div>
-    <div class="option-stats-grid-item option-stats-middle-column-bottom"><span id="optionAveragePremiumB" class="option-average-premium-item"></span></div>
-  </div></div>
-  <div style="text-align:center"><img src="./files/AIL_logo.png" class="logo" alt="AIL"><button id="fullscreenBtn" tabindex="-1"><img id="fullscreenIcon" src="./files/fullscreen.png" alt="Fullscreen"></button></div>
-</div>
 
-<div style="margin-top:10vh">
-<link rel="stylesheet" href="./files/option-builder-style.css" type="text/css">
-<script src="./files/optionBuilderFormat.js"></script>
-
-<!-- SETUP SECTION -->
-<div class="setup-shell">
-  <div class="setup-hero">
-    <section class="setup-card">
-      <div class="setup-eyebrow">Household Setup</div>
-      <h1 class="setup-title">Start the quote the right way.</h1>
-      <div class="setup-sub">Set up the main insured, optional spouse, household income, and Hour Power before moving into the quote columns.</div>
-      <div class="setup-grid">
-        <div class="setup-person">
-          <div class="setup-person-head">
-            <div class="setup-person-title">Main Insured</div>
-            <span class="setup-pill">Required</span>
+    <div class="card" id="twoCard">
+      <div class="cardHeader">TWO HOUR<div class="cardMeta">Target budget</div></div>
+      <div class="split" id="twoSplit">
+        <div class="pane" data-card="two" data-person="main">
+          <div class="paneTitle">MAIN</div>
+          <div class="cover">
+            <div class="coverLine">WL: <span data-field="wlText">$0</span></div>
+            <div class="coverLine">TERM: <span data-field="termText">$0</span></div>
+            <div class="coverLine">ACCIDENTAL: <span data-field="adbText">$0</span></div>
+            <div class="coverLine hidden" data-field="a71Row">A71: <span data-field="a71Text">ON</span></div>
+            <div class="rateLine">Monthly <span data-field="monthlyText">$0.00</span></div>
+            <div class="rateLine">Weekly <span data-field="weeklyText">$0.00</span></div>
           </div>
-          <div class="setup-fields">
-            <div class="setup-field span-2"><label for="setupNameA">Name</label><input id="setupNameA" class="setup-input" placeholder="Main insured name"></div>
-            <div class="setup-field"><label for="setupAgeA">Age</label><select id="setupAgeA" class="setup-select"></select></div>
-            <div class="setup-field"><label for="setupTobA">TU / NTU</label><select id="setupTobA" class="setup-select"><option value="ntu" selected>NTU</option><option value="tu">TU</option></select></div>
-            <div class="setup-field span-2"><label for="setupSexA">Sex</label><select id="setupSexA" class="setup-select"><option value="male" selected>Male</option><option value="female">Female</option></select></div>
-            <div class="setup-field span-2">
-              <label>A71 Add-on</label>
-              <label class="setup-a71-toggle"><input type="checkbox" id="setupA71A" checked><span class="sat-on">✓ Include A71</span><span class="sat-off">✗ No A71</span></label>
-            </div>
+          <div class="edit">
+            <div class="editRow"><span>WL</span><input data-input="wl" type="number" step="1000" min="0" value="25000"></div>
+            <div class="editRow"><span>TERM</span><input data-input="term" type="number" step="1000" min="0" value="36000"></div>
+            <div class="editRow"><span>ADB</span><input data-input="adb" type="number" step="1000" min="0" value="100000"></div>
           </div>
+          <div class="mini" data-field="notes"></div>
+          <div class="actions"><button class="gold" data-action="auto">Auto Complete</button><button class="ghost" data-action="clear">Clear</button></div>
         </div>
-        <div class="setup-person">
-          <div class="setup-person-head">
-            <div class="setup-person-title">Spouse</div>
-            <label class="setup-pill" style="cursor:pointer"><input id="setupIncludeB" type="checkbox" checked style="accent-color:var(--gold)"> Include spouse</label>
+        <div class="pane hidden" data-card="two" data-person="spouse">
+          <div class="paneTitle">SPOUSE</div>
+          <div class="cover">
+            <div class="coverLine">WL: <span data-field="wlText">$0</span></div>
+            <div class="coverLine">TERM: <span data-field="termText">$0</span></div>
+            <div class="coverLine">ACCIDENTAL: <span data-field="adbText">$0</span></div>
+            <div class="coverLine hidden" data-field="a71Row">A71: <span data-field="a71Text">ON</span></div>
+            <div class="rateLine">Monthly <span data-field="monthlyText">$0.00</span></div>
+            <div class="rateLine">Weekly <span data-field="weeklyText">$0.00</span></div>
           </div>
-          <div class="setup-fields" id="setupSpouseFields">
-            <div class="setup-field span-2"><label for="setupNameB">Name</label><input id="setupNameB" class="setup-input" placeholder="Spouse name"></div>
-            <div class="setup-field"><label for="setupAgeB">Age</label><select id="setupAgeB" class="setup-select"></select></div>
-            <div class="setup-field"><label for="setupTobB">TU / NTU</label><select id="setupTobB" class="setup-select"><option value="ntu" selected>NTU</option><option value="tu">TU</option></select></div>
-            <div class="setup-field span-2"><label for="setupSexB">Sex</label><select id="setupSexB" class="setup-select"><option value="male" selected>Male</option><option value="female">Female</option></select></div>
-            <div class="setup-field span-2">
-              <label>A71 Add-on</label>
-              <label class="setup-a71-toggle"><input type="checkbox" id="setupA71B" checked><span class="sat-on">✓ Include A71</span><span class="sat-off">✗ No A71</span></label>
-            </div>
+          <div class="edit">
+            <div class="editRow"><span>WL</span><input data-input="wl" type="number" step="1000" min="0" value="25000"></div>
+            <div class="editRow"><span>TERM</span><input data-input="term" type="number" step="1000" min="0" value="36000"></div>
+            <div class="editRow"><span>ADB</span><input data-input="adb" type="number" step="1000" min="0" value="100000"></div>
           </div>
+          <div class="mini" data-field="notes"></div>
+          <div class="actions"><button class="gold" data-action="auto">Auto Complete</button><button class="ghost" data-action="clear">Clear</button></div>
         </div>
       </div>
-      <div class="setup-actions">
-        <button type="button" class="setup-btn primary" id="applyHouseholdSetup">Apply household setup</button>
-        <button type="button" class="setup-btn secondary" id="jumpToQuotesBtn">Jump to quotes ↓</button>
-      </div>
-      <div class="setup-mini-grid">
-        <div class="setup-mini-card"><span class="label">Main age / tobacco</span><span class="value" id="setupSummaryA">30 · NTU</span></div>
-        <div class="setup-mini-card"><span class="label">Spouse status</span><span class="value" id="setupSummaryB">Included</span></div>
-        <div class="setup-mini-card"><span class="label">Home income</span><span class="value" id="setupSummaryIncome">$0/mo</span></div>
-        <div class="setup-mini-card"><span class="label">Focus budget</span><span class="value" id="setupSummaryBudget">$0/mo</span></div>
-        <div class="setup-mini-card" id="setupSummaryA71Card"><span class="label">A71 status</span><span class="value" id="setupSummaryA71">—</span></div>
-      </div>
-    </section>
-
-    <aside class="hourpower-card">
-      <div>
-        <div class="setup-eyebrow">Hour Power</div>
-        <h2 class="hp-title">Make the budget visual.</h2>
-        <div class="hp-sub">Calculate hourly value from monthly income ÷ 160 hrs, or enter it directly. 1 hr/week = 4 hrs/month budget. 2 hrs/week = 8 hrs/month budget.</div>
-      </div>
-      <div class="hp-methods">
-        <label class="hp-radio"><input type="radio" name="hpMethod" value="monthly" checked><span>Use home income</span></label>
-        <label class="hp-radio"><input type="radio" name="hpMethod" value="hourly"><span>Input hourly</span></label>
-      </div>
-      <div class="hp-grid">
-        <div class="setup-field">
-          <label for="setupHomeIncome">Home income / month</label>
-          <input id="setupHomeIncome" class="setup-input" inputmode="numeric" placeholder="e.g. 6500">
-        </div>
-        <div class="setup-field" id="hourlyFieldWrap">
-          <label for="setupHourlyInput">Hourly value</label>
-          <input id="setupHourlyInput" class="setup-input" inputmode="decimal" placeholder="e.g. 40.63" disabled>
-        </div>
-        <div class="setup-field">
-          <label for="setupQuoteFocus">Quote focus</label>
-          <select id="setupQuoteFocus" class="setup-select"><option value="A" selected>Main</option><option value="B">Spouse</option></select>
-        </div>
-        <div class="setup-field">
-          <label>&nbsp;</label>
-          <button type="button" class="setup-btn primary" id="applyHouseholdSetup2" style="height:100%;margin:0">Apply Setup</button>
-        </div>
-      </div>
-      <div class="hp-output-grid">
-        <div class="hp-stat"><div class="hp-kicker">Calculated hourly</div><div class="hp-value" id="hpHourlyValue">$0.00</div><div class="hp-note">Income ÷ 160 hrs/mo</div></div>
-        <div class="hp-stat"><div class="hp-kicker">1 hr/week budget</div><div class="hp-value" id="hpBudget1Display">$0.00</div><div class="hp-note">4 hours × hourly rate</div></div>
-        <div class="hp-stat"><div class="hp-kicker">2 hr/week budget</div><div class="hp-value" id="hpBudget2Display">$0.00</div><div class="hp-note">8 hours × hourly rate</div></div>
-      </div>
-    </aside>
-  </div>
-</div>
-
-<!-- NAV BAR -->
-<div class="button-goto-grid no-slide" id="option-builder-slide">
-  <div style="display:flex;flex-direction:row;align-items:center">
-    <button onclick="showPiA(); calculatePremium('A'); toggleSeniorShowHide('A'); toggleCopyPrimaryButtonVisibilityOff();" class="button-goto-primary">Principal</button>
-    <button onclick="showPiB(); calculatePremium('A'); toggleSeniorShowHide('B'); toggleCopyPrimaryButtonVisibility();" class="button-goto-spouse">Cónyuge</button>
-    <button type="button" id="copyPrimaryButton" class="button-goto" style="width:unset;display:none" onclick="copyPrimary()">COPIAR PRINCIPAL</button>
-    <span class="show-senior" style="display:none">
-      <select id="state" class="option-drop" onchange="calculatePremium('A'); calculatePremium('B')">
-        <optgroup label="Estados Unidos">
-          <option value="AL">AL</option><option value="AK">AK</option><option value="AZ">AZ</option><option value="AR">AR</option><option value="CA">CA</option><option value="CO">CO</option><option value="CT">CT</option><option value="DE">DE</option><option value="FL">FL</option><option value="GA">GA</option><option value="HI">HI</option><option value="ID">ID</option><option value="IL">IL</option><option value="IN">IN</option><option value="IA">IA</option><option value="KS">KS</option><option value="KY">KY</option><option value="LA">LA</option><option value="ME">ME</option><option value="MD">MD</option><option value="MA">MA</option><option value="MI">MI</option><option value="MN">MN</option><option value="MS">MS</option><option value="MO">MO</option><option value="MT">MT</option><option value="NE">NE</option><option value="NV">NV</option><option value="NH">NH</option><option value="NJ">NJ</option><option value="NM">NM</option><option value="NC">NC</option><option value="ND">ND</option><option value="OH">OH</option><option value="OK">OK</option><option value="OR">OR</option><option value="PA" selected>PA</option><option value="RI">RI</option><option value="SC">SC</option><option value="SD">SD</option><option value="TN">TN</option><option value="TX">TX</option><option value="UT">UT</option><option value="VT">VT</option><option value="VA">VA</option><option value="WA">WA</option><option value="WV">WV</option><option value="WI">WI</option><option value="WY">WY</option>
-        </optgroup>
-        <optgroup label="Canadá">
-          <option value="AB">AB</option><option value="BC">BC</option><option value="MB">MB</option><option value="NB">NB</option><option value="NL">NL</option><option value="NT">NT</option><option value="NS">NS</option><option value="NU">NU</option><option value="ON">ON</option><option value="PE">PE</option><option value="QC">QC</option><option value="SK">SK</option><option value="YT">YT</option>
-        </optgroup>
-      </select>
-      <label style="margin-left:5px">ESTADO</label>
-    </span>
-  </div>
-  <div style="text-align:right">
-    <button type="button" class="hide-stats button-goto" id="backToNeeds" onclick="goToSlideByElementId('needs-anal-slide');">← VOLVER A NECESIDADES&nbsp;&nbsp;&nbsp;</button>
-  </div>
-</div>
-
-<!-- QUOTE ACTIVE CHIP -->
-<div class="quote-active-banner">
-  <div class="quote-active-chip">Household mode <strong id="activeQuoteLabel">Main only</strong></div>
-</div>
-
-<!-- ===================== NEW QUOTE OVERVIEW ===================== -->
-<div class="quote-overview-shell">
-  <div class="overview-topbar">
-    <div class="overview-eyebrow">⏱ Hour Power Budgets</div>
-    <div class="a71-master-toggle" id="a71StatusDisplay">
-      <span id="a71StatusText">A71 · set per person ↑</span>
+      <div class="divider"></div>
+      <div class="bottom" id="twoBottom"></div>
     </div>
   </div>
-  <div id="hpPanelGrid" class="hp-panel-grid">
-    <div class="hp-no-income">Enter home income or hourly value above to see Hour Power budgets.</div>
-  </div>
 </div>
 
-<!-- ===================== FORM A ===================== -->
-<div class="option-bigboy-container piA no-slide" id="piA">
-  <form id="optionMyFormA">
-    <div class="hide-stats"><!-- hidden stats block A --></div>
-
-    <!-- A71 hidden state (controlled by master toggle above) -->
-    <input type="checkbox" id="a71EnabledA" checked style="display:none">
-
-    <!-- QUOTE EDITOR: generated by overview, editable per tier/person -->
-    <div id="quoteEditorA"></div>
-
-  </form>
-</div>
-
-<!-- ===================== FORM B ===================== -->
-<div class="option-bigboy-container piB no-slide" style="display:none">
-  <form id="optionMyFormB">
-    <div class="hide-stats"><!-- hidden stats block B --></div>
-
-    <!-- A71 hidden state (controlled per-person toggle) -->
-    <input type="checkbox" id="a71EnabledB" checked style="display:none">
-
-    <div id="quoteEditorB"></div>
-
-  </form>
-</div>
-
-<!-- Hidden result elements required by calculatePremium engine -->
-<div style="display:none">
-  <div id="platinumResultA"></div><div id="goldResultA"></div><div id="silverResultA"></div>
-  <div id="platinumDeathFromSicknessA"></div><div id="platinumDeathFromAccidentA"></div>
-  <div id="goldDeathFromSicknessA"></div><div id="goldDeathFromAccidentA"></div>
-  <div id="silverDeathFromSicknessA"></div><div id="silverDeathFromAccidentA"></div>
-  <div id="platinumResultB"></div><div id="goldResultB"></div><div id="silverResultB"></div>
-  <div id="platinumDeathFromSicknessB"></div><div id="platinumDeathFromAccidentB"></div>
-  <div id="goldDeathFromSicknessB"></div><div id="goldDeathFromAccidentB"></div>
-  <div id="silverDeathFromSicknessB"></div><div id="silverDeathFromAccidentB"></div>
-  <!-- Hidden face amount inputs required by calculatePremium -->
-  <input id="wlPlatinumInputA"><input id="tenrcPlatinumInputA"><input id="adbPlatinumInputA">
-  <input id="wlGoldInputA"><input id="tenrcGoldInputA"><input id="adbGoldInputA">
-  <input id="wlSilverInputA"><input id="tenrcSilverInputA"><input id="adbSilverInputA">
-  <input id="wlPlatinumInputB"><input id="tenrcPlatinumInputB"><input id="adbPlatinumInputB">
-  <input id="wlGoldInputB"><input id="tenrcGoldInputB"><input id="adbGoldInputB">
-  <input id="wlSilverInputB"><input id="tenrcSilverInputB"><input id="adbSilverInputB">
-  <input id="autoPlanCheckboxA" type="checkbox"><input id="autoCompleteCheckboxA" type="checkbox" checked>
-  <input id="autoPlanCheckboxB" type="checkbox"><input id="autoCompleteCheckboxB" type="checkbox" checked>
-</div>
-
-<!-- ===================== SCRIPTS ===================== -->
 <script>
-function dimOthers(s,t1,t2){var src=document.getElementById(s),t1e=document.getElementById(t1),t2e=document.getElementById(t2);if(parseFloat(t1e.style.opacity)<1||parseFloat(t2e.style.opacity)<1){src.style.opacity=1;t1e.style.opacity=1;t2e.style.opacity=1;t1e.style.userSelect='auto';t2e.style.userSelect='auto';}else{src.style.opacity=1;t1e.style.opacity=0.25;t2e.style.opacity=0.25;t1e.style.userSelect='none';t2e.style.userSelect='none';}}
-function checkBoxControl(target,state){var cb=document.getElementById(target);cb.checked=(state==='true');if(target==='autoPlanCheckboxA')document.getElementById('autoCompleteCheckboxA').disabled=false;if(target==='autoPlanCheckboxB')document.getElementById('autoCompleteCheckboxB').disabled=false;}
-function showPiA(){document.querySelectorAll('.piA').forEach(function(e){e.style.display='block'});document.querySelectorAll('.piB').forEach(function(e){e.style.display='none'});}
-function showPiB(){document.querySelectorAll('.piA').forEach(function(e){e.style.display='none'});document.querySelectorAll('.piB').forEach(function(e){e.style.display='block'});}
-document.querySelectorAll('form[id^="optionMyForm"]').forEach(function(form){Array.from(form.elements).forEach(function(el){if(el.tagName.toLowerCase()==='input')el.setAttribute('autocomplete','off');});});
-</script>
-<script src="./files/optionPremiums.js"></script>
-<script>
-function lockAutoComplete(pi){var ac=document.getElementById('autoCompleteCheckbox'+pi),ap=document.getElementById('autoPlanCheckbox'+pi);if(ap.checked){ac.checked=true;ac.disabled=true;}else{ac.disabled=false;}}
-function optionClearFaceAmounts(pi){['platinum','gold','silver'].forEach(function(t){document.getElementById(t+'Result'+pi).textContent='';document.getElementById(t+'DeathFromAccident'+pi).textContent='';document.getElementById(t+'DeathFromSickness'+pi).textContent='';['wl','adb','tenrc'].forEach(function(p){document.getElementById(p+t.charAt(0).toUpperCase()+t.slice(1)+'Input'+pi).value='';});});document.getElementById('autoPlanCheckbox'+pi).checked=false;lockAutoComplete(pi);['platinum','gold','silver'].forEach(function(t){document.getElementById(t+pi).style.opacity=1;});}
-</script>
-<script src="./files/seniorDropAdjuster.js"></script>
-</div>
-
-<script src="./files/colorChange.js"></script>
-<script src="./files/fullscreen.js"></script>
-<script src="./files/needsOptionTransfer.js"></script>
-
-<!-- ===================== A71 ENGINE ===================== -->
-<script>
-(function(){
-  function money(n){return '$'+(Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+'/mo';}
-  function rateForAge(age){age=Number(age)||0;if(age<18)return 0;if(age<=60)return 25;if(age<=65)return 35;return null;}
-  function getAge(pi){var el=document.getElementById('optionAgeInput'+pi);return el?Number(el.value||0):0;}
-  function enabled(pi){var el=document.getElementById('a71Enabled'+pi);return !!(el&&el.checked);}
-  function addonRate(pi){return enabled(pi)?rateForAge(getAge(pi)):0;}
-  function parseMoney(text){if(!text)return 0;var m=String(text).replace(/,/g,'').match(/\$?\s*([0-9]+(?:\.[0-9]{1,2})?)/);return m?Number(m[1]):0;}
-  function totalHousehold(){return addonRate('A')+addonRate('B');}
-  function updateAddonCard(pi){
-    var age=getAge(pi),rate=rateForAge(age),isEnabled=enabled(pi);
-    var price=document.getElementById('a71Price'+pi),note=document.getElementById('a71PriceNote'+pi),band=document.getElementById('a71Band'+pi),avail=document.getElementById('a71Availability'+pi),total=document.getElementById('a71HouseholdTotal'+pi);
-    if(!price)return;
-    if(!isEnabled){price.textContent='Off';note.textContent='A71 is not included.';}
-    else if(rate===null){price.textContent='N/A';note.textContent='No A71 above age 65.';}
-    else{price.textContent=money(rate);note.textContent='Current insured add-on premium.';}
-    if(age<18)band.textContent='Under 18 · unavailable';
-    else if(age<=60)band.textContent='Age 18–60 band · $25/mo';
-    else if(age<=65)band.textContent='Age 61–65 band · $35/mo';
-    else band.textContent='Over age 65 · unavailable';
-    avail.innerHTML=(rate===null?'<strong>Unavailable</strong> over age 65.':'<strong>Available</strong> through age 65.')+' Fixed benefits only.';
-    total.innerHTML='Household add-on total: <strong>'+money(totalHousehold())+'</strong>';
-  }
-  function ensureAddonTotals(){['A','B'].forEach(function(pi){['platinum','gold','silver'].forEach(function(tier){var result=document.getElementById(tier+'Result'+pi);if(result&&!document.getElementById(tier+'AddonTotal'+pi)){var wrap=document.createElement('div');wrap.className='addon-tier-total';wrap.id=tier+'AddonTotal'+pi;wrap.innerHTML='With A71 add-on<span>—</span>';result.insertAdjacentElement('afterend',wrap);}});});}
-  function updateTierTotals(pi){var rate=addonRate(pi);['platinum','gold','silver'].forEach(function(tier){var baseEl=document.getElementById(tier+'Result'+pi),totalEl=document.getElementById(tier+'AddonTotal'+pi);if(!baseEl||!totalEl)return;var span=totalEl.querySelector('span');var base=parseMoney(baseEl.textContent);if(!enabled(pi))span.textContent='Base plan only';else if(rate===null)span.textContent='A71 unavailable at this age';else if(base>0)span.textContent=money(base+rate);else span.textContent=money(rate);});}
-  function refreshAll(){ensureAddonTotals();['A','B'].forEach(function(pi){updateAddonCard(pi);updateTierTotals(pi);});if(typeof window.refreshQuoteOverview==='function')window.refreshQuoteOverview();}
-  document.addEventListener('DOMContentLoaded',function(){['A','B'].forEach(function(pi){var age=document.getElementById('optionAgeInput'+pi),tog=document.getElementById('a71Enabled'+pi);if(age)age.addEventListener('change',function(){setTimeout(refreshAll,0);});if(tog)tog.addEventListener('change',function(){setTimeout(refreshAll,0);});});setTimeout(refreshAll,50);});
-  var orig=window.calculatePremium;
-  if(typeof orig==='function'){window.calculatePremium=function(pi){var out=orig.apply(this,arguments);setTimeout(function(){refreshAll();},0);return out;};}
-  else{window.addEventListener('load',refreshAll);}
-  window._a71RefreshAll=refreshAll;
-})();
-</script>
-
-<!-- ===================== SETUP ENGINE ===================== -->
-<script>
-(function(){
-  function byId(id){return document.getElementById(id);}
-  function money(n){return '$'+(Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
-  function moneyMo(n){return money(n)+'/mo';}
-  function cleanNum(v){return Number(String(v||'').replace(/[^0-9.]/g,''))||0;}
-  function fillAgeSelect(id){var el=byId(id);if(!el||el.options.length)return;for(var i=18;i<=80;i++){var opt=document.createElement('option');opt.value=String(i);opt.textContent=String(i);if(i===30)opt.selected=true;el.appendChild(opt);}}
-  function setBackendValue(id,value){var el=byId(id);if(el)el.value=value;}
-  function setIncome(id,amount){var el=byId(id);if(el)el.value=amount?Math.round(amount).toLocaleString():'';}
-
-  window.getHPValues = function(){
-    var method=(document.querySelector('input[name="hpMethod"]:checked')||{}).value||'monthly';
-    var homeIncome=cleanNum(byId('setupHomeIncome').value);
-    var directHourly=cleanNum(byId('setupHourlyInput').value);
-    var hourly=method==='hourly'?directHourly:(homeIncome/160);
-    var budget1=hourly*4;
-    var budget2=hourly*8;
-    return{hourly:hourly,budget1:budget1,budget2:budget2,homeIncome:homeIncome};
-  };
-
-  function updateHourPower(){
-    var vals=window.getHPValues();
-    byId('hourlyFieldWrap').style.opacity=(document.querySelector('input[name="hpMethod"]:checked')||{}).value==='hourly'?'1':'.65';
-    byId('setupHourlyInput').disabled=(document.querySelector('input[name="hpMethod"]:checked')||{}).value!=='hourly';
-    byId('hpHourlyValue').textContent=money(vals.hourly);
-    byId('hpBudget1Display').textContent=money(vals.budget1);
-    byId('hpBudget2Display').textContent=money(vals.budget2);
-    byId('setupSummaryIncome').textContent=moneyMo(vals.homeIncome);
-    byId('setupSummaryBudget').textContent=moneyMo(vals.budget1);
-    if(typeof window.refreshQuoteOverview==='function')window.refreshQuoteOverview();
-  }
-
-  function syncSetupSummaries(){
-    byId('setupSummaryA').textContent=byId('setupAgeA').value+' · '+byId('setupTobA').value.toUpperCase();
-    var spouseOn=byId('setupIncludeB').checked;
-    byId('setupSummaryB').textContent=spouseOn?(byId('setupAgeB').value+' · '+byId('setupTobB').value.toUpperCase()):'Not included';
-    byId('setupSpouseFields').style.opacity=spouseOn?'1':'.45';
-    Array.from(byId('setupSpouseFields').querySelectorAll('input,select')).forEach(function(el){if(el.id!=='setupIncludeB')el.disabled=!spouseOn;});
-    var spouseBtn=document.querySelector('.button-goto-spouse');
-    if(spouseBtn)spouseBtn.style.display=spouseOn?'inline-flex':'none';
-    var spouseFocusOpt=byId('setupQuoteFocus').querySelector('option[value="B"]');
-    if(spouseFocusOpt)spouseFocusOpt.disabled=!spouseOn;
-    if(!spouseOn&&byId('setupQuoteFocus').value==='B')byId('setupQuoteFocus').value='A';
-    var bPanels=document.querySelectorAll('.option-bigboy-container.piB,.header .piB');
-    bPanels.forEach(function(el){if(!spouseOn)el.classList.add('household-hidden');else el.classList.remove('household-hidden');});
-    byId('activeQuoteLabel').textContent=spouseOn?'Main + spouse':'Main only';
-    updateHourPower();
-  }
-
-  function applyHouseholdSetup(goFocus){
-    var spouseOn=byId('setupIncludeB').checked;
-    setBackendValue('optionNameInputA',byId('setupNameA').value);
-    setBackendValue('optionAgeInputA',byId('setupAgeA').value);
-    setBackendValue('optionTobInputA',byId('setupTobA').value);
-    setBackendValue('optionSexInputA',byId('setupSexA').value);
-    var inc=cleanNum(byId('setupHomeIncome').value);
-    setIncome('optionIncomeInputA',inc);
-    if(spouseOn){
-      setBackendValue('optionNameInputB',byId('setupNameB').value);
-      setBackendValue('optionAgeInputB',byId('setupAgeB').value);
-      setBackendValue('optionTobInputB',byId('setupTobB').value);
-      setBackendValue('optionSexInputB',byId('setupSexB').value);
-      setIncome('optionIncomeInputB',inc);
-    }
-    try{if(typeof handleInputChange==='function')handleInputChange();}catch(e){}
-    try{if(typeof handleInputChangeB==='function')handleInputChangeB();}catch(e){}
-    if(typeof calculatePremium==='function'){try{calculatePremium('A');}catch(e){} if(spouseOn){try{calculatePremium('B');}catch(e){}}}
-    if(goFocus==='B'&&spouseOn){if(typeof showPiB==='function')showPiB();}
-    else{if(typeof showPiA==='function')showPiA();}
-    syncSetupSummaries();
-  }
-
-  document.addEventListener('DOMContentLoaded',function(){
-    ['setupAgeA','setupAgeB'].forEach(fillAgeSelect);
-    ['setupNameA','setupNameB'].forEach(function(id){var el=byId(id);if(el)el.addEventListener('input',function(){});});
-    byId('setupHomeIncome').addEventListener('input',updateHourPower);
-    byId('setupHourlyInput').addEventListener('input',updateHourPower);
-    document.querySelectorAll('input[name="hpMethod"]').forEach(function(el){el.addEventListener('change',updateHourPower);});
-    ['setupAgeA','setupTobA','setupSexA','setupAgeB','setupTobB','setupSexB','setupIncludeB','setupQuoteFocus'].forEach(function(id){var el=byId(id);if(el)el.addEventListener('change',syncSetupSummaries);});
-    byId('applyHouseholdSetup').addEventListener('click',function(){applyHouseholdSetup(byId('setupQuoteFocus').value);});
-    byId('applyHouseholdSetup2').addEventListener('click',function(){applyHouseholdSetup(byId('setupQuoteFocus').value);});
-    byId('jumpToQuotesBtn').addEventListener('click',function(){applyHouseholdSetup(byId('setupQuoteFocus').value);var nav=byId('option-builder-slide');if(nav)nav.scrollIntoView({behavior:'smooth',block:'start'});});
-    var mainBtn=document.querySelector('.button-goto-primary');
-    var spouseBtn=document.querySelector('.button-goto-spouse');
-    if(mainBtn)mainBtn.addEventListener('click',function(){byId('setupQuoteFocus').value='A';updateHourPower();});
-    if(spouseBtn)spouseBtn.addEventListener('click',function(){byId('setupQuoteFocus').value='B';updateHourPower();});
-    syncSetupSummaries();
-    applyHouseholdSetup('A');
-  });
-})();
-</script>
-
-<!-- ===================== QUOTE OVERVIEW ENGINE ===================== -->
-<script>
-(function(){
-
-// ---- Rate tables (mirrored from optionPremiums.js) ----
-var RATES = {
-  rMNTU:[10.21,10.57,10.95,11.34,11.79,12.25,12.73,13.3,13.95,14.65,15.38,16.16,17.01,17.94,18.91,19.95,21.05,22.19,23.29,24.47,25.73,27.04,28.43,29.89,31.44,33.04,34.74,36.61,38.57,40.68,42.9,45.26,47.78,50.46,53.28,56.29,59.48,62.74,66.13,69.68,73.48,77.51],
-  prMNTU:[8.9,9.21,9.53,9.9,10.27,10.68,11.11,11.61,12.16,12.76,13.4,14.08,14.84,15.65,16.46,17.38,18.35,19.32,20.28,21.33,22.44,23.56,24.76,26.05,27.37,28.8,30.28,31.89,33.6,35.44,37.4,39.43,41.62,43.94,46.44,49.05,51.81,54.65,57.59,60.7,64.01,67.52],
-  exMNTU:[7.73,8,8.3,8.57,8.94,9.27,9.64,10.06,10.54,11.06,11.63,12.24,12.88,13.57,14.3,15.11,15.92,16.77,17.62,18.51,19.46,20.45,21.51,22.61,23.77,24.98,26.27,27.69,29.17,30.79,32.46,34.24,36.14,38.17,40.31,42.57,45,47.47,50.01,52.72,55.58,58.63],
-  slMNTU:[6.59,6.76,6.95,7.2,7.41,7.67,7.96,8.28,8.64,9.04,9.47,9.94,10.43,10.85,11.51,12.1,12.72,13.39,14.09,14.82,15.61,16.46,17.36,18.33,19.36,20.45,21.58,22.72,23.87,25.04,26.29,27.61,29.05,30.56,32.22,34.01,36,38.17,40.59,43.22,46.07,49.12],
-  rMTU:[12.81,13.27,13.75,14.29,14.82,15.43,16.07,16.77,17.56,18.43,19.33,20.3,21.36,22.48,23.67,24.96,26.3,27.75,29.35,31.03,32.82,34.7,36.69,38.82,41.09,43.47,46.01,48.6,51.23,54.01,56.96,60.12,63.43,67.01,70.77,74.74,78.81,83.02,87.33,91.76,96.42,101.37],
-  prMTU:[11.16,11.56,11.96,12.43,12.93,13.45,13.99,14.62,15.29,16.05,16.84,17.68,18.6,19.59,20.63,21.75,22.92,24.17,25.58,27.03,28.58,30.22,31.97,33.83,35.78,37.87,40.09,42.34,44.64,47.05,49.62,52.37,55.27,58.37,61.66,65.12,68.69,72.33,76.05,79.89,84.01,88.29],
-  exMTU:[9.68,10.02,10.41,10.8,11.21,11.68,12.14,12.68,13.28,13.94,14.62,15.36,16.16,17,17.89,18.89,19.89,20.98,22.22,23.46,24.84,26.25,27.75,29.38,31.08,32.88,34.8,36.74,38.77,40.85,43.08,45.47,48,50.67,53.49,56.43,59.49,62.7,66,69.43,72.99,76.69],
-  slMTU:[8.43,8.61,8.83,9.08,9.36,9.69,10.07,10.51,11.03,11.62,12.26,12.95,13.66,14.4,15.17,15.99,16.88,17.87,18.97,20.14,21.41,22.74,24.15,25.65,27.21,28.83,30.51,32.2,33.91,35.63,37.43,39.31,41.28,43.36,45.55,47.88,50.41,53.21,56.29,59.64,63.23,67.02],
-  rFNTU:[9.2,9.55,9.91,10.29,10.67,11.1,11.57,12.08,12.65,13.28,13.95,14.66,15.39,16.14,16.91,17.71,18.51,19.33,20.15,20.99,21.86,22.73,23.6,24.47,25.35,26.29,27.39,28.71,30.32,32.17,34.2,36.37,38.7,41.14,43.66,46.28,49.01,51.8,54.67,57.62,60.64,63.71],
-  prFNTU:[8.01,8.32,8.63,8.96,9.3,9.67,10.07,10.52,11.01,11.58,12.16,12.77,13.4,14.05,14.73,15.42,16.12,16.83,17.55,18.27,19.02,19.78,20.54,21.3,22.08,22.91,23.87,25,26.41,28.01,29.8,31.69,33.68,35.78,38.04,40.34,42.69,45.11,47.57,50.09,52.72,55.47],
-  exFNTU:[6.95,7.22,7.49,7.78,8.07,8.4,8.75,9.14,9.57,10.04,10.54,11.08,11.64,12.2,12.78,13.39,14,14.62,15.25,15.88,16.53,17.19,17.85,18.51,19.17,19.88,20.72,21.72,22.94,24.33,25.87,27.51,29.26,31.11,33.05,35.07,37.14,39.27,41.43,43.64,45.91,48.23],
-  slFNTU:[5.96,6.14,6.33,6.52,6.73,6.95,7.19,7.45,7.73,8.04,8.37,8.7,9.07,9.47,9.91,10.35,10.81,11.28,11.76,12.24,12.73,13.27,13.83,14.43,15.19,16,16.88,17.76,18.64,19.52,20.42,21.43,22.59,23.91,25.39,27.01,28.7,30.46,32.25,34.11,36.12,38.31],
-  rFTU:[11.54,11.96,12.41,12.86,13.35,13.88,14.47,15.11,15.83,16.59,17.42,18.29,19.23,20.26,21.34,22.46,23.68,24.92,26.17,27.5,28.88,30.35,31.89,33.49,35.19,37.01,38.9,40.82,42.77,44.8,46.97,49.24,51.61,54.15,56.79,59.61,62.55,65.61,68.85,72.21,75.82,79.6],
-  prFTU:[10.05,10.43,10.82,11.2,11.64,12.1,12.61,13.16,13.77,14.45,15.18,15.93,16.76,17.64,18.57,19.58,20.64,21.69,22.8,23.96,25.17,26.42,27.76,29.18,30.66,32.22,33.89,35.56,37.25,39.04,40.92,42.89,44.95,47.17,49.51,51.93,54.51,57.15,60,62.92,66.05,69.33],
-  exFTU:[8.73,9.05,9.4,9.73,10.11,10.49,10.94,11.42,11.96,12.54,13.18,13.84,14.54,15.31,16.14,16.99,17.9,18.84,19.79,20.79,21.84,22.95,24.11,25.35,26.63,27.97,29.41,30.86,32.35,33.89,35.54,37.23,39.05,40.95,42.97,45.1,47.32,49.62,52.07,54.63,57.34,60.21],
-  slFTU:[7.15,7.35,7.56,7.8,8.05,8.31,8.63,8.97,9.36,9.81,10.29,10.78,11.32,11.87,12.44,13.03,13.67,14.35,15.07,15.82,16.6,17.39,18.29,19.23,20.2,21.23,22.29,23.35,24.4,25.48,26.59,27.81,29.15,30.65,32.28,34.06,35.91,37.87,39.86,41.96,44.21,46.69]
+const state = {
+  rates: [],
+  loaded: false,
+  spouseIncluded: false,
 };
 
-// Get the correct rate table for this insured
-function getRateTable(sex, tob){
-  var key = (sex==='male'?'M':'F') + (tob==='tu'?'TU':'NTU');
-  return {r:RATES['r'+key], pr:RATES['pr'+key], ex:RATES['ex'+key], sl:RATES['sl'+key]};
+const $ = (id) => document.getElementById(id);
+const currency = (n) => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2,minimumFractionDigits:2}).format(Number(n)||0);
+const money0 = (n) => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(Number(n)||0);
+const round1000 = (n) => Math.max(0, Math.round((Number(n)||0) / 1000) * 1000);
+const floor1000 = (n) => Math.max(0, Math.floor((Number(n)||0) / 1000) * 1000);
+const clamp = (n,a,b) => Math.min(b, Math.max(a, n));
+
+function parseCSV(text){
+  const rows=[]; let row=[]; let cur=''; let quote=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i], n=text[i+1];
+    if(c==='"'){
+      if(quote && n==='"'){cur+='"'; i++;}
+      else quote=!quote;
+    } else if(c===',' && !quote){ row.push(cur); cur=''; }
+    else if((c==='\n' || c==='\r') && !quote){
+      if(c==='\r' && n==='\n') i++;
+      row.push(cur); if(row.some(v=>v!=='')) rows.push(row); row=[]; cur='';
+    } else cur+=c;
+  }
+  row.push(cur); if(row.some(v=>v!=='')) rows.push(row);
+  const headers=rows.shift().map(h=>h.trim());
+  return rows.map(r=>Object.fromEntries(headers.map((h,i)=>[h,(r[i]??'').trim()])));
 }
 
-// Given a monthly budget, calculate WL face amount
-function budgetToFaceAmount(monthlyBudget, sex, tob, age){
-  if(!monthlyBudget||age<18||age>59) return 0;
-  var ev = age - 18;
-  var t = getRateTable(sex, tob);
-  var annual = monthlyBudget * 12;
-  // Try Standard (r) first, then preferred, then extra preferred, then super preferred
-  // Larger face = better. Use Standard which allows most face.
-  // We use Standard rate to maximize face shown
-  var rate = t.r[ev];
-  if(!rate) return 0;
-  return Math.round((annual / rate) * 1000 / 1000) * 1000;
+function num(v){
+  if(v===null || v===undefined || v==='') return null;
+  const x = parseFloat(String(v).replace(/[$,]/g,''));
+  return Number.isFinite(x) ? x : null;
 }
 
-// Calculate monthly premium from face amount
-function faceAmountToPremium(face, sex, tob, age){
-  if(!face||age<18||age>59) return 0;
-  var ev = age-18;
-  var t = getRateTable(sex, tob);
-  // Auto-plan picks best tier based on face size
-  var sl=t.sl[ev],ex=t.ex[ev],pr=t.pr[ev],r=t.r[ev];
-  var faceK = face/1000;
-  if(face>=120000&&sl) return (faceK*sl)/12;
-  if(face>=60000&&ex) return (faceK*ex)/12;
-  if(face>=35000&&pr) return (faceK*pr)/12;
-  return (faceK*r)/12;
+async function loadRates(){
+  const res = await fetch('Rates.csv');
+  if(!res.ok) throw new Error('Could not load Rates.csv');
+  const text = await res.text();
+  const parsed = parseCSV(text).map(r=>(
+    {
+      ...r,
+      age:num(r.age),
+      base_rate:num(r.base_rate),
+      wp_rate:num(r.wp_rate),
+      coverage_fixed:num(r.coverage_fixed),
+      face_min:num(r.face_min),
+      face_max:num(r.face_max),
+      policy_fee_annual:num(r.policy_fee_annual) || 0,
+      volume_adjustment_annual:num(r.volume_adjustment_annual) || 0,
+      sold_as_policy_flag:num(r.sold_as_policy_flag) || 0,
+      include_wp_flag:num(r.include_wp_flag) || 0,
+    }
+  ));
+  state.rates = parsed.filter(r => ['WL','PR','EX','SL','10RC','ADB'].includes(r.plan_code));
+  state.loaded = true;
+  $('csvStatus').innerHTML = 'Loaded <strong>Rates.csv</strong> successfully.';
+  $('csvStatus').classList.add('good');
+  refreshAll();
 }
 
-function a71Rate(age){age=Number(age)||0;if(age<18)return 0;if(age<=60)return 25;if(age<=65)return 35;return 0;}
-
-function byId(id){return document.getElementById(id);}
-function money(n){return '$'+(Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
-function moneyMo(n){return money(n)+'/mo';}
-function fmt(n){if(!n)return '$0';return '$'+(Number(n)||0).toLocaleString();}
-function cleanNum(v){return Number(String(v||'').replace(/[^0-9.]/g,''))||0;}
-
-function getSetup(){
+function getPersonInput(person){
   return {
-    ageA: Number((byId('setupAgeA')||{}).value||30),
-    sexA: (byId('setupSexA')||{}).value||'male',
-    tobA: (byId('setupTobA')||{}).value||'ntu',
-    ageB: Number((byId('setupAgeB')||{}).value||30),
-    sexB: (byId('setupSexB')||{}).value||'female',
-    tobB: (byId('setupTobB')||{}).value||'ntu',
-    spouseOn: !!((byId('setupIncludeB')||{}).checked),
-    a71A: !!((byId('setupA71A')||{}).checked),
-    a71B: !!((byId('setupA71B')||{}).checked)
+    age: clamp(parseInt($(person==='main'?'main_age':'sp_age').value || '18',10),18,80),
+    sex: $(person==='main'?'main_sex':'sp_sex').value,
+    tob: $(person==='main'?'main_tob':'sp_tob').value,
+    a71: $(person==='main'?'main_a71':'sp_a71').checked,
   };
 }
 
-// Tier budget multipliers (matching original auto-plan logic)
-var TIER_MULT = {platinum:0.06, gold:0.045, silver:0.03};
-// ADB amounts per tier
-var ADB_BY_TIER = {platinum:200000, gold:150000, silver:100000};
-
-function calcTierForBudget(budget, setup, pi){
-  var age = pi==='A'?setup.ageA:setup.ageB;
-  var sex = pi==='A'?setup.sexA:setup.sexB;
-  var tob = pi==='A'?setup.tobA:setup.tobB;
-  if(age<18||age>59) return null; // senior not supported in budget calc
-  var ev = age-18;
-  var t = getRateTable(sex,tob);
-  var annual = budget*12;
-  // Pick best WL rate tier
-  var wlFace=0, wlRate=0, rateName='';
-  var trialSl=(annual/t.sl[ev])*1000;
-  var trialEx=(annual/t.ex[ev])*1000;
-  var trialPr=(annual/t.pr[ev])*1000;
-  if(trialSl>=120000){wlFace=Math.round(trialSl/1000)*1000;wlRate=t.sl[ev];rateName='Super Preferred';}
-  else if(trialEx>=60000){wlFace=Math.round(trialEx/1000)*1000;wlRate=t.ex[ev];rateName='Extra Preferred';}
-  else if(trialPr>=35000){wlFace=Math.round(trialPr/1000)*1000;wlRate=t.pr[ev];rateName='Preferred';}
-  else{wlFace=Math.round((annual/t.r[ev])*1000/1000)*1000;wlRate=t.r[ev];rateName='Standard';}
-  var premium=wlFace>0?((wlFace/1000)*wlRate/12):0;
-  return{wlFace:wlFace,premium:Math.floor(premium),rateName:rateName,age:age,sex:sex,tob:tob};
+function getPane(card, person){
+  return document.querySelector(`.pane[data-card="${card}"][data-person="${person}"]`);
 }
 
-// Budgets per tier based on income
-function tierBudgetsFromIncome(income){
-  return{
-    platinum: income*TIER_MULT.platinum,
-    gold: income*TIER_MULT.gold,
-    silver: income*TIER_MULT.silver
+function getCoverage(card, person){
+  const pane = getPane(card, person);
+  return {
+    wl: round1000(pane.querySelector('[data-input="wl"]').value),
+    term: round1000(pane.querySelector('[data-input="term"]').value),
+    adb: round1000(pane.querySelector('[data-input="adb"]').value),
   };
 }
 
-
-
-function applyTierToForm(pi, wlFace, tier){
-  var tierMap={platinum:'Platinum',gold:'Gold',silver:'Silver'};
-  ['platinum','gold','silver'].forEach(function(t){
-    var el=byId('wl'+t.charAt(0).toUpperCase()+t.slice(1)+'Input'+pi);
-    if(el) el.value = t===tier&&wlFace?fmt(wlFace).replace('$',''):'';
-  });
-  if(typeof calculatePremium==='function') calculatePremium(pi);
+function setCoverage(card, person, values){
+  const pane = getPane(card, person);
+  pane.querySelector('[data-input="wl"]').value = round1000(values.wl || 0);
+  pane.querySelector('[data-input="term"]').value = round1000(values.term || 0);
+  pane.querySelector('[data-input="adb"]').value = round1000(values.adb || 0);
 }
 
-// A71 accidental death benefit amounts (flat per policy)
-var A71_ADB = 50000;
-var A71_ADB_AUTO = 100000;
-var A71_ADB_CARRIER = 250000;
-// a71Rate() defined in A71 engine block above: $25/mo age 18-60, $35/mo 61-65
+function matchAgeBand(age, band){
+  if(!band) return false;
+  const m = String(band).match(/^(\d+)\s*-\s*(\d+)$/);
+  if(!m) return false;
+  const a=Number(m[1]), b=Number(m[2]);
+  return age>=a && age<=b;
+}
 
-function renderRecommended(setup, income){
-  var grid = byId('recGrid');
-  if(!income){
-    grid.innerHTML='<div class="rec-no-budget"><span>∅</span>Enter home income in Household Setup to generate recommended packages.</div>';
-    return;
+function findWLRate(age, sex, tob, face){
+  const code = face >= 120000 ? 'SL' : face >= 60000 ? 'EX' : face >= 15100 ? 'PR' : 'WL';
+  const rows = state.rates.filter(r => r.plan_code===code && r.record_type==='rate' && r.age===age && r.sex===sex && r.tobacco===tob);
+  const row = rows.find(r => (r.face_min==null || face>=r.face_min) && (r.face_max==null || face<=r.face_max));
+  return row ? {...row, effective_code: code} : null;
+}
+
+function find10RCRate(age, sex, tob){
+  return state.rates.find(r => r.plan_code==='10RC' && r.record_type==='rate' && r.age===age && r.sex===sex && r.tobacco===tob) || null;
+}
+
+function findADBRate(age){
+  return state.rates.find(r => r.plan_code==='ADB' && r.record_type==='banded_rate' && matchAgeBand(age, r.age_band)) || null;
+}
+
+function annualToMonthly(annual){ return annual / 12; }
+function annualToWeekly(annual){ return annual / 52; }
+
+function priceCoverage(personInput, coverage){
+  const notes=[];
+  let monthly = 0;
+  let annualTotal = 0;
+
+  if(coverage.wl > 0){
+    const wlRow = findWLRate(personInput.age, personInput.sex, personInput.tob, coverage.wl);
+    if(wlRow){
+      const units = coverage.wl / 1000;
+      const annual = units * wlRow.base_rate + wlRow.policy_fee_annual + wlRow.volume_adjustment_annual;
+      annualTotal += annual;
+      notes.push(`${wlRow.effective_code} used for WL`);
+    } else {
+      notes.push('No WL rate found');
+    }
   }
-  var budgets = tierBudgetsFromIncome(income);
-  var a71A = setup.a71A ? a71Rate(setup.ageA) : 0;
-  var a71B = (setup.a71B && setup.spouseOn) ? a71Rate(setup.ageB) : 0;
-  var masterA71 = !!(a71A || a71B);
-  var a71Total = a71A + a71B;
-  var tiers = ['platinum','gold','silver'];
-  var tierLabels = {platinum:'Platinum', gold:'Gold', silver:'Silver'};
-  var storedTiers = {};
 
-  var html = '';
-  tiers.forEach(function(tier){
-    var budgetA = budgets[tier];
-    var budgetB = budgets[tier];
-    var dataA = calcTierForBudget(budgetA, setup, 'A');
-    var dataB = setup.spouseOn ? calcTierForBudget(budgetB, setup, 'B') : null;
-    storedTiers[tier] = {A:dataA, B:dataB};
-
-    var premA = dataA ? dataA.premium : 0;
-    var premB = dataB ? dataB.premium : 0;
-    var baseTotal = premA + premB;
-    var grandTotal = baseTotal + a71Total;
-
-    var wlA = dataA ? dataA.wlFace : 0;
-    var wlB = dataB ? dataB.wlFace : 0;
-
-    // A71 accidental death totals per insured (WL + ADB from A71)
-    var adbMainSick = wlA;                            // WL only — sickness death
-    var adbMainAcc  = wlA + (masterA71&&a71A ? A71_ADB : 0);  // WL + A71 ADB
-    var adbMainAuto = wlA + (masterA71&&a71A ? A71_ADB_AUTO : 0);
-    var adbMainCarr = wlA + (masterA71&&a71A ? A71_ADB_CARRIER : 0);
-    var adbSpSick   = wlB;
-    var adbSpAcc    = wlB + (masterA71&&a71B ? A71_ADB : 0);
-    var adbSpAuto   = wlB + (masterA71&&a71B ? A71_ADB_AUTO : 0);
-    var adbSpCarr   = wlB + (masterA71&&a71B ? A71_ADB_CARRIER : 0);
-
-    html += '<section class="rec-card tier-'+tier+'">';
-    html += '<div class="rec-card-top">';
-    html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">';
-    html += '<div class="rec-tier-badge">'+tierLabels[tier]+'</div>';
-    var _onA=setup.a71A,_onB=setup.a71B&&setup.spouseOn;
-    var _chipCls=(_onA||_onB)?'on':'off';
-    var _chipTxt=(!_onA&&!_onB)?'A71 ✗':(_onA&&_onB)?'A71 ✓ Both':(_onA?'A71 Main ✓':'A71 Spouse ✓');
-    html += '<span class="a71-status-chip '+_chipCls+'">' + _chipTxt + '</span>';
-    html += '</div>';
-    html += '<div class="rec-total-amount">'+(masterA71?moneyMo(grandTotal):moneyMo(baseTotal))+'</div>';
-    html += '<div class="rec-total-note">'+(masterA71?'Household + A71 add-on':'Household base — no A71')+'</div>';
-    html += '</div>';
-    html += '<div class="rec-card-body">';
-    html += '<div class="rec-breakdown">';
-    html += '<div class="rec-line"><span>Main ('+setup.ageA+'y '+setup.sexA[0].toUpperCase()+')</span><strong>'+moneyMo(premA)+'</strong></div>';
-    if(setup.spouseOn) html += '<div class="rec-line"><span>Spouse ('+setup.ageB+'y '+setup.sexB[0].toUpperCase()+')</span><strong>'+moneyMo(premB)+'</strong></div>';
-    html += '<hr class="rec-divider">';
-    html += '<div class="rec-line"><span>Base household</span><strong>'+moneyMo(baseTotal)+'</strong></div>';
-    if(masterA71 && a71Total){
-      html += '<div class="rec-line"><span>A71 add-on ('+(setup.spouseOn&&a71B?'both':'main only')+')</span><strong style="color:var(--green)">+'+moneyMo(a71Total)+'</strong></div>';
-      html += '<div class="rec-line" style="font-weight:700"><span>Grand total</span><strong style="color:var(--green)">'+moneyMo(grandTotal)+'</strong></div>';
+  if(coverage.term > 0){
+    const termRow = find10RCRate(personInput.age, personInput.sex, personInput.tob);
+    if(termRow){
+      const units = coverage.term / 1000;
+      const annual = units * termRow.base_rate + termRow.policy_fee_annual + termRow.volume_adjustment_annual;
+      annualTotal += annual;
+    } else {
+      notes.push('No 10RC rate found');
     }
-    html += '</div>';
+  }
 
-    // Coverage section — expanded with A71 ADB breakdown
-    html += '<div class="rec-coverage">';
-    html += '<div class="rec-coverage-kicker">Coverage at this budget</div>';
-    html += '<div class="cov-insured-block">';
-
-    // Main insured coverage
-    html += '<div class="cov-person-label">Main insured</div>';
-    html += '<div class="rec-coverage-grid">';
-    html += '<div class="rec-cov-item"><label>WL face</label><span>'+fmt(wlA)+'</span></div>';
-    html += '<div class="rec-cov-item"><label>Budget/mo</label><span>'+money(budgetA)+'</span></div>';
-    if(masterA71&&a71A){
-      html += '<div class="rec-cov-item"><label>Death (sickness)</label><span>'+fmt(adbMainSick)+'</span></div>';
-      html += '<div class="rec-cov-item"><label>Death (accident)</label><span style="color:var(--green)">'+fmt(adbMainAcc)+'</span></div>';
-      html += '<div class="rec-cov-item"><label>Auto accident</label><span style="color:var(--green)">'+fmt(adbMainAuto)+'</span></div>';
-      html += '<div class="rec-cov-item"><label>Common carrier</label><span style="color:var(--green)">'+fmt(adbMainCarr)+'</span></div>';
+  if(coverage.adb > 0){
+    const adbRow = findADBRate(personInput.age);
+    if(adbRow){
+      const units = coverage.adb / 1000;
+      const annual = units * adbRow.base_rate;
+      annualTotal += annual;
+    } else {
+      notes.push('ADB unavailable at this age');
     }
-    html += '</div>';
+  }
 
-    // Spouse coverage
-    if(setup.spouseOn && wlB){
-      html += '<div class="cov-person-label" style="margin-top:10px">Spouse</div>';
-      html += '<div class="rec-coverage-grid">';
-      html += '<div class="rec-cov-item"><label>WL face</label><span>'+fmt(wlB)+'</span></div>';
-      html += '<div class="rec-cov-item"><label>% of income</label><span>'+(TIER_MULT[tier]*100).toFixed(1)+'%</span></div>';
-      if(masterA71&&a71B){
-        html += '<div class="rec-cov-item"><label>Death (sickness)</label><span>'+fmt(adbSpSick)+'</span></div>';
-        html += '<div class="rec-cov-item"><label>Death (accident)</label><span style="color:var(--green)">'+fmt(adbSpAcc)+'</span></div>';
-        html += '<div class="rec-cov-item"><label>Auto accident</label><span style="color:var(--green)">'+fmt(adbSpAuto)+'</span></div>';
-        html += '<div class="rec-cov-item"><label>Common carrier</label><span style="color:var(--green)">'+fmt(adbSpCarr)+'</span></div>';
+  if(personInput.a71){
+    let a71m = 0;
+    if(personInput.age >= 18 && personInput.age <= 59) a71m = 20;
+    else if(personInput.age >= 60 && personInput.age <= 64) a71m = 22.5;
+    else if(personInput.age >= 65 && personInput.age <= 80) a71m = 35.25;
+    monthly += a71m;
+  }
+
+  monthly += annualToMonthly(annualTotal);
+  return { monthly, annualTotal, notes };
+}
+
+function calcDeathTotals(personInput, coverage){
+  const sickness = coverage.wl + coverage.term;
+  const a71Acc = personInput.a71 ? 50000 : 0;
+  const a71Car = personInput.a71 ? 100000 : 0;
+  const a71Common = personInput.a71 ? 250000 : 0;
+  return {
+    sickness,
+    accident: sickness + coverage.adb + a71Acc,
+    car: sickness + coverage.adb + a71Car,
+    common: sickness + coverage.adb + a71Common,
+  };
+}
+
+function paneBudgetShare(card, person){
+  const monthly = Number($('monthlyIncome').value || 0);
+  const hourly = Number($('hourlyIncome').value || 0);
+  const base = card==='one' ? hourly * 4 : hourly * 8;
+  if(!state.spouseIncluded || person==='main' && !getPane(card,'spouse')) return base;
+  return person==='main' ? base*0.55 : base*0.45;
+}
+
+function autoFill(card, person){
+  const input = getPersonInput(person);
+  let budget = paneBudgetShare(card, person);
+  let wlTarget;
+  if(card==='one'){
+    wlTarget = state.spouseIncluded ? 10000 : Math.max(20000, Math.min(35000, round1000(budget * 300)));
+  } else {
+    wlTarget = state.spouseIncluded ? 15000 : Math.max(25000, Math.min(45000, round1000(budget * 350)));
+  }
+  wlTarget = round1000(wlTarget);
+  const minWL = state.spouseIncluded ? 10000 : 20000;
+  wlTarget = Math.max(minWL, wlTarget);
+
+  let termTarget = round1000((Number($('monthlyIncome').value||0) * (card==='one'?6:12)) * (state.spouseIncluded ? (person==='main'?0.55:0.45) : 1));
+  if(termTarget < 10000) termTarget = 10000;
+
+  let adbTarget = card==='one' ? 50000 : 100000;
+  if(input.age >= 60) adbTarget = card==='one' ? 25000 : 50000;
+  if(input.age >= 65) adbTarget = 0;
+
+  let best = { wl: wlTarget, term: termTarget, adb: adbTarget, diff: Infinity, monthly: 0 };
+  for(let wl = wlTarget; wl >= 10000; wl -= 5000){
+    for(let term = termTarget; term >= 0; term -= 1000){
+      for(let adb = adbTarget; adb >= 0; adb -= 1000){
+        const priced = priceCoverage(input, { wl, term, adb });
+        const diff = Math.abs(priced.monthly - budget);
+        const wlFloor = state.spouseIncluded ? 10000 : (card==='one' ? 20000 : 25000);
+        if(wl < wlFloor) continue;
+        if(priced.monthly <= budget + 2.50 && (diff < best.diff || (Math.abs(diff-best.diff)<0.001 && (wl+term+adb) > (best.wl+best.term+best.adb)))){
+          best = { wl, term, adb, diff, monthly: priced.monthly };
+        }
       }
-      html += '</div>';
     }
-    html += '</div>'; // cov-insured-block
-
-    if(masterA71){
-      html += '<div class="a71-benefits-strip">';
-      html += '<div class="a71-benefit-pill">💊 ER/Urgent Care $250</div>';
-      html += '<div class="a71-benefit-pill">🏥 Hospital $500/night</div>';
-      html += '<div class="a71-benefit-pill">🚨 ICU $1,000/night</div>';
-      html += '<div class="a71-benefit-pill adb-pill">☠ Accident ADB +$50k</div>';
-      html += '<div class="a71-benefit-pill adb-pill">🚗 Auto +$100k</div>';
-      html += '<div class="a71-benefit-pill adb-pill">✈ Carrier +$250k</div>';
-      html += '</div>';
-    }
-    html += '</div>'; // rec-coverage
-
-    html += '<button class="rec-apply-btn" onclick="applyRecTier(\''+tier+'\')">Apply '+tierLabels[tier]+' to Quote ↓</button>';
-    html += '</div></section>';
-  });
-  grid.innerHTML = html;
-
-  window._recData = {setup:setup, budgets:budgets, tiers:storedTiers};
+  }
+  setCoverage(card, person, best);
+  refreshAll();
 }
 
-window.applyRecTier = function(tier){
-  var d = window._recData;
-  if(!d) return;
-  var tierCap = tier.charAt(0).toUpperCase()+tier.slice(1);
-  var dataA = d.tiers[tier].A;
-  var dataB = d.tiers[tier].B;
-  if(dataA && dataA.wlFace){
-    var el = byId('wl'+tierCap+'InputA');
-    if(el){el.value=fmt(dataA.wlFace).replace('$','');if(typeof calculatePremium==='function')calculatePremium('A');}
-  }
-  if(dataB && dataB.wlFace && d.setup.spouseOn){
-    var elB = byId('wl'+tierCap+'InputB');
-    if(elB){elB.value=fmt(dataB.wlFace).replace('$','');if(typeof calculatePremium==='function')calculatePremium('B');}
-  }
-  // scroll to quote
-  var nav=byId('option-builder-slide');if(nav)nav.scrollIntoView({behavior:'smooth',block:'start'});
-};
-
-function renderHourPower(setup, hp){
-  var grid = byId('hpPanelGrid');
-  grid.className = 'hp-panel-grid';
-  if(!hp||!hp.hourly){
-    grid.innerHTML='<div class="hp-no-income">Enter home income or hourly value above to see Hour Power budgets.</div>';
-    return;
-  }
-  var a71A = setup.a71A ? a71Rate(setup.ageA) : 0;
-  var a71B = (setup.a71B && setup.spouseOn) ? a71Rate(setup.ageB) : 0;
-  var a71Total = a71A + a71B;
-
-  function renderCard(hours, budget, hourClass){
-    var h = hours; // alias for closures
-    var hoursPerMonth = hours * 4;
-    var budgetForCoverage = Math.max(0, budget - a71Total);
-    var splitA = setup.spouseOn ? budgetForCoverage * 0.5 : budgetForCoverage;
-    var splitB = setup.spouseOn ? budgetForCoverage * 0.5 : 0;
-
-    var dataA = calcTierForBudget(splitA, setup, 'A');
-    var dataB = setup.spouseOn ? calcTierForBudget(splitB, setup, 'B') : null;
-    var wlA = dataA ? dataA.wlFace : 0;
-    var wlB = dataB ? dataB.wlFace : 0;
-    var premA = dataA ? dataA.premium : 0;
-    var premB = dataB ? dataB.premium : 0;
-
-    var _onA=setup.a71A, _onB=setup.a71B&&setup.spouseOn;
-    var _chipCls=(_onA||_onB)?'on':'off';
-    var _chipTxt=(!_onA&&!_onB)?'A71 \u2717':(_onA&&_onB)?'A71 \u2713 Both':(_onA?'A71 Main \u2713':'A71 Spouse \u2713');
-
-    var pfx = 'hp'+hours; // unique id prefix per card: hp1 or hp2
-    var cols = setup.spouseOn ? 2 : 1;
-    var colTpl = '1.6fr repeat('+cols+',1fr)';
-
-    var html = '<section class="hp-panel-card '+hourClass+'" id="hpCard'+hours+'">';
-
-    // HEAD
-    html += '<div class="hp-card-head">';
-    html += '<div class="hp-card-head-left">';
-    html += '<div class="hp-panel-kicker">'+(hours===1?'One Hour':'Two Hours')+' Per Week</div>';
-    html += '<div class="hp-panel-hours">'+hours+' hr'+(hours>1?'s':'')+'/week \xb7 '+hoursPerMonth+' hrs/mo</div>';
-    html += '</div>';
-    html += '<span class="a71-status-chip '+_chipCls+'">'+_chipTxt+'</span>';
-    html += '</div>';
-
-    // BUDGET BAR
-    html += '<div class="hp-budget-bar">';
-    html += '<div class="hp-budget-item"><span class="hp-bi-label">Budget</span><span class="hp-bi-val '+(hours===2?'two':'one')+'">'+money(budget)+'/mo</span></div>';
-    html += '<div class="hp-budget-item"><span class="hp-bi-label">Hourly</span><span class="hp-bi-val">'+money(hp.hourly)+'/hr</span></div>';
-    if(a71Total){
-      html += '<div class="hp-budget-item"><span class="hp-bi-label">A71</span><span class="hp-bi-val red">\u2212$'+a71Total+'/mo</span></div>';
-      html += '<div class="hp-budget-item"><span class="hp-bi-label">For coverage</span><span class="hp-bi-val">'+money(budgetForCoverage)+'/mo</span></div>';
-    }
-    html += '</div>';
-
-    // COVERAGE TABLE — editable inputs for WL, 10RC, ADB
-    html += '<div class="hp-cov-table" style="--cols:'+cols+'">';
-
-    // Header row
-    html += '<div class="hp-cov-thead" style="grid-template-columns:'+colTpl+'">';
-    html += '<div class="hp-cov-th">Coverage</div>';
-    html += '<div class="hp-cov-th">Main</div>';
-    if(setup.spouseOn) html += '<div class="hp-cov-th">Spouse</div>';
-    html += '</div>';
-
-    // Helper: editable cell
-    function editCell(id, val, placeholder, cls){
-      return '<div class="hp-cov-td val hp-edit-cell'+(cls?' '+cls:'')+'">'
-        +'<input class="hp-edit-input" id="'+id+'" type="text" inputmode="numeric"'
-        +' value="'+(val||'')+'" placeholder="'+(placeholder||'—')+'"'
-        +' oninput="window.hpRecalc('+hours+')">'
-        +'</div>';
-    }
-    // Helper: static cell
-    function staticCell(val, cls){
-      return '<div class="hp-cov-td val'+(cls?' '+cls:'')+'">'+(val||'\u2014')+'</div>';
-    }
-    // Helper: full editable row
-    function editRow(label, idA, valA, idB, valB, ph, cls){
-      var r = '<div class="hp-cov-tr'+(cls?' '+cls:'')+'" style="grid-template-columns:'+colTpl+'">';
-      r += '<div class="hp-cov-td label">'+label+'</div>';
-      r += editCell(idA, valA, ph, cls);
-      if(setup.spouseOn) r += editCell(idB, valB, ph, cls);
-      r += '</div>';
-      return r;
-    }
-    // Helper: static display row (death totals)
-    function dispRow(label, idA, idB, cls){
-      var r = '<div class="hp-cov-tr'+(cls?' '+cls:'')+'" style="grid-template-columns:'+colTpl+'">';
-      r += '<div class="hp-cov-td label">'+label+'</div>';
-      r += '<div class="hp-cov-td val'+(cls?' '+cls:'')+'" id="'+idA+'">—</div>';
-      if(setup.spouseOn) r += '<div class="hp-cov-td val'+(cls?' '+cls:'')+'" id="'+idB+'">—</div>';
-      r += '</div>';
-      return r;
-    }
-
-    // Editable coverage rows
-    html += editRow('Whole Life', pfx+'_wlA', wlA||'', pfx+'_wlB', wlB||'', 'face amount');
-    html += editRow('Term 10RC', pfx+'_rcA', '', pfx+'_rcB', '', 'optional', 'muted');
-    // ADB standalone + A71 note
-    var adbPlA = _onA ? 'standalone (A71 \u2713 +$50k)' : 'optional';
-    var adbPlB = _onB ? 'standalone (A71 \u2713 +$50k)' : 'optional';
-    html += '<div class="hp-cov-tr" style="grid-template-columns:'+colTpl+'">';
-    html += '<div class="hp-cov-td label">ADB'+((_onA||_onB)?' <em style="color:var(--green);font-style:normal">(+A71)</em>':'')+'</div>';
-    html += editCell(pfx+'_adbA', '', adbPlA, _onA?'green':'');
-    if(setup.spouseOn) html += editCell(pfx+'_adbB', '', adbPlB, _onB?'green':'');
-    html += '</div>';
-
-    // Divider
-    html += '<div class="hp-cov-divider">Death Benefit Totals</div>';
-    html += dispRow('Sickness', pfx+'_sickA', pfx+'_sickB');
-    html += dispRow('Accident (+$50k A71)', pfx+'_accA', pfx+'_accB', _onA?'green':'');
-    html += dispRow('Auto (+$100k A71)', pfx+'_autoA', pfx+'_autoB', _onA?'green':'');
-
-    // Premium row
-    html += '<div class="hp-cov-divider">Monthly Premium</div>';
-    html += '<div class="hp-cov-tr" style="grid-template-columns:'+colTpl+'">';
-    html += '<div class="hp-cov-td label">Est. premium</div>';
-    html += '<div class="hp-cov-td val" id="'+pfx+'_premA">'+money(premA+(a71A||0))+'/mo</div>';
-    if(setup.spouseOn) html += '<div class="hp-cov-td val" id="'+pfx+'_premB">'+money(premB+(a71B||0))+'/mo</div>';
-    html += '</div>';
-
-    html += '</div>'; // hp-cov-table
-
-    // FOOTER total
-    html += '<div class="hp-cost-footer">';
-    html += '<div class="hp-cost-line"><span>Total / month</span><strong id="'+pfx+'_total">'+money(premA+premB+a71Total)+'/mo</strong></div>';
-    if(a71Total) html += '<div class="hp-cost-line muted"><span>A71 $'+a71Total+'/mo included</span><span>Coverage budget: '+money(budgetForCoverage)+'/mo</span></div>';
-    html += '</div>';
-
-    html += '<button class="hp-apply-btn" onclick="applyHourPower('+hours+')">Apply '+hours+'-Hour Budget \u2193</button>';
-    html += '</section>';
-    return html;
-  }
-
-  grid.innerHTML = renderCard(1, hp.budget1, 'one-hour') + renderCard(2, hp.budget2, 'two-hour');
-  window._hpData = {setup:setup, hp:hp, income:cleanNum((document.getElementById('setupHomeIncome')||{}).value)};
-
-  // Initial recalc for both cards
-  hpRecalcCard(1, setup, a71A, a71B);
-  hpRecalcCard(2, setup, a71A, a71B);
+function renderPane(card, person){
+  const pane = getPane(card, person);
+  if(!pane) return;
+  const personInput = getPersonInput(person);
+  const coverage = getCoverage(card, person);
+  const priced = priceCoverage(personInput, coverage);
+  const totals = calcDeathTotals(personInput, coverage);
+  pane.querySelector('[data-field="wlText"]').textContent = money0(coverage.wl);
+  pane.querySelector('[data-field="termText"]').textContent = money0(coverage.term);
+  pane.querySelector('[data-field="adbText"]').textContent = money0(coverage.adb);
+  pane.querySelector('[data-field="monthlyText"]').textContent = currency(priced.monthly);
+  pane.querySelector('[data-field="weeklyText"]').textContent = currency(priced.monthly / 4);
+  const a71Row = pane.querySelector('[data-field="a71Row"]');
+  a71Row.classList.toggle('hidden', !personInput.a71);
+  pane.querySelector('[data-field="a71Text"]').textContent = personInput.a71 ? 'ON' : 'OFF';
+  const notesEl = pane.querySelector('[data-field="notes"]');
+  notesEl.textContent = priced.notes.join(' · ');
+  notesEl.className = 'mini' + (priced.notes.some(x=>x.includes('No ') || x.includes('unavailable')) ? ' bad' : '');
+  return { priced, totals, coverage };
 }
 
-// Called on any input change inside an HP card
-window.hpRecalc = function(hours){
-  var s = window._hpData ? window._hpData.setup : null;
-  if(!s) return;
-  var a71A = s.a71A ? a71Rate(s.ageA) : 0;
-  var a71B = (s.a71B && s.spouseOn) ? a71Rate(s.ageB) : 0;
-  hpRecalcCard(hours, s, a71A, a71B);
-};
-
-function hpRecalcCard(hours, setup, a71A, a71B){
-  var pfx = 'hp'+hours;
-  function byId(id){return document.getElementById(id);}
-  function cleanV(s){return Number(String(s||'').replace(/[^0-9.]/g,''))||0;}
-  function fmtN(n){return n?'$'+Math.round(n).toLocaleString():'\u2014';}
-  function fmtMo(n){return n?'$'+Math.floor(n).toLocaleString()+'/mo':'\u2014';}
-
-  // Read editable inputs
-  var wlA  = cleanV((byId(pfx+'_wlA')||{}).value);
-  var rcA  = cleanV((byId(pfx+'_rcA')||{}).value);
-  var adbA = cleanV((byId(pfx+'_adbA')||{}).value);
-  var wlB  = cleanV((byId(pfx+'_wlB')||{}).value);
-  var rcB  = cleanV((byId(pfx+'_rcB')||{}).value);
-  var adbB = cleanV((byId(pfx+'_adbB')||{}).value);
-
-  // Premium calc (reuse QE functions if available)
-  function wlPrem(face, pi){
-    if(!face) return 0;
-    var age=Number((byId('setupAge'+pi)||{}).value||30);
-    var sex=(byId('setupSex'+pi)||{}).value||'male';
-    var tob=(byId('setupTob'+pi)||{}).value||'ntu';
-    if(age<18||age>59) return 0;
-    var ev=age-18;
-    if(typeof getRateTable!=='function') return 0;
-    var t=getRateTable(sex,tob);
-    var fK=face/1000;
-    var rate;
-    if(face>=120000&&t.sl[ev]) rate=t.sl[ev];
-    else if(face>=60000&&t.ex[ev]) rate=t.ex[ev];
-    else if(face>=35000&&t.pr[ev]) rate=t.pr[ev];
-    else rate=t.r[ev]||0;
-    return (fK*rate)/12;
+function renderBottom(card){
+  const entries = ['main'];
+  if(state.spouseIncluded) entries.push('spouse');
+  let monthly = 0, sickness = 0, accident = 0, car = 0, common = 0;
+  for(const p of entries){
+    const pane = renderPane(card,p);
+    if(!pane) continue;
+    monthly += pane.priced.monthly;
+    sickness += pane.totals.sickness;
+    accident += pane.totals.accident;
+    car += pane.totals.car;
+    common += pane.totals.common;
   }
-  function rcPrem(face, pi){
-    if(!face) return 0;
-    var age=Number((byId('setupAge'+pi)||{}).value||30);
-    var sex=(byId('setupSex'+pi)||{}).value||'male';
-    var tob=(byId('setupTob'+pi)||{}).value||'ntu';
-    if(age<18||age>59) return 0;
-    var ev=age-18;
-    var rcR={mntu:[3.7,3.71,3.72,3.74,3.76,3.78,3.8,3.83,3.89,3.93,3.97,4.01,4.05,4.11,4.19,4.27,4.4,4.59,4.81,5.07,5.38,5.73,6.12,6.55,7.02,7.55,8.14,8.8,9.51,10.31,11.18,12.14,13.19,14.33,15.59,16.99,18.61,20.45,22.53,24.84,27.36,30.06],mtu:[4.71,4.79,4.85,4.91,5,5.07,5.15,5.25,5.34,5.47,5.58,5.72,5.86,6.01,6.17,6.36,6.62,6.92,7.29,7.7,8.19,8.75,9.38,10.08,10.85,11.72,12.66,13.72,14.9,16.17,17.54,18.97,20.48,22.01,23.68,25.55,27.65,30.07,32.82,35.87,39.2,42.78],fntu:[3.18,3.2,3.21,3.22,3.24,3.26,3.27,3.29,3.32,3.36,3.39,3.44,3.48,3.53,3.58,3.69,3.78,3.93,4.13,4.36,4.62,4.91,5.24,5.6,5.99,6.42,6.91,7.47,8.09,8.77,9.52,10.33,11.16,12.03,13,14.11,15.39,16.87,18.59,20.51,22.61,24.89],ftu:[4.37,4.42,4.47,4.55,4.62,4.7,4.8,4.88,5,5.1,5.23,5.34,5.46,5.58,5.7,5.87,6.05,6.31,6.58,6.92,7.32,7.78,8.28,8.85,9.49,10.17,10.93,11.76,12.65,13.61,14.64,15.75,16.92,18.11,19.44,20.91,22.56,24.51,26.71,29.17,31.84,34.77]};
-    var k=(sex==='male'?'m':'f')+(tob==='tu'?'tu':'ntu');
-    var r=rcR[k]&&rcR[k][ev]; return r?(face/1000*r/12):0;
-  }
-  function adbPrem(face, pi){
-    if(!face) return 0;
-    var age=Number((byId('setupAge'+pi)||{}).value||30);
-    return (face/12000)*(age>=50?1.25:1);
-  }
-
-  var pA = wlPrem(wlA,'A') + rcPrem(rcA,'A') + adbPrem(adbA,'A') + a71A;
-  var pB = setup.spouseOn ? (wlPrem(wlB,'B') + rcPrem(rcB,'B') + adbPrem(adbB,'B') + a71B) : 0;
-
-  // Death totals
-  var sickA = wlA + rcA;
-  var sickB = wlB + rcB;
-  var accA  = sickA + adbA + (setup.a71A ? 50000 : 0);
-  var accB  = sickB + adbB + (setup.a71B && setup.spouseOn ? 50000 : 0);
-  var autoA = sickA + adbA + (setup.a71A ? 100000 : 0);
-  var autoB = sickB + adbB + (setup.a71B && setup.spouseOn ? 100000 : 0);
-
-  function set(id, val){ var el=byId(id); if(el) el.textContent=val; }
-  set(pfx+'_sickA', fmtN(sickA||null));
-  set(pfx+'_sickB', fmtN(sickB||null));
-  set(pfx+'_accA',  setup.a71A ? fmtN(accA) : fmtN(sickA+adbA||null));
-  set(pfx+'_accB',  (setup.a71B&&setup.spouseOn) ? fmtN(accB) : fmtN(sickB+adbB||null));
-  set(pfx+'_autoA', setup.a71A ? fmtN(autoA) : '\u2014');
-  set(pfx+'_autoB', (setup.a71B&&setup.spouseOn) ? fmtN(autoB) : '\u2014');
-  set(pfx+'_premA', fmtMo(pA));
-  set(pfx+'_premB', fmtMo(pB));
-  set(pfx+'_total', fmtMo(pA+pB));
+  const target = card==='one' ? Number($('hourlyIncome').value||0) * 4 : Number($('hourlyIncome').value||0) * 8;
+  $(card+'Bottom').innerHTML = `
+    <div class="money">Monthly ${currency(monthly)}</div>
+    <div class="bottomLine">Weekly ${currency(monthly / 4)}</div>
+    <div class="small">Target budget ${currency(target)}</div>
+    <div class="bottomLine" style="margin-top:12px">Death from sickness: ${money0(sickness)}</div>
+    <div class="bottomLine">Death from accident: ${money0(accident)}</div>
+    <div class="bottomLine">Car accident death: ${money0(car)}</div>
+    <div class="bottomLine">Common carrier death: ${money0(common)}</div>
+  `;
 }
 
-window.applyHourPower = function(hours){
-  var d = window._hpData;
-  if(!d) return;
-  var budget = hours===2 ? d.hp.budget2 : d.hp.budget1;
-  var income = d.income;
-  if(!income) return;
-  var budgets = tierBudgetsFromIncome(income);
-  // Find fitting tier
-  var masterA71 = d.setup.masterA71;
-  var a71Total = (masterA71?a71Rate(d.setup.ageA):0)+(masterA71&&d.setup.spouseOn?a71Rate(d.setup.ageB):0);
-  var bestTier = null;
-  ['platinum','gold','silver'].forEach(function(tier){
-    if(bestTier) return;
-    var dataA = calcTierForBudget(budgets[tier], d.setup, 'A');
-    var premA = dataA ? dataA.premium : 0;
-    var dataB = d.setup.spouseOn ? calcTierForBudget(budgets[tier], d.setup, 'B') : null;
-    var premB = dataB ? dataB.premium : 0;
-    if((premA+premB) <= budget) bestTier = tier;
-  });
-  if(!bestTier) bestTier = 'silver';
-  var tierCap = bestTier.charAt(0).toUpperCase()+bestTier.slice(1);
-  var dataA = calcTierForBudget(budgets[bestTier], d.setup, 'A');
-  var dataB = d.setup.spouseOn ? calcTierForBudget(budgets[bestTier], d.setup, 'B') : null;
-  if(dataA && dataA.wlFace){
-    var el = byId('wl'+tierCap+'InputA');
-    if(el){el.value=fmt(dataA.wlFace).replace('$','');if(typeof calculatePremium==='function')calculatePremium('A');}
-  }
-  if(dataB && dataB.wlFace && d.setup.spouseOn){
-    var elB = byId('wl'+tierCap+'InputB');
-    if(elB){elB.value=fmt(dataB.wlFace).replace('$','');if(typeof calculatePremium==='function')calculatePremium('B');}
-  }
-  var nav=byId('option-builder-slide');if(nav)nav.scrollIntoView({behavior:'smooth',block:'start'});
-};
+function refreshAll(){
+  const monthly = Number($('monthlyIncome').value || 0);
+  const hourly = Number($('hourlyIncome').value || 0);
+  $('oneBudgetText').textContent = currency(hourly * 4);
+  $('twoBudgetText').textContent = currency(hourly * 8);
 
-function renderOverview(){
-  var setup = getSetup();
-  var hp = typeof window.getHPValues==='function' ? window.getHPValues() : {hourly:0,budget1:0,budget2:0,homeIncome:0};
-  renderHourPower(setup, hp);
+  $('mainSummary').textContent = `MAIN (${ $('main_sex').value.toUpperCase() }) AGE: ${$('main_age').value} ${$('main_tob').value} ${$('main_a71').checked ? 'A71 ON' : 'A71 OFF'}`;
+  $('spSummary').textContent = state.spouseIncluded
+    ? `SPOUSE (${ $('sp_sex').value.toUpperCase() }) AGE: ${$('sp_age').value} ${$('sp_tob').value} ${$('sp_a71').checked ? 'A71 ON' : 'A71 OFF'}`
+    : 'SPOUSE NOT INCLUDED';
+
+  ['one','two'].forEach(card => {
+    const split = $(card+'Split');
+    split.classList.toggle('withSpouse', state.spouseIncluded);
+    const spousePane = getPane(card,'spouse');
+    spousePane.classList.toggle('hidden', !state.spouseIncluded);
+    renderBottom(card);
+  });
 }
 
-window.refreshQuoteOverview = renderOverview;
-
-// Per-person A71 — setupA71A/B are the single source of truth
-document.addEventListener('DOMContentLoaded', function(){
-  function syncPerPersonA71(){
-    var ageA=Number((document.getElementById('setupAgeA')||{}).value||30);
-    var ageB=Number((document.getElementById('setupAgeB')||{}).value||30);
-    var spouseOn=!!((document.getElementById('setupIncludeB')||{}).checked);
-    var onA=!!((document.getElementById('setupA71A')||{}).checked);
-    var onB=!!((document.getElementById('setupA71B')||{}).checked);
-    // Sync hidden engine checkboxes
-    var dA=document.getElementById('a71EnabledA'); if(dA)dA.checked=onA;
-    var dB=document.getElementById('a71EnabledB'); if(dB)dB.checked=onB&&spouseOn;
-    // Compute rates
-    var rA=onA?(ageA>=18&&ageA<=60?25:ageA<=65?35:0):0;
-    var rB=(onB&&spouseOn)?(ageB>=18&&ageB<=60?25:ageB<=65?35:0):0;
-    var total=rA+rB;
-    // Topbar status
-    var st=document.getElementById('a71StatusText');
-    if(st){
-      if(!onA&&!onB) st.textContent='A71 Off';
-      else if(onA&&(!spouseOn||onB)) st.textContent='A71 ✓ · $'+total+'/mo';
-      else if(onA) st.textContent='A71 Main ✓ · $'+rA+'/mo';
-      else st.textContent='A71 Spouse ✓ · $'+rB+'/mo';
-    }
-    // Summary chip
-    var sc=document.getElementById('setupSummaryA71');
-    if(sc) sc.innerHTML=total?'<span class="summary-a71-chip on">✓ $'+total+'/mo</span>':'<span class="summary-a71-chip off">✗ Off</span>';
-    setTimeout(renderOverview,20);
-  }
-  ['setupA71A','setupA71B','setupAgeA','setupAgeB','setupIncludeB'].forEach(function(id){
-    var el=document.getElementById(id);
-    if(el)el.addEventListener('change',function(){setTimeout(syncPerPersonA71,30);});
-  });
-  setTimeout(syncPerPersonA71,250);
-  ['setupIncludeB'].forEach(function(id){
-    var el = document.getElementById(id);
-    if(el) el.addEventListener('change', function(){ setTimeout(renderOverview, 20); });
-  });
-  ['setupAgeA','setupAgeB','setupSexA','setupSexB','setupTobA','setupTobB','setupHomeIncome','setupHourlyInput'].forEach(function(id){
-    var el = document.getElementById(id);
-    if(el){
-      el.addEventListener('input', function(){ setTimeout(renderOverview, 100); });
-      el.addEventListener('change', function(){ setTimeout(renderOverview, 50); });
-    }
-  });
-  document.querySelectorAll('input[name="hpMethod"]').forEach(function(el){
-    el.addEventListener('change', function(){ setTimeout(renderOverview, 50); });
-  });
-  ['applyHouseholdSetup','applyHouseholdSetup2'].forEach(function(id){
-    var el = document.getElementById(id);
-    if(el) el.addEventListener('click', function(){ setTimeout(renderOverview, 100); });
-  });
-  setTimeout(renderOverview, 300);
-  setTimeout(renderOverview, 900);
+$('spouseBtn').addEventListener('click', ()=>{
+  state.spouseIncluded = !state.spouseIncluded;
+  $('spouseGrid').classList.toggle('hidden', !state.spouseIncluded);
+  $('spouseBtn').textContent = state.spouseIncluded ? 'Remove spouse' : 'Add spouse';
+  refreshAll();
 });
 
-// Hook into calculatePremium
-var _origCalc = window.calculatePremium;
-if(typeof _origCalc==='function'){
-  window.calculatePremium=function(pi){
-    var out=_origCalc.apply(this,arguments);
-    setTimeout(renderOverview,50);
-    return out;
-  };
-}
+$('monthlyIncome').addEventListener('input', ()=>{
+  const monthly = Number($('monthlyIncome').value || 0);
+  $('hourlyIncome').value = monthly ? (monthly / 160).toFixed(2) : '';
+  refreshAll();
+});
+$('hourlyIncome').addEventListener('input', ()=>{
+  const hourly = Number($('hourlyIncome').value || 0);
+  $('monthlyIncome').value = hourly ? (hourly * 160).toFixed(2) : '';
+  refreshAll();
+});
 
-})();
-</script>
+['main_age','main_sex','main_tob','main_a71','sp_age','sp_sex','sp_tob','sp_a71'].forEach(id=>{
+  $(id).addEventListener('input', refreshAll);
+  $(id).addEventListener('change', refreshAll);
+});
 
-<!-- ===================== QUOTE EDITOR ENGINE ===================== -->
-<script>
-(function(){
-  var TIERS=['platinum','gold','silver'];
-  var TIER_LABELS={platinum:'Platinum',gold:'Gold',silver:'Silver'};
-  function byId(id){return document.getElementById(id);}
-  function fmt(n){if(!n)return '\u2014';return '$'+(Number(n)||0).toLocaleString();}
-  function fmtMo(n){return '$'+(Math.floor(Number(n)||0)).toLocaleString()+'/mo';}
-  function cleanVal(s){return Number(String(s||'').replace(/[^0-9.]/g,''))||0;}
-  function a71OnFor(pi){var el=byId('setupA71'+pi);return !!(el&&el.checked);}
-  function a71RateFor(pi){
-    if(!a71OnFor(pi))return 0;
-    var age=Number((byId('setupAge'+pi)||{}).value||30);
-    return age>=18&&age<=60?25:age<=65?35:0;
-  }
-
-  // Calculate WL premium directly from rate tables (same engine, bypasses form sync delay)
-  function calcWLPremium(face, pi){
-    if(!face||face<1000) return 0;
-    var age=Number((byId('setupAge'+pi)||{}).value||30);
-    var sex=(byId('setupSex'+pi)||{}).value||'male';
-    var tob=(byId('setupTob'+pi)||{}).value||'ntu';
-    if(age<18||age>59) return 0;
-    var ev=age-18;
-    if(typeof getRateTable!=='function') return 0;
-    var t=getRateTable(sex,tob);
-    var faceK=face/1000;
-    var rate;
-    if(face>=120000&&t.sl[ev]) rate=t.sl[ev];
-    else if(face>=60000&&t.ex[ev]) rate=t.ex[ev];
-    else if(face>=35000&&t.pr[ev]) rate=t.pr[ev];
-    else rate=t.r[ev]||0;
-    return (faceK*rate)/12;
-  }
-  // 10RC premium per $1000 face
-  function calcRCPremium(face, pi){
-    if(!face||face<1000) return 0;
-    var age=Number((byId('setupAge'+pi)||{}).value||30);
-    var sex=(byId('setupSex'+pi)||{}).value||'male';
-    var tob=(byId('setupTob'+pi)||{}).value||'ntu';
-    if(age<18||age>59) return 0;
-    var ev=age-18;
-    var rcRates={
-      mntu:[3.7,3.71,3.72,3.74,3.76,3.78,3.8,3.83,3.89,3.93,3.97,4.01,4.05,4.11,4.19,4.27,4.4,4.59,4.81,5.07,5.38,5.73,6.12,6.55,7.02,7.55,8.14,8.8,9.51,10.31,11.18,12.14,13.19,14.33,15.59,16.99,18.61,20.45,22.53,24.84,27.36,30.06],
-      mtu:[4.71,4.79,4.85,4.91,5,5.07,5.15,5.25,5.34,5.47,5.58,5.72,5.86,6.01,6.17,6.36,6.62,6.92,7.29,7.7,8.19,8.75,9.38,10.08,10.85,11.72,12.66,13.72,14.9,16.17,17.54,18.97,20.48,22.01,23.68,25.55,27.65,30.07,32.82,35.87,39.2,42.78],
-      fntu:[3.18,3.2,3.21,3.22,3.24,3.26,3.27,3.29,3.32,3.36,3.39,3.44,3.48,3.53,3.58,3.69,3.78,3.93,4.13,4.36,4.62,4.91,5.24,5.6,5.99,6.42,6.91,7.47,8.09,8.77,9.52,10.33,11.16,12.03,13,14.11,15.39,16.87,18.59,20.51,22.61,24.89],
-      ftu:[4.37,4.42,4.47,4.55,4.62,4.7,4.8,4.88,5,5.1,5.23,5.34,5.46,5.58,5.7,5.87,6.05,6.31,6.58,6.92,7.32,7.78,8.28,8.85,9.49,10.17,10.93,11.76,12.65,13.61,14.64,15.75,16.92,18.11,19.44,20.91,22.56,24.51,26.71,29.17,31.84,34.77]
-    };
-    var sex=(byId('setupSex'+pi)||{}).value||'male';
-    var tob=(byId('setupTob'+pi)||{}).value||'ntu';
-    var key=(sex==='male'?'m':'f')+(tob==='tu'?'tu':'ntu');
-    var r=rcRates[key]&&rcRates[key][ev];
-    return r ? (face/1000)*r/12 : 0;
-  }
-  // ADB rate
-  function calcADBPremium(face, pi){
-    if(!face||face<1000) return 0;
-    var age=Number((byId('setupAge'+pi)||{}).value||30);
-    var rate=age>=50?1.25:1;
-    return (face/12000)*rate;
-  }
-  // Rate per $1k for display hint
-  function getRatePer1k(pi, product){
-    var age=Number((byId('setupAge'+pi)||{}).value||30);
-    var sex=(byId('setupSex'+pi)||{}).value||'male';
-    var tob=(byId('setupTob'+pi)||{}).value||'ntu';
-    if(age<18||age>59) return null;
-    var ev=age-18;
-    if(product==='wl'){
-      if(typeof getRateTable!=='function') return null;
-      var t=getRateTable(sex,tob);
-      return t.r[ev]?((t.r[ev]/12)).toFixed(3):null;
-    }
-    if(product==='rc'){
-      var rcRates={mntu:[3.7,3.71,3.72,3.74,3.76,3.78,3.8,3.83,3.89,3.93,3.97,4.01,4.05,4.11,4.19,4.27,4.4,4.59,4.81,5.07,5.38,5.73,6.12,6.55,7.02,7.55,8.14,8.8,9.51,10.31,11.18,12.14,13.19,14.33,15.59,16.99,18.61,20.45,22.53,24.84,27.36,30.06],mtu:[4.71,4.79,4.85,4.91,5,5.07,5.15,5.25,5.34,5.47,5.58,5.72,5.86,6.01,6.17,6.36,6.62,6.92,7.29,7.7,8.19,8.75,9.38,10.08,10.85,11.72,12.66,13.72,14.9,16.17,17.54,18.97,20.48,22.01,23.68,25.55,27.65,30.07,32.82,35.87,39.2,42.78],fntu:[3.18,3.2,3.21,3.22,3.24,3.26,3.27,3.29,3.32,3.36,3.39,3.44,3.48,3.53,3.58,3.69,3.78,3.93,4.13,4.36,4.62,4.91,5.24,5.6,5.99,6.42,6.91,7.47,8.09,8.77,9.52,10.33,11.16,12.03,13,14.11,15.39,16.87,18.59,20.51,22.61,24.89],ftu:[4.37,4.42,4.47,4.55,4.62,4.7,4.8,4.88,5,5.1,5.23,5.34,5.46,5.58,5.7,5.87,6.05,6.31,6.58,6.92,7.32,7.78,8.28,8.85,9.49,10.17,10.93,11.76,12.65,13.61,14.64,15.75,16.92,18.11,19.44,20.91,22.56,24.51,26.71,29.17,31.84,34.77]};
-      var key=(sex==='male'?'m':'f')+(tob==='tu'?'tu':'ntu');
-      var r=rcRates[key]&&rcRates[key][ev];
-      return r?((r/12)).toFixed(3):null;
-    }
-    if(product==='adb'){
-      var rate=age>=50?1.25:1;
-      return (rate/12).toFixed(3);
-    }
-    return null;
-  }
-
-  function buildPersonBlock(tier,pi,name,a71On,a71Rate){
-    var age=Number((byId('setupAge'+pi)||{}).value||30);
-    var sex=(byId('setupSex'+pi)||{}).value||'male';
-    var wlHint=getRatePer1k(pi,'wl');
-    var rcHint=getRatePer1k(pi,'rc');
-    var adbHint=getRatePer1k(pi,'adb');
-    var html='<div class="qe-person-block">';
-    html+='<div class="qe-person-head">';
-    html+='<span class="qe-person-name">'+(name||(pi==='A'?'Main':'Spouse'))+'</span>';
-    html+='<span class="qe-person-prem" id="qe_prem_'+tier+'_'+pi+'">—</span>';
-    html+='</div>';
-    html+='<div class="qe-fields">';
-    // WL
-    html+='<div class="qe-field"><label>Whole Life'+(wlHint?' <em>$'+wlHint+'/mo per $1k</em>':'')+'</label>';
-    html+='<input id="qe_wl_'+tier+'_'+pi+'" type="text" inputmode="numeric" placeholder="e.g. 50,000" oninput="window.qeOnInput(\''+tier+'\',\''+pi+'\')"></div>';
-    // 10RC
-    html+='<div class="qe-field"><label>Term 10RC'+(rcHint?' <em>$'+rcHint+'/mo per $1k</em>':'')+'</label>';
-    html+='<input id="qe_rc_'+tier+'_'+pi+'" type="text" inputmode="numeric" placeholder="optional" oninput="window.qeOnInput(\''+tier+'\',\''+pi+'\')"></div>';
-    // ADB
-    html+='<div class="qe-field full"><label>ADB Standalone'+(adbHint?' <em>$'+adbHint+'/mo per $1k</em>':'')+'</label>';
-    html+='<input id="qe_adb_'+tier+'_'+pi+'" type="text" inputmode="numeric" placeholder="optional" oninput="window.qeOnInput(\''+tier+'\',\''+pi+'\')"></div>';
-    html+='</div>';
-    // Death totals
-    html+='<div class="qe-death-block">';
-    html+='<div class="qe-death-item"><label>Sickness</label><span id="qe_sick_'+tier+'_'+pi+'">—</span></div>';
-    html+='<div class="qe-death-item"><label>Accident (+$50k A71)</label><span id="qe_acc_'+tier+'_'+pi+'">—</span></div>';
-    html+='<div class="qe-death-item"><label>Auto (+$100k A71)</label><span id="qe_auto_'+tier+'_'+pi+'">—</span></div>';
-    html+='<div class="qe-death-item"><label>Premium</label><span id="qe_prem2_'+tier+'_'+pi+'">—</span></div>';
-    html+='</div>';
-    // A71 row — only if this person has A71
-    if(a71On&&a71Rate){
-      html+='<div class="qe-a71-row">';
-      html+='<span class="qe-a71-label">A71 · +$50k acc · +$100k auto · +$250k carrier</span>';
-      html+='<span class="qe-a71-val">$'+a71Rate+'/mo</span>';
-      html+='</div>';
-    }
-    html+='</div>';
-    return html;
-  }
-
-  function buildQuoteEditor(pi,name,spouseOn,spouseName){
-    var container=byId('quoteEditor'+pi);
-    if(!container||pi!=='A')return;
-    var html='<div class="qe-shell">';
-    TIERS.forEach(function(tier){
-      var a71OnA=a71OnFor('A'),rA=a71RateFor('A');
-      var a71OnB=a71OnFor('B'),rB=a71RateFor('B');
-      html+='<div class="qe-card tier-'+tier+'" id="qe_card_'+tier+'">';
-      html+='<div class="qe-head"><div class="qe-tier-name">'+TIER_LABELS[tier]+'</div>';
-      html+='<div class="qe-total" id="qe_total_'+tier+'">—</div></div>';
-      html+='<div class="qe-body">';
-      html+=buildPersonBlock(tier,'A',name,a71OnA,rA);
-      if(spouseOn)html+=buildPersonBlock(tier,'B',spouseName,a71OnB,rB);
-      html+='</div>';
-      html+='<div class="qe-footer"><button class="qe-clear-btn" onclick="window.qeClear(\''+tier+'\')">Clear</button>';
-      html+='<span class="qe-status" id="qe_status_'+tier+'">—</span></div>';
-      html+='</div>';
-    });
-    html+='</div>';
-    container.innerHTML=html;
-    setTimeout(updateAllTotals,80);
-  }
-
-  function updateAllTotals(){
-    var spouseOn=!!((byId('setupIncludeB')||{}).checked);
-    TIERS.forEach(function(tier){
-      var grandTotal=0;
-      ['A','B'].forEach(function(pi){
-        if(pi==='B'&&!spouseOn)return;
-        var wl=cleanVal((byId('qe_wl_'+tier+'_'+pi)||{}).value);
-        var rc=cleanVal((byId('qe_rc_'+tier+'_'+pi)||{}).value);
-        var adb=cleanVal((byId('qe_adb_'+tier+'_'+pi)||{}).value);
-        var a71On=a71OnFor(pi),a71R=a71RateFor(pi);
-        // Calculate premiums directly from rate tables
-        var wlPrem=calcWLPremium(wl,pi);
-        var rcPrem=calcRCPremium(rc,pi);
-        var adbPrem=calcADBPremium(adb,pi);
-        var basePrem=wlPrem+rcPrem+adbPrem;
-        var totalPrem=basePrem+a71R;
-        grandTotal+=totalPrem;
-        // Update per-person premium display
-        var pEl=byId('qe_prem_'+tier+'_'+pi);
-        var p2El=byId('qe_prem2_'+tier+'_'+pi);
-        var premTxt=totalPrem?fmtMo(totalPrem):'—';
-        if(pEl)pEl.textContent=premTxt;
-        if(p2El)p2El.textContent=premTxt;
-        // Sync hidden engine inputs
-        var tierCap=tier.charAt(0).toUpperCase()+tier.slice(1);
-        var wH=byId('wl'+tierCap+'Input'+pi),rH=byId('tenrc'+tierCap+'Input'+pi),aH=byId('adb'+tierCap+'Input'+pi);
-        if(wH)wH.value=wl||'';
-        if(rH)rH.value=rc||'';
-        if(aH)aH.value=adb||'';
-        // Death totals
-        var sick=wl+rc;
-        var acc=sick+adb+(a71On?50000:0);
-        var auto=sick+adb+(a71On?100000:0);
-        var sEl=byId('qe_sick_'+tier+'_'+pi);
-        var aEl=byId('qe_acc_'+tier+'_'+pi);
-        var atEl=byId('qe_auto_'+tier+'_'+pi);
-        if(sEl)sEl.textContent=sick?fmt(sick):(a71On?'\u2014':'—');
-        if(aEl)aEl.textContent=a71On?(acc?fmt(acc):fmt(50000)+' (A71 only)'):'—';
-        if(atEl)atEl.textContent=a71On?(auto?fmt(auto):fmt(100000)+' (A71 only)'):'—';
-      });
-      var tEl=byId('qe_total_'+tier);
-      if(tEl)tEl.textContent=grandTotal?fmtMo(grandTotal):'—';
-    });
-  }
-
-  window.qeOnInput=function(tier,pi){
-    var sEl=byId('qe_status_'+tier);if(sEl)sEl.textContent='edited';
-    setTimeout(updateAllTotals,20);
-  };
-
-  window.qeClear=function(tier){
-    ['A','B'].forEach(function(pi){
-      ['qe_wl_','qe_rc_','qe_adb_'].forEach(function(p){var el=byId(p+tier+'_'+pi);if(el)el.value='';});
-      var tierCap=tier.charAt(0).toUpperCase()+tier.slice(1);
-      ['wl','tenrc','adb'].forEach(function(p){var el=byId(p+tierCap+'Input'+pi);if(el)el.value='';});
-    });
-    var sEl=byId('qe_status_'+tier);if(sEl)sEl.textContent='cleared';
-    setTimeout(updateAllTotals,20);
-  };
-
-  var _origRec=window.applyRecTier;
-  window.applyRecTier=function(tier){
-    if(_origRec)_origRec.apply(this,arguments);
-    setTimeout(function(){
-      var d=window._recData;if(!d)return;
-      var spouseOn=!!((byId('setupIncludeB')||{}).checked);
-      TIERS.forEach(function(t){
-        ['A','B'].forEach(function(pi){
-          if(pi==='B'&&!spouseOn)return;
-          var data=d.tiers[t]&&d.tiers[t][pi];
-          var el=byId('qe_wl_'+t+'_'+pi);
-          if(el)el.value=data&&data.wlFace?data.wlFace.toLocaleString():'';
-        });
-        var sEl=byId('qe_status_'+t);
-        if(sEl)sEl.textContent=t===tier?'applied':'—';
-      });
-      setTimeout(updateAllTotals,80);
-    },150);
-  };
-
-  var _origHP=window.applyHourPower;
-  window.applyHourPower=function(hours){
-    if(_origHP)_origHP.apply(this,arguments);
-    setTimeout(function(){
-      TIERS.forEach(function(t){
-        ['A','B'].forEach(function(pi){
-          var tierCap=t.charAt(0).toUpperCase()+t.slice(1);
-          var hEl=byId('wl'+tierCap+'Input'+pi);
-          var qEl=byId('qe_wl_'+t+'_'+pi);
-          if(qEl&&hEl&&hEl.value)qEl.value=hEl.value;
-        });
-        var sEl=byId('qe_status_'+t);if(sEl)sEl.textContent='auto-generated';
-      });
-      setTimeout(updateAllTotals,80);
-    },150);
-  };
-
-  function fullRebuild(){
-    var nameA=(byId('setupNameA')||{}).value||'Main';
-    var nameB=(byId('setupNameB')||{}).value||'Spouse';
-    var spouseOn=!!((byId('setupIncludeB')||{}).checked);
-    // Preserve existing values across rebuild
-    var saved={};
-    TIERS.forEach(function(t){
-      ['A','B'].forEach(function(pi){
-        ['wl','rc','adb'].forEach(function(f){
-          var el=byId('qe_'+f+'_'+t+'_'+pi);
-          if(el&&el.value) saved[f+'_'+t+'_'+pi]=el.value;
-        });
-      });
-    });
-    buildQuoteEditor('A',nameA,spouseOn,nameB);
-    // Restore
-    TIERS.forEach(function(t){
-      ['A','B'].forEach(function(pi){
-        ['wl','rc','adb'].forEach(function(f){
-          var key=f+'_'+t+'_'+pi;
-          if(saved[key]){var el=byId('qe_'+f+'_'+t+'_'+pi);if(el)el.value=saved[key];}
-        });
-      });
-    });
-    setTimeout(updateAllTotals,80);
-  }
-
-  document.addEventListener('DOMContentLoaded',function(){
-    setTimeout(fullRebuild,500);
-    ['applyHouseholdSetup','applyHouseholdSetup2'].forEach(function(id){
-      var el=byId(id);if(el)el.addEventListener('click',function(){setTimeout(fullRebuild,200);});
-    });
-    ['setupA71A','setupA71B','setupIncludeB','setupAgeA','setupAgeB','setupSexA','setupSexB','setupTobA','setupTobB'].forEach(function(id){
-      var el=byId(id);if(el)el.addEventListener('change',function(){setTimeout(fullRebuild,100);});
-    });
+document.querySelectorAll('.pane').forEach(pane=>{
+  pane.querySelectorAll('[data-input]').forEach(inp=>{
+    inp.addEventListener('input', refreshAll);
+    inp.addEventListener('change', refreshAll);
   });
-  window.qeUpdateAllTotals=updateAllTotals;
-  window.qeFullRebuild=fullRebuild;
-})();
-</script>
+  pane.querySelector('[data-action="auto"]').addEventListener('click', ()=> autoFill(pane.dataset.card, pane.dataset.person));
+  pane.querySelector('[data-action="clear"]').addEventListener('click', ()=> { setCoverage(pane.dataset.card, pane.dataset.person, {wl:0,term:0,adb:0}); refreshAll(); });
+});
 
+loadRates().catch(err=>{
+  $('csvStatus').innerHTML = 'Could not load <strong>Rates.csv</strong>. Put it in the same folder as this HTML file.';
+  $('csvStatus').classList.add('bad');
+  console.error(err);
+  refreshAll();
+});
+refreshAll();
+</script>
 </body>
 </html>
