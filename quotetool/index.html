@@ -124,7 +124,7 @@ button.ghost{background:#f6f8fc;color:var(--navy)}
             <div class="editRow"><span>ADB</span><input data-input="adb" type="number" step="1000" min="0" max="500000" value="50000"></div>
           </div>
           <div class="mini" data-field="notes"></div>
-          <div class="actions actions3"><button class="gold" data-action="auto">Auto Complete</button><button class="alt" data-action="autochg">Auto Change</button><button class="ghost" data-action="clear">Clear</button></div>
+          <div class="actions actions2"><button class="alt" data-action="autochg">Auto Change</button><button class="ghost" data-action="clear">Clear</button></div>
         </div>
         <div class="pane hidden" data-card="one" data-person="spouse">
           <div class="paneTitle">SPOUSE</div>
@@ -142,9 +142,10 @@ button.ghost{background:#f6f8fc;color:var(--navy)}
             <div class="editRow"><span>ADB</span><input data-input="adb" type="number" step="1000" min="0" max="500000" value="50000"></div>
           </div>
           <div class="mini" data-field="notes"></div>
-          <div class="actions actions3"><button class="gold" data-action="auto">Auto Complete</button><button class="alt" data-action="autochg">Auto Change</button><button class="ghost" data-action="clear">Clear</button></div>
+          <div class="actions actions2"><button class="alt" data-action="autochg">Auto Change</button><button class="ghost" data-action="clear">Clear</button></div>
         </div>
       </div>
+      <div class="cardActions"><button class="gold" data-card-action="auto" data-card-target="one">Auto Complete One Hour</button><button class="alt" data-card-action="clear" data-card-target="one">Clear One Hour</button></div>
       <div class="divider"></div>
       <div class="bottom" id="oneBottom"></div>
     </div>
@@ -168,7 +169,7 @@ button.ghost{background:#f6f8fc;color:var(--navy)}
             <div class="editRow"><span>ADB</span><input data-input="adb" type="number" step="1000" min="0" max="500000" value="100000"></div>
           </div>
           <div class="mini" data-field="notes"></div>
-          <div class="actions actions3"><button class="gold" data-action="auto">Auto Complete</button><button class="alt" data-action="autochg">Auto Change</button><button class="ghost" data-action="clear">Clear</button></div>
+          <div class="actions actions2"><button class="alt" data-action="autochg">Auto Change</button><button class="ghost" data-action="clear">Clear</button></div>
         </div>
         <div class="pane hidden" data-card="two" data-person="spouse">
           <div class="paneTitle">SPOUSE</div>
@@ -186,9 +187,10 @@ button.ghost{background:#f6f8fc;color:var(--navy)}
             <div class="editRow"><span>ADB</span><input data-input="adb" type="number" step="1000" min="0" max="500000" value="100000"></div>
           </div>
           <div class="mini" data-field="notes"></div>
-          <div class="actions actions3"><button class="gold" data-action="auto">Auto Complete</button><button class="alt" data-action="autochg">Auto Change</button><button class="ghost" data-action="clear">Clear</button></div>
+          <div class="actions actions2"><button class="alt" data-action="autochg">Auto Change</button><button class="ghost" data-action="clear">Clear</button></div>
         </div>
       </div>
+      <div class="cardActions"><button class="gold" data-card-action="auto" data-card-target="two">Auto Complete Two Hour</button><button class="alt" data-card-action="clear" data-card-target="two">Clear Two Hour</button></div>
       <div class="divider"></div>
       <div class="bottom" id="twoBottom"></div>
     </div>
@@ -420,35 +422,56 @@ function getRecommendedTargets(card, person){
   const householdMonthly = Number($('monthlyIncome').value || 0);
   const incomeShare = !state.spouseIncluded ? 1 : (person==='main' ? 0.55 : 0.45);
   const paneIncome = householdMonthly * incomeShare;
+  const input = getPersonInput(person);
 
-  let minWL = 20000;
-  if(card === 'one'){
-    if(paneBudget >= 95) minWL = 25000;
-    if(paneBudget >= 125) minWL = 30000;
-    if(paneBudget >= 160) minWL = 35000;
-  } else {
-    minWL = 25000;
-    if(paneBudget >= 150) minWL = 30000;
-    if(paneBudget >= 190) minWL = 35000;
-    if(paneBudget >= 245) minWL = 50000;
+  let minWL = 25000;
+  if(paneIncome <= 2500) minWL = 20000;
+  else if(paneIncome <= 4500) minWL = 25000;
+  else if(paneIncome <= 6500) minWL = 30000;
+  else minWL = 35000;
+
+  if(card === 'two'){
+    minWL += 5000;
+    if(paneIncome >= 8000) minWL += 10000;
   }
-  if(state.spouseIncluded) minWL = Math.max(card==='one' ? 15000 : 20000, Math.round(minWL * 0.75 / 1000) * 1000);
+
+  if(state.spouseIncluded){
+    minWL = Math.max(card==='one' ? 15000 : 20000, round1000(minWL * 0.8));
+  }
   minWL = clamp(round1000(minWL), 10000, 500000);
 
-  let termTarget = round1000(paneIncome * (card==='one' ? 6 : 12));
+  let termMonths = card==='one' ? 6 : 12;
+  if(paneIncome < 2500) termMonths = card==='one' ? 5 : 10;
+  let termTarget = round1000(paneIncome * termMonths);
   termTarget = clamp(termTarget, card==='one' ? 10000 : 20000, 500000);
 
-  let adbTarget = 0;
-  if(card==='one'){
-    adbTarget = paneBudget >= 70 ? 50000 : 25000;
-    if(paneBudget >= 105) adbTarget = 75000;
-  } else {
-    adbTarget = paneBudget >= 120 ? 100000 : 50000;
-    if(paneBudget >= 175) adbTarget = 150000;
+  let annualIncomeTarget = round1000(paneIncome * 12);
+  let includedA71 = input.a71 ? 50000 : 0;
+  let desiredAccidental = Math.max(0, annualIncomeTarget - includedA71);
+
+  if(minWL >= 25000){
+    desiredAccidental = Math.min(desiredAccidental, 100000);
   }
-  if(person==='spouse' && state.spouseIncluded) adbTarget = round1000(adbTarget * 0.75);
-  if(getPersonInput(person).age >= 60) adbTarget = Math.min(adbTarget, card==='one' ? 25000 : 50000);
-  if(getPersonInput(person).age >= 65) adbTarget = 0;
+  if(paneIncome < 8000){
+    desiredAccidental = Math.min(desiredAccidental, 100000);
+  } else {
+    desiredAccidental = Math.min(desiredAccidental, 150000);
+  }
+
+  if(input.age >= 60) desiredAccidental = Math.min(desiredAccidental, 50000);
+  if(input.age >= 65) desiredAccidental = 0;
+
+  let adbTarget = 0;
+  const coreEstimate = priceCoverage(input, { wl:minWL, term:termTarget, adb:0 }).monthly;
+  const a71Monthly = input.a71 ? (input.age <= 59 ? 20 : input.age <= 64 ? 22.5 : 35.25) : 0;
+  const remainingForAdb = paneBudget - coreEstimate - a71Monthly;
+
+  if(remainingForAdb >= 4 && desiredAccidental > 0){
+    adbTarget = desiredAccidental;
+  } else if(remainingForAdb >= 2 && desiredAccidental >= 50000){
+    adbTarget = 50000;
+  }
+
   adbTarget = clamp(round1000(adbTarget), 0, 500000);
 
   return { paneBudget, paneIncome, minWL, termTarget, adbTarget };
@@ -518,13 +541,14 @@ function findBestAutoMix(card, person){
 
         const score =
           over * 120 +
-          under * 18 +
-          wlShort * 75 +
-          termShort * 10 +
-          adbShort * 3 -
-          (wl/1000) * 1.5 -
-          (term/1000) * 0.45 -
-          (adb/1000) * 0.20;
+          under * 16 +
+          wlShort * 90 +
+          termShort * 12 +
+          adbShort * 8 +
+          (adb > 100000 && (Number($('monthlyIncome').value || 0) < 8000)) * 220 -
+          (wl/1000) * 1.2 -
+          (term/1000) * 0.40 -
+          (Math.min(adb,100000)/1000) * 0.10;
 
         if(score < best.score || (Math.abs(score - best.score) < 0.001 && priced.monthly > best.monthly)){
           best = { wl, term, adb, monthly: priced.monthly, score };
@@ -562,10 +586,13 @@ function renderBottom(card){
   const people = ['main'];
   if(state.spouseIncluded) people.push('spouse');
   let html = '';
+  let totalMonthly = 0;
   people.forEach(person => {
     const input = getPersonInput(person);
     const coverage = getCoverage(card, person);
     const death = calcDeathTotals(input, coverage);
+    const priced = priceCoverage(input, coverage);
+    totalMonthly += priced.monthly;
     html += `
       <div style="margin-bottom:10px;">
         <div class="paneTitle" style="font-size:18px;margin-bottom:4px;">${person === 'main' ? 'MAIN' : 'SPOUSE'}</div>
@@ -575,6 +602,14 @@ function renderBottom(card){
         <div class="bottomLine">Common carrier death: ${money0(death.common)}</div>
       </div>`;
   });
+  if(state.spouseIncluded){
+    html += `
+      <div style="border-top:3px solid var(--navy);padding-top:10px;margin-top:8px;">
+        <div class="paneTitle" style="font-size:18px;margin-bottom:4px;">TOTAL HOUSEHOLD</div>
+        <div class="bottomLine">Total monthly: ${currency(totalMonthly)}</div>
+        <div class="bottomLine">Total weekly: ${currency(totalMonthly / 4)}</div>
+      </div>`;
+  }
   bottom.innerHTML = html;
 }
 
@@ -624,6 +659,18 @@ function autoChangePermanent(card, person){
   refreshAll();
 }
 
+function autoFillCard(card){
+  autoFill(card, 'main');
+  if(state.spouseIncluded) autoFill(card, 'spouse');
+  refreshAll();
+}
+
+function clearCard(card){
+  setCoverage(card, 'main', {wl:0,term:0,adb:0});
+  if(state.spouseIncluded) setCoverage(card, 'spouse', {wl:0,term:0,adb:0});
+  refreshAll();
+}
+
 $('spouseBtn').addEventListener('click', ()=>{
   state.spouseIncluded = !state.spouseIncluded;
   $('spouseGrid').classList.toggle('hidden', !state.spouseIncluded);
@@ -652,11 +699,20 @@ document.querySelectorAll('.pane').forEach(pane=>{
     inp.addEventListener('input', refreshAll);
     inp.addEventListener('change', refreshAll);
   });
-  pane.querySelector('[data-action="auto"]').addEventListener('click', ()=> autoFill(pane.dataset.card, pane.dataset.person));
   pane.querySelector('[data-action="autochg"]').addEventListener('click', ()=> autoChangePermanent(pane.dataset.card, pane.dataset.person));
   pane.querySelector('[data-action="clear"]').addEventListener('click', ()=> {
     setCoverage(pane.dataset.card, pane.dataset.person, {wl:0,term:0,adb:0});
     refreshAll();
+  });
+});
+
+
+document.querySelectorAll('[data-card-action]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const card = btn.dataset.cardTarget;
+    const action = btn.dataset.cardAction;
+    if(action === 'auto') autoFillCard(card);
+    if(action === 'clear') clearCard(card);
   });
 });
 
@@ -670,3 +726,4 @@ refreshAll();
 </script>
 </body>
 </html>
+
