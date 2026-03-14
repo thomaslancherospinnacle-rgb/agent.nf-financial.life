@@ -785,15 +785,18 @@ function calcLocalPersist() {
   const cutoff = getRolling12Cutoff();
   const window = sales.filter(s => s.month && s.month >= cutoff);
   const result = {};
+  // Combined setter + closer count determines the unlock gate
+  const totalPolicies = window.length;
+  const eligible      = totalPolicies >= 10;
+
   ['setter','closer'].forEach(role => {
     const rows        = window.filter(s => s.role === role);
     const count       = rows.length;
     const good        = rows.filter(s => s.status !== 'CHARGEBACK').length;
     const chargebacks = count - good;
-    const eligible    = count >= 10;
     const rate        = count > 0 ? parseFloat(((good / count) * 100).toFixed(2)) : 0;
     const bonus       = eligible ? getPersistBonus(rate) : 0;
-    result[role]      = { count, good, chargebacks, eligible, rate, bonus };
+    result[role]      = { count, good, chargebacks, eligible, rate, bonus, totalPolicies };
   });
   return result;
 }
@@ -831,8 +834,9 @@ function renderPersist() {
     const fillW       = Math.min(rate, 100);
     const fillCls     = rate>=90?'c3':rate>=70?'c2':rate>=50?'c1':'c0';
     const rColor      = rate>=90?'var(--green)':rate>=70?'var(--gold2)':'var(--muted)';
-    const needMore    = Math.max(0, 10 - count);
-    const policyFill  = Math.min((count/10)*100, 100);
+    const totalPolicies = p.totalPolicies ?? (count); // combined setter+closer from persist
+    const needMore    = Math.max(0, 10 - totalPolicies);
+    const policyFill  = Math.min((totalPolicies/10)*100, 100);
 
     return `<div class="pc">
       <div class="pc-head">
@@ -860,7 +864,7 @@ function renderPersist() {
           <div style="height:100%;width:${policyFill}%;background:${eligible?'var(--green)':'var(--gold)'};border-radius:4px;transition:width .4s"></div>
         </div>
         <span style="font-family:var(--mono);font-size:11px;white-space:nowrap;color:${eligible?'var(--green)':'var(--muted)'}">
-          ${count}/10${eligible?' ✓ unlocked':' — need '+needMore+' more'}
+          ${totalPolicies}/10 combined${eligible?' ✓ unlocked':' — need '+needMore+' more'}
         </span>
       </div>
 
