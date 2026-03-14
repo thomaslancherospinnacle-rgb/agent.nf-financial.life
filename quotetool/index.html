@@ -143,6 +143,7 @@ button.ghost{background:#f6f8fc;color:var(--navy)}
             <div class="editRow"><span>TERM</span><input data-input="term" type="number" step="1000" min="0" max="500000" value="18000"></div>
             <div class="editRow"><span>ADB</span><input data-input="adb" type="number" step="1000" min="0" max="500000" value="50000"></div>
           </div>
+          <div class="inlineToggle" style="justify-content:center;margin-top:8px;"><input type="checkbox" id="crem_one_main" style="width:16px;height:16px;accent-color:var(--gold)"><span style="font-size:12px;">+$2,500 cremation costs</span></div>
           <div class="mini" data-field="notes"></div>
           <div class="actions actions2"><button class="alt" data-action="autochg">Auto Change</button><button class="ghost" data-action="clear">Clear</button></div>
         </div>
@@ -161,11 +162,12 @@ button.ghost{background:#f6f8fc;color:var(--navy)}
             <div class="editRow"><span>TERM</span><input data-input="term" type="number" step="1000" min="0" max="500000" value="18000"></div>
             <div class="editRow"><span>ADB</span><input data-input="adb" type="number" step="1000" min="0" max="500000" value="50000"></div>
           </div>
+          <div class="inlineToggle" style="justify-content:center;margin-top:8px;"><input type="checkbox" id="crem_one_spouse" style="width:16px;height:16px;accent-color:var(--gold)"><span style="font-size:12px;">+$2,500 cremation costs</span></div>
           <div class="mini" data-field="notes"></div>
           <div class="actions actions2"><button class="alt" data-action="autochg">Auto Change</button><button class="ghost" data-action="clear">Clear</button></div>
         </div>
       </div>
-      <div class="cardActions"><button class="gold" data-card-action="auto" data-card-target="one">Auto Complete One Hour</button><button class="alt" data-card-action="clear" data-card-target="one">Clear One Hour</button></div>
+      <div class="cardActions"><button class="gold" data-card-action="auto" data-card-target="one" id="autoBtn_one">Auto Complete Option 1</button><button class="alt" data-card-action="clear" data-card-target="one">Clear Option 1</button></div>
       <div class="divider"></div>
       <div class="bottom" id="oneBottom"></div>
     </div>
@@ -188,6 +190,7 @@ button.ghost{background:#f6f8fc;color:var(--navy)}
             <div class="editRow"><span>TERM</span><input data-input="term" type="number" step="1000" min="0" max="500000" value="36000"></div>
             <div class="editRow"><span>ADB</span><input data-input="adb" type="number" step="1000" min="0" max="500000" value="100000"></div>
           </div>
+          <div class="inlineToggle" style="justify-content:center;margin-top:8px;"><input type="checkbox" id="crem_two_main" style="width:16px;height:16px;accent-color:var(--gold)"><span style="font-size:12px;">+$2,500 cremation costs</span></div>
           <div class="mini" data-field="notes"></div>
           <div class="actions actions2"><button class="alt" data-action="autochg">Auto Change</button><button class="ghost" data-action="clear">Clear</button></div>
         </div>
@@ -206,11 +209,12 @@ button.ghost{background:#f6f8fc;color:var(--navy)}
             <div class="editRow"><span>TERM</span><input data-input="term" type="number" step="1000" min="0" max="500000" value="36000"></div>
             <div class="editRow"><span>ADB</span><input data-input="adb" type="number" step="1000" min="0" max="500000" value="100000"></div>
           </div>
+          <div class="inlineToggle" style="justify-content:center;margin-top:8px;"><input type="checkbox" id="crem_two_spouse" style="width:16px;height:16px;accent-color:var(--gold)"><span style="font-size:12px;">+$2,500 cremation costs</span></div>
           <div class="mini" data-field="notes"></div>
           <div class="actions actions2"><button class="alt" data-action="autochg">Auto Change</button><button class="ghost" data-action="clear">Clear</button></div>
         </div>
       </div>
-      <div class="cardActions"><button class="gold" data-card-action="auto" data-card-target="two">Auto Complete Two Hour</button><button class="alt" data-card-action="clear" data-card-target="two">Clear Two Hour</button></div>
+      <div class="cardActions"><button class="gold" data-card-action="auto" data-card-target="two" id="autoBtn_two">Auto Complete Option 2</button><button class="alt" data-card-action="clear" data-card-target="two">Clear Option 2</button></div>
       <div class="divider"></div>
       <div class="bottom" id="twoBottom"></div>
     </div>
@@ -700,12 +704,13 @@ function getRecommendedTargets(card, person){
   let termTarget = 0;
 
   if(sspMode){
-    // MAIN pane  = "if main dies" → covers the SPOUSE's income loss
-    // SPOUSE pane = "if spouse dies" → covers the MAIN's income loss
-    // Term = that specific monthly loss × months selected + $2,500 final expense
+    // MAIN pane  = insuring main's life → covers SPOUSE's income loss if main dies
+    // SPOUSE pane = insuring spouse's life → covers MAIN's income loss if spouse dies
     const scenarioLoss = person === 'main' ? ssp.lossIfMainDies : ssp.lossIfSpouseDies;
+    const cremId = `crem_${card}_${person}`;
+    const cremBonus = $(cremId)?.checked ? 2500 : 0;
     if(scenarioLoss > 0){
-      termTarget = round1000(scenarioLoss * months + 2500);
+      termTarget = round1000(scenarioLoss * months + cremBonus);
     }
   } else if(termTaper > 0){
     if(card === 'one'){
@@ -903,6 +908,18 @@ function renderPane(card, person){
   const a71Row = pane.querySelector('[data-field="a71Row"]');
   a71Row.classList.toggle('hidden', !input.a71);
   pane.querySelector('[data-field="a71Text"]').textContent = input.a71 ? 'ON' : 'OFF';
+  // Cremation indicator — show in cover when checked
+  const cremId = `crem_${card}_${person}`;
+  const cremChecked = $(`${cremId}`)?.checked || false;
+  let cremLine = pane.querySelector('.cremLine');
+  if(!cremLine){
+    cremLine = document.createElement('div');
+    cremLine.className = 'coverLine cremLine';
+    cremLine.style.fontSize = '14px';
+    cremLine.style.color = 'var(--gold)';
+    pane.querySelector('.cover').appendChild(cremLine);
+  }
+  cremLine.textContent = cremChecked ? '+ $2,500 Cremation' : '';
   pane.querySelector('[data-field="notes"]').innerHTML = priced.notes.join('<br>');
   const adbInput = pane.querySelector('[data-input="adb"]');
   const lockADB = input.age >= 55;
@@ -973,8 +990,22 @@ function refreshAll(){
   if(sspModeOn && state.spouseIncluded){
     const ssp = getSSPScenario();
     const pair = getSSPMonthPair();
-    $('oneHeaderText').textContent = `SSP ${pair.one} MONTHS`;
-    $('twoHeaderText').textContent = `SSP ${pair.two} MONTHS`;
+    // Card headers: show months + the calculated term amount for context
+    const cremMainOne   = $('crem_one_main')?.checked   ? 2500 : 0;
+    const cremSpOne     = $('crem_one_spouse')?.checked ? 2500 : 0;
+    const cremMainTwo   = $('crem_two_main')?.checked   ? 2500 : 0;
+    const cremSpTwo     = $('crem_two_spouse')?.checked ? 2500 : 0;
+    const termOne_main   = ssp.lossIfMainDies   > 0 ? round1000(ssp.lossIfMainDies   * pair.one + cremMainOne) : 0;
+    const termOne_sp     = ssp.lossIfSpouseDies > 0 ? round1000(ssp.lossIfSpouseDies * pair.one + cremSpOne)   : 0;
+    const termTwo_main   = ssp.lossIfMainDies   > 0 ? round1000(ssp.lossIfMainDies   * pair.two + cremMainTwo) : 0;
+    const termTwo_sp     = ssp.lossIfSpouseDies > 0 ? round1000(ssp.lossIfSpouseDies * pair.two + cremSpTwo)   : 0;
+    $('oneHeaderText').textContent = `SSP — ${pair.one} MONTHS`;
+    $('twoHeaderText').textContent = `SSP — ${pair.two} MONTHS`;
+    $('oneMetaText').textContent = `Main ${money0(termOne_main)} · Spouse ${money0(termOne_sp)}`;
+    $('twoMetaText').textContent = `Main ${money0(termTwo_main)} · Spouse ${money0(termTwo_sp)}`;
+    // Button labels
+    if($('autoBtn_one')) $('autoBtn_one').textContent = `Auto Complete — ${pair.one} Months`;
+    if($('autoBtn_two')) $('autoBtn_two').textContent = `Auto Complete — ${pair.two} Months`;
     $('sspTotalIncome').textContent          = currency(ssp.total);
     $('sspSpouseOwn').textContent            = currency(ssp.spouseSSI);
     $('sspSpouse75').textContent             = currency(ssp.mainSSI * 0.75);
@@ -989,6 +1020,10 @@ function refreshAll(){
   } else {
     $('oneHeaderText').textContent = 'ONE HOUR';
     $('twoHeaderText').textContent = 'TWO HOUR';
+    $('oneMetaText').textContent = 'Target budget';
+    $('twoMetaText').textContent = 'Target budget';
+    if($('autoBtn_one')) $('autoBtn_one').textContent = 'Auto Complete Option 1';
+    if($('autoBtn_two')) $('autoBtn_two').textContent = 'Auto Complete Option 2';
   }
 
   const main = getPersonInput('main');
@@ -1085,9 +1120,10 @@ $('hourlyIncome').addEventListener('input', ()=>{
   refreshAll();
 });
 
-['main_age','main_sex','main_tob','main_a71','sp_age','sp_sex','sp_tob','sp_a71','sspMode','mainSSI','spSSI','sspStartMonths'].forEach(id=>{
-  $(id).addEventListener('input', refreshAll);
-  $(id).addEventListener('change', refreshAll);
+['main_age','main_sex','main_tob','main_a71','sp_age','sp_sex','sp_tob','sp_a71','sspMode','mainSSI','spSSI','sspStartMonths',
+ 'crem_one_main','crem_one_spouse','crem_two_main','crem_two_spouse'].forEach(id=>{
+  $(id)?.addEventListener('input', refreshAll);
+  $(id)?.addEventListener('change', refreshAll);
 });
 
 document.querySelectorAll('.pane').forEach(pane=>{
