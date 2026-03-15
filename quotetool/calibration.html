@@ -907,8 +907,13 @@ function findBestAutoMix(card, person, budgetOverride){
     6. Always pick the HIGHEST face within the winning bracket that still fits
   ─────────────────────────────────────────────────────────────────────────── */
 
+  // Reserve A71 cost from ceiling — it's a fixed cost that must come off the top
+  const a71Cost = input.a71
+    ? (age <= 59 ? 20 : age <= 64 ? 22.5 : 35.25)
+    : 0;
+  const budgetAfterA71 = ceiling - a71Cost;
+
   // Reserve space for minimum meaningful term if applicable
-  // Married: always reserve for min term. Solo: only if termTarget > 0.
   const needsTerm = termTarget > 0;
   let minTermCost = 0;
   if(needsTerm && termRow){
@@ -916,7 +921,7 @@ function findBestAutoMix(card, person, budgetOverride){
     const u = minTerm / 1000;
     minTermCost = annualToMonthly(u * termRow.base_rate + termRow.policy_fee_annual + termRow.volume_adjustment_annual);
   }
-  const wlCeiling = ceiling - minTermCost;
+  const wlCeiling = budgetAfterA71 - minTermCost;
 
   // Bracket entry faces in descending order — always try highest value first
   const BRACKET_ENTRIES = [120000, 60000, 35000, 25000, 15000, 10000, 5000, 1000];
@@ -965,8 +970,8 @@ function findBestAutoMix(card, person, budgetOverride){
   const MEANINGFUL_WL_MIN = 10000;
   if(chosenWL < MEANINGFUL_WL_MIN) return { wl: 0, term: 0, adb: 0 };
 
-  const wlCost = priceCoverage(input, { wl: chosenWL, term: 0, adb: 0 }).monthly;
-  let remaining = ceiling - wlCost;
+  const wlCost = priceCoverage(input, { wl: chosenWL, term: 0, adb: 0 }).monthly - a71Cost;
+  let remaining = budgetAfterA71 - wlCost;
 
   // ── STEP 2: TERM — fill remaining budget ─────────────────────────────────────
   let chosenTerm = 0;
@@ -1007,8 +1012,8 @@ function findBestAutoMix(card, person, budgetOverride){
       let keepGoing = true;
       while(keepGoing && chosenTerm < maxTerm){
         const nextTerm = chosenTerm + 1000;
-        const nextCost = priceCoverage(input, { wl: chosenWL, term: nextTerm, adb: chosenADB }).monthly;
-        if(nextCost <= ceiling){ chosenTerm = nextTerm; }
+        const nextCost = priceCoverage(input, { wl: chosenWL, term: nextTerm, adb: chosenADB }).monthly - a71Cost;
+        if(nextCost <= budgetAfterA71){ chosenTerm = nextTerm; }
         else keepGoing = false;
       }
     }
@@ -1016,8 +1021,8 @@ function findBestAutoMix(card, person, budgetOverride){
     // 2. Push term up from zero if there was no term — add minimum if it fits
     if(termRow && chosenTerm === 0 && !needsTerm){
       const minTerm = round1000(income * 3);
-      const testCost = priceCoverage(input, { wl: chosenWL, term: minTerm, adb: chosenADB }).monthly;
-      if(testCost <= ceiling) chosenTerm = minTerm;
+      const testCost = priceCoverage(input, { wl: chosenWL, term: minTerm, adb: chosenADB }).monthly - a71Cost;
+      if(testCost <= budgetAfterA71) chosenTerm = minTerm;
     }
 
     // 3. Push WL up bracket by bracket with leftover
@@ -1025,16 +1030,16 @@ function findBestAutoMix(card, person, budgetOverride){
       const BRACKET_ENTRIES = [120000, 60000, 35000, 25000, 20000, 15000, 10000];
       for(const entry of BRACKET_ENTRIES){
         if(entry <= chosenWL) break;
-        const testCost = priceCoverage(input, { wl: entry, term: chosenTerm, adb: chosenADB }).monthly;
-        if(testCost <= ceiling){ chosenWL = entry; break; }
+        const testCost = priceCoverage(input, { wl: entry, term: chosenTerm, adb: chosenADB }).monthly - a71Cost;
+        if(testCost <= budgetAfterA71){ chosenWL = entry; break; }
       }
     }
 
     // 4. Add ADB if still room and WL gate passed
     if(chosenADB === 0 && age < 55 && chosenWL >= 25000){
       const adbRow = findADBRate(input.age);
-      const spent = priceCoverage(input, { wl: chosenWL, term: chosenTerm, adb: 0 }).monthly;
-      const left  = ceiling - spent;
+      const spent = priceCoverage(input, { wl: chosenWL, term: chosenTerm, adb: 0 }).monthly - a71Cost;
+      const left  = budgetAfterA71 - spent;
       if(adbRow && left >= 1.0){
         for(const a of [50000, 40000, 25000, 15000, 10000]){
           const cost = annualToMonthly((a / 1000) * adbRow.base_rate);
@@ -1258,13 +1263,14 @@ function autoFillCard(card){
   const mainInput = getPersonInput('main');
 
   // ── Estimate spouse anchor cost first ──────────────────────────────────────
-  // Spouse one-hour = WL floor only (~15k WL).
-  // We estimate it so main knows how much budget it has.
-  const spFloorWL = 15000;
+  // Include spouse A71 cost in the reserve so main gets accurate budget
+  const spFloorWL  = 15000;
   const spFloorRow = findPermanentRate(spInput.age, spInput.sex, spInput.tob, spFloorWL);
-  const spFloorCost = spFloorRow
+  const spA71Cost  = spInput.a71 ? (spInput.age <= 59 ? 20 : spInput.age <= 64 ? 22.5 : 35.25) : 0;
+  const spWLCost   = spFloorRow
     ? annualToMonthly(spFloorWL/1000 * spFloorRow.base_rate + spFloorRow.policy_fee_annual + spFloorRow.volume_adjustment_annual)
-    : ceiling * 0.25; // fallback estimate
+    : ceiling * 0.22;
+  const spFloorCost = spWLCost + spA71Cost;
 
   // ── Step 1: Fill main first with (ceiling - spouse floor reserve) ──────────
   const mainBudget = Math.max(10, ceiling - spFloorCost);
