@@ -433,22 +433,7 @@ body{
           <div><label data-i18n="age">Edad</label><input id="main_age" type="number" min="18" max="80" value="35"></div>
           <div><label data-i18n="gender">Género</label><select id="main_sex"><option data-i18n-opt="male">Hombre</option><option data-i18n-opt="female">Mujer</option></select></div>
           <div class="full"><label data-i18n="tobacco">Usuario de Tabaco</label><select id="main_tob"><option>NTU</option><option>TU</option></select></div>
-          <div class="full inlineToggle"><input id="main_a71" type="checkbox"><span data-i18n="a71Main">A71 en Principal</span></div>
-          <div class="full a71InfoCard" id="a71InfoMain">
-            <div class="a71InfoHeader">
-              <span class="a71Badge">A71</span>
-              <span class="a71Title" data-i18n="a71InfoTitle">Beneficios de Vida — Cobertura de Enfermedad Terminal</span>
-            </div>
-            <ul class="a71Bullets">
-              <li data-i18n="a71Bullet1">Urgencias / Visita de cuidado urgente: <strong>$250</strong></li>
-              <li data-i18n="a71Bullet2">Hospitalización noches 1–14: <strong>$1,000/noche</strong></li>
-              <li data-i18n="a71Bullet3">Hospitalización noches 15–365: <strong>$500/noche</strong></li>
-              <li class="a71Tir" data-i18n="a71Tir">
-                <span class="a71TirBadge">TIR</span>
-                Si es diagnosticado con menos de 2 años de vida, recibe el <strong>50% del valor de la póliza de vida entera</strong> en vida.
-              </li>
-            </ul>
-          </div>
+
         </div>
       </div>
 
@@ -458,22 +443,7 @@ body{
           <div><label data-i18n="age">Edad</label><input id="sp_age" type="number" min="18" max="80" value="33"></div>
           <div><label data-i18n="gender">Género</label><select id="sp_sex"><option data-i18n-opt="female">Mujer</option><option data-i18n-opt="male">Hombre</option></select></div>
           <div class="full"><label data-i18n="tobacco">Usuario de Tabaco</label><select id="sp_tob"><option>NTU</option><option>TU</option></select></div>
-          <div class="full inlineToggle"><input id="sp_a71" type="checkbox"><span data-i18n="a71Spouse">A71 en Cónyuge</span></div>
-          <div class="full a71InfoCard" id="a71InfoSpouse">
-            <div class="a71InfoHeader">
-              <span class="a71Badge">A71</span>
-              <span class="a71Title" data-i18n="a71InfoTitle">Beneficios de Vida — Cobertura de Enfermedad Terminal</span>
-            </div>
-            <ul class="a71Bullets">
-              <li data-i18n="a71Bullet1">Urgencias / Visita de cuidado urgente: <strong>$250</strong></li>
-              <li data-i18n="a71Bullet2">Hospitalización noches 1–14: <strong>$1,000/noche</strong></li>
-              <li data-i18n="a71Bullet3">Hospitalización noches 15–365: <strong>$500/noche</strong></li>
-              <li class="a71Tir" data-i18n="a71Tir">
-                <span class="a71TirBadge">TIR</span>
-                Si es diagnosticado con menos de 2 años de vida, recibe el <strong>50% del valor de la póliza de vida entera</strong> en vida.
-              </li>
-            </ul>
-          </div>
+
         </div>
       </div>
 
@@ -1997,6 +1967,871 @@ loadRates().catch(err=>{
 });
 applyLang();
 refreshAll();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     HOSPITAL & CANCER SUPPLEMENTAL QUOTER
+════════════════════════════════════════════════════════════════ -->
+<style>
+/* ── Supplemental Section ──────────────────────────────────────── */
+#suppSection{
+  max-width:1520px;margin:24px auto 0;padding:0 20px 32px;
+}
+.suppHeader{
+  display:flex;align-items:center;gap:14px;
+  margin-bottom:18px;padding:14px 20px;
+  background:linear-gradient(90deg,var(--navy-3) 0%,var(--navy-2) 60%,var(--navy) 100%);
+  border-radius:14px;
+  border:1px solid rgba(176,128,48,.2);
+  box-shadow:0 4px 20px rgba(7,17,31,.18);
+  position:relative;overflow:hidden;
+}
+.suppHeader::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold-3),var(--gold-2),transparent);
+}
+.suppHeaderIcon{
+  width:40px;height:40px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--gold-3) 0%,var(--gold) 100%);
+  border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-size:20px;box-shadow:0 2px 10px rgba(176,128,48,.3);
+}
+.suppHeaderText h2{
+  font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:22px;font-weight:600;color:#d8c8a0;letter-spacing:.5px;line-height:1;
+}
+.suppHeaderText p{
+  font-size:11px;color:rgba(176,128,48,.65);
+  letter-spacing:.8px;text-transform:uppercase;margin-top:3px;
+  font-family:'Inter',sans-serif;
+}
+.suppGrid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:16px;
+}
+@media(max-width:1000px){.suppGrid{grid-template-columns:1fr}}
+
+/* ── Supplemental Card ─────────────────────────────────────────── */
+.suppCard{
+  background:var(--white);
+  border:1px solid var(--line);border-radius:14px;
+  overflow:hidden;
+  box-shadow:0 2px 8px rgba(7,17,31,.06),0 8px 24px rgba(7,17,31,.06);
+  position:relative;
+}
+.suppCard::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+}
+.suppCard.cancer::before{background:linear-gradient(90deg,#8b1a1a,#c0392b,#e74c3c)}
+.suppCard.hospital::before{background:linear-gradient(90deg,#1a3a8b,#2980b9,#3498db)}
+.suppCard.a71::before{background:linear-gradient(90deg,var(--navy),var(--navy-4),var(--gold-2))}
+
+.suppCardHead{
+  padding:14px 16px 10px;
+  border-bottom:1px solid var(--line);
+  background:var(--surface);
+  display:flex;align-items:center;gap:10px;
+}
+.suppCardBadge{
+  padding:3px 10px;border-radius:6px;
+  font-size:11px;font-weight:800;letter-spacing:.8px;
+  font-family:'Inter',sans-serif;
+}
+.cancer .suppCardBadge{background:#fde8e8;color:#8b1a1a;border:1px solid #f5c6c6}
+.hospital .suppCardBadge{background:#e8f0fe;color:#1a3a8b;border:1px solid #c6d4f5}
+.a71 .suppCardBadge{background:rgba(176,128,48,.1);color:var(--gold);border:1px solid rgba(176,128,48,.25)}
+
+.suppCardTitle{
+  font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:17px;font-weight:600;color:var(--navy);letter-spacing:.3px;
+}
+.suppCardSub{
+  font-size:10px;color:var(--muted-2);
+  letter-spacing:.5px;text-transform:uppercase;margin-top:1px;
+  font-family:'Inter',sans-serif;
+}
+
+.suppBody{padding:14px 16px}
+
+/* ── Supp form rows ─────────────────────────────────────────────── */
+.suppRow{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:8px;margin-bottom:10px;
+}
+.suppRow label{
+  font-size:10px;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.7px;
+  white-space:nowrap;min-width:90px;
+}
+.suppRow select,.suppRow input[type=number]{
+  flex:1;padding:7px 9px;
+  border:1px solid var(--line);border-radius:6px;
+  background:var(--surface);color:var(--ink);
+  font:inherit;font-size:12px;font-weight:600;
+  transition:border-color .15s;
+}
+.suppRow select:focus,.suppRow input:focus{
+  outline:none;border-color:var(--navy-4);
+  box-shadow:0 0 0 2px rgba(26,53,96,.08);
+}
+.suppToggle{
+  display:flex;align-items:center;gap:7px;
+  font-size:11px;font-weight:600;color:var(--muted);
+  cursor:pointer;padding:4px 0;
+}
+.suppToggle input{width:14px;height:14px;accent-color:var(--navy-4);cursor:pointer}
+.suppToggle strong{color:var(--ink-2)}
+
+/* ── Price display ─────────────────────────────────────────────── */
+.suppPrice{
+  margin-top:12px;padding:12px 14px;
+  background:linear-gradient(135deg,var(--navy-2) 0%,var(--navy) 100%);
+  border-radius:10px;
+  display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;
+}
+.suppPriceLabel{
+  font-size:10px;font-weight:700;color:rgba(180,170,140,.7);
+  text-transform:uppercase;letter-spacing:.8px;
+  font-family:'Inter',sans-serif;
+}
+.suppPriceAmount{
+  font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:26px;font-weight:700;color:var(--gold-3);
+  text-align:right;line-height:1;
+}
+.suppPriceBreakdown{
+  grid-column:1/-1;
+  font-size:10px;color:rgba(165,155,120,.7);
+  line-height:1.7;margin-top:4px;
+  border-top:1px solid rgba(255,255,255,.06);padding-top:6px;
+}
+.suppPriceBreakdown span{color:rgba(200,185,140,.85);font-weight:600}
+
+/* ── Benefit summary pills ─────────────────────────────────────── */
+.suppBenefits{
+  display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;
+}
+.suppBenefit{
+  padding:3px 9px;border-radius:20px;
+  font-size:10px;font-weight:700;
+  font-family:'Inter',sans-serif;letter-spacing:.2px;
+}
+.cancer .suppBenefit{background:#fde8e8;color:#8b1a1a;border:1px solid #f5c6c6}
+.hospital .suppBenefit{background:#e8f0fe;color:#1a3a8b;border:1px solid #c6d4f5}
+.a71 .suppBenefit{background:rgba(176,128,48,.1);color:var(--gold);border:1px solid rgba(176,128,48,.2)}
+
+/* ── TIR callout ───────────────────────────────────────────────── */
+.tirCallout{
+  margin-top:10px;padding:8px 10px;
+  background:linear-gradient(135deg,rgba(176,128,48,.08),rgba(176,128,48,.03));
+  border:1px solid rgba(176,128,48,.25);border-left:2px solid var(--gold-3);
+  border-radius:7px;font-size:10.5px;color:var(--ink-2);line-height:1.5;
+}
+.tirCallout .tirBadge{
+  display:inline-block;padding:1px 5px;
+  background:rgba(176,128,48,.18);color:var(--gold-2);
+  font-size:9px;font-weight:800;border-radius:3px;
+  border:1px solid rgba(176,128,48,.3);margin-right:4px;
+  font-family:'Inter',sans-serif;letter-spacing:.6px;
+}
+.tirCallout strong{color:var(--ink);font-weight:700}
+
+/* ── Not available notice ──────────────────────────────────────── */
+.suppNA{
+  margin-top:12px;padding:10px 12px;
+  background:var(--bg-2);border:1px solid var(--line);border-radius:8px;
+  font-size:11px;color:var(--muted-2);text-align:center;font-style:italic;
+}
+</style>
+
+<div id="suppSection">
+  <!-- Header -->
+  <div class="suppHeader">
+    <div class="suppHeaderIcon">🏥</div>
+    <div class="suppHeaderText">
+      <h2 data-i18n="suppTitle">Seguro Hospitalario y de Cáncer</h2>
+      <p data-i18n="suppSub">Suplementos · A71 · H34 · C10 · C20</p>
+    </div>
+  </div>
+
+  <div class="suppGrid">
+
+    <!-- ── A71 LIVING BENEFITS ─────────────────────────────── -->
+    <div class="suppCard a71">
+      <div class="suppCardHead">
+        <div>
+          <span class="suppCardBadge">A71</span>
+          <div class="suppCardTitle" data-i18n="a71CardTitle">Beneficios de Vida</div>
+          <div class="suppCardSub" data-i18n="a71CardSub">Living Benefits · Terminal Illness Rider</div>
+        </div>
+      </div>
+      <div class="suppBody">
+        <div class="suppRow">
+          <label data-i18n="suppWho">¿Quién?</label>
+          <select id="supp_a71_who">
+            <option value="none" data-i18n-opt="none">Ninguno</option>
+            <option value="main" data-i18n-opt="mainOnly">Solo Principal</option>
+            <option value="both" data-i18n-opt="both">Principal + Cónyuge</option>
+          </select>
+        </div>
+        <div class="suppRow">
+          <label data-i18n="suppBenefit">Beneficio Diario</label>
+          <select id="supp_a71_benefit">
+            <option value="100">$100/día</option>
+            <option value="200" selected>$200/día</option>
+            <option value="300">$300/día</option>
+          </select>
+        </div>
+        <div class="suppRow">
+          <label data-i18n="suppRider">Con Rider</label>
+          <select id="supp_a71_rider">
+            <option value="BASE" data-i18n-opt="base">Base</option>
+            <option value="BM000_DOUBLE" data-i18n-opt="double">Doble Accidente</option>
+          </select>
+        </div>
+        <!-- Hidden checkboxes for WL/Term engine compatibility -->
+        <input type="checkbox" id="main_a71" style="display:none">
+        <input type="checkbox" id="sp_a71" style="display:none">
+        <div id="supp_a71_price" class="suppPrice">
+          <div class="suppPriceLabel" data-i18n="suppMonthly">Mensual Total</div>
+          <div class="suppPriceAmount" id="a71_total">$0.00</div>
+          <div class="suppPriceBreakdown" id="a71_breakdown">—</div>
+        </div>
+        <div class="suppBenefits">
+          <span class="suppBenefit" data-i18n="a71b1">🏥 $250 Urgencias</span>
+          <span class="suppBenefit" data-i18n="a71b2">🛏 $1,000/noche 1-14</span>
+          <span class="suppBenefit" data-i18n="a71b3">🛏 $500/noche 15+</span>
+        </div>
+        <div class="tirCallout">
+          <span class="tirBadge">TIR</span>
+          <span data-i18n="tirDesc">Si es diagnosticado con menos de 2 años de vida, recibe el <strong>50% del valor de su póliza de vida entera</strong> en vida.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── H34 HOSPITAL INDEMNITY ──────────────────────────── -->
+    <div class="suppCard hospital">
+      <div class="suppCardHead">
+        <div>
+          <span class="suppCardBadge">H34</span>
+          <div class="suppCardTitle" data-i18n="h34CardTitle">Indemnización Hospitalaria</div>
+          <div class="suppCardSub" data-i18n="h34CardSub">Hospital Indemnity · Cash Per Night</div>
+        </div>
+      </div>
+      <div class="suppBody">
+        <div class="suppRow">
+          <label data-i18n="suppWho">¿Quién?</label>
+          <select id="supp_h34_who">
+            <option value="none" data-i18n-opt="none">Ninguno</option>
+            <option value="main" data-i18n-opt="mainOnly">Solo Principal</option>
+            <option value="both" data-i18n-opt="both">Principal + Cónyuge</option>
+          </select>
+        </div>
+        <div class="suppRow">
+          <label data-i18n="suppNightly">Beneficio Noche</label>
+          <select id="supp_h34_benefit">
+            <option value="50">$50/noche</option>
+            <option value="75">$75/noche</option>
+            <option value="100">$100/noche</option>
+            <option value="150" selected>$150/noche</option>
+          </select>
+        </div>
+        <div class="suppToggle" onclick="document.getElementById('supp_h34_recup').click();calcSupp()">
+          <input type="checkbox" id="supp_h34_recup">
+          <strong data-i18n="suppRecup">+ Rider de Recuperación</strong>
+        </div>
+        <div id="supp_h34_price" class="suppPrice">
+          <div class="suppPriceLabel" data-i18n="suppMonthly">Mensual Total</div>
+          <div class="suppPriceAmount" id="h34_total">$0.00</div>
+          <div class="suppPriceBreakdown" id="h34_breakdown">—</div>
+        </div>
+        <div class="suppBenefits">
+          <span class="suppBenefit" data-i18n="h34b1">💵 Efectivo por noche</span>
+          <span class="suppBenefit" data-i18n="h34b2">✓ Sin importar seguro médico</span>
+          <span class="suppBenefit" data-i18n="h34b3">✓ Cualquier razón</span>
+        </div>
+        <div id="supp_h34_na" class="suppNA hidden" data-i18n="h34na">No disponible para mayores de 80 años.</div>
+      </div>
+    </div>
+
+    <!-- ── C10 / C20 CANCER ────────────────────────────────── -->
+    <div class="suppCard cancer">
+      <div class="suppCardHead">
+        <div>
+          <span class="suppCardBadge">C10 / C20</span>
+          <div class="suppCardTitle" data-i18n="c10CardTitle">Seguro de Cáncer</div>
+          <div class="suppCardSub" data-i18n="c10CardSub">Cancer Insurance · Detection Rider</div>
+        </div>
+      </div>
+      <div class="suppBody">
+        <div class="suppRow">
+          <label data-i18n="suppPlan">Plan</label>
+          <select id="supp_c10_plan">
+            <option value="none" data-i18n-opt="none">Ninguno</option>
+            <option value="C10_10" data-i18n-opt="c10_10">C10 · 10 unidades</option>
+            <option value="C10_15" data-i18n-opt="c10_15">C10 · 15 unidades</option>
+            <option value="C10_20" selected data-i18n-opt="c10_20">C10 · 20 unidades ✓</option>
+            <option value="C20_10k" data-i18n-opt="c20_10k">C20 · $10,000</option>
+            <option value="C20_25k" data-i18n-opt="c20_25k">C20 · $25,000</option>
+            <option value="C20_50k" data-i18n-opt="c20_50k">C20 · $50,000</option>
+          </select>
+        </div>
+        <div class="suppRow" id="c10DetRow">
+          <label data-i18n="suppDetection">Detection Rider</label>
+          <select id="supp_c10_detection">
+            <option value="0" data-i18n-opt="none">Sin rider</option>
+            <option value="10" selected data-i18n-opt="det10">10 unidades · $10,000</option>
+          </select>
+        </div>
+        <div id="supp_c10_price" class="suppPrice">
+          <div class="suppPriceLabel" data-i18n="suppMonthly">Mensual Total</div>
+          <div class="suppPriceAmount" id="c10_total">$0.00</div>
+          <div class="suppPriceBreakdown" id="c10_breakdown">—</div>
+        </div>
+        <div class="suppBenefits" id="c10Benefits">
+          <span class="suppBenefit" id="c10b_treat" data-i18n="c10b1">💊 $200/tratamiento</span>
+          <span class="suppBenefit" id="c10b_detect" data-i18n="c10b2">🔬 $10,000 al diagnóstico</span>
+        </div>
+        <div id="supp_c10_na" class="suppNA hidden" data-i18n="c10na">C20 no disponible mayores de 64.</div>
+      </div>
+    </div>
+
+  </div><!-- .suppGrid -->
+</div><!-- #suppSection -->
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  SUPPLEMENTAL RATES ENGINE
+// ══════════════════════════════════════════════════════════════
+const SUPP_RATES = [
+{product:'A71',state:'MI',rider:'BASE',coverage_type:'IND',gender:'',age_min:'18',age_max:'49',monthly_rate:'2.38',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BASE',coverage_type:'FAM',gender:'',age_min:'18',age_max:'49',monthly_rate:'4.75',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BASE',coverage_type:'IND',gender:'',age_min:'50',age_max:'59',monthly_rate:'2.63',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BASE',coverage_type:'FAM',gender:'',age_min:'50',age_max:'59',monthly_rate:'5.25',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BASE',coverage_type:'IND',gender:'',age_min:'60',age_max:'64',monthly_rate:'3.25',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BASE',coverage_type:'FAM',gender:'',age_min:'60',age_max:'64',monthly_rate:'6.25',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BASE',coverage_type:'IND',gender:'',age_min:'65',age_max:'74',monthly_rate:'6.25',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BASE',coverage_type:'FAM',gender:'',age_min:'65',age_max:'74',monthly_rate:'12.25',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BM000_DOUBLE',coverage_type:'IND',gender:'',age_min:'18',age_max:'49',monthly_rate:'4.13',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BM000_DOUBLE',coverage_type:'FAM',gender:'',age_min:'18',age_max:'49',monthly_rate:'8.5',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BM000_DOUBLE',coverage_type:'IND',gender:'',age_min:'50',age_max:'59',monthly_rate:'4.63',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BM000_DOUBLE',coverage_type:'FAM',gender:'',age_min:'50',age_max:'59',monthly_rate:'9.5',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BM000_DOUBLE',coverage_type:'IND',gender:'',age_min:'60',age_max:'64',monthly_rate:'5.5',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BM000_DOUBLE',coverage_type:'FAM',gender:'',age_min:'60',age_max:'64',monthly_rate:'10.75',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BASE',coverage_type:'IND',gender:'',age_min:'18',age_max:'49',monthly_rate:'4.5',daily_benefit:'200',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BASE',coverage_type:'FAM',gender:'',age_min:'18',age_max:'49',monthly_rate:'9.25',daily_benefit:'200',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BASE',coverage_type:'IND',gender:'',age_min:'50',age_max:'59',monthly_rate:'5.0',daily_benefit:'200',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BASE',coverage_type:'FAM',gender:'',age_min:'50',age_max:'59',monthly_rate:'10.25',daily_benefit:'200',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BASE',coverage_type:'IND',gender:'',age_min:'60',age_max:'64',monthly_rate:'6.25',daily_benefit:'200',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BASE',coverage_type:'FAM',gender:'',age_min:'60',age_max:'64',monthly_rate:'12.25',daily_benefit:'200',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BASE',coverage_type:'IND',gender:'',age_min:'65',age_max:'120',monthly_rate:'12.25',daily_benefit:'200',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BASE',coverage_type:'FAM',gender:'',age_min:'65',age_max:'120',monthly_rate:'24.25',daily_benefit:'200',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BM000_DOUBLE',coverage_type:'IND',gender:'',age_min:'18',age_max:'49',monthly_rate:'6.25',daily_benefit:'200',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BM000_DOUBLE',coverage_type:'FAM',gender:'',age_min:'18',age_max:'49',monthly_rate:'13.0',daily_benefit:'200',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BM000_DOUBLE',coverage_type:'IND',gender:'',age_min:'50',age_max:'59',monthly_rate:'7.0',daily_benefit:'200',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BM000_DOUBLE',coverage_type:'FAM',gender:'',age_min:'50',age_max:'59',monthly_rate:'14.5',daily_benefit:'200',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BM000_DOUBLE',coverage_type:'IND',gender:'',age_min:'60',age_max:'64',monthly_rate:'8.5',daily_benefit:'200',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BM000_DOUBLE',coverage_type:'FAM',gender:'',age_min:'60',age_max:'64',monthly_rate:'16.75',daily_benefit:'200',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BASE',coverage_type:'IND',gender:'',age_min:'18',age_max:'49',monthly_rate:'6.63',daily_benefit:'300',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BASE',coverage_type:'FAM',gender:'',age_min:'18',age_max:'49',monthly_rate:'13.75',daily_benefit:'300',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BASE',coverage_type:'IND',gender:'',age_min:'50',age_max:'59',monthly_rate:'7.38',daily_benefit:'300',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BASE',coverage_type:'FAM',gender:'',age_min:'50',age_max:'59',monthly_rate:'15.25',daily_benefit:'300',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BASE',coverage_type:'IND',gender:'',age_min:'60',age_max:'64',monthly_rate:'9.25',daily_benefit:'300',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BASE',coverage_type:'FAM',gender:'',age_min:'60',age_max:'64',monthly_rate:'18.25',daily_benefit:'300',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BASE',coverage_type:'IND',gender:'',age_min:'65',age_max:'120',monthly_rate:'18.25',daily_benefit:'300',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BASE',coverage_type:'FAM',gender:'',age_min:'65',age_max:'120',monthly_rate:'36.25',daily_benefit:'300',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BM000_SINGLE',coverage_type:'IND',gender:'',age_min:'18',age_max:'49',monthly_rate:'7.5',daily_benefit:'300',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BM000_SINGLE',coverage_type:'FAM',gender:'',age_min:'18',age_max:'49',monthly_rate:'15.63',daily_benefit:'300',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BM000_SINGLE',coverage_type:'IND',gender:'',age_min:'50',age_max:'59',monthly_rate:'8.38',daily_benefit:'300',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BM000_SINGLE',coverage_type:'FAM',gender:'',age_min:'50',age_max:'59',monthly_rate:'17.38',daily_benefit:'300',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BM000_SINGLE',coverage_type:'IND',gender:'',age_min:'60',age_max:'64',monthly_rate:'10.38',daily_benefit:'300',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BM000_SINGLE',coverage_type:'FAM',gender:'',age_min:'60',age_max:'64',monthly_rate:'20.5',daily_benefit:'300',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BM000_DOUBLE',coverage_type:'IND',gender:'',age_min:'18',age_max:'49',monthly_rate:'8.38',daily_benefit:'300',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BM000_DOUBLE',coverage_type:'FAM',gender:'',age_min:'18',age_max:'49',monthly_rate:'17.5',daily_benefit:'300',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BM000_DOUBLE',coverage_type:'IND',gender:'',age_min:'50',age_max:'59',monthly_rate:'9.38',daily_benefit:'300',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BM000_DOUBLE',coverage_type:'FAM',gender:'',age_min:'50',age_max:'59',monthly_rate:'19.5',daily_benefit:'300',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BM000_DOUBLE',coverage_type:'IND',gender:'',age_min:'60',age_max:'64',monthly_rate:'11.5',daily_benefit:'300',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A71',state:'MI',rider:'BM000_DOUBLE',coverage_type:'FAM',gender:'',age_min:'60',age_max:'64',monthly_rate:'22.75',daily_benefit:'300',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'A74',state:'MI',rider:'BASE',coverage_type:'IND',gender:'',age_min:'18',age_max:'60',monthly_rate:'9.5',daily_benefit:'',benefit_amount:'',units:'1',plan_type:'',available:'Y'},
+{product:'A74',state:'MI',rider:'BASE',coverage_type:'IND',gender:'',age_min:'18',age_max:'60',monthly_rate:'18.75',daily_benefit:'',benefit_amount:'',units:'2',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'MALE',age_min:'18',age_max:'34',monthly_rate:'3.0',daily_benefit:'',benefit_amount:'10000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'MALE',age_min:'35',age_max:'39',monthly_rate:'5.0',daily_benefit:'',benefit_amount:'10000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'MALE',age_min:'40',age_max:'44',monthly_rate:'9.0',daily_benefit:'',benefit_amount:'10000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'MALE',age_min:'45',age_max:'49',monthly_rate:'13.0',daily_benefit:'',benefit_amount:'10000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'MALE',age_min:'50',age_max:'54',monthly_rate:'19.0',daily_benefit:'',benefit_amount:'10000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'MALE',age_min:'55',age_max:'59',monthly_rate:'25.0',daily_benefit:'',benefit_amount:'10000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'MALE',age_min:'60',age_max:'64',monthly_rate:'32.0',daily_benefit:'',benefit_amount:'10000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'FEMALE',age_min:'18',age_max:'34',monthly_rate:'7.0',daily_benefit:'',benefit_amount:'10000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'FEMALE',age_min:'35',age_max:'39',monthly_rate:'9.0',daily_benefit:'',benefit_amount:'10000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'FEMALE',age_min:'40',age_max:'44',monthly_rate:'13.0',daily_benefit:'',benefit_amount:'10000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'FEMALE',age_min:'45',age_max:'49',monthly_rate:'17.0',daily_benefit:'',benefit_amount:'10000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'FEMALE',age_min:'50',age_max:'54',monthly_rate:'19.0',daily_benefit:'',benefit_amount:'10000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'FEMALE',age_min:'55',age_max:'59',monthly_rate:'25.0',daily_benefit:'',benefit_amount:'10000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'FEMALE',age_min:'60',age_max:'64',monthly_rate:'32.0',daily_benefit:'',benefit_amount:'10000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'CHILD',gender:'CHILD',age_min:'0',age_max:'18',monthly_rate:'1.0',daily_benefit:'',benefit_amount:'10000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'MALE',age_min:'18',age_max:'34',monthly_rate:'7.5',daily_benefit:'',benefit_amount:'25000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'MALE',age_min:'35',age_max:'39',monthly_rate:'12.5',daily_benefit:'',benefit_amount:'25000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'MALE',age_min:'40',age_max:'44',monthly_rate:'20.0',daily_benefit:'',benefit_amount:'25000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'MALE',age_min:'45',age_max:'49',monthly_rate:'30.0',daily_benefit:'',benefit_amount:'25000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'MALE',age_min:'50',age_max:'54',monthly_rate:'45.0',daily_benefit:'',benefit_amount:'25000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'MALE',age_min:'55',age_max:'59',monthly_rate:'55.0',daily_benefit:'',benefit_amount:'25000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'MALE',age_min:'60',age_max:'64',monthly_rate:'60.0',daily_benefit:'',benefit_amount:'25000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'FEMALE',age_min:'18',age_max:'34',monthly_rate:'17.5',daily_benefit:'',benefit_amount:'25000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'FEMALE',age_min:'35',age_max:'39',monthly_rate:'22.5',daily_benefit:'',benefit_amount:'25000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'FEMALE',age_min:'40',age_max:'44',monthly_rate:'30.0',daily_benefit:'',benefit_amount:'25000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'FEMALE',age_min:'45',age_max:'49',monthly_rate:'40.0',daily_benefit:'',benefit_amount:'25000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'FEMALE',age_min:'50',age_max:'54',monthly_rate:'45.0',daily_benefit:'',benefit_amount:'25000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'FEMALE',age_min:'55',age_max:'59',monthly_rate:'55.0',daily_benefit:'',benefit_amount:'25000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'FEMALE',age_min:'60',age_max:'64',monthly_rate:'60.0',daily_benefit:'',benefit_amount:'25000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'CHILD',gender:'CHILD',age_min:'0',age_max:'18',monthly_rate:'2.5',daily_benefit:'',benefit_amount:'25000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'MALE',age_min:'18',age_max:'34',monthly_rate:'15.0',daily_benefit:'',benefit_amount:'50000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'MALE',age_min:'35',age_max:'39',monthly_rate:'25.0',daily_benefit:'',benefit_amount:'50000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'MALE',age_min:'40',age_max:'44',monthly_rate:'40.0',daily_benefit:'',benefit_amount:'50000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'MALE',age_min:'45',age_max:'49',monthly_rate:'60.0',daily_benefit:'',benefit_amount:'50000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'MALE',age_min:'50',age_max:'54',monthly_rate:'90.0',daily_benefit:'',benefit_amount:'50000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'MALE',age_min:'55',age_max:'59',monthly_rate:'110.0',daily_benefit:'',benefit_amount:'50000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'MALE',age_min:'60',age_max:'64',monthly_rate:'120.0',daily_benefit:'',benefit_amount:'50000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'FEMALE',age_min:'18',age_max:'34',monthly_rate:'35.0',daily_benefit:'',benefit_amount:'50000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'FEMALE',age_min:'35',age_max:'39',monthly_rate:'45.0',daily_benefit:'',benefit_amount:'50000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'FEMALE',age_min:'40',age_max:'44',monthly_rate:'60.0',daily_benefit:'',benefit_amount:'50000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'FEMALE',age_min:'45',age_max:'49',monthly_rate:'80.0',daily_benefit:'',benefit_amount:'50000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'FEMALE',age_min:'50',age_max:'54',monthly_rate:'90.0',daily_benefit:'',benefit_amount:'50000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'FEMALE',age_min:'55',age_max:'59',monthly_rate:'110.0',daily_benefit:'',benefit_amount:'50000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'IND',gender:'FEMALE',age_min:'60',age_max:'64',monthly_rate:'120.0',daily_benefit:'',benefit_amount:'50000',units:'',plan_type:'',available:'Y'},
+{product:'C20',state:'MI',rider:'',coverage_type:'CHILD',gender:'CHILD',age_min:'0',age_max:'18',monthly_rate:'5.0',daily_benefit:'',benefit_amount:'50000',units:'',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'MALE',age_min:'19',age_max:'29',monthly_rate:'0.8',daily_benefit:'',benefit_amount:'',units:'10',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'MALE',age_min:'30',age_max:'39',monthly_rate:'2.41',daily_benefit:'',benefit_amount:'',units:'10',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'MALE',age_min:'40',age_max:'49',monthly_rate:'5.81',daily_benefit:'',benefit_amount:'',units:'10',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'MALE',age_min:'50',age_max:'59',monthly_rate:'11.26',daily_benefit:'',benefit_amount:'',units:'10',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'MALE',age_min:'60',age_max:'69',monthly_rate:'17.66',daily_benefit:'',benefit_amount:'',units:'10',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'MALE',age_min:'70',age_max:'120',monthly_rate:'23.28',daily_benefit:'',benefit_amount:'',units:'10',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'FEMALE',age_min:'19',age_max:'29',monthly_rate:'1.1',daily_benefit:'',benefit_amount:'',units:'10',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'FEMALE',age_min:'30',age_max:'39',monthly_rate:'1.98',daily_benefit:'',benefit_amount:'',units:'10',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'FEMALE',age_min:'40',age_max:'49',monthly_rate:'3.94',daily_benefit:'',benefit_amount:'',units:'10',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'FEMALE',age_min:'50',age_max:'59',monthly_rate:'6.18',daily_benefit:'',benefit_amount:'',units:'10',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'FEMALE',age_min:'60',age_max:'69',monthly_rate:'7.84',daily_benefit:'',benefit_amount:'',units:'10',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'FEMALE',age_min:'70',age_max:'120',monthly_rate:'8.88',daily_benefit:'',benefit_amount:'',units:'10',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'MALE',age_min:'19',age_max:'29',monthly_rate:'1.63',daily_benefit:'',benefit_amount:'',units:'10',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'MALE',age_min:'30',age_max:'39',monthly_rate:'3.25',daily_benefit:'',benefit_amount:'',units:'10',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'MALE',age_min:'40',age_max:'49',monthly_rate:'6.65',daily_benefit:'',benefit_amount:'',units:'10',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'MALE',age_min:'50',age_max:'59',monthly_rate:'12.1',daily_benefit:'',benefit_amount:'',units:'10',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'MALE',age_min:'60',age_max:'69',monthly_rate:'17.66',daily_benefit:'',benefit_amount:'',units:'10',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'MALE',age_min:'70',age_max:'120',monthly_rate:'23.28',daily_benefit:'',benefit_amount:'',units:'10',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'FEMALE',age_min:'19',age_max:'29',monthly_rate:'1.94',daily_benefit:'',benefit_amount:'',units:'10',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'FEMALE',age_min:'30',age_max:'39',monthly_rate:'2.81',daily_benefit:'',benefit_amount:'',units:'10',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'FEMALE',age_min:'40',age_max:'49',monthly_rate:'4.77',daily_benefit:'',benefit_amount:'',units:'10',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'FEMALE',age_min:'50',age_max:'59',monthly_rate:'7.01',daily_benefit:'',benefit_amount:'',units:'10',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'FEMALE',age_min:'60',age_max:'69',monthly_rate:'7.84',daily_benefit:'',benefit_amount:'',units:'10',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'FEMALE',age_min:'70',age_max:'120',monthly_rate:'8.88',daily_benefit:'',benefit_amount:'',units:'10',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'ADD_PER_POLICY',coverage_type:'',gender:'',age_min:'',age_max:'',monthly_rate:'1.5',daily_benefit:'',benefit_amount:'',units:'10',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'MALE',age_min:'19',age_max:'29',monthly_rate:'1.19',daily_benefit:'',benefit_amount:'',units:'15',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'MALE',age_min:'30',age_max:'39',monthly_rate:'3.62',daily_benefit:'',benefit_amount:'',units:'15',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'MALE',age_min:'40',age_max:'49',monthly_rate:'8.72',daily_benefit:'',benefit_amount:'',units:'15',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'MALE',age_min:'50',age_max:'59',monthly_rate:'16.89',daily_benefit:'',benefit_amount:'',units:'15',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'MALE',age_min:'60',age_max:'69',monthly_rate:'26.49',daily_benefit:'',benefit_amount:'',units:'15',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'MALE',age_min:'70',age_max:'120',monthly_rate:'34.92',daily_benefit:'',benefit_amount:'',units:'15',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'FEMALE',age_min:'19',age_max:'29',monthly_rate:'1.65',daily_benefit:'',benefit_amount:'',units:'15',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'FEMALE',age_min:'30',age_max:'39',monthly_rate:'2.97',daily_benefit:'',benefit_amount:'',units:'15',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'FEMALE',age_min:'40',age_max:'49',monthly_rate:'5.9',daily_benefit:'',benefit_amount:'',units:'15',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'FEMALE',age_min:'50',age_max:'59',monthly_rate:'9.27',daily_benefit:'',benefit_amount:'',units:'15',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'FEMALE',age_min:'60',age_max:'69',monthly_rate:'11.75',daily_benefit:'',benefit_amount:'',units:'15',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'FEMALE',age_min:'70',age_max:'120',monthly_rate:'13.32',daily_benefit:'',benefit_amount:'',units:'15',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'MALE',age_min:'19',age_max:'29',monthly_rate:'2.44',daily_benefit:'',benefit_amount:'',units:'15',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'MALE',age_min:'30',age_max:'39',monthly_rate:'4.87',daily_benefit:'',benefit_amount:'',units:'15',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'MALE',age_min:'40',age_max:'49',monthly_rate:'9.97',daily_benefit:'',benefit_amount:'',units:'15',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'MALE',age_min:'50',age_max:'59',monthly_rate:'18.14',daily_benefit:'',benefit_amount:'',units:'15',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'MALE',age_min:'60',age_max:'69',monthly_rate:'26.49',daily_benefit:'',benefit_amount:'',units:'15',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'MALE',age_min:'70',age_max:'120',monthly_rate:'34.92',daily_benefit:'',benefit_amount:'',units:'15',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'FEMALE',age_min:'19',age_max:'29',monthly_rate:'2.9',daily_benefit:'',benefit_amount:'',units:'15',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'FEMALE',age_min:'30',age_max:'39',monthly_rate:'4.22',daily_benefit:'',benefit_amount:'',units:'15',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'FEMALE',age_min:'40',age_max:'49',monthly_rate:'7.15',daily_benefit:'',benefit_amount:'',units:'15',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'FEMALE',age_min:'50',age_max:'59',monthly_rate:'10.52',daily_benefit:'',benefit_amount:'',units:'15',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'FEMALE',age_min:'60',age_max:'69',monthly_rate:'11.75',daily_benefit:'',benefit_amount:'',units:'15',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'FEMALE',age_min:'70',age_max:'120',monthly_rate:'13.32',daily_benefit:'',benefit_amount:'',units:'15',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'ADD_PER_POLICY',coverage_type:'',gender:'',age_min:'',age_max:'',monthly_rate:'1.5',daily_benefit:'',benefit_amount:'',units:'15',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'MALE',age_min:'19',age_max:'29',monthly_rate:'1.59',daily_benefit:'',benefit_amount:'',units:'20',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'MALE',age_min:'30',age_max:'39',monthly_rate:'4.82',daily_benefit:'',benefit_amount:'',units:'20',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'MALE',age_min:'40',age_max:'49',monthly_rate:'11.62',daily_benefit:'',benefit_amount:'',units:'20',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'MALE',age_min:'50',age_max:'59',monthly_rate:'22.52',daily_benefit:'',benefit_amount:'',units:'20',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'MALE',age_min:'60',age_max:'69',monthly_rate:'35.32',daily_benefit:'',benefit_amount:'',units:'20',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'MALE',age_min:'70',age_max:'120',monthly_rate:'46.55',daily_benefit:'',benefit_amount:'',units:'20',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'FEMALE',age_min:'19',age_max:'29',monthly_rate:'2.2',daily_benefit:'',benefit_amount:'',units:'20',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'FEMALE',age_min:'30',age_max:'39',monthly_rate:'3.95',daily_benefit:'',benefit_amount:'',units:'20',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'FEMALE',age_min:'40',age_max:'49',monthly_rate:'7.87',daily_benefit:'',benefit_amount:'',units:'20',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'FEMALE',age_min:'50',age_max:'59',monthly_rate:'12.35',daily_benefit:'',benefit_amount:'',units:'20',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'FEMALE',age_min:'60',age_max:'69',monthly_rate:'15.67',daily_benefit:'',benefit_amount:'',units:'20',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ONE_ADULT',gender:'FEMALE',age_min:'70',age_max:'120',monthly_rate:'17.75',daily_benefit:'',benefit_amount:'',units:'20',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'MALE',age_min:'19',age_max:'29',monthly_rate:'3.25',daily_benefit:'',benefit_amount:'',units:'20',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'MALE',age_min:'30',age_max:'39',monthly_rate:'6.49',daily_benefit:'',benefit_amount:'',units:'20',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'MALE',age_min:'40',age_max:'49',monthly_rate:'13.29',daily_benefit:'',benefit_amount:'',units:'20',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'MALE',age_min:'50',age_max:'59',monthly_rate:'24.19',daily_benefit:'',benefit_amount:'',units:'20',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'MALE',age_min:'60',age_max:'69',monthly_rate:'35.32',daily_benefit:'',benefit_amount:'',units:'20',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'MALE',age_min:'70',age_max:'120',monthly_rate:'46.55',daily_benefit:'',benefit_amount:'',units:'20',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'FEMALE',age_min:'19',age_max:'29',monthly_rate:'3.87',daily_benefit:'',benefit_amount:'',units:'20',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'FEMALE',age_min:'30',age_max:'39',monthly_rate:'5.62',daily_benefit:'',benefit_amount:'',units:'20',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'FEMALE',age_min:'40',age_max:'49',monthly_rate:'9.54',daily_benefit:'',benefit_amount:'',units:'20',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'FEMALE',age_min:'50',age_max:'59',monthly_rate:'14.02',daily_benefit:'',benefit_amount:'',units:'20',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'FEMALE',age_min:'60',age_max:'69',monthly_rate:'15.67',daily_benefit:'',benefit_amount:'',units:'20',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'',coverage_type:'ADULT_WITH_CHILDREN',gender:'FEMALE',age_min:'70',age_max:'120',monthly_rate:'17.75',daily_benefit:'',benefit_amount:'',units:'20',plan_type:'',available:'Y'},
+{product:'C10',state:'MI',rider:'ADD_PER_POLICY',coverage_type:'',gender:'',age_min:'',age_max:'',monthly_rate:'1.5',daily_benefit:'',benefit_amount:'',units:'20',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'19',age_max:'34',monthly_rate:'2.4',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'35',age_max:'44',monthly_rate:'4.2',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'45',age_max:'54',monthly_rate:'7.1',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'55',age_max:'59',monthly_rate:'10.89',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'60',age_max:'64',monthly_rate:'16.3',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'65',age_max:'69',monthly_rate:'22.1',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'70',age_max:'74',monthly_rate:'27.1',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'75',age_max:'80',monthly_rate:'32.9',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'19',age_max:'34',monthly_rate:'3.7',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'35',age_max:'44',monthly_rate:'5.9',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'45',age_max:'54',monthly_rate:'7.7',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'55',age_max:'59',monthly_rate:'10.4',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'60',age_max:'64',monthly_rate:'15.2',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'65',age_max:'69',monthly_rate:'20.6',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'70',age_max:'74',monthly_rate:'25.6',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'75',age_max:'80',monthly_rate:'31.4',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'19',age_max:'34',monthly_rate:'3.6',daily_benefit:'75',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'35',age_max:'44',monthly_rate:'6.3',daily_benefit:'75',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'45',age_max:'54',monthly_rate:'10.65',daily_benefit:'75',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'55',age_max:'59',monthly_rate:'16.33',daily_benefit:'75',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'60',age_max:'64',monthly_rate:'24.45',daily_benefit:'75',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'65',age_max:'69',monthly_rate:'33.15',daily_benefit:'75',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'70',age_max:'74',monthly_rate:'40.65',daily_benefit:'75',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'75',age_max:'80',monthly_rate:'49.35',daily_benefit:'75',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'19',age_max:'34',monthly_rate:'5.55',daily_benefit:'75',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'35',age_max:'44',monthly_rate:'8.85',daily_benefit:'75',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'45',age_max:'54',monthly_rate:'11.55',daily_benefit:'75',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'55',age_max:'59',monthly_rate:'15.6',daily_benefit:'75',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'60',age_max:'64',monthly_rate:'22.8',daily_benefit:'75',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'65',age_max:'69',monthly_rate:'30.9',daily_benefit:'75',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'70',age_max:'74',monthly_rate:'38.4',daily_benefit:'75',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'75',age_max:'80',monthly_rate:'47.1',daily_benefit:'75',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'19',age_max:'34',monthly_rate:'4.8',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'35',age_max:'44',monthly_rate:'8.4',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'45',age_max:'54',monthly_rate:'14.2',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'55',age_max:'59',monthly_rate:'21.77',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'60',age_max:'64',monthly_rate:'32.6',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'65',age_max:'69',monthly_rate:'44.2',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'70',age_max:'74',monthly_rate:'54.2',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'75',age_max:'80',monthly_rate:'65.8',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'19',age_max:'34',monthly_rate:'7.4',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'35',age_max:'44',monthly_rate:'11.8',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'45',age_max:'54',monthly_rate:'15.4',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'55',age_max:'59',monthly_rate:'20.8',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'60',age_max:'64',monthly_rate:'30.4',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'65',age_max:'69',monthly_rate:'41.2',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'70',age_max:'74',monthly_rate:'51.2',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'75',age_max:'80',monthly_rate:'62.8',daily_benefit:'100',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'19',age_max:'34',monthly_rate:'7.2',daily_benefit:'150',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'35',age_max:'44',monthly_rate:'12.6',daily_benefit:'150',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'45',age_max:'54',monthly_rate:'21.3',daily_benefit:'150',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'55',age_max:'59',monthly_rate:'32.66',daily_benefit:'150',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'60',age_max:'64',monthly_rate:'48.9',daily_benefit:'150',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'65',age_max:'69',monthly_rate:'66.3',daily_benefit:'150',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'70',age_max:'74',monthly_rate:'81.3',daily_benefit:'150',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'MALE',age_min:'75',age_max:'80',monthly_rate:'98.7',daily_benefit:'150',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'19',age_max:'34',monthly_rate:'11.1',daily_benefit:'150',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'35',age_max:'44',monthly_rate:'17.7',daily_benefit:'150',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'45',age_max:'54',monthly_rate:'23.1',daily_benefit:'150',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'55',age_max:'59',monthly_rate:'31.2',daily_benefit:'150',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'60',age_max:'64',monthly_rate:'45.6',daily_benefit:'150',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'65',age_max:'69',monthly_rate:'61.8',daily_benefit:'150',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'70',age_max:'74',monthly_rate:'76.8',daily_benefit:'150',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'BASE',coverage_type:'IND',gender:'FEMALE',age_min:'75',age_max:'80',monthly_rate:'94.2',daily_benefit:'150',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'RECUP',coverage_type:'IND',gender:'MALE',age_min:'19',age_max:'34',monthly_rate:'3.7',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'RECUP',coverage_type:'IND',gender:'MALE',age_min:'35',age_max:'44',monthly_rate:'6.5',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'RECUP',coverage_type:'IND',gender:'MALE',age_min:'45',age_max:'54',monthly_rate:'10.7',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'RECUP',coverage_type:'IND',gender:'MALE',age_min:'55',age_max:'59',monthly_rate:'16.09',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'RECUP',coverage_type:'IND',gender:'MALE',age_min:'60',age_max:'64',monthly_rate:'24.0',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'RECUP',coverage_type:'IND',gender:'MALE',age_min:'65',age_max:'69',monthly_rate:'32.4',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'RECUP',coverage_type:'IND',gender:'MALE',age_min:'70',age_max:'74',monthly_rate:'39.8',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'RECUP',coverage_type:'IND',gender:'MALE',age_min:'75',age_max:'80',monthly_rate:'47.7',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'RECUP',coverage_type:'IND',gender:'FEMALE',age_min:'19',age_max:'34',monthly_rate:'6.3',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'RECUP',coverage_type:'IND',gender:'FEMALE',age_min:'35',age_max:'44',monthly_rate:'9.9',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'RECUP',coverage_type:'IND',gender:'FEMALE',age_min:'45',age_max:'54',monthly_rate:'12.4',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'RECUP',coverage_type:'IND',gender:'FEMALE',age_min:'55',age_max:'59',monthly_rate:'15.9',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'RECUP',coverage_type:'IND',gender:'FEMALE',age_min:'60',age_max:'64',monthly_rate:'22.4',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'RECUP',coverage_type:'IND',gender:'FEMALE',age_min:'65',age_max:'69',monthly_rate:'30.6',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'RECUP',coverage_type:'IND',gender:'FEMALE',age_min:'70',age_max:'74',monthly_rate:'38.0',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'},
+{product:'H34',state:'MI',rider:'RECUP',coverage_type:'IND',gender:'FEMALE',age_min:'75',age_max:'80',monthly_rate:'45.9',daily_benefit:'50',benefit_amount:'',units:'',plan_type:'',available:'Y'}
+];
+
+function suppRatesMI(product){ return SUPP_RATES.filter(r=>r.state==='MI'&&r.product===product); }
+
+function findA71Rate(age, cov, daily, rider){
+  const rows = suppRatesMI('A71');
+  return rows.find(r =>
+    r.coverage_type === cov &&
+    Number(r.daily_benefit) === Number(daily) &&
+    r.rider === rider &&
+    Number(r.age_min) <= age && age <= Number(r.age_max)
+  );
+}
+
+function findH34Rate(age, sex, daily, rider){
+  const rows = suppRatesMI('H34');
+  const g = sex === 'Male' ? 'MALE' : 'FEMALE';
+  return rows.find(r =>
+    r.gender === g &&
+    r.rider === rider &&
+    Number(r.daily_benefit) === Number(daily) &&
+    Number(r.age_min) <= age && age <= Number(r.age_max)
+  );
+}
+
+function findC10Rate(age, sex, units, cov){
+  const rows = suppRatesMI('C10');
+  const g = sex === 'Male' ? 'MALE' : 'FEMALE';
+  return rows.find(r =>
+    r.gender === g &&
+    Number(r.units) === Number(units) &&
+    r.coverage_type === cov &&
+    Number(r.age_min) <= age && age <= Number(r.age_max)
+  );
+}
+
+function findC20Rate(age, sex, benefit){
+  const rows = suppRatesMI('C20');
+  const g = sex === 'Male' ? 'MALE' : 'FEMALE';
+  return rows.find(r =>
+    r.gender === g &&
+    Number(r.benefit_amount) === Number(benefit) &&
+    r.coverage_type === 'IND' &&
+    Number(r.age_min) <= age && age <= Number(r.age_max)
+  );
+}
+
+function findC10PolicyFee(units){
+  const rows = suppRatesMI('C10');
+  const fee = rows.find(r => r.rider === 'ADD_PER_POLICY' && Number(r.units) === Number(units));
+  return fee ? Number(fee.monthly_rate) : 1.50;
+}
+
+function calcSupp(){
+  const mIn  = getPersonInput('main');
+  const spIn = state.spouseIncluded ? getPersonInput('spouse') : null;
+  const cu   = currency;
+
+  // ── A71 ──────────────────────────────────────────────────────
+  const a71Who     = document.getElementById('supp_a71_who').value;
+  const a71Daily   = Number(document.getElementById('supp_a71_benefit').value);
+  const a71Rider   = document.getElementById('supp_a71_rider').value;
+
+  // Sync hidden checkboxes so WL/Term engine still works
+  const mainA71El = document.getElementById('main_a71');
+  const spA71El   = document.getElementById('sp_a71');
+  mainA71El.checked = (a71Who === 'main' || a71Who === 'both');
+  spA71El.checked   = (a71Who === 'both') && !!spIn;
+
+  let a71Total = 0;
+  let a71Lines = [];
+
+  if(a71Who !== 'none'){
+    const cov = spIn && a71Who === 'both' ? 'FAM' : 'IND';
+    const mRow = findA71Rate(mIn.age, cov, a71Daily, a71Rider);
+    if(mRow){
+      a71Total += Number(mRow.monthly_rate);
+      a71Lines.push(`Principal: ${cu(mRow.monthly_rate)}/mo`);
+    }
+    if(a71Who === 'both' && spIn){
+      // FAM rate covers both — no extra
+      a71Lines[0] = `Principal + Cónyuge: ${cu(mRow?.monthly_rate||0)}/mo`;
+    }
+  }
+  document.getElementById('a71_total').textContent = cu(a71Total);
+  document.getElementById('a71_breakdown').innerHTML = a71Lines.length
+    ? a71Lines.map(l=>`<span>${l}</span>`).join(' · ')
+    : '—';
+
+  // Trigger WL refresh since A71 status changed
+  refreshAll();
+
+  // ── H34 ──────────────────────────────────────────────────────
+  const h34Who    = document.getElementById('supp_h34_who').value;
+  const h34Daily  = Number(document.getElementById('supp_h34_benefit').value);
+  const h34Recup  = document.getElementById('supp_h34_recup').checked;
+  const naEl      = document.getElementById('supp_h34_na');
+
+  let h34Total = 0;
+  let h34Lines = [];
+
+  if(h34Who !== 'none'){
+    const baseRider = 'BASE';
+    const mRow = findH34Rate(mIn.age, mIn.sex, h34Daily, baseRider);
+    if(mRow && mRow.available === 'Y'){
+      const mBase = Number(mRow.monthly_rate);
+      h34Total += mBase;
+      let mLine = `Principal: ${cu(mBase)}/mo`;
+      if(h34Recup){
+        // Recup rider uses $50/night base rate scaled proportionally
+        const recupRow = findH34Rate(mIn.age, mIn.sex, 50, 'RECUP');
+        if(recupRow){
+          const recupScaled = Number(recupRow.monthly_rate) * (h34Daily / 50);
+          h34Total += recupScaled;
+          mLine += ` + Recup ${cu(recupScaled)}/mo`;
+        }
+      }
+      h34Lines.push(mLine);
+      naEl.classList.add('hidden');
+    } else {
+      naEl.classList.remove('hidden');
+    }
+
+    if(h34Who === 'both' && spIn){
+      const spRow = findH34Rate(spIn.age, spIn.sex, h34Daily, baseRider);
+      if(spRow && spRow.available === 'Y'){
+        const spBase = Number(spRow.monthly_rate);
+        h34Total += spBase;
+        let spLine = `Cónyuge: ${cu(spBase)}/mo`;
+        if(h34Recup){
+          const spRecup = findH34Rate(spIn.age, spIn.sex, 50, 'RECUP');
+          if(spRecup){
+            const rs = Number(spRecup.monthly_rate) * (h34Daily / 50);
+            h34Total += rs;
+            spLine += ` + Recup ${cu(rs)}/mo`;
+          }
+        }
+        h34Lines.push(spLine);
+      }
+    }
+  }
+  document.getElementById('h34_total').textContent = cu(h34Total);
+  document.getElementById('h34_breakdown').innerHTML = h34Lines.length
+    ? h34Lines.map(l=>`<span>${l}</span>`).join('<br>')
+    : '—';
+
+  // ── C10 / C20 ────────────────────────────────────────────────
+  const c10Plan = document.getElementById('supp_c10_plan').value;
+  const detUnits = Number(document.getElementById('supp_c10_detection').value);
+  const c10DetRow = document.getElementById('c10DetRow');
+  const c10NAEl   = document.getElementById('supp_c10_na');
+  const c10bDet   = document.getElementById('c10b_detect');
+  const c10bTreat = document.getElementById('c10b_treat');
+
+  c10DetRow.style.display = c10Plan.startsWith('C10') ? '' : 'none';
+  c10NAEl.classList.add('hidden');
+
+  let c10Total = 0;
+  let c10Lines = [];
+
+  if(c10Plan !== 'none'){
+    if(c10Plan.startsWith('C10')){
+      const units = Number(c10Plan.split('_')[1]);
+      const mRow = findC10Rate(mIn.age, mIn.sex, units, 'ONE_ADULT');
+      if(mRow){
+        const cancer = Number(mRow.monthly_rate);
+        c10Total += cancer;
+        c10Lines.push(`C10 ${units}u: ${cu(cancer)}/mo`);
+      }
+      // Detection rider — use same units lookup at detection tier
+      if(detUnits > 0){
+        const dRow = findC10Rate(mIn.age, mIn.sex, detUnits, 'ONE_ADULT');
+        if(dRow){
+          // Detection is priced at same per-unit rate
+          const detRate = Number(dRow.monthly_rate) * (detUnits / Number(dRow.units || detUnits));
+          // Actually: just use the rate directly since units match
+          c10Total += Number(dRow.monthly_rate);
+          c10Lines.push(`Detection ${detUnits}u: ${cu(dRow.monthly_rate)}/mo`);
+        }
+      }
+      // Policy fee
+      const fee = findC10PolicyFee(units);
+      c10Total += fee;
+      c10Lines.push(`Fee: ${cu(fee)}/mo`);
+
+      // Update benefit pills
+      const treatBen = units * 10;
+      const detBen   = detUnits * 1000;
+      if(c10bTreat) c10bTreat.textContent = `💊 ${cu(treatBen)}/tratamiento`;
+      if(c10bDet)   c10bDet.style.display = detUnits > 0 ? '' : 'none';
+      if(c10bDet)   c10bDet.textContent = `🔬 ${money0(detBen)} al diagnóstico`;
+
+    } else {
+      // C20
+      const benefit = Number(c10Plan.split('_')[1].replace('k','000'));
+      const mRow = findC20Rate(mIn.age, mIn.sex, benefit);
+      if(mRow){
+        c10Total += Number(mRow.monthly_rate);
+        c10Lines.push(`C20 ${money0(benefit)}: ${cu(mRow.monthly_rate)}/mo`);
+        if(mIn.age > 64){
+          c10NAEl.textContent = currentLang === 'es'
+            ? 'C20 no disponible para mayores de 64 años.'
+            : 'C20 not available over age 64.';
+          c10NAEl.classList.remove('hidden');
+        }
+      } else {
+        c10NAEl.textContent = currentLang === 'es'
+          ? 'C20 no disponible para esta edad.'
+          : 'C20 not available at this age.';
+        c10NAEl.classList.remove('hidden');
+      }
+      if(c10bDet) c10bDet.style.display = 'none';
+      if(c10bTreat) c10bTreat.textContent = currentLang === 'es'
+        ? `💊 ${money0(benefit)} cobertura de cáncer`
+        : `💊 ${money0(benefit)} cancer coverage`;
+    }
+  }
+
+  document.getElementById('c10_total').textContent = cu(c10Total);
+  document.getElementById('c10_breakdown').innerHTML = c10Lines.length
+    ? c10Lines.map(l=>`<span>${l}</span>`).join('<br>')
+    : '—';
+}
+
+// Hook all supplemental controls to calcSupp
+['supp_a71_who','supp_a71_benefit','supp_a71_rider',
+ 'supp_h34_who','supp_h34_benefit','supp_h34_recup',
+ 'supp_c10_plan','supp_c10_detection'
+].forEach(id => {
+  const el = document.getElementById(id);
+  if(el) el.addEventListener('change', calcSupp);
+});
+
+// Initial calc
+calcSupp();
+
+// Add supplemental i18n keys
+const suppI18n = {
+  es: {
+    suppTitle:'Seguro Hospitalario y de Cáncer',
+    suppSub:'Suplementos · A71 · H34 · C10 · C20',
+    a71CardTitle:'Beneficios de Vida', a71CardSub:'Living Benefits · Terminal Illness Rider',
+    h34CardTitle:'Indemnización Hospitalaria', h34CardSub:'Hospital Indemnity · Cash Per Night',
+    c10CardTitle:'Seguro de Cáncer', c10CardSub:'Cancer Insurance · Detection Rider',
+    suppWho:'¿Quién?', suppBenefit:'Beneficio Diario', suppRider:'Con Rider',
+    suppNightly:'Beneficio Noche', suppRecup:'+ Rider de Recuperación',
+    suppPlan:'Plan', suppDetection:'Detection Rider',
+    suppMonthly:'Mensual Total',
+    a71b1:'🏥 $250 Urgencias', a71b2:'🛏 $1,000/noche 1-14', a71b3:'🛏 $500/noche 15+',
+    h34b1:'💵 Efectivo por noche', h34b2:'✓ Sin importar seguro médico', h34b3:'✓ Cualquier razón',
+    c10b1:'💊 $200/tratamiento', c10b2:'🔬 $10,000 al diagnóstico',
+    h34na:'No disponible para esta edad.', c10na:'C20 no disponible mayores de 64.',
+    tirDesc:'Si es diagnosticado con menos de 2 años de vida, recibe el <strong>50% del valor de su póliza de vida entera</strong> en vida.',
+  },
+  en: {
+    suppTitle:'Hospital & Cancer Insurance',
+    suppSub:'Supplementals · A71 · H34 · C10 · C20',
+    a71CardTitle:'Living Benefits', a71CardSub:'Living Benefits · Terminal Illness Rider',
+    h34CardTitle:'Hospital Indemnity', h34CardSub:'Hospital Indemnity · Cash Per Night',
+    c10CardTitle:'Cancer Insurance', c10CardSub:'Cancer Insurance · Detection Rider',
+    suppWho:'Who?', suppBenefit:'Daily Benefit', suppRider:'Rider',
+    suppNightly:'Nightly Benefit', suppRecup:'+ Recovery Rider',
+    suppPlan:'Plan', suppDetection:'Detection Rider',
+    suppMonthly:'Monthly Total',
+    a71b1:'🏥 $250 ER Visit', a71b2:'🛏 $1,000/night 1-14', a71b3:'🛏 $500/night 15+',
+    h34b1:'💵 Cash per night', h34b2:'✓ Regardless of health ins.', h34b3:'✓ Any reason',
+    c10b1:'💊 $200/treatment', c10b2:'🔬 $10,000 on diagnosis',
+    h34na:'Not available at this age.', c10na:'C20 not available over age 64.',
+    tirDesc:'If diagnosed with less than 2 years to live, receive <strong>50% of whole life face value</strong> paid out immediately.',
+  }
+};
+
+// Merge into main LANGS
+Object.keys(suppI18n).forEach(lang => {
+  Object.assign(LANGS[lang], suppI18n[lang]);
+});
+
+// Re-run applyLang once to catch new keys
+applyLang();
 </script>
 </body>
 </html>
