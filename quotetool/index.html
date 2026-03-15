@@ -1920,10 +1920,10 @@ function renderBottom(card){
 }
 
 function refreshAll(){
-  if(typeof syncSpouseToggles === 'function') syncSpouseToggles();
+  syncSpouseToggles();
   const monthly = Number($('monthlyIncome').value || 0);
   const hourly = Number($('hourlyIncome').value || 0);
-  const _suppDeduct = (typeof suppInBudgetDeduction==='function') ? suppInBudgetDeduction() : 0;
+  const _suppDeduct = suppInBudgetDeduction();
   const _oneRaw = (Number($('hourlyIncome').value||0)*4) + (Number($('monthlyIncome').value||0)>=6000?8:4);
   const _twoRaw = (Number($('hourlyIncome').value||0)*8) + (Number($('monthlyIncome').value||0)>=6000?8:4);
   $('oneBudgetText').textContent = _suppDeduct>0
@@ -2132,6 +2132,16 @@ const suppI18nKeys = {
 Object.keys(suppI18nKeys).forEach(lang=>{
   if(LANGS[lang]) Object.assign(LANGS[lang], suppI18nKeys[lang]);
 });
+
+// ── Stubs for supplemental functions defined in the second <script> block ──
+// These are overridden by the real implementations once that block loads.
+// They prevent ReferenceErrors when refreshAll() fires during initial page load.
+function syncSpouseToggles(){ /* overridden by supp engine */ }
+function buildPayouts(){ /* overridden by supp engine */ }
+function calcSupp(){ /* overridden by supp engine */ }
+function suppInBudgetDeduction(){ return 0; }
+</script>
+
 
 
 <!-- ═══════════════════════════════════════════════════════════════
@@ -2542,6 +2552,8 @@ Object.keys(suppI18nKeys).forEach(lang=>{
 
 </div><!-- #suppSection -->
 
+
+<script>
 
 // ══════════════════════════════════════════════════════════════
 //  SUPPLEMENTAL ENGINE
