@@ -859,7 +859,7 @@ function permanentPremiumFromRow(row, face){
 
 function findPermanentRate(age, sex, tob, face){
   const rows = state.rates
-    .filter(r => ['WL','PR','EX','SL'].includes(r.plan_code) && r.record_type==='rate' && r.age===age && r.sex===sex && r.tobacco===tob)
+    .filter(r => ['WL','PR','EX','SL'].includes(r.plan_code) && r.record_type==='rate' && Number(r.age)===age && r.sex===sex && r.tobacco===tob)
     .filter(r => (r.face_min==null || face>=r.face_min) && (r.face_max==null || face<=r.face_max))
     .sort((a,b)=> (a.face_min||0)-(b.face_min||0));
   const row = rows[0] || null;
@@ -883,7 +883,7 @@ function getNextPermanentStep(age, sex, tob, face, currentMonthly){
 }
 
 function find10RCRate(age, sex, tob){
-  return state.rates.find(r => r.plan_code==='10RC' && r.record_type==='rate' && r.age===age && r.sex===sex && r.tobacco===tob) || null;
+  return state.rates.find(r => r.plan_code==='10RC' && r.record_type==='rate' && Number(r.age)===age && r.sex===sex && r.tobacco===tob) || null;
 }
 
 function findADBRate(age){
@@ -1356,7 +1356,7 @@ function personInputHasA71(person){
 
 function buildPermanentOptions(age, sex, tob){
   const rows = state.rates
-    .filter(r => ['WL','PR','EX','SL'].includes(r.plan_code) && r.record_type==='rate' && r.age===age && r.sex===sex && r.tobacco===tob)
+    .filter(r => ['WL','PR','EX','SL'].includes(r.plan_code) && r.record_type==='rate' && Number(r.age)===age && r.sex===sex && r.tobacco===tob)
     .sort((a,b)=> (a.face_min||0)-(b.face_min||0));
   const opts = [{face:0, monthly:0, code:'', row:null}];
   for(const row of rows){
