@@ -904,23 +904,21 @@ function buildPermanentOptions(age, sex, tob){
 
 // Price WL face for a person from ratebook
 function priceWL(personInput, face){
-  if(face <= 0) return 0;
+  if(!face || face <= 0) return 0;
   const row = findPermanentRate(personInput.age, personInput.sex, personInput.tob, face);
   if(!row) return 9999;
   return annualToMonthly(face/1000 * row.base_rate + row.policy_fee_annual + row.volume_adjustment_annual);
 }
 
-// Price term face for a person
 function priceTerm(personInput, face){
-  if(face <= 0) return 0;
+  if(!face || face <= 0) return 0;
   const row = find10RCRate(personInput.age, personInput.sex, personInput.tob);
   if(!row) return 9999;
   return annualToMonthly(face/1000 * row.base_rate + row.policy_fee_annual + row.volume_adjustment_annual);
 }
 
-// Price ADB face
 function priceADB(personInput, face){
-  if(face <= 0) return 0;
+  if(!face || face <= 0) return 0;
   const row = findADBRate(personInput.age);
   if(!row) return 9999;
   return annualToMonthly(face/1000 * row.base_rate);
@@ -936,14 +934,18 @@ function a71Cost(personInput){
 
 // Find the highest face <= faceTarget that costs <= budget for a person
 // Searches ratebook in $1k steps
-function bestFaceForBudget(personInput, faceTarget, budget, type){
-  if(budget <= 0 || faceTarget <= 0) return 0;
-  // Walk from faceTarget down to 1k in $1k steps
+// Try faceTarget exactly first. If total household cost fits budget, done.
+// Otherwise walk down $1k at a time until it fits.
+// Always prices in full context (existing mWL+mTerm+spWL) to check fit.
+function tryFace(personInput, faceTarget, type, getTotal, budget){
   for(let f = Math.floor(faceTarget/1000)*1000; f >= 1000; f -= 1000){
-    const cost = type === 'term' ? priceTerm(personInput, f) : priceWL(personInput, f);
-    if(cost <= budget + 0.01) return f;
+    // Temporarily set the value and check total
+    const cost = type === 'wl' ? priceWL(personInput, f) : priceTerm(personInput, f);
+    if(cost >= 9999) continue; // no rate found at this face
+    const total = getTotal(f);
+    if(total <= budget + 0.01) return f;
   }
-  return 0;
+  return 0; // nothing fits
 }
 
 function autoFillCard(card){
@@ -1001,10 +1003,12 @@ function autoFillCard(card){
   const mo12 = round1000(income * 12);
   const mo15 = round1000(income * 15);
 
-  // Helper: total cost of current state
+  // Helper: total WL+Term cost of current state (0 face = $0 cost)
   function totalCost(){
-    return priceWL(mIn, mWL) + priceTerm(mIn, mTerm) +
-           (spIn ? priceWL(spIn, spWL) : 0);
+    const mWLc  = mWL   > 0 ? priceWL(mIn,   mWL)   : 0;
+    const mTmc  = mTerm > 0 ? priceTerm(mIn,  mTerm) : 0;
+    const spWLc = (spIn && spWL > 0) ? priceWL(spIn, spWL) : 0;
+    return mWLc + mTmc + spWLc;
   }
 
   // Helper: try to set a value, return true if it fits, false if over budget
@@ -1022,49 +1026,115 @@ function autoFillCard(card){
   }
 
   let done = false;
+  function rem(){ return budget - totalCost(); }
+
+  // Each step passes a getTotal(f) lambda that prices f in full context
+  // so the fit check is always: does the whole household fit in budget?
 
   // Step 1: Main WL 15k
-  if(!done){ mWL = bestFaceForBudget(mIn, 15000, budget, 'wl'); if(totalCost() >= budget - 0.5) done = true; }
+  if(!done){
+    mWL = tryFace(mIn, 15000, 'wl', f => priceWL(mIn,f) + priceTerm(mIn,mTerm) + (spIn?priceWL(spIn,spWL):0), budget);
+    if(rem() < 1) done = true;
+  }
   // Step 2: Spouse WL 15k
-  if(!done && spIn){ spWL = bestFaceForBudget(spIn, 15000, budget - priceWL(mIn,mWL) - priceTerm(mIn,mTerm), 'wl'); if(totalCost() >= budget - 0.5) done = true; }
-  // Step 3: Main WL 35k
-  if(!done){ const r = budget - priceTerm(mIn,mTerm) - (spIn?priceWL(spIn,spWL):0); mWL = bestFaceForBudget(mIn, 35000, r, 'wl'); if(totalCost() >= budget - 0.5) done = true; }
+  if(!done && spIn){
+    spWL = tryFace(spIn, 15000, 'wl', f => priceWL(mIn,mWL) + priceTerm(mIn,mTerm) + priceWL(spIn,f), budget);
+    if(rem() < 1) done = true;
+  }
+  // Step 3: Main WL → 35k
+  if(!done){
+    mWL = tryFace(mIn, 35000, 'wl', f => priceWL(mIn,f) + priceTerm(mIn,mTerm) + (spIn?priceWL(spIn,spWL):0), budget);
+    if(rem() < 1) done = true;
+  }
   // Step 4: Main Term 3mo
-  if(!done){ const r = budget - priceWL(mIn,mWL) - (spIn?priceWL(spIn,spWL):0); mTerm = bestFaceForBudget(mIn, mo3, r, 'term'); if(totalCost() >= budget - 0.5) done = true; }
-  // Step 5: Spouse WL 20k
-  if(!done && spIn){ const r = budget - priceWL(mIn,mWL) - priceTerm(mIn,mTerm); spWL = bestFaceForBudget(spIn, 20000, r, 'wl'); if(totalCost() >= budget - 0.5) done = true; }
-  // Step 6: Main Term 6mo
-  if(!done){ const r = budget - priceWL(mIn,mWL) - (spIn?priceWL(spIn,spWL):0); mTerm = bestFaceForBudget(mIn, mo6, r, 'term'); if(totalCost() >= budget - 0.5) done = true; }
-  // Step 7: Main WL 45k
-  if(!done){ const r = budget - priceTerm(mIn,mTerm) - (spIn?priceWL(spIn,spWL):0); mWL = bestFaceForBudget(mIn, 45000, r, 'wl'); if(totalCost() >= budget - 0.5) done = true; }
-  // Step 8: Spouse WL 35k
-  if(!done && spIn){ const r = budget - priceWL(mIn,mWL) - priceTerm(mIn,mTerm); spWL = bestFaceForBudget(spIn, 35000, r, 'wl'); if(totalCost() >= budget - 0.5) done = true; }
-  // Step 9: Main Term 9mo
-  if(!done){ const r = budget - priceWL(mIn,mWL) - (spIn?priceWL(spIn,spWL):0); mTerm = bestFaceForBudget(mIn, mo9, r, 'term'); if(totalCost() >= budget - 0.5) done = true; }
-  // Step 10: Main WL 60k
-  if(!done){ const r = budget - priceTerm(mIn,mTerm) - (spIn?priceWL(spIn,spWL):0); mWL = bestFaceForBudget(mIn, 60000, r, 'wl'); if(totalCost() >= budget - 0.5) done = true; }
-  // Step 11: Spouse WL 40k
-  if(!done && spIn){ const r = budget - priceWL(mIn,mWL) - priceTerm(mIn,mTerm); spWL = bestFaceForBudget(spIn, 40000, r, 'wl'); if(totalCost() >= budget - 0.5) done = true; }
-  // Step 12: Main Term 12mo
-  if(!done){ const r = budget - priceWL(mIn,mWL) - (spIn?priceWL(spIn,spWL):0); mTerm = bestFaceForBudget(mIn, mo12, r, 'term'); if(totalCost() >= budget - 0.5) done = true; }
-  // Step 13: Main WL 75k
-  if(!done){ const r = budget - priceTerm(mIn,mTerm) - (spIn?priceWL(spIn,spWL):0); mWL = bestFaceForBudget(mIn, 75000, r, 'wl'); if(totalCost() >= budget - 0.5) done = true; }
-  // Step 14: Main Term 15mo
-  if(!done){ const r = budget - priceWL(mIn,mWL) - (spIn?priceWL(spIn,spWL):0); mTerm = bestFaceForBudget(mIn, mo15, r, 'term'); if(totalCost() >= budget - 0.5) done = true; }
-  // Step 15: Spouse WL 60k
-  if(!done && spIn){ const r = budget - priceWL(mIn,mWL) - priceTerm(mIn,mTerm); spWL = bestFaceForBudget(spIn, 60000, r, 'wl'); if(totalCost() >= budget - 0.5) done = true; }
-  // Step 16: Main WL 120k
-  if(!done){ const r = budget - priceTerm(mIn,mTerm) - (spIn?priceWL(spIn,spWL):0); mWL = bestFaceForBudget(mIn, 120000, r, 'wl'); if(totalCost() >= budget - 0.5) done = true; }
-  // Step 17: Spouse WL 75k
-  if(!done && spIn){ const r = budget - priceWL(mIn,mWL) - priceTerm(mIn,mTerm); spWL = bestFaceForBudget(spIn, 75000, r, 'wl'); if(totalCost() >= budget - 0.5) done = true; }
-  // Step 18: Main WL 150k
-  if(!done){ const r = budget - priceTerm(mIn,mTerm) - (spIn?priceWL(spIn,spWL):0); mWL = bestFaceForBudget(mIn, 150000, r, 'wl'); if(totalCost() >= budget - 0.5) done = true; }
-  // Step 19: Spouse WL 120k
-  if(!done && spIn){ const r = budget - priceWL(mIn,mWL) - priceTerm(mIn,mTerm); spWL = bestFaceForBudget(spIn, 120000, r, 'wl'); if(totalCost() >= budget - 0.5) done = true; }
-  // Step 20: Main WL 200k
-  if(!done){ const r = budget - priceTerm(mIn,mTerm) - (spIn?priceWL(spIn,spWL):0); mWL = bestFaceForBudget(mIn, 200000, r, 'wl'); if(totalCost() >= budget - 0.5) done = true; }
-  // Step 21: Spouse WL 150k
-  if(!done && spIn){ const r = budget - priceWL(mIn,mWL) - priceTerm(mIn,mTerm); spWL = bestFaceForBudget(spIn, 150000, r, 'wl'); }
+  if(!done){
+    mTerm = tryFace(mIn, mo3, 'term', f => priceWL(mIn,mWL) + priceTerm(mIn,f) + (spIn?priceWL(spIn,spWL):0), budget);
+    if(rem() < 1) done = true;
+  }
+  // Step 5: Spouse WL → 20k
+  if(!done && spIn){
+    spWL = tryFace(spIn, 20000, 'wl', f => priceWL(mIn,mWL) + priceTerm(mIn,mTerm) + priceWL(spIn,f), budget);
+    if(rem() < 1) done = true;
+  }
+  // Step 6: Main Term → 6mo
+  if(!done){
+    mTerm = tryFace(mIn, mo6, 'term', f => priceWL(mIn,mWL) + priceTerm(mIn,f) + (spIn?priceWL(spIn,spWL):0), budget);
+    if(rem() < 1) done = true;
+  }
+  // Step 7: Main WL → 45k
+  if(!done){
+    mWL = tryFace(mIn, 45000, 'wl', f => priceWL(mIn,f) + priceTerm(mIn,mTerm) + (spIn?priceWL(spIn,spWL):0), budget);
+    if(rem() < 1) done = true;
+  }
+  // Step 8: Spouse WL → 35k
+  if(!done && spIn){
+    spWL = tryFace(spIn, 35000, 'wl', f => priceWL(mIn,mWL) + priceTerm(mIn,mTerm) + priceWL(spIn,f), budget);
+    if(rem() < 1) done = true;
+  }
+  // Step 9: Main Term → 9mo
+  if(!done){
+    mTerm = tryFace(mIn, mo9, 'term', f => priceWL(mIn,mWL) + priceTerm(mIn,f) + (spIn?priceWL(spIn,spWL):0), budget);
+    if(rem() < 1) done = true;
+  }
+  // Step 10: Main WL → 60k
+  if(!done){
+    mWL = tryFace(mIn, 60000, 'wl', f => priceWL(mIn,f) + priceTerm(mIn,mTerm) + (spIn?priceWL(spIn,spWL):0), budget);
+    if(rem() < 1) done = true;
+  }
+  // Step 11: Spouse WL → 40k
+  if(!done && spIn){
+    spWL = tryFace(spIn, 40000, 'wl', f => priceWL(mIn,mWL) + priceTerm(mIn,mTerm) + priceWL(spIn,f), budget);
+    if(rem() < 1) done = true;
+  }
+  // Step 12: Main Term → 12mo
+  if(!done){
+    mTerm = tryFace(mIn, mo12, 'term', f => priceWL(mIn,mWL) + priceTerm(mIn,f) + (spIn?priceWL(spIn,spWL):0), budget);
+    if(rem() < 1) done = true;
+  }
+  // Step 13: Main WL → 75k
+  if(!done){
+    mWL = tryFace(mIn, 75000, 'wl', f => priceWL(mIn,f) + priceTerm(mIn,mTerm) + (spIn?priceWL(spIn,spWL):0), budget);
+    if(rem() < 1) done = true;
+  }
+  // Step 14: Main Term → 15mo
+  if(!done){
+    mTerm = tryFace(mIn, mo15, 'term', f => priceWL(mIn,mWL) + priceTerm(mIn,f) + (spIn?priceWL(spIn,spWL):0), budget);
+    if(rem() < 1) done = true;
+  }
+  // Step 15: Spouse WL → 60k
+  if(!done && spIn){
+    spWL = tryFace(spIn, 60000, 'wl', f => priceWL(mIn,mWL) + priceTerm(mIn,mTerm) + priceWL(spIn,f), budget);
+    if(rem() < 1) done = true;
+  }
+  // Step 16: Main WL → 120k
+  if(!done){
+    mWL = tryFace(mIn, 120000, 'wl', f => priceWL(mIn,f) + priceTerm(mIn,mTerm) + (spIn?priceWL(spIn,spWL):0), budget);
+    if(rem() < 1) done = true;
+  }
+  // Step 17: Spouse WL → 75k
+  if(!done && spIn){
+    spWL = tryFace(spIn, 75000, 'wl', f => priceWL(mIn,mWL) + priceTerm(mIn,mTerm) + priceWL(spIn,f), budget);
+    if(rem() < 1) done = true;
+  }
+  // Step 18: Main WL → 150k
+  if(!done){
+    mWL = tryFace(mIn, 150000, 'wl', f => priceWL(mIn,f) + priceTerm(mIn,mTerm) + (spIn?priceWL(spIn,spWL):0), budget);
+    if(rem() < 1) done = true;
+  }
+  // Step 19: Spouse WL → 120k
+  if(!done && spIn){
+    spWL = tryFace(spIn, 120000, 'wl', f => priceWL(mIn,mWL) + priceTerm(mIn,mTerm) + priceWL(spIn,f), budget);
+    if(rem() < 1) done = true;
+  }
+  // Step 20: Main WL → 200k
+  if(!done){
+    mWL = tryFace(mIn, 200000, 'wl', f => priceWL(mIn,f) + priceTerm(mIn,mTerm) + (spIn?priceWL(spIn,spWL):0), budget);
+    if(rem() < 1) done = true;
+  }
+  // Step 21: Spouse WL → 150k
+  if(!done && spIn){
+    spWL = tryFace(spIn, 150000, 'wl', f => priceWL(mIn,mWL) + priceTerm(mIn,mTerm) + priceWL(spIn,f), budget);
+  }
 
   // ── Set coverage ──────────────────────────────────────────────────────────
   setCoverage(card, 'main',   { wl: mWL,  term: mTerm,  adb: adbFace });
@@ -1096,6 +1166,174 @@ function autoChangePermanent(card, person){
   refreshAll();
 }
 
+
+function renderPane(card, person){
+  const pane = getPane(card, person);
+  if(!pane) return;
+  const input = getPersonInput(person);
+  const coverage = getCoverage(card, person);
+  setCoverage(card, person, coverage);
+  const priced = priceCoverage(input, coverage);
+  const death = calcDeathTotals(input, coverage);
+  pane.querySelector('[data-field="wlText"]').textContent   = money0(coverage.wl);
+  pane.querySelector('[data-field="termText"]').textContent = money0(coverage.term);
+  pane.querySelector('[data-field="adbText"]').textContent  = money0(coverage.adb);
+  pane.querySelector('[data-field="monthlyText"]').textContent = currency(priced.monthly);
+  pane.querySelector('[data-field="weeklyText"]').textContent  = currency(priced.monthly / 4);
+
+  // Per-component price tags
+  const wlPEl  = pane.querySelector('[data-field="wlPrice"]');
+  const tmPEl  = pane.querySelector('[data-field="termPrice"]');
+  const adbPEl = pane.querySelector('[data-field="adbPrice"]');
+  const a71PEl = pane.querySelector('[data-field="a71Price"]');
+  if(wlPEl)  wlPEl.textContent  = coverage.wl   > 0 ? currency(priced.wlMonthly)+'/mo'   : '';
+  if(tmPEl)  tmPEl.textContent  = coverage.term > 0 ? currency(priced.termMonthly)+'/mo' : '';
+  if(adbPEl) adbPEl.textContent = coverage.adb  > 0 ? currency(priced.adbMonthly)+'/mo'  : '';
+  if(a71PEl) a71PEl.textContent = input.a71         ? currency(priced.a71Monthly)+'/mo'  : '';
+  const a71Row = pane.querySelector('[data-field="a71Row"]');
+  a71Row.classList.toggle('hidden', !input.a71);
+  pane.querySelector('[data-field="a71Text"]').textContent = input.a71 ? 'ON' : 'OFF';
+  // Show/hide cremation checkbox — SSP only
+  const cremCheckRow = pane.querySelector(`#crem_${card}_${person}`)?.closest('.inlineToggle');
+  if(cremCheckRow) cremCheckRow.style.display = isSSPMode() ? 'flex' : 'none';
+
+  // In SSP mode hide TERM and ADB rows entirely — it's WL only
+  const termRow = pane.querySelector('[data-input="term"]')?.closest('.editRow');
+  const adbRow  = pane.querySelector('[data-input="adb"]')?.closest('.editRow');
+  const termCover = pane.querySelector('[data-field="termText"]')?.closest('.coverLine');
+  const adbCover  = pane.querySelector('[data-field="adbText"]')?.closest('.coverLine');
+  const sspOn = isSSPMode();
+  if(termRow)   termRow.style.display   = sspOn ? 'none' : '';
+  if(adbRow)    adbRow.style.display    = sspOn ? 'none' : '';
+  if(termCover) termCover.style.display = sspOn ? 'none' : '';
+  if(adbCover)  adbCover.style.display  = sspOn ? 'none' : '';
+  pane.querySelector('[data-field="notes"]').innerHTML = priced.notes.join('<br>');
+  const adbInput = pane.querySelector('[data-input="adb"]');
+  const lockADB = input.age >= 55;
+  adbInput.disabled = lockADB;
+  if(lockADB){ adbInput.value = 0; }
+  return { priced, death, coverage: getCoverage(card, person), input };
+}
+
+function renderBottom(card){
+  const bottom = $(card === 'one' ? 'oneBottom' : 'twoBottom');
+  const people = ['main'];
+  if(state.spouseIncluded) people.push('spouse');
+  let html = '';
+  let totalMonthly = 0;
+  people.forEach(person => {
+    const input = getPersonInput(person);
+    const coverage = getCoverage(card, person);
+    const death = calcDeathTotals(input, coverage);
+    const priced = priceCoverage(input, coverage);
+    totalMonthly += priced.monthly;
+
+    // A71 living benefit detail
+    let a71Detail = '';
+    if(input.a71){
+      a71Detail = `
+        <div style="margin-top:6px;padding:6px 10px;background:linear-gradient(135deg,#fffbef,#fef6d8);border:2px solid var(--gold);border-radius:10px;font-size:13px;color:var(--navy);text-align:left;">
+          <div style="font-weight:800;color:var(--navy);margin-bottom:3px;">A71 Living Benefits</div>
+          <div>🏥 ER / Urgent Care visit: <strong>$250</strong></div>
+          <div>🛏 Hospital nights 1–14: <strong>$1,000/night</strong></div>
+          <div>🛏 Hospital nights 15–365: <strong>$500/night</strong></div>
+          <div style="margin-top:3px;font-size:11px;color:var(--muted);">Max hospital benefit: ~$196,500/yr (14×$1k + 351×$500)</div>
+        </div>`;
+    }
+
+    html += `
+      <div style="margin-bottom:10px;">
+        <div class="paneTitle" style="font-size:18px;margin-bottom:4px;">${person === 'main' ? 'MAIN' : 'SPOUSE'}</div>
+        <div class="bottomLine">Death from sickness: ${money0(death.sickness)}</div>
+        <div class="bottomLine">Death from accident: ${money0(death.accident)}</div>
+        <div class="bottomLine">Car accident death: ${money0(death.car)}</div>
+        <div class="bottomLine">Common carrier death: ${money0(death.common)}</div>
+        ${a71Detail}
+      </div>`;
+  });
+  if(state.spouseIncluded){
+    html += `
+      <div style="border-top:3px solid var(--navy);padding-top:10px;margin-top:8px;">
+        <div class="paneTitle" style="font-size:18px;margin-bottom:4px;">TOTAL HOUSEHOLD</div>
+        <div class="bottomLine">Total monthly: ${currency(totalMonthly)}</div>
+        <div class="bottomLine">Total weekly: ${currency(totalMonthly / 4)}</div>
+      </div>`;
+  }
+  bottom.innerHTML = html;
+}
+
+function refreshAll(){
+  const monthly = Number($('monthlyIncome').value || 0);
+  const hourly = Number($('hourlyIncome').value || 0);
+  $('oneBudgetText').textContent = currency(hourly * 4);
+  $('twoBudgetText').textContent = currency(hourly * 8);
+
+  const sspModeOn = $('sspMode').checked;
+  $('sspGrid').classList.toggle('hidden', !sspModeOn || !state.spouseIncluded);
+  $('sspSummaryBox').classList.toggle('hidden', !sspModeOn || !state.spouseIncluded);
+  $('oneMetaText').textContent = sspModeOn && state.spouseIncluded ? 'SSP target' : 'Target budget';
+  $('twoMetaText').textContent = sspModeOn && state.spouseIncluded ? 'SSP target' : 'Target budget';
+
+  if(sspModeOn && state.spouseIncluded){
+    const ssp = getSSPScenario();
+    const pair = getSSPMonthPair();
+    // WL targets per card per person
+    const cremMainOne   = $('crem_one_main')?.checked   ? 2500 : 0;
+    const cremSpOne     = $('crem_one_spouse')?.checked ? 2500 : 0;
+    const cremMainTwo   = $('crem_two_main')?.checked   ? 2500 : 0;
+    const cremSpTwo     = $('crem_two_spouse')?.checked ? 2500 : 0;
+    const wlOne_main   = Math.min(34999, Math.max(0, round1000(ssp.lossIfMainDies   * pair.one  + cremMainOne)));
+    const wlOne_sp     = Math.min(34999, Math.max(0, round1000(ssp.lossIfSpouseDies * pair.one  + cremSpOne)));
+    const wlTwo_main   = Math.min(34999, Math.max(0, round1000(ssp.lossIfMainDies   * pair.two  + cremMainTwo)));
+    const wlTwo_sp     = Math.min(34999, Math.max(0, round1000(ssp.lossIfSpouseDies * pair.two  + cremSpTwo)));
+    $('oneHeaderText').textContent = `SSP — ${pair.one} MONTHS`;
+    $('twoHeaderText').textContent = `SSP — ${pair.two} MONTHS`;
+    $('oneMetaText').textContent = `Main WL ${money0(wlOne_main)} · Spouse WL ${money0(wlOne_sp)}`;
+    $('twoMetaText').textContent = `Main WL ${money0(wlTwo_main)} · Spouse WL ${money0(wlTwo_sp)}`;
+    if($('autoBtn_one')) $('autoBtn_one').textContent = `Auto Complete — ${pair.one} Months`;
+    if($('autoBtn_two')) $('autoBtn_two').textContent = `Auto Complete — ${pair.two} Months`;
+    $('sspTotalIncome').textContent           = currency(ssp.total);
+    $('sspSpouseOwn').textContent             = currency(ssp.spouseSSI);
+    $('sspSpouse75').textContent              = currency(ssp.mainSSI * 0.75);
+    $('sspSpouseKeeps').textContent           = currency(ssp.spouseKeepsIfMainDies);
+    $('sspLossIfMainDies').textContent        = currency(ssp.lossIfMainDies);
+    $('sspLossIfMainDiesAnnual').textContent  = currency(ssp.lossIfMainDies * 12);
+    $('sspMainOwn').textContent              = currency(ssp.mainSSI);
+    $('sspMain75').textContent               = currency(ssp.spouseSSI * 0.75);
+    $('sspMainKeeps').textContent            = currency(ssp.mainKeepsIfSpouseDies);
+    $('sspLossIfSpouseDies').textContent       = currency(ssp.lossIfSpouseDies);
+    $('sspLossIfSpouseDiesAnnual').textContent = currency(ssp.lossIfSpouseDies * 12);
+  } else {
+    $('oneHeaderText').textContent = 'ONE HOUR';
+    $('twoHeaderText').textContent = 'TWO HOUR';
+    $('oneMetaText').textContent = 'Target budget';
+    $('twoMetaText').textContent = 'Target budget';
+    if($('autoBtn_one')) $('autoBtn_one').textContent = 'Auto Complete Option 1';
+    if($('autoBtn_two')) $('autoBtn_two').textContent = 'Auto Complete Option 2';
+  }
+
+  const main = getPersonInput('main');
+  $('mainSummary').textContent = `MAIN (${main.sex.toUpperCase()}) AGE:${main.age} ${main.tob} ${main.a71 ? 'A71 ON' : 'A71 OFF'}`;
+
+  $('spouseGrid').classList.toggle('hidden', !state.spouseIncluded);
+  $('spouseBtn').textContent = state.spouseIncluded ? 'Remove spouse' : 'Add spouse';
+  const spouseOnePane = getPane('one','spouse');
+  const spouseTwoPane = getPane('two','spouse');
+  spouseOnePane.classList.toggle('hidden', !state.spouseIncluded);
+  spouseTwoPane.classList.toggle('hidden', !state.spouseIncluded);
+  if(state.spouseIncluded){
+    const sp = getPersonInput('spouse');
+    $('spSummary').textContent = `SPOUSE (${sp.sex.toUpperCase()}) AGE:${sp.age} ${sp.tob} ${sp.a71 ? 'A71 ON' : 'A71 OFF'}`;
+  } else {
+    $('spSummary').textContent = 'SPOUSE NOT INCLUDED';
+  }
+
+  ['one','two'].forEach(card => {
+    renderPane(card, 'main');
+    if(state.spouseIncluded) renderPane(card, 'spouse');
+    renderBottom(card);
+  });
+}
 
 function clearCard(card){
   setCoverage(card, 'main', {wl:0,term:0,adb:0});
