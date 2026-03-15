@@ -1250,32 +1250,44 @@ function autoFillCard(card){
     return;
   }
 
-  // ── Step 1: Fill spouse at their anchor (WL floor, no term one-hour)
-  const spouseBest = findBestAutoMix(card, 'spouse', ceiling);
-  setCoverage(card, 'spouse', spouseBest);
+  const spInput   = getPersonInput('spouse');
+  const mainInput = getPersonInput('main');
 
-  // ── Step 2: Main gets everything left
-  const spInput = getPersonInput('spouse');
-  const spCost  = priceCoverage(spInput, spouseBest).monthly;
-  const mainBudget = Math.max(10, ceiling - spCost);
-  const mainBest = findBestAutoMix(card, 'main', mainBudget);
+  // ── Estimate spouse anchor cost first ──────────────────────────────────────
+  // Spouse one-hour = WL floor only (~15k WL).
+  // We estimate it so main knows how much budget it has.
+  const spFloorWL = 15000;
+  const spFloorRow = findPermanentRate(spInput.age, spInput.sex, spInput.tob, spFloorWL);
+  const spFloorCost = spFloorRow
+    ? annualToMonthly(spFloorWL/1000 * spFloorRow.base_rate + spFloorRow.policy_fee_annual + spFloorRow.volume_adjustment_annual)
+    : ceiling * 0.25; // fallback estimate
+
+  // ── Step 1: Fill main first with (ceiling - spouse floor reserve) ──────────
+  const mainBudget = Math.max(10, ceiling - spFloorCost);
+  const mainBest   = findBestAutoMix(card, 'main', mainBudget);
   setCoverage(card, 'main', mainBest);
 
-  // ── Step 3: Use any remaining household budget to push spouse WL higher
-  const mainInput = getPersonInput('main');
-  const mainCov   = getCoverage(card, 'main');
-  const spCov     = getCoverage(card, 'spouse');
-  const spent     = priceCoverage(mainInput, mainCov).monthly + priceCoverage(spInput, spCov).monthly;
-  const leftover  = ceiling - spent;
+  // ── Step 2: Measure actual main cost ──────────────────────────────────────
+  const mainCost = priceCoverage(mainInput, mainBest).monthly;
 
-  if(leftover >= 1.0 && spouseBest.wl > 0){
-    // Try to push spouse WL up bracket by bracket
-    const spPermOpts = buildPermanentOptions(spInput.age, spInput.sex, spInput.tob);
+  // ── Step 3: Spouse gets everything left ────────────────────────────────────
+  const spBudget = Math.max(0, ceiling - mainCost);
+  const spBest   = findBestAutoMix(card, 'spouse', spBudget);
+  setCoverage(card, 'spouse', spBest);
+
+  // ── Step 4: If still household budget left, push spouse WL up ──────────────
+  const spCov     = getCoverage(card, 'spouse');
+  const mainCov   = getCoverage(card, 'main');
+  const spCost    = priceCoverage(spInput, spCov).monthly;
+  const totalSpent = mainCost + spCost;
+  const leftover  = ceiling - totalSpent;
+
+  if(leftover >= 1.0 && spCov.wl > 0){
     const ENTRIES = [60000, 35000, 25000, 20000, 15000, 10000];
     for(const entry of ENTRIES){
       if(entry <= spCov.wl) break;
       const testSpCost = priceCoverage(spInput, { ...spCov, wl: entry }).monthly;
-      if(testSpCost - priceCoverage(spInput, spCov).monthly <= leftover){
+      if(mainCost + testSpCost <= ceiling){
         setCoverage(card, 'spouse', { ...spCov, wl: entry });
         break;
       }
