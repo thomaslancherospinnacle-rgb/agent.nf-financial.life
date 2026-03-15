@@ -2307,6 +2307,10 @@ function suppInBudgetDeduction(){ return 0; }
 .rd-item-amount{font-family:'Cormorant Garamond',Georgia,serif;
   font-size:15px;font-weight:700;color:var(--ink);
   white-space:nowrap;font-variant-numeric:tabular-nums;}
+.rd-item-warn{background:rgba(230,80,30,.05);border-left:3px solid rgba(230,80,30,.4);}
+.rd-item-warn .rd-item-label{color:#9b3a1a;}
+.rd-item-warn .rd-item-note{color:#c05030;}
+.rd-item-warn .rd-item-amount{color:#b84020;font-size:12px;letter-spacing:.3px;}
 
 .rd-running-total{font-size:10.5px;color:var(--muted);
   padding:5px 0;border-top:1px dashed var(--line);}
@@ -3030,12 +3034,12 @@ function buildPayouts({a71Total,a74Total,h34Total,c10Total,c20Total}){
   const c1 = cardCov('one'), c2 = cardCov('two');
 
   // ── Scenario builder ──────────────────────────────────────────────────────
-  function buildScenario(title, icon, color, accentColor, coverageObj, scenarioFn){
+  function buildScenario(title, icon, accentColor, coverageObj, scenarioFn){
     const { wl, term, adb } = coverageObj;
     const result = scenarioFn({ wl, term, adb, a71Bens, a74Bens, h34Daily, h34Recup,
                                   c10PerTrt, c10DetAmt, c20Ben, a71Daily, a74Units,
                                   a71Total, a74Total, h34Total, c10Total, c20Total });
-    return { title, icon, color, accentColor, wl, term, adb, ...result };
+    return { title, icon, accentColor, wl, term, adb, ...result };
   }
 
   // ── Scenario definitions ──────────────────────────────────────────────────
@@ -3049,7 +3053,7 @@ function buildPayouts({a71Total,a74Total,h34Total,c10Total,c20Total}){
     // Phase 1: Diagnosis
     const diagnosisItems = [];
     if(active.c10 && c10DetAmt > 0){
-      diagnosisItems.push({ label:'C10 Cancer Detection Rider', amount: c10DetAmt, note:'One-time lump sum' });
+      diagnosisItems.push({ label:'C10 Cancer Detection Rider', amount: c10DetAmt, note:'One-time lump sum at diagnosis' });
       runningTotal += c10DetAmt;
     }
     if(active.c20 && c20Ben > 0){
@@ -3058,46 +3062,38 @@ function buildPayouts({a71Total,a74Total,h34Total,c10Total,c20Total}){
     }
     if(diagnosisItems.length) phases.push({ phase:'Diagnosis', emoji:'🔬', items: diagnosisItems, subtotal: runningTotal });
 
-    // Phase 2: Treatment (assume 12 treatments / chemotherapy sessions)
+    // Phase 2: Treatment (12 chemo sessions)
     const treatItems = [];
     const TREATMENTS = 12;
     if(active.c10 && c10PerTrt > 0){
       const trtTotal = c10PerTrt * TREATMENTS;
-      treatItems.push({ label:`C10 Cancer Treatment (${TREATMENTS}× $${c10PerTrt}/trt)`, amount: trtTotal, note:`$${c10PerTrt} per treatment` });
+      treatItems.push({ label:`C10 Cancer Treatment (${TREATMENTS}× $${c10PerTrt}/trt)`, amount: trtTotal, note:`$${c10PerTrt} per treatment × ${TREATMENTS} sessions` });
       runningTotal += trtTotal;
     }
-    if(treatItems.length) phases.push({ phase:`Treatment (${TREATMENTS} sessions)`, emoji:'💊', items: treatItems, subtotal: runningTotal });
+    if(treatItems.length) phases.push({ phase:`Chemotherapy (${TREATMENTS} sessions)`, emoji:'💊', items: treatItems, subtotal: runningTotal });
 
-    // Phase 3: Hospitalization — 365 nights (worst case)
+    // Phase 3: Hospitalization — 365 nights worst case
     const hospItems = [];
     const HOSP_NIGHTS = 365;
     if(active.h34 && h34Daily > 0){
       const hospTotal = h34Daily * HOSP_NIGHTS;
-      hospItems.push({ label:`H34 Hospital Indemnity (${HOSP_NIGHTS} nights × $${h34Daily})`, amount: hospTotal, note:`$${h34Daily}/night cash benefit` });
+      hospItems.push({ label:`H34 Hospital Cash (${HOSP_NIGHTS} nights × $${h34Daily})`, amount: hospTotal, note:`$${h34Daily}/night — paid regardless of other insurance` });
       runningTotal += hospTotal;
       if(h34Recup){
         const recupNights = Math.round(HOSP_NIGHTS * 0.5);
         const recupTotal = h34Daily * recupNights;
-        hospItems.push({ label:`H34 Recovery Rider (${recupNights} nights × $${h34Daily})`, amount: recupTotal, note:'50% of hospital nights in rehab' });
+        hospItems.push({ label:`H34 Recovery Rider (${recupNights} nights × $${h34Daily})`, amount: recupTotal, note:'50% of hospital nights in rehab/skilled nursing' });
         runningTotal += recupTotal;
-      }
-      if(h34SpouseChk && h34Total > 0){
-        const spouseNights = Math.round(HOSP_NIGHTS * 0.3);
-        hospItems.push({ label:`H34 Spouse (caregiver hospitalization, ${spouseNights} nights)`, amount: h34Daily * spouseNights, note:'Estimated spouse hospital days' });
-        runningTotal += h34Daily * spouseNights;
       }
     }
     if(active.a71 && a71Bens){
       const erVisits = 6;
-      const erTotal  = a71Bens.er * erVisits;
       const icuNights = 30;
-      const icuTotal  = a71Bens.icu * icuNights;
       const regNights = HOSP_NIGHTS - icuNights;
-      const regTotal  = a71Bens.hospital * regNights;
-      hospItems.push({ label:`A71 ER Visits (${erVisits}× $${a71Bens.er})`, amount: erTotal, note:'Emergency room benefit' });
-      hospItems.push({ label:`A71 ICU (${icuNights} nights × $${a71Bens.icu})`, amount: icuTotal, note:'Double rate in ICU' });
-      hospItems.push({ label:`A71 Hospital (${regNights} nights × $${a71Bens.hospital})`, amount: regTotal, note:'Regular hospital nights' });
-      runningTotal += erTotal + icuTotal + regTotal;
+      hospItems.push({ label:`A71 ER Visits (${erVisits}× $${a71Bens.er})`, amount: a71Bens.er * erVisits, note:'Emergency room benefit per visit' });
+      hospItems.push({ label:`A71 ICU (${icuNights} nights × $${a71Bens.icu})`, amount: a71Bens.icu * icuNights, note:'Double daily benefit while in ICU' });
+      hospItems.push({ label:`A71 Hospital (${regNights} nights × $${a71Bens.hospital})`, amount: a71Bens.hospital * regNights, note:'Daily hospital benefit — regular room' });
+      runningTotal += (a71Bens.er * erVisits) + (a71Bens.icu * icuNights) + (a71Bens.hospital * regNights);
     }
     if(hospItems.length) phases.push({ phase:'Hospitalization (365 days)', emoji:'🏥', items: hospItems, subtotal: runningTotal });
 
@@ -3106,121 +3102,232 @@ function buildPayouts({a71Total,a74Total,h34Total,c10Total,c20Total}){
     const DIS_WEEKS = 52;
     if(active.a74 && a74Bens && a74Bens.disability > 0){
       const disTotal = a74Bens.disability * DIS_WEEKS;
-      disItems.push({ label:`A74 Disability Pay (${DIS_WEEKS} wks × $${a74Bens.disability}/wk)`, amount: disTotal, note:'Weekly disability benefit' });
+      disItems.push({ label:`A74 Disability Pay (${DIS_WEEKS} wks × $${a74Bens.disability}/wk)`, amount: disTotal, note:'Weekly accident disability — if accident-related illness' });
       runningTotal += disTotal;
     }
     if(disItems.length) phases.push({ phase:'Disability (1 year)', emoji:'🩼', items: disItems, subtotal: runningTotal });
 
-    // Phase 5: Death (illness)
+    // Phase 5: Death by illness — NO ADB (illness/disease, not accident)
     const deathItems = [];
-    if(wl > 0){ deathItems.push({ label:`WL Death Benefit`, amount: wl, note:'Whole life — permanent' }); runningTotal += wl; }
-    if(term > 0){ deathItems.push({ label:`Term Death Benefit`, amount: term, note:'Term life coverage' }); runningTotal += term; }
-    if(deathItems.length) phases.push({ phase:'Death (by illness)', emoji:'☠️', items: deathItems, subtotal: runningTotal });
+    if(wl > 0){ deathItems.push({ label:'WL Death Benefit', amount: wl, note:'Whole life — permanent coverage' }); runningTotal += wl; }
+    if(term > 0){ deathItems.push({ label:'Term Death Benefit', amount: term, note:'Term life coverage' }); runningTotal += term; }
+    // Note: ADB does NOT pay for death from illness/cancer
+    deathItems.push({ label:'ADB — NOT paid', amount: 0, note:'Accidental death benefit does not cover illness/disease deaths' });
+    if(deathItems.length) phases.push({ phase:'Death — By Illness/Disease', emoji:'☠️', items: deathItems, subtotal: runningTotal });
 
     return { phases, grandTotal: runningTotal };
   }
 
-  // SCENARIO 2: Auto Accident → Hospital → Death
-  function scenarioAutoAccident({ wl, term, adb, a71Bens, a74Bens, h34Daily, h34Recup,
-                                    c10PerTrt, c10DetAmt, c20Ben }){
+  // SCENARIO 2A: Accident → Survives with dismemberment (1 limb lost)
+  function scenarioAccidentSurviveDismember({ wl, term, adb, a71Bens, a74Bens, h34Daily, h34Recup }){
     const phases = [];
     let runningTotal = 0;
 
-    // Phase 1: Emergency — accident
+    // Phase 1: Emergency Room
     const erItems = [];
     if(active.a71 && a71Bens){
-      erItems.push({ label:`A71 ER Visit ($${a71Bens.er})`, amount: a71Bens.er, note:'Accident ER benefit' });
+      erItems.push({ label:`A71 ER Visit ($${a71Bens.er})`, amount: a71Bens.er, note:'Emergency room accident benefit' });
       runningTotal += a71Bens.er;
     }
-    if(erItems.length) phases.push({ phase:'Emergency Room', emoji:'🚨', items: erItems, subtotal: runningTotal });
+    if(erItems.length) phases.push({ phase:'Emergency Response', emoji:'🚑', items: erItems, subtotal: runningTotal });
 
-    // Phase 2: Hospitalization — 90 nights
+    // Phase 2: Hospitalization — 60 nights (surgery + recovery)
     const hospItems = [];
-    const HOSP_NIGHTS = 90;
+    const HOSP_NIGHTS = 60;
     if(active.h34 && h34Daily > 0){
-      const icuNights = 14;
-      hospItems.push({ label:`H34 ICU (14 nights × $${h34Daily})`, amount: h34Daily * icuNights, note:'Hospital indemnity in ICU' });
-      hospItems.push({ label:`H34 Hospital (${HOSP_NIGHTS-icuNights} nights × $${h34Daily})`, amount: h34Daily * (HOSP_NIGHTS-icuNights), note:'Regular hospital nights' });
+      const icuNights = 10;
+      hospItems.push({ label:`H34 ICU (${icuNights} nights × $${h34Daily})`, amount: h34Daily * icuNights, note:'Hospital indemnity — ICU' });
+      hospItems.push({ label:`H34 Hospital (${HOSP_NIGHTS-icuNights} nights × $${h34Daily})`, amount: h34Daily * (HOSP_NIGHTS-icuNights), note:'Hospital indemnity — regular room' });
       runningTotal += h34Daily * HOSP_NIGHTS;
       if(h34Recup){
         const recupNights = 30;
-        hospItems.push({ label:`H34 Recovery Rider (30 nights)`, amount: h34Daily * recupNights, note:'Rehab/recovery facility' });
+        hospItems.push({ label:`H34 Recovery Rider (${recupNights} nights × $${h34Daily})`, amount: h34Daily * recupNights, note:'Rehab / prosthetic recovery' });
         runningTotal += h34Daily * recupNights;
       }
     }
     if(active.a71 && a71Bens){
-      const icuNights = 14;
+      const icuNights = 10;
       const regNights = HOSP_NIGHTS - icuNights;
-      hospItems.push({ label:`A71 ICU (14 nights × $${a71Bens.icu})`, amount: a71Bens.icu * icuNights, note:'Double rate in ICU' });
-      hospItems.push({ label:`A71 Hospital (${regNights} nights × $${a71Bens.hospital})`, amount: a71Bens.hospital * regNights, note:'Regular hospital nights' });
-      runningTotal += a71Bens.icu * icuNights + a71Bens.hospital * regNights;
+      hospItems.push({ label:`A71 ICU (${icuNights} nights × $${a71Bens.icu})`, amount: a71Bens.icu * icuNights, note:'Double benefit in ICU' });
+      hospItems.push({ label:`A71 Hospital (${regNights} nights × $${a71Bens.hospital})`, amount: a71Bens.hospital * regNights, note:'Daily hospital benefit' });
+      runningTotal += (a71Bens.icu * icuNights) + (a71Bens.hospital * regNights);
     }
-    if(hospItems.length) phases.push({ phase:'Hospitalization (90 days)', emoji:'🏥', items: hospItems, subtotal: runningTotal });
+    if(hospItems.length) phases.push({ phase:'Surgery + Hospitalization (60 days)', emoji:'🏥', items: hospItems, subtotal: runningTotal });
 
-    // Phase 3: Disability
+    // Phase 3: Dismemberment — 1 limb = 50% of ADB face
+    const dismemberItems = [];
+    if(adb > 0){
+      const oneArm  = Math.round(adb * 0.50);
+      const oneLeg  = Math.round(adb * 0.50);
+      const oneEye  = Math.round(adb * 0.25);
+      dismemberItems.push({ label:`ADB — Loss of 1 Arm/Leg (50% of $${(adb).toLocaleString()})`, amount: oneArm, note:'Dismemberment benefit — 1 limb = 50% of accidental death face amount' });
+      dismemberItems.push({ label:`ADB — Loss of 1 Eye (25%) — alt. scenario`, amount: oneEye, note:'Loss of sight = 25% of face amount (not added to total above)' });
+      runningTotal += oneArm;
+    }
+    if(active.a71 && a71Bens && a71Bens.ad > 0){
+      const a71Dismember = Math.round(a71Bens.ad * 0.50);
+      dismemberItems.push({ label:`A71 AD&D — 1 Limb (50% of $${(a71Bens.ad).toLocaleString()})`, amount: a71Dismember, note:'A71 dismemberment — 1 limb = 50% of AD&D benefit' });
+      runningTotal += a71Dismember;
+    }
+    if(active.a74 && a74Bens && a74Bens.ad > 0){
+      const a74Dismember = Math.round(a74Bens.ad * 0.50);
+      dismemberItems.push({ label:`A74 AD&D — 1 Limb (50% of $${(a74Bens.ad).toLocaleString()})`, amount: a74Dismember, note:'A74 dismemberment — 1 limb = 50% of AD&D benefit' });
+      runningTotal += a74Dismember;
+    }
+    if(dismemberItems.length) phases.push({ phase:'Dismemberment — 1 Limb Lost', emoji:'🦾', items: dismemberItems, subtotal: runningTotal });
+
+    // Phase 4: Disability (survives, can't work — 26 weeks)
     const disItems = [];
     const DIS_WEEKS = 26;
     if(active.a74 && a74Bens){
-      disItems.push({ label:`A74 Disability (${DIS_WEEKS} wks × $${a74Bens.disability}/wk)`, amount: a74Bens.disability * DIS_WEEKS, note:'Accident disability pay' });
+      disItems.push({ label:`A74 Disability (${DIS_WEEKS} wks × $${a74Bens.disability}/wk)`, amount: a74Bens.disability * DIS_WEEKS, note:'Weekly accident disability pay — survivor' });
       runningTotal += a74Bens.disability * DIS_WEEKS;
     }
-    if(disItems.length) phases.push({ phase:'Disability (6 months)', emoji:'🩼', items: disItems, subtotal: runningTotal });
-
-    // Phase 4: Accidental Death (auto)
-    const deathItems = [];
-    if(wl > 0){ deathItems.push({ label:'WL Death Benefit', amount: wl, note:'Whole life' }); runningTotal += wl; }
-    if(term > 0){ deathItems.push({ label:'Term Death Benefit', amount: term, note:'Term life' }); runningTotal += term; }
-    if(adb > 0){ deathItems.push({ label:'ADB Accidental Death', amount: adb, note:'Accident death benefit' }); runningTotal += adb; }
-    if(active.a71 && a71Bens){ deathItems.push({ label:`A71 AD&D (Auto 2×)`, amount: a71Bens.auto, note:'Auto accident multiplier' }); runningTotal += a71Bens.auto; }
-    if(active.a74 && a74Bens){ deathItems.push({ label:`A74 Auto Accident`, amount: a74Bens.auto, note:'Auto accident payout' }); runningTotal += a74Bens.auto; }
-    if(deathItems.length) phases.push({ phase:'Accidental Death (Auto)', emoji:'🚗', items: deathItems, subtotal: runningTotal });
+    if(disItems.length) phases.push({ phase:'Disability — Survivor (6 months)', emoji:'🩼', items: disItems, subtotal: runningTotal });
 
     return { phases, grandTotal: runningTotal };
   }
 
-  // SCENARIO 3: Common Carrier (plane crash)
+  // SCENARIO 2B: Accident → TBI → Hospital → Dies from TBI complications
+  // TBI death = ILLNESS death (not on-site) → NO ADB, NO A71/A74 AD&D
+  function scenarioTBIDeath({ wl, term, adb, a71Bens, a74Bens, h34Daily, h34Recup }){
+    const phases = [];
+    let runningTotal = 0;
+
+    // Phase 1: ER at scene
+    const erItems = [];
+    if(active.a71 && a71Bens){
+      erItems.push({ label:`A71 ER Visit ($${a71Bens.er})`, amount: a71Bens.er, note:'Accident ER benefit — paid at scene' });
+      runningTotal += a71Bens.er;
+    }
+    if(erItems.length) phases.push({ phase:'Emergency Room — Accident Scene', emoji:'🚨', items: erItems, subtotal: runningTotal });
+
+    // Phase 2: ICU / hospital — 30 nights with TBI
+    const hospItems = [];
+    const ICU_NIGHTS = 21;
+    const HOSP_NIGHTS = 30;
+    if(active.h34 && h34Daily > 0){
+      hospItems.push({ label:`H34 ICU (${ICU_NIGHTS} nights × $${h34Daily})`, amount: h34Daily * ICU_NIGHTS, note:'Hospital indemnity — ICU with TBI' });
+      hospItems.push({ label:`H34 Hospital (${HOSP_NIGHTS-ICU_NIGHTS} nights × $${h34Daily})`, amount: h34Daily * (HOSP_NIGHTS-ICU_NIGHTS), note:'Step-down after ICU' });
+      runningTotal += h34Daily * HOSP_NIGHTS;
+    }
+    if(active.a71 && a71Bens){
+      hospItems.push({ label:`A71 ICU (${ICU_NIGHTS} nights × $${a71Bens.icu})`, amount: a71Bens.icu * ICU_NIGHTS, note:'Double benefit while in ICU' });
+      hospItems.push({ label:`A71 Hospital (${HOSP_NIGHTS-ICU_NIGHTS} nights × $${a71Bens.hospital})`, amount: a71Bens.hospital * (HOSP_NIGHTS-ICU_NIGHTS), note:'Regular room benefit' });
+      runningTotal += (a71Bens.icu * ICU_NIGHTS) + (a71Bens.hospital * (HOSP_NIGHTS-ICU_NIGHTS));
+    }
+    if(hospItems.length) phases.push({ phase:'ICU & Hospital — TBI (30 days)', emoji:'🧠', items: hospItems, subtotal: runningTotal });
+
+    // Phase 3: Death — from TBI complications = ILLNESS DEATH
+    // ADB and A71/A74 AD&D do NOT pay — death was not instantaneous/on-site
+    const deathItems = [];
+    if(wl > 0){ deathItems.push({ label:'WL Death Benefit', amount: wl, note:'Whole life — pays for any cause of death' }); runningTotal += wl; }
+    if(term > 0){ deathItems.push({ label:'Term Death Benefit', amount: term, note:'Term life — pays for any cause of death' }); runningTotal += term; }
+    deathItems.push({
+      label:'ADB — NOT paid ⚠️',
+      amount: 0,
+      note: 'ADB requires death to be accidental & direct cause. TBI complications → hospital death is classified as natural/illness cause — ADB does not apply.'
+    });
+    if(active.a71 && a71Bens){
+      deathItems.push({
+        label:'A71 AD&D — NOT paid ⚠️',
+        amount: 0,
+        note: 'A71 AD&D pays only for on-site/immediate accidental death. Hospital death from TBI = illness classification.'
+      });
+    }
+    if(active.a74 && a74Bens){
+      deathItems.push({
+        label:'A74 AD&D — NOT paid ⚠️',
+        amount: 0,
+        note: 'A74 AD&D requires direct accidental cause of death. Death from TBI complications does not qualify.'
+      });
+    }
+    phases.push({ phase:'Death — TBI Complications (Illness Classification)', emoji:'☠️', items: deathItems, subtotal: runningTotal });
+
+    return { phases, grandTotal: runningTotal };
+  }
+
+  // SCENARIO 2C: On-site Accidental Death (instant — car crash/plane/fall)
+  // ADB + A71 AD&D + A74 AD&D all pay
+  function scenarioOnSiteAccidentalDeath({ wl, term, adb, a71Bens, a74Bens }){
+    const phases = [];
+    let runningTotal = 0;
+
+    const deathItems = [];
+    if(wl > 0){ deathItems.push({ label:'WL Death Benefit', amount: wl, note:'Whole life — any cause of death' }); runningTotal += wl; }
+    if(term > 0){ deathItems.push({ label:'Term Death Benefit', amount: term, note:'Term life — any cause of death' }); runningTotal += term; }
+    if(adb > 0){ deathItems.push({ label:`ADB Accidental Death — $${(adb).toLocaleString()}`, amount: adb, note:'Pays ONLY for on-site / direct accidental death' }); runningTotal += adb; }
+    if(active.a71 && a71Bens){ deathItems.push({ label:`A71 AD&D — On-Site Accident`, amount: a71Bens.ad, note:'Accidental death benefit — instant/direct cause' }); runningTotal += a71Bens.ad; }
+    if(active.a74 && a74Bens){ deathItems.push({ label:`A74 AD&D — On-Site Accident`, amount: a74Bens.ad, note:'Accidental death — direct cause only' }); runningTotal += a74Bens.ad; }
+    phases.push({ phase:'On-Site Accidental Death', emoji:'💀', items: deathItems, subtotal: runningTotal });
+
+    return { phases, grandTotal: runningTotal };
+  }
+
+  // SCENARIO 3: Auto Accident — On-site death (ADB + A71 auto multiplier + A74 auto)
+  function scenarioAutoOnSite({ wl, term, adb, a71Bens, a74Bens }){
+    const phases = [];
+    let runningTotal = 0;
+
+    const deathItems = [];
+    if(wl > 0){ deathItems.push({ label:'WL Death Benefit', amount: wl, note:'Whole life — any cause' }); runningTotal += wl; }
+    if(term > 0){ deathItems.push({ label:'Term Death Benefit', amount: term, note:'Term life' }); runningTotal += term; }
+    if(adb > 0){ deathItems.push({ label:`ADB Accidental Death`, amount: adb, note:'On-site auto accident — direct cause' }); runningTotal += adb; }
+    if(active.a71 && a71Bens){ deathItems.push({ label:`A71 Auto Accident (2× AD&D)`, amount: a71Bens.auto, note:`2× multiplier on auto accident = $${(a71Bens.auto).toLocaleString()}` }); runningTotal += a71Bens.auto; }
+    if(active.a74 && a74Bens){ deathItems.push({ label:`A74 Auto Accident Payout`, amount: a74Bens.auto, note:'A74 auto accident benefit' }); runningTotal += a74Bens.auto; }
+    phases.push({ phase:'On-Site Auto Accident Death', emoji:'🚗', items: deathItems, subtotal: runningTotal });
+
+    return { phases, grandTotal: runningTotal };
+  }
+
+  // SCENARIO 4: Common Carrier (plane/bus/train — highest multiplier)
   function scenarioCommonCarrier({ wl, term, adb, a71Bens, a74Bens }){
     const phases = [];
     let runningTotal = 0;
+
     const deathItems = [];
     if(wl > 0){ deathItems.push({ label:'WL Death Benefit', amount: wl, note:'Whole life' }); runningTotal += wl; }
     if(term > 0){ deathItems.push({ label:'Term Death Benefit', amount: term, note:'Term life' }); runningTotal += term; }
-    if(adb > 0){ deathItems.push({ label:'ADB Accidental Death', amount: adb, note:'Accident death benefit' }); runningTotal += adb; }
-    if(active.a71 && a71Bens){ deathItems.push({ label:`A71 AD&D (Common Carrier 5×)`, amount: a71Bens.common, note:'Plane/bus/train multiplier' }); runningTotal += a71Bens.common; }
-    if(active.a74 && a74Bens){ deathItems.push({ label:`A74 Common Carrier`, amount: a74Bens.common, note:'Common carrier payout' }); runningTotal += a74Bens.common; }
-    if(deathItems.length) phases.push({ phase:'Death — Common Carrier', emoji:'✈️', items: deathItems, subtotal: runningTotal });
+    if(adb > 0){ deathItems.push({ label:`ADB Accidental Death`, amount: adb, note:'On-site accident — direct cause' }); runningTotal += adb; }
+    if(active.a71 && a71Bens){ deathItems.push({ label:`A71 Common Carrier (5× AD&D)`, amount: a71Bens.common, note:`5× multiplier = $${(a71Bens.common).toLocaleString()} (plane/bus/train)` }); runningTotal += a71Bens.common; }
+    if(active.a74 && a74Bens){ deathItems.push({ label:`A74 Common Carrier Payout`, amount: a74Bens.common, note:'Common carrier maximum benefit' }); runningTotal += a74Bens.common; }
+    phases.push({ phase:'Death — Plane / Bus / Train', emoji:'✈️', items: deathItems, subtotal: runningTotal });
+
     return { phases, grandTotal: runningTotal };
   }
 
   // ── Render function ───────────────────────────────────────────────────────
-  function renderTimeline(scenario, cardLabel, colorClass){
-    const { title, icon, accentColor, phases, grandTotal, wl, term, adb } = scenario;
+  function renderTimeline(scenario, cardLabel){
+    const { title, icon, accentColor, phases, grandTotal } = scenario;
     if(!phases || phases.length === 0) return '';
+    // Skip if no items at all (no active plans contributed)
+    const totalItems = phases.reduce((s,p)=>s+p.items.filter(i=>i.amount>0).length,0);
+    if(totalItems === 0) return '';
 
     const phaseHtml = phases.map((ph, pi) => {
-      const itemHtml = ph.items.map(item => `
-        <div class="rd-item">
-          <div class="rd-item-label">${item.label}<span class="rd-item-note">${item.note}</span></div>
-          <div class="rd-item-amount">${money0(item.amount)}</div>
-        </div>`).join('');
       const isLast = pi === phases.length - 1;
+      const itemHtml = ph.items.map(item => {
+        const isWarning = item.amount === 0 && item.label.includes('NOT paid');
+        return `
+        <div class="rd-item${isWarning?' rd-item-warn':''}">
+          <div class="rd-item-label">${item.label}<span class="rd-item-note">${item.note}</span></div>
+          <div class="rd-item-amount">${item.amount > 0 ? money0(item.amount) : (isWarning ? '—' : '$0')}</div>
+        </div>`;
+      }).join('');
       return `
         <div class="rd-phase${isLast?' rd-phase-last':''}">
-          <div class="rd-phase-dot" style="background:${accentColor};">${ph.emoji}</div>
+          <div class="rd-phase-dot" style="background:${accentColor}20;border:2px solid ${accentColor}40;">${ph.emoji}</div>
           <div class="rd-phase-content">
             <div class="rd-phase-title">${ph.phase}</div>
             <div class="rd-items">${itemHtml}</div>
-            <div class="rd-running-total">Running total after this phase: <strong>${money0(ph.subtotal)}</strong></div>
+            <div class="rd-running-total">Running total: <strong>${money0(ph.subtotal)}</strong></div>
           </div>
         </div>`;
     }).join('');
 
     const activeList = [
-      active.a71 ? 'A71' : null,
-      active.a74 ? 'A74' : null,
-      active.h34 ? 'H34' : null,
-      active.c10 ? 'C10' : null,
-      active.c20 ? 'C20' : null,
+      active.a71?'A71':null, active.a74?'A74':null, active.h34?'H34':null,
+      active.c10?'C10':null, active.c20?'C20':null,
     ].filter(Boolean).join(' · ');
 
     return `
@@ -3229,7 +3336,7 @@ function buildPayouts({a71Total,a74Total,h34Total,c10Total,c20Total}){
           <div class="rd-scenario-icon">${icon}</div>
           <div class="rd-scenario-meta">
             <div class="rd-scenario-title">${title}</div>
-            <div class="rd-scenario-sub">${cardLabel} — Active plans: ${activeList}</div>
+            <div class="rd-scenario-sub">Active plans: ${activeList}</div>
           </div>
           <div class="rd-scenario-grand">
             <div class="rd-scenario-grand-label">Total Benefits</div>
@@ -3240,19 +3347,22 @@ function buildPayouts({a71Total,a74Total,h34Total,c10Total,c20Total}){
       </div>`;
   }
 
-  // ── Build for each option card ────────────────────────────────────────────
-  const scenarios1 = [
-    buildScenario('Worst Case: Cancer + 365 Days Hospital', '🎗', '#b30000', '#ff6b6b', c1, scenarioCancer),
-    buildScenario('Auto Accident → Hospital → Death', '🚗', '#b06000', '#ffaa44', c1, scenarioAutoAccident),
-    buildScenario('Common Carrier Accident (Plane/Train)', '✈️', '#004a99', '#5badff', c1, scenarioCommonCarrier),
-  ];
-  const scenarios2 = [
-    buildScenario('Worst Case: Cancer + 365 Days Hospital', '🎗', '#b30000', '#ff6b6b', c2, scenarioCancer),
-    buildScenario('Auto Accident → Hospital → Death', '🚗', '#b06000', '#ffaa44', c2, scenarioAutoAccident),
-    buildScenario('Common Carrier Accident (Plane/Train)', '✈️', '#004a99', '#5badff', c2, scenarioCommonCarrier),
-  ];
 
-  const hasCard1 = c1.wl > 0 || c1.term > 0 || c1.adb > 0;
+  // ── Build for each option card ────────────────────────────────────────────
+  function makeScenarios(cov){
+    return [
+      buildScenario('Worst Case: Cancer + 365 Days Hospital', '🎗', '#c0392b', cov, scenarioCancer),
+      buildScenario('Accident → Survive with 1 Limb Lost', '🦾', '#8e44ad', cov, scenarioAccidentSurviveDismember),
+      buildScenario('Accident → TBI → Hospital → Death (Illness Classification)', '🧠', '#e67e22', cov, scenarioTBIDeath),
+      buildScenario('On-Site Accidental Death — Direct Cause', '💀', '#2c3e50', cov, scenarioOnSiteAccidentalDeath),
+      buildScenario('Auto Accident — On-Site Death (2× AD&D)', '🚗', '#27ae60', cov, scenarioAutoOnSite),
+      buildScenario('Common Carrier — Plane/Bus/Train (5× AD&D)', '✈️', '#2980b9', cov, scenarioCommonCarrier),
+    ];
+  }
+  const scenarios1 = makeScenarios(c1);
+  const scenarios2 = makeScenarios(c2);
+
+ const hasCard1 = c1.wl > 0 || c1.term > 0 || c1.adb > 0;
   const hasCard2 = c2.wl > 0 || c2.term > 0 || c2.adb > 0;
 
   // ── Summary pill for each scenario ───────────────────────────────────────
