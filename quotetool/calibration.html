@@ -5,72 +5,256 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Ratebook Quote Builder</title>
 <style>
-*{box-sizing:border-box}
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0}
+
 :root{
-  --navy:#0d1f3c;
-  --navy-2:#132a4f;
-  --navy-3:#1b3c6e;
-  --gold:#c8a14d;
-  --gold-2:#e3c980;
-  --panel:#ffffff;
-  --bg:#eef3f9;
-  --line:#d7dfeb;
-  --ink:#132746;
-  --muted:#5b6f90;
+  --navy:      #07111f;
+  --navy-2:    #0c1c32;
+  --navy-3:    #112645;
+  --navy-4:    #1a3560;
+  --navy-5:    #243f72;
+  --gold:      #b08030;
+  --gold-2:    #c9973e;
+  --gold-3:    #ddb055;
+  --gold-4:    #eecb7a;
+  --gold-lt:   #f7edd4;
+  --white:     #ffffff;
+  --bg:        #edf0f6;
+  --bg-2:      #e4e8f1;
+  --surface:   #f8f9fc;
+  --line:      #d0d8e8;
+  --line-2:    #bac6db;
+  --ink:       #0c1824;
+  --ink-2:     #1e304a;
+  --muted:     #56697e;
+  --muted-2:   #8496ab;
+  --bad:       #8c1f1f;
+  --good:      #1a5432;
 }
-body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(180deg,#f4f7fb 0%,#eaf0f8 100%);color:var(--ink)}
-.page{max-width:1480px;margin:0 auto;padding:16px}
-.layout{display:grid;grid-template-columns:360px 1fr 1fr;gap:18px;align-items:start}
-.leftRail{position:relative;min-height:760px;background:linear-gradient(180deg,#f8fbff 0%,#eef3f9 100%);border:5px solid var(--navy);border-radius:26px;padding:14px;box-shadow:0 16px 36px rgba(8,21,45,.08)}
-.leftRail:after{content:"";position:absolute;top:10px;bottom:10px;right:-14px;width:8px;background:var(--navy);border-radius:8px}
-.panel{background:var(--panel);border:4px solid var(--navy);border-radius:20px;padding:12px;margin-bottom:14px}
-.personTitle{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border:3px solid var(--gold);border-radius:16px;background:linear-gradient(180deg,#fff 0%,#fcf8ef 100%);font-weight:800;color:var(--navy)}
-.personTitle .summary{font-size:15px;line-height:1.1}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+
+body{
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  background:#e8ecf4;
+  background-image:
+    linear-gradient(135deg,rgba(7,17,31,.04) 0%,transparent 50%),
+    radial-gradient(ellipse at 100% 0%,rgba(176,128,48,.06) 0%,transparent 55%);
+  color:var(--ink);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+
+.page{max-width:1520px;margin:0 auto;padding:20px}
+.layout{display:grid;grid-template-columns:356px 1fr 1fr;gap:20px;align-items:start}
+
+/* LEFT RAIL */
+.leftRail{
+  position:relative;min-height:760px;
+  background:linear-gradient(160deg,var(--navy-3) 0%,var(--navy-2) 45%,var(--navy) 100%);
+  border-radius:18px;padding:18px 16px;
+  box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 20px 60px rgba(7,17,31,.28),0 4px 16px rgba(7,17,31,.18);
+  overflow:hidden;
+}
+.leftRail::before{
+  content:'';position:absolute;inset:0;border-radius:18px;pointer-events:none;
+  background:radial-gradient(ellipse at 30% 0%,rgba(176,128,48,.08) 0%,transparent 60%),
+             radial-gradient(ellipse at 80% 100%,rgba(24,56,110,.4) 0%,transparent 55%);
+}
+.leftRail:after{
+  content:'';position:absolute;top:16px;bottom:16px;right:-10px;width:5px;border-radius:3px;
+  background:linear-gradient(180deg,transparent 0%,var(--gold-3) 20%,var(--gold-2) 50%,var(--gold-3) 80%,transparent 100%);
+  opacity:.85;box-shadow:0 0 16px rgba(176,128,48,.35);
+}
+
+.panel{
+  position:relative;
+  background:rgba(255,255,255,.045);
+  border:1px solid rgba(255,255,255,.09);
+  border-top:1px solid rgba(255,255,255,.13);
+  border-radius:12px;padding:14px 16px;margin-bottom:12px;
+}
+.personTitle{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:9px 13px;border:1px solid rgba(176,128,48,.45);border-radius:9px;
+  background:linear-gradient(135deg,rgba(176,128,48,.14) 0%,rgba(176,128,48,.05) 100%);
+  color:#e5d5a8;letter-spacing:.25px;
+}
+.personTitle .summary{
+  font-size:12px;font-weight:600;font-family:'Inter',sans-serif;
+  line-height:1.4;letter-spacing:.4px;text-transform:uppercase;color:#d4c08c;
+}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
 .grid .full{grid-column:1/-1}
-label{display:block;font-size:12px;font-weight:800;color:var(--navy);margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px}
-input,select,button{width:100%;font:inherit}
-input,select{padding:10px 11px;border:2px solid #cbd5e3;border-radius:12px;background:#fff;color:var(--ink)}
-button{padding:11px 14px;border-radius:14px;border:2px solid var(--navy);background:var(--navy);color:#fff;font-weight:800;cursor:pointer}
-button.alt{background:#fff;color:var(--navy)}
-button.gold{background:linear-gradient(180deg,var(--gold-2) 0%,var(--gold) 100%);border-color:#ae8a3b;color:#231c0b}
-button.ghost{background:#f6f8fc;color:var(--navy)}
-.inlineToggle{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--navy);padding-top:4px}
-.inlineToggle input{width:18px;height:18px;accent-color:var(--gold)}
-.card{min-height:760px;border:5px solid var(--navy);background:linear-gradient(180deg,#fff 0%,#f8fbff 100%);padding:12px;box-shadow:0 16px 36px rgba(8,21,45,.08)}
-.cardHeader{position:relative;text-align:center;font-size:34px;color:var(--navy);margin:2px 0 10px;font-weight:500;letter-spacing:.5px}
-.cardMeta{position:absolute;top:4px;right:0;font-size:13px;color:var(--muted);font-weight:700}
-.split{display:grid;grid-template-columns:1fr;min-height:580px}
+
+.leftRail label{
+  display:block;font-size:9.5px;font-weight:700;
+  color:rgba(176,128,48,.75);margin-bottom:5px;
+  text-transform:uppercase;letter-spacing:1px;
+}
+.leftRail input,.leftRail select{
+  width:100%;padding:8px 11px;
+  border:1px solid rgba(255,255,255,.11);
+  border-bottom:1px solid rgba(255,255,255,.18);
+  border-radius:7px;background:rgba(0,0,0,.28);
+  color:#ddd5be;font:inherit;font-size:13px;font-weight:500;
+  transition:border-color .18s,box-shadow .18s;appearance:auto;
+}
+.leftRail input:focus,.leftRail select:focus{
+  outline:none;border-color:rgba(176,128,48,.55);
+  box-shadow:0 0 0 2.5px rgba(176,128,48,.12);background:rgba(0,0,0,.32);
+}
+.leftRail select option{background:#0c1c32;color:#ddd5be}
+
+.inlineToggle{
+  display:flex;align-items:center;gap:8px;
+  font-size:12px;font-weight:500;color:rgba(195,182,148,.8);
+  padding-top:4px;letter-spacing:.15px;
+}
+.inlineToggle input{width:15px;height:15px;accent-color:var(--gold-3);flex-shrink:0;cursor:pointer}
+
+.leftRail button{
+  padding:8px 13px;border-radius:7px;
+  border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.07);
+  color:#c8bfa0;font:inherit;font-size:12px;font-weight:600;
+  cursor:pointer;width:100%;letter-spacing:.3px;text-transform:uppercase;transition:all .16s;
+}
+.leftRail button:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.28);color:#e0d5b2}
+.leftRail button.gold{
+  background:linear-gradient(135deg,var(--gold-3) 0%,var(--gold) 100%);
+  border:1px solid var(--gold-2);color:#140e00;font-weight:700;
+  box-shadow:0 2px 10px rgba(176,128,48,.32),0 1px 0 rgba(255,255,255,.18) inset;
+}
+.leftRail button.gold:hover{
+  background:linear-gradient(135deg,var(--gold-4) 0%,var(--gold-3) 100%);
+  box-shadow:0 4px 14px rgba(176,128,48,.42);
+}
+.leftRail button.alt{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.14)}
+
+.infoBox{margin-top:118px;min-height:150px;display:flex;flex-direction:column;justify-content:center}
+.status{font-size:11.5px;color:rgba(168,158,122,.65);margin-top:10px;line-height:1.7}
+.status strong{color:rgba(205,170,80,.85);font-weight:600}
+
+/* QUOTE CARDS */
+.card{
+  min-height:760px;background:var(--white);
+  border:1px solid var(--line);border-radius:16px;
+  padding:0;position:relative;overflow:hidden;
+  box-shadow:0 1px 3px rgba(7,17,31,.06),0 8px 32px rgba(7,17,31,.09),0 20px 60px rgba(7,17,31,.06);
+}
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:4px;z-index:1;
+  background:linear-gradient(90deg,var(--navy) 0%,var(--navy-4) 40%,var(--gold-2) 70%,var(--gold-3) 100%);
+}
+.cardHeader,.split,.cardActions,.divider,.bottom{padding-left:18px;padding-right:18px}
+
+.cardHeader{
+  position:relative;text-align:center;
+  font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:30px;font-weight:600;color:var(--navy);
+  letter-spacing:.8px;padding:18px 18px 14px;
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,var(--surface) 0%,var(--white) 100%);
+}
+.cardMeta{
+  position:absolute;bottom:16px;right:18px;
+  font-size:10px;font-weight:600;color:var(--muted-2);
+  letter-spacing:.6px;font-family:'Inter',sans-serif;text-transform:uppercase;
+}
+
+.split{display:grid;grid-template-columns:1fr;min-height:540px;padding:0}
 .split.withSpouse{grid-template-columns:1fr 1fr}
-.pane{padding:6px 16px 8px}
-.split.withSpouse .pane:first-child{border-right:3px solid var(--gold)}
-.paneTitle{text-align:center;font-size:22px;color:var(--navy);font-weight:800;margin:2px 0 10px}
+.pane{padding:12px 20px 10px}
+.split.withSpouse .pane:first-child{border-right:1px solid var(--line);position:relative}
+.split.withSpouse .pane:first-child::after{
+  content:'';position:absolute;top:8%;bottom:8%;right:-1px;width:1px;opacity:.5;
+  background:linear-gradient(180deg,transparent 0%,var(--gold-2) 40%,var(--gold-2) 60%,transparent 100%);
+}
+
+.paneTitle{
+  text-align:center;font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:20px;font-weight:600;color:var(--navy-2);margin:2px 0 10px;letter-spacing:.6px;
+}
+
 .cover{max-width:310px;margin:0 auto;text-align:center;color:var(--navy)}
-.coverLine{font-size:25px;line-height:1.3;margin:4px 0}
-.coverLine small{font-size:16px;color:var(--muted)}
-.rateLine{font-size:17px;line-height:1.35;color:var(--muted);margin:10px 0 4px}
-.edit{max-width:290px;margin:12px auto 0;display:grid;gap:8px}
-.editRow{display:grid;grid-template-columns:94px 1fr;gap:8px;align-items:center}
-.editRow span{font-size:13px;font-weight:800;color:var(--navy)}
-.editRow input{text-align:right;font-weight:800}
-.mini{font-size:12px;color:var(--muted);text-align:center;margin-top:8px;min-height:18px}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:310px;margin:14px auto 0}.actions3{grid-template-columns:1fr 1fr 1fr;max-width:420px}
-.divider{border-top:4px solid var(--navy);margin:10px -12px 8px}
-.bottom{padding:8px 10px 0;text-align:center;color:var(--navy)}
-.bottomLine{font-size:19px;line-height:1.32;margin:3px 0}
-.money{font-size:26px;color:var(--navy);margin:7px 0 4px}
-.small{font-size:13px;color:var(--muted)}
-.infoBox{margin-top:146px;min-height:150px;display:flex;flex-direction:column;justify-content:center}
-.status{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.45}
+.coverLine{
+  font-size:20px;line-height:1.4;margin:4px 0;
+  display:flex;align-items:baseline;justify-content:center;gap:9px;
+  font-weight:600;letter-spacing:-.1px;color:var(--ink);
+}
+.coverLine small{font-size:13px;color:var(--muted-2);font-weight:400}
+.covPrice{
+  font-size:11px;font-weight:700;color:var(--muted);
+  background:var(--bg-2);border:1px solid var(--line);
+  border-radius:5px;padding:1px 7px;white-space:nowrap;
+  letter-spacing:.15px;font-family:'Inter',sans-serif;
+}
+.rateLine{font-size:14px;line-height:1.45;color:var(--muted);margin:9px 0 3px;font-weight:500;font-variant-numeric:tabular-nums}
+
+.edit{max-width:280px;margin:14px auto 0;display:grid;gap:7px}
+.editRow{display:grid;grid-template-columns:64px 1fr;gap:8px;align-items:center}
+.editRow span{font-size:10px;font-weight:700;color:var(--muted-2);text-transform:uppercase;letter-spacing:.8px}
+.editRow input{
+  text-align:right;font-weight:700;padding:7px 10px;
+  border:1px solid var(--line);border-radius:6px;
+  background:var(--surface);color:var(--ink);
+  width:100%;font:inherit;font-size:13px;font-weight:700;
+  transition:border-color .15s,box-shadow .15s;font-variant-numeric:tabular-nums;
+}
+.editRow input:focus{outline:none;border-color:var(--navy-4);box-shadow:0 0 0 2.5px rgba(26,53,96,.1);background:var(--white)}
+.editRow input:disabled{color:var(--muted-2);background:var(--bg-2);border-color:var(--line);cursor:not-allowed}
+
+.mini{font-size:10.5px;color:var(--gold-2);text-align:center;margin-top:6px;min-height:16px;font-style:italic;letter-spacing:.1px;opacity:.85}
+
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:290px;margin:12px auto 0}
+.actions3{grid-template-columns:1fr 1fr 1fr;max-width:400px}
+
+.card button{
+  padding:8px 12px;border-radius:7px;font:inherit;
+  font-size:11.5px;font-weight:700;cursor:pointer;width:100%;
+  letter-spacing:.4px;text-transform:uppercase;transition:all .15s;
+}
+.card button.alt{border:1px solid var(--line-2);background:var(--white);color:var(--navy-2)}
+.card button.alt:hover{background:var(--surface);border-color:var(--navy-4);color:var(--navy)}
+.card button.ghost{border:1px solid var(--line);background:var(--surface);color:var(--muted)}
+.card button.ghost:hover{background:var(--bg-2);color:var(--ink-2)}
+
+.cardActions{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  padding:10px 18px;border-top:1px solid var(--line);background:var(--surface);
+}
+.cardActions button.gold{
+  padding:11px 14px;font-size:12px;
+  background:linear-gradient(135deg,var(--navy-4) 0%,var(--navy-2) 100%);
+  border:1px solid var(--navy-3);color:rgba(220,200,155,.95);font-weight:700;
+  box-shadow:0 2px 6px rgba(7,17,31,.2);letter-spacing:.4px;
+}
+.cardActions button.gold:hover{
+  background:linear-gradient(135deg,var(--navy-5) 0%,var(--navy-3) 100%);
+  box-shadow:0 4px 12px rgba(7,17,31,.28);color:#e8d9a8;
+}
+.cardActions button.alt{padding:11px 14px;font-size:12px;border:1px solid var(--line-2);background:var(--white);color:var(--navy-2)}
+.cardActions button.alt:hover{background:var(--bg);border-color:var(--navy-4)}
+
+.divider{border:none;border-top:1px solid var(--line);margin:0 18px}
+.bottom{padding:12px 20px 16px;text-align:center;color:var(--navy);background:linear-gradient(180deg,var(--white) 0%,var(--surface) 100%)}
+.bottomLine{font-size:15px;line-height:1.5;margin:3px 0;font-weight:500;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.money{font-size:22px;color:var(--navy);margin:6px 0 4px;font-weight:700}
+.small{font-size:12px;color:var(--muted)}
+
 .hidden{display:none!important}
+.bad{color:var(--bad)}
+.good{color:var(--good)}
 .cremRow{transition:opacity .2s}
 .cremRow.cremHidden{display:none!important}
-.bad{color:#a22727}
-.good{color:#1b5e20}
-.coverLine{font-size:25px;line-height:1.3;margin:4px 0;display:flex;align-items:baseline;justify-content:center;gap:10px}
-.coverLine small{font-size:16px;color:var(--muted)}
-.covPrice{font-size:14px;font-weight:700;color:var(--muted);background:#f0f4fa;border-radius:7px;padding:2px 8px;white-space:nowrap}
-@media (max-width:1230px){.layout{grid-template-columns:1fr}.leftRail:after{display:none}.card{min-height:auto}.infoBox{margin-top:18px}}
+
+@media(max-width:1260px){
+  .layout{grid-template-columns:1fr}
+  .leftRail:after{display:none}
+  .card{min-height:auto}
+  .infoBox{margin-top:16px}
+}
 </style>
 </head>
 <body>
@@ -1425,135 +1609,6 @@ loadRates().catch(err=>{
   refreshAll();
 });
 refreshAll();
-</script>
-<!-- ── MINIMAL QUOTE RECORDER ─────────────────────────────── -->
-<style>
-#recorder{max-width:1480px;margin:14px auto;padding:0 16px}
-.recBar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:linear-gradient(180deg,#fff,#f8fbff);border:4px solid var(--navy);border-radius:18px;padding:12px 16px;box-shadow:0 8px 24px rgba(8,21,45,.07)}
-.recBar label{font-size:12px;font-weight:800;color:var(--navy);white-space:nowrap;text-transform:uppercase;letter-spacing:.3px}
-#recUrl{flex:1;min-width:260px;padding:9px 12px;border:2px solid #cbd5e3;border-radius:10px;font:inherit;font-size:13px;color:var(--ink)}
-.recRisk{display:flex;align-items:center;gap:6px;padding:9px 12px;border:2px solid #cbd5e3;border-radius:10px;background:#fff;cursor:pointer;font-weight:700;font-size:13px;color:var(--navy);white-space:nowrap;user-select:none}
-.recRisk input{width:16px;height:16px;accent-color:#e53935;margin:0}
-.recRisk.on{border-color:#e53935;color:#e53935;background:#fff5f5}
-#recBtn{padding:10px 20px;border-radius:12px;border:2px solid var(--navy);background:var(--navy);color:#fff;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;white-space:nowrap}
-#recBtn:hover{background:var(--navy-3)}
-#recMsg{font-size:13px;font-weight:700;padding:6px 12px;border-radius:8px;display:none}
-#recMsg.ok{display:inline-block;background:#e8f5e9;color:#1b5e20}
-#recMsg.err{display:inline-block;background:#ffebee;color:#b71c1c}
-#recMsg.wait{display:inline-block;background:#e3f2fd;color:#0d47a1}
-</style>
-
-<div id="recorder">
-  <div class="recBar">
-    <label>GSheet URL:</label>
-    <input id="recUrl" type="text" placeholder="Paste Apps Script Web App URL…">
-    <div class="recRisk" id="riskDiv" onclick="toggleRisk()">
-      <input type="checkbox" id="recRisk"> High Risk Job
-    </div>
-    <button id="recBtn" onclick="recRecord()">📥 Record to Sheets</button>
-    <span id="recMsg"></span>
-  </div>
-</div>
-
-<script>
-// Restore saved URL
-(()=>{ const u=localStorage.getItem('recUrl'); if(u) document.getElementById('recUrl').value=u; })();
-
-function toggleRisk(){
-  const cb=document.getElementById('recRisk');
-  cb.checked=!cb.checked;
-  document.getElementById('riskDiv').classList.toggle('on', cb.checked);
-}
-
-async function recRecord(){
-  const url = document.getElementById('recUrl').value.trim();
-  if(!url){ recMsg('Paste your Apps Script URL first','err'); return; }
-  localStorage.setItem('recUrl', url);
-
-  let d;
-  try {
-    const main     = getPersonInput('main');
-    const married  = state.spouseIncluded;
-    const sp       = married ? getPersonInput('spouse') : null;
-    const inc      = Number(document.getElementById('monthlyIncome').value||0);
-    const hrly     = Number(document.getElementById('hourlyIncome').value||0);
-    const highRisk = document.getElementById('recRisk').checked;
-
-    // getCoverage reads DOM inputs — safe whether spouse pane visible or not
-    const cov1m = getCoverage('one','main');
-    const cov2m = getCoverage('two','main');
-    const cov1s = married ? getCoverage('one','spouse') : {wl:0,term:0,adb:0};
-    const cov2s = married ? getCoverage('two','spouse') : {wl:0,term:0,adb:0};
-
-    const pr1m = priceCoverage(main, cov1m);
-    const pr2m = priceCoverage(main, cov2m);
-    const pr1s = married ? priceCoverage(sp, cov1s) : {monthly:0};
-    const pr2s = married ? priceCoverage(sp, cov2s) : {monthly:0};
-
-    d = {
-      ts: new Date().toISOString(),
-      // Main
-      main_age: main.age, main_sex: main.sex, main_tob: main.tob,
-      main_a71:  main.a71   ? 'Yes' : 'No',
-      high_risk: highRisk   ? 'Yes' : 'No',
-      a71_rec:  (main.a71 && highRisk) ? 'Yes' : 'No',
-      // Spouse
-      married:   married    ? 'Yes' : 'No',
-      sp_age:    sp ? sp.age  : '',
-      sp_sex:    sp ? sp.sex  : '',
-      sp_tob:    sp ? sp.tob  : '',
-      sp_a71:    sp ? (sp.a71 ? 'Yes' : 'No') : '',
-      // Income & budgets
-      income: inc,
-      hourly: hrly,
-      bud1:   +(hrly*4).toFixed(2),
-      bud2:   +(hrly*8).toFixed(2),
-      // Option 1 — Main
-      o1_wl_m:    cov1m.wl,
-      o1_term_m:  cov1m.term,
-      o1_adb_m:   cov1m.adb,
-      o1_prem_m:  +pr1m.monthly.toFixed(2),
-      // Option 1 — Spouse
-      o1_wl_s:    cov1s.wl,
-      o1_term_s:  cov1s.term,
-      o1_adb_s:   cov1s.adb,
-      o1_prem_s:  +pr1s.monthly.toFixed(2),
-      // Option 1 — Household total
-      o1_total:   +(pr1m.monthly + pr1s.monthly).toFixed(2),
-      // Option 2 — Main
-      o2_wl_m:    cov2m.wl,
-      o2_term_m:  cov2m.term,
-      o2_adb_m:   cov2m.adb,
-      o2_prem_m:  +pr2m.monthly.toFixed(2),
-      // Option 2 — Spouse
-      o2_wl_s:    cov2s.wl,
-      o2_term_s:  cov2s.term,
-      o2_adb_s:   cov2s.adb,
-      o2_prem_s:  +pr2s.monthly.toFixed(2),
-      // Option 2 — Household total
-      o2_total:   +(pr2m.monthly + pr2s.monthly).toFixed(2),
-      ssp: isSSPMode() ? 'Yes' : 'No',
-    };
-  } catch(e){ recMsg('Error reading quoter: '+e.message,'err'); return; }
-
-  recMsg('Sending…','wait');
-  try {
-    await fetch(url, {
-      method:'POST', mode:'no-cors',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({action:'record', data:d}),
-    });
-    const tag = d.married === 'Yes'
-      ? `Age ${d.main_age}+${d.sp_age} Married`
-      : `Age ${d.main_age} ${d.main_sex}`;
-    recMsg(`✅ Saved — ${tag} $${d.income.toLocaleString()}/mo`,'ok');
-  } catch(e){ recMsg('❌ Fetch failed — check URL','err'); }
-}
-
-function recMsg(txt, type){
-  const el=document.getElementById('recMsg');
-  el.textContent=txt; el.className=type;
-}
 </script>
 </body>
 </html>
