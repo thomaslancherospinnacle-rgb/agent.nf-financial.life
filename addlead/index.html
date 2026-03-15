@@ -1012,7 +1012,7 @@
     if (tob)      params.set('tob',    tob);
     if (income)   params.set('income', income);
 
-    const url = 'quotetool/index.html' + (params.toString() ? '?' + params.toString() : '');
+    const url = '../quotetool/index.html' + (params.toString() ? '?' + params.toString() : '');
     document.getElementById('quotizarBtn').href = url;
     window.open(url, '_blank');
   }
