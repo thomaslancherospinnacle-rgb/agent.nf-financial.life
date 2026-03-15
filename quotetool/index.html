@@ -326,12 +326,12 @@ body{
 <div id="langBar">
   <div id="langBarInner">
     <div id="langWordmark">
-      <span id="langWordmarkText">Cotizador de Seguros</span>
+      <span id="langWordmarkText">Insurance Quoter</span>
       <span id="langWordmarkSub">American Income Life</span>
     </div>
     <button id="langToggle" onclick="toggleLang()" aria-label="Switch language">
-      <span id="langFlag"></span>
-      <span id="langLabel">English</span>
+      <span id="langFlag">🇲🇽</span>
+      <span id="langLabel">Español</span>
       <span id="langArrow">⇄</span>
     </button>
   </div>
@@ -430,9 +430,9 @@ body{
       <div class="panel">
         <div class="personTitle"><div class="summary" id="mainSummary">MAIN (MALE) AGE: 35 NTU A71 OFF</div><button type="button" class="alt">MAIN</button></div>
         <div class="grid">
-          <div><label data-i18n="age">Edad</label><input id="main_age" type="number" min="18" max="80" value="35"></div>
-          <div><label data-i18n="gender">Género</label><select id="main_sex"><option value="Male" data-i18n-opt="male">Hombre</option><option value="Female" data-i18n-opt="female">Mujer</option></select></div>
-          <div class="full"><label data-i18n="tobacco">Usuario de Tabaco</label><select id="main_tob"><option>NTU</option><option>TU</option></select></div>
+          <div><label data-i18n="age">Age</label><input id="main_age" type="number" min="18" max="80" value="35"></div>
+          <div><label data-i18n="gender">Gender</label><select id="main_sex"><option value="Male" data-i18n-opt="male">Male</option><option value="Female" data-i18n-opt="female">Female</option></select></div>
+          <div class="full"><label data-i18n="tobacco">Tobacco User</label><select id="main_tob"><option>NTU</option><option>TU</option></select></div>
 
         </div>
       </div>
@@ -440,42 +440,42 @@ body{
       <div class="panel">
         <div class="personTitle"><div class="summary" id="spSummary">SPOUSE NOT INCLUDED</div><button type="button" id="spouseBtn" class="gold">Add spouse</button></div>
         <div class="grid hidden" id="spouseGrid">
-          <div><label data-i18n="age">Edad</label><input id="sp_age" type="number" min="18" max="80" value="33"></div>
-          <div><label data-i18n="gender">Género</label><select id="sp_sex"><option value="Female" data-i18n-opt="female">Mujer</option><option value="Male" data-i18n-opt="male">Hombre</option></select></div>
-          <div class="full"><label data-i18n="tobacco">Usuario de Tabaco</label><select id="sp_tob"><option>NTU</option><option>TU</option></select></div>
+          <div><label data-i18n="age">Age</label><input id="sp_age" type="number" min="18" max="80" value="33"></div>
+          <div><label data-i18n="gender">Gender</label><select id="sp_sex"><option value="Female" data-i18n-opt="female">Female</option><option value="Male" data-i18n-opt="male">Male</option></select></div>
+          <div class="full"><label data-i18n="tobacco">Tobacco User</label><select id="sp_tob"><option>NTU</option><option>TU</option></select></div>
 
         </div>
       </div>
 
       <div class="panel infoBox">
         <div class="grid" style="margin-top:0">
-          <div><label data-i18n="monthlyIncome">Ingreso Mensual</label><input id="monthlyIncome" type="number" min="0" step="0.01" value="3000"></div>
-          <div><label data-i18n="hourlyIncome">Ingreso por Hora</label><input id="hourlyIncome" type="number" min="0" step="0.01" value="18.75"></div>
-          <div class="full inlineToggle"><input id="sspMode" type="checkbox"><span data-i18n="sspModeLabel">Modo SSP (Protección Seguro Social)</span></div>
+          <div><label data-i18n="monthlyIncome">Monthly Income</label><input id="monthlyIncome" type="number" min="0" step="0.01" value="3000"></div>
+          <div><label data-i18n="hourlyIncome">Hourly Income</label><input id="hourlyIncome" type="number" min="0" step="0.01" value="18.75"></div>
+          <div class="full inlineToggle"><input id="sspMode" type="checkbox"><span data-i18n="sspModeLabel">SSP Mode (Social Security Protection)</span></div>
         </div>
         <div class="grid hidden" id="sspGrid">
-          <div><label data-i18n="mainSSI">SSI Principal</label><input id="mainSSI" type="number" min="0" step="0.01" value="2200"></div>
-          <div><label data-i18n="spouseSSI">SSI Cónyuge</label><input id="spSSI" type="number" min="0" step="0.01" value="1600"></div>
-          <div class="full"><label data-i18n="sspMonths">Meses SSP</label><select id="sspStartMonths"><option value="3">3 & 6 months</option><option value="6" selected>6 & 9 months</option><option value="9">9 & 12 months</option><option value="12">12 & 15 months</option><option value="15">15 & 18 months</option><option value="18">15 & 18 months (max)</option></select></div>
+          <div><label data-i18n="mainSSI">Main SSI</label><input id="mainSSI" type="number" min="0" step="0.01" value="2200"></div>
+          <div><label data-i18n="spouseSSI">Spouse SSI</label><input id="spSSI" type="number" min="0" step="0.01" value="1600"></div>
+          <div class="full"><label data-i18n="sspMonths">SSP Months Set</label><select id="sspStartMonths"><option value="3">3 & 6 months</option><option value="6" selected>6 & 9 months</option><option value="9">9 & 12 months</option><option value="12">12 & 15 months</option><option value="15">15 & 18 months</option><option value="18">15 & 18 months (max)</option></select></div>
         </div>
         <div class="status">
-          <div data-i18n-wrap="oneBudget">Presupuesto Una Hora Mensual: <strong id="oneBudgetText"></strong></div>
-          <div data-i18n-wrap="twoBudget">Presupuesto Dos Horas Mensual: <strong id="twoBudgetText"></strong></div>
+          <div data-i18n-wrap="oneBudget">One Hour Budget Monthly: <strong id="oneBudgetText"></strong></div>
+          <div data-i18n-wrap="twoBudget">Two Hour Budget Monthly: <strong id="twoBudgetText"></strong></div>
           <div class="hidden" id="sspSummaryBox">
             <div style="font-weight:800;margin-bottom:4px;">Combined SS: <strong id="sspTotalIncome"></strong>/mo</div>
             <div style="border-left:3px solid var(--gold);padding-left:8px;margin:4px 0">
-              <div style="font-size:12px;font-weight:800;color:var(--navy);" data-i18n="ifMainDies">SI FALLECE EL PRINCIPAL → Opciones del Cónyuge:</div>
-              <div style="font-size:12px;" data-i18n-wrap="keepHerOwn">Mantiene el suyo: <strong id="sspSpouseOwn"></strong> &nbsp;|&nbsp; Take 75% of main's: <strong id="sspSpouse75"></strong></div>
-              <div style="font-size:12px;" data-i18n-wrap="sheKeeps">Ella conserva: <strong id="sspSpouseKeeps"></strong> &nbsp;→&nbsp; <span style="color:#a22727;font-weight:800;">Loss: <strong id="sspLossIfMainDies"></strong>/mo · <strong id="sspLossIfMainDiesAnnual"></strong>/yr</span></div>
+              <div style="font-size:12px;font-weight:800;color:var(--navy);" data-i18n="ifMainDies">IF MAIN DIES → Spouse's options:</div>
+              <div style="font-size:12px;" data-i18n-wrap="keepHerOwn">Keep her own: <strong id="sspSpouseOwn"></strong> &nbsp;|&nbsp; Take 75% of main's: <strong id="sspSpouse75"></strong></div>
+              <div style="font-size:12px;" data-i18n-wrap="sheKeeps">She keeps: <strong id="sspSpouseKeeps"></strong> &nbsp;→&nbsp; <span style="color:#a22727;font-weight:800;">Loss: <strong id="sspLossIfMainDies"></strong>/mo · <strong id="sspLossIfMainDiesAnnual"></strong>/yr</span></div>
             </div>
             <div style="border-left:3px solid var(--gold);padding-left:8px;margin:4px 0">
-              <div style="font-size:12px;font-weight:800;color:var(--navy);" data-i18n="ifSpouseDies">SI FALLECE EL CÓNYUGE → Opciones del Principal:</div>
-              <div style="font-size:12px;" data-i18n-wrap="keepHisOwn">Mantiene el suyo: <strong id="sspMainOwn"></strong> &nbsp;|&nbsp; Take 75% of spouse's: <strong id="sspMain75"></strong></div>
-              <div style="font-size:12px;" data-i18n-wrap="heKeeps">Él conserva: <strong id="sspMainKeeps"></strong> &nbsp;→&nbsp; <span style="color:#a22727;font-weight:800;">Loss: <strong id="sspLossIfSpouseDies"></strong>/mo · <strong id="sspLossIfSpouseDiesAnnual"></strong>/yr</span></div>
+              <div style="font-size:12px;font-weight:800;color:var(--navy);" data-i18n="ifSpouseDies">IF SPOUSE DIES → Main's options:</div>
+              <div style="font-size:12px;" data-i18n-wrap="keepHisOwn">Keep his own: <strong id="sspMainOwn"></strong> &nbsp;|&nbsp; Take 75% of spouse's: <strong id="sspMain75"></strong></div>
+              <div style="font-size:12px;" data-i18n-wrap="heKeeps">He keeps: <strong id="sspMainKeeps"></strong> &nbsp;→&nbsp; <span style="color:#a22727;font-weight:800;">Loss: <strong id="sspLossIfSpouseDies"></strong>/mo · <strong id="sspLossIfSpouseDiesAnnual"></strong>/yr</span></div>
             </div>
-            <div style="margin-top:4px;font-size:11px;color:var(--muted);"><span data-i18n="sspNote">Seguro de vida = pérdida × meses + $2,500 gastos finales. WL máx $34,000.</span></div>
+            <div style="margin-top:4px;font-size:11px;color:var(--muted);"><span data-i18n="sspNote">Term = scenario loss × months + $2,500 final expense. WL max $34,000.</span></div>
           </div>
-          <div id="csvStatus" data-i18n-wrap="loading">Cargando <strong>Rates.csv</strong>...</div>
+          <div id="csvStatus" data-i18n-wrap="loading">Loading <strong>Rates.csv</strong>...</div>
         </div>
       </div>
     </div>
@@ -484,45 +484,45 @@ body{
       <div class="cardHeader"><span id="oneHeaderText">ONE HOUR</span><div class="cardMeta"><span id="oneMetaText">Target budget</span></div></div>
       <div class="split" id="oneSplit">
         <div class="pane" data-card="one" data-person="main">
-          <div class="paneTitle" data-i18n="main">PRINCIPAL</div>
+          <div class="paneTitle" data-i18n="main">MAIN</div>
           <div class="cover">
-            <div class="coverLine" data-i18n-wrap="wlLabel">Vida Entera: <span data-field="wlText">$0</span><span class="covPrice" data-field="wlPrice"></span></div>
-            <div class="coverLine" data-i18n-wrap="termLabel">Término: <span data-field="termText">$0</span><span class="covPrice" data-field="termPrice"></span></div>
-            <div class="coverLine" data-i18n-wrap="adbLabel">Accidental: <span data-field="adbText">$0</span><span class="covPrice" data-field="adbPrice"></span></div>
+            <div class="coverLine" data-i18n-wrap="wlLabel">WL: <span data-field="wlText">$0</span><span class="covPrice" data-field="wlPrice"></span></div>
+            <div class="coverLine" data-i18n-wrap="termLabel">TERM: <span data-field="termText">$0</span><span class="covPrice" data-field="termPrice"></span></div>
+            <div class="coverLine" data-i18n-wrap="adbLabel">ACCIDENTAL: <span data-field="adbText">$0</span><span class="covPrice" data-field="adbPrice"></span></div>
             <div class="coverLine hidden" data-field="a71Row" data-i18n-wrap="a71Label">A71: <span data-field="a71Text">ON</span><span class="covPrice" data-field="a71Price"></span></div>
-            <div class="rateLine" data-i18n-wrap="monthlyLabel">Mensual <span data-field="monthlyText">$0.00</span></div>
-            <div class="rateLine" data-i18n-wrap="weeklyLabel">Semanal <span data-field="weeklyText">$0.00</span></div>
+            <div class="rateLine" data-i18n-wrap="monthlyLabel">Monthly <span data-field="monthlyText">$0.00</span></div>
+            <div class="rateLine" data-i18n-wrap="weeklyLabel">Weekly <span data-field="weeklyText">$0.00</span></div>
           </div>
           <div class="edit">
-            <div class="editRow"><span data-i18n="wlShort">VE</span><input data-input="wl" type="number" step="1000" min="0" max="500000" value="10000"></div>
-            <div class="editRow"><span data-i18n="termShort">TÉRMINO</span><input data-input="term" type="number" step="1000" min="0" max="500000" value="18000"></div>
+            <div class="editRow"><span data-i18n="wlShort">WL</span><input data-input="wl" type="number" step="1000" min="0" max="500000" value="10000"></div>
+            <div class="editRow"><span data-i18n="termShort">TERM</span><input data-input="term" type="number" step="1000" min="0" max="500000" value="18000"></div>
             <div class="editRow"><span data-i18n="adbShort">ADB</span><input data-input="adb" type="number" step="1000" min="0" max="500000" value="50000"></div>
           </div>
-          <div class="inlineToggle" style="justify-content:center;margin-top:8px;"><input type="checkbox" id="crem_one_main" style="width:16px;height:16px;accent-color:var(--gold)"><span style="font-size:12px;"><span data-i18n="cremation">+$2,500 gastos de cremación</span></span></div>
+          <div class="inlineToggle" style="justify-content:center;margin-top:8px;"><input type="checkbox" id="crem_one_main" style="width:16px;height:16px;accent-color:var(--gold)"><span style="font-size:12px;"><span data-i18n="cremation">+$2,500 cremation costs</span></span></div>
           <div class="mini" data-field="notes"></div>
-          <div class="actions actions2"><button class="alt" data-action="autochg" data-i18n="autoChange">Cambio Automático</button><button class="ghost" data-action="clear" data-i18n="clearBtn">Limpiar</button></div>
+          <div class="actions actions2"><button class="alt" data-action="autochg" data-i18n="autoChange">Auto Change</button><button class="ghost" data-action="clear" data-i18n="clearBtn">Clear</button></div>
         </div>
         <div class="pane hidden" data-card="one" data-person="spouse">
-          <div class="paneTitle" data-i18n="spouse">CÓNYUGE</div>
+          <div class="paneTitle" data-i18n="spouse">SPOUSE</div>
           <div class="cover">
-            <div class="coverLine" data-i18n-wrap="wlLabel">Vida Entera: <span data-field="wlText">$0</span><span class="covPrice" data-field="wlPrice"></span></div>
-            <div class="coverLine" data-i18n-wrap="termLabel">Término: <span data-field="termText">$0</span><span class="covPrice" data-field="termPrice"></span></div>
-            <div class="coverLine" data-i18n-wrap="adbLabel">Accidental: <span data-field="adbText">$0</span><span class="covPrice" data-field="adbPrice"></span></div>
+            <div class="coverLine" data-i18n-wrap="wlLabel">WL: <span data-field="wlText">$0</span><span class="covPrice" data-field="wlPrice"></span></div>
+            <div class="coverLine" data-i18n-wrap="termLabel">TERM: <span data-field="termText">$0</span><span class="covPrice" data-field="termPrice"></span></div>
+            <div class="coverLine" data-i18n-wrap="adbLabel">ACCIDENTAL: <span data-field="adbText">$0</span><span class="covPrice" data-field="adbPrice"></span></div>
             <div class="coverLine hidden" data-field="a71Row" data-i18n-wrap="a71Label">A71: <span data-field="a71Text">ON</span><span class="covPrice" data-field="a71Price"></span></div>
-            <div class="rateLine" data-i18n-wrap="monthlyLabel">Mensual <span data-field="monthlyText">$0.00</span></div>
-            <div class="rateLine" data-i18n-wrap="weeklyLabel">Semanal <span data-field="weeklyText">$0.00</span></div>
+            <div class="rateLine" data-i18n-wrap="monthlyLabel">Monthly <span data-field="monthlyText">$0.00</span></div>
+            <div class="rateLine" data-i18n-wrap="weeklyLabel">Weekly <span data-field="weeklyText">$0.00</span></div>
           </div>
           <div class="edit">
-            <div class="editRow"><span data-i18n="wlShort">VE</span><input data-input="wl" type="number" step="1000" min="0" max="500000" value="10000"></div>
-            <div class="editRow"><span data-i18n="termShort">TÉRMINO</span><input data-input="term" type="number" step="1000" min="0" max="500000" value="18000"></div>
+            <div class="editRow"><span data-i18n="wlShort">WL</span><input data-input="wl" type="number" step="1000" min="0" max="500000" value="10000"></div>
+            <div class="editRow"><span data-i18n="termShort">TERM</span><input data-input="term" type="number" step="1000" min="0" max="500000" value="18000"></div>
             <div class="editRow"><span data-i18n="adbShort">ADB</span><input data-input="adb" type="number" step="1000" min="0" max="500000" value="50000"></div>
           </div>
-          <div class="inlineToggle" style="justify-content:center;margin-top:8px;"><input type="checkbox" id="crem_one_spouse" style="width:16px;height:16px;accent-color:var(--gold)"><span style="font-size:12px;"><span data-i18n="cremation">+$2,500 gastos de cremación</span></span></div>
+          <div class="inlineToggle" style="justify-content:center;margin-top:8px;"><input type="checkbox" id="crem_one_spouse" style="width:16px;height:16px;accent-color:var(--gold)"><span style="font-size:12px;"><span data-i18n="cremation">+$2,500 cremation costs</span></span></div>
           <div class="mini" data-field="notes"></div>
-          <div class="actions actions2"><button class="alt" data-action="autochg" data-i18n="autoChange">Cambio Automático</button><button class="ghost" data-action="clear" data-i18n="clearBtn">Limpiar</button></div>
+          <div class="actions actions2"><button class="alt" data-action="autochg" data-i18n="autoChange">Auto Change</button><button class="ghost" data-action="clear" data-i18n="clearBtn">Clear</button></div>
         </div>
       </div>
-      <div class="cardActions"><button class="gold" data-card-action="auto" data-card-target="one" id="autoBtn_one">Auto Complete Option 1</button><button class="alt" data-card-action="clear" data-card-target="one"><span data-i18n="clearOpt1">Limpiar Opción 1</span></button></div>
+      <div class="cardActions"><button class="gold" data-card-action="auto" data-card-target="one" id="autoBtn_one">Auto Complete Option 1</button><button class="alt" data-card-action="clear" data-card-target="one"><span data-i18n="clearOpt1">Clear Option 1</span></button></div>
       <div class="divider"></div>
       <div class="bottom" id="oneBottom"></div>
     </div>
@@ -531,45 +531,45 @@ body{
       <div class="cardHeader"><span id="twoHeaderText">TWO HOUR</span><div class="cardMeta"><span id="twoMetaText">Target budget</span></div></div>
       <div class="split" id="twoSplit">
         <div class="pane" data-card="two" data-person="main">
-          <div class="paneTitle" data-i18n="main">PRINCIPAL</div>
+          <div class="paneTitle" data-i18n="main">MAIN</div>
           <div class="cover">
-            <div class="coverLine" data-i18n-wrap="wlLabel">Vida Entera: <span data-field="wlText">$0</span><span class="covPrice" data-field="wlPrice"></span></div>
-            <div class="coverLine" data-i18n-wrap="termLabel">Término: <span data-field="termText">$0</span><span class="covPrice" data-field="termPrice"></span></div>
-            <div class="coverLine" data-i18n-wrap="adbLabel">Accidental: <span data-field="adbText">$0</span><span class="covPrice" data-field="adbPrice"></span></div>
+            <div class="coverLine" data-i18n-wrap="wlLabel">WL: <span data-field="wlText">$0</span><span class="covPrice" data-field="wlPrice"></span></div>
+            <div class="coverLine" data-i18n-wrap="termLabel">TERM: <span data-field="termText">$0</span><span class="covPrice" data-field="termPrice"></span></div>
+            <div class="coverLine" data-i18n-wrap="adbLabel">ACCIDENTAL: <span data-field="adbText">$0</span><span class="covPrice" data-field="adbPrice"></span></div>
             <div class="coverLine hidden" data-field="a71Row" data-i18n-wrap="a71Label">A71: <span data-field="a71Text">ON</span><span class="covPrice" data-field="a71Price"></span></div>
-            <div class="rateLine" data-i18n-wrap="monthlyLabel">Mensual <span data-field="monthlyText">$0.00</span></div>
-            <div class="rateLine" data-i18n-wrap="weeklyLabel">Semanal <span data-field="weeklyText">$0.00</span></div>
+            <div class="rateLine" data-i18n-wrap="monthlyLabel">Monthly <span data-field="monthlyText">$0.00</span></div>
+            <div class="rateLine" data-i18n-wrap="weeklyLabel">Weekly <span data-field="weeklyText">$0.00</span></div>
           </div>
           <div class="edit">
-            <div class="editRow"><span data-i18n="wlShort">VE</span><input data-input="wl" type="number" step="1000" min="0" max="500000" value="25000"></div>
-            <div class="editRow"><span data-i18n="termShort">TÉRMINO</span><input data-input="term" type="number" step="1000" min="0" max="500000" value="36000"></div>
+            <div class="editRow"><span data-i18n="wlShort">WL</span><input data-input="wl" type="number" step="1000" min="0" max="500000" value="25000"></div>
+            <div class="editRow"><span data-i18n="termShort">TERM</span><input data-input="term" type="number" step="1000" min="0" max="500000" value="36000"></div>
             <div class="editRow"><span data-i18n="adbShort">ADB</span><input data-input="adb" type="number" step="1000" min="0" max="500000" value="100000"></div>
           </div>
-          <div class="inlineToggle" style="justify-content:center;margin-top:8px;"><input type="checkbox" id="crem_two_main" style="width:16px;height:16px;accent-color:var(--gold)"><span style="font-size:12px;"><span data-i18n="cremation">+$2,500 gastos de cremación</span></span></div>
+          <div class="inlineToggle" style="justify-content:center;margin-top:8px;"><input type="checkbox" id="crem_two_main" style="width:16px;height:16px;accent-color:var(--gold)"><span style="font-size:12px;"><span data-i18n="cremation">+$2,500 cremation costs</span></span></div>
           <div class="mini" data-field="notes"></div>
-          <div class="actions actions2"><button class="alt" data-action="autochg" data-i18n="autoChange">Cambio Automático</button><button class="ghost" data-action="clear" data-i18n="clearBtn">Limpiar</button></div>
+          <div class="actions actions2"><button class="alt" data-action="autochg" data-i18n="autoChange">Auto Change</button><button class="ghost" data-action="clear" data-i18n="clearBtn">Clear</button></div>
         </div>
         <div class="pane hidden" data-card="two" data-person="spouse">
-          <div class="paneTitle" data-i18n="spouse">CÓNYUGE</div>
+          <div class="paneTitle" data-i18n="spouse">SPOUSE</div>
           <div class="cover">
-            <div class="coverLine" data-i18n-wrap="wlLabel">Vida Entera: <span data-field="wlText">$0</span><span class="covPrice" data-field="wlPrice"></span></div>
-            <div class="coverLine" data-i18n-wrap="termLabel">Término: <span data-field="termText">$0</span><span class="covPrice" data-field="termPrice"></span></div>
-            <div class="coverLine" data-i18n-wrap="adbLabel">Accidental: <span data-field="adbText">$0</span><span class="covPrice" data-field="adbPrice"></span></div>
+            <div class="coverLine" data-i18n-wrap="wlLabel">WL: <span data-field="wlText">$0</span><span class="covPrice" data-field="wlPrice"></span></div>
+            <div class="coverLine" data-i18n-wrap="termLabel">TERM: <span data-field="termText">$0</span><span class="covPrice" data-field="termPrice"></span></div>
+            <div class="coverLine" data-i18n-wrap="adbLabel">ACCIDENTAL: <span data-field="adbText">$0</span><span class="covPrice" data-field="adbPrice"></span></div>
             <div class="coverLine hidden" data-field="a71Row" data-i18n-wrap="a71Label">A71: <span data-field="a71Text">ON</span><span class="covPrice" data-field="a71Price"></span></div>
-            <div class="rateLine" data-i18n-wrap="monthlyLabel">Mensual <span data-field="monthlyText">$0.00</span></div>
-            <div class="rateLine" data-i18n-wrap="weeklyLabel">Semanal <span data-field="weeklyText">$0.00</span></div>
+            <div class="rateLine" data-i18n-wrap="monthlyLabel">Monthly <span data-field="monthlyText">$0.00</span></div>
+            <div class="rateLine" data-i18n-wrap="weeklyLabel">Weekly <span data-field="weeklyText">$0.00</span></div>
           </div>
           <div class="edit">
-            <div class="editRow"><span data-i18n="wlShort">VE</span><input data-input="wl" type="number" step="1000" min="0" max="500000" value="25000"></div>
-            <div class="editRow"><span data-i18n="termShort">TÉRMINO</span><input data-input="term" type="number" step="1000" min="0" max="500000" value="36000"></div>
+            <div class="editRow"><span data-i18n="wlShort">WL</span><input data-input="wl" type="number" step="1000" min="0" max="500000" value="25000"></div>
+            <div class="editRow"><span data-i18n="termShort">TERM</span><input data-input="term" type="number" step="1000" min="0" max="500000" value="36000"></div>
             <div class="editRow"><span data-i18n="adbShort">ADB</span><input data-input="adb" type="number" step="1000" min="0" max="500000" value="100000"></div>
           </div>
-          <div class="inlineToggle" style="justify-content:center;margin-top:8px;"><input type="checkbox" id="crem_two_spouse" style="width:16px;height:16px;accent-color:var(--gold)"><span style="font-size:12px;"><span data-i18n="cremation">+$2,500 gastos de cremación</span></span></div>
+          <div class="inlineToggle" style="justify-content:center;margin-top:8px;"><input type="checkbox" id="crem_two_spouse" style="width:16px;height:16px;accent-color:var(--gold)"><span style="font-size:12px;"><span data-i18n="cremation">+$2,500 cremation costs</span></span></div>
           <div class="mini" data-field="notes"></div>
-          <div class="actions actions2"><button class="alt" data-action="autochg" data-i18n="autoChange">Cambio Automático</button><button class="ghost" data-action="clear" data-i18n="clearBtn">Limpiar</button></div>
+          <div class="actions actions2"><button class="alt" data-action="autochg" data-i18n="autoChange">Auto Change</button><button class="ghost" data-action="clear" data-i18n="clearBtn">Clear</button></div>
         </div>
       </div>
-      <div class="cardActions"><button class="gold" data-card-action="auto" data-card-target="two" id="autoBtn_two">Auto Complete Option 2</button><button class="alt" data-card-action="clear" data-card-target="two"><span data-i18n="clearOpt2">Limpiar Opción 2</span></button></div>
+      <div class="cardActions"><button class="gold" data-card-action="auto" data-card-target="two" id="autoBtn_two">Auto Complete Option 2</button><button class="alt" data-card-action="clear" data-card-target="two"><span data-i18n="clearOpt2">Clear Option 2</span></button></div>
       <div class="divider"></div>
       <div class="bottom" id="twoBottom"></div>
     </div>
@@ -697,7 +697,7 @@ const LANGS = {
   }
 };
 
-let currentLang = 'es';
+let currentLang = 'en';
 function t(key){ return LANGS[currentLang][key] || LANGS['en'][key] || key; }
 
 function applyLang(){
@@ -1794,7 +1794,7 @@ function renderBottom(card){
         <span style="font-size:13px;color:var(--muted-2);">${t('cardFirstMonth')}</span>
         <span style="font-size:15px;font-weight:700;color:var(--navy);">${currency(grandMonthly)}</span>
       </div>
-      ${suppTotal > 0 ? `<div style="font-size:10px;color:var(--muted-2);margin-top:4px;text-align:right;">incl. ${currency(suppTotal)}/mo supl. en presupuesto</div>` : ''}
+      ${suppTotal > 0 ? `<div style="font-size:10px;color:var(--muted-2);margin-top:4px;text-align:right;">incl. ${currency(suppTotal)}/mo in budget</div>` : ''}
     </div>`;
 
   bottom.innerHTML = html;
@@ -1807,10 +1807,10 @@ function refreshAll(){
   const _oneRaw = (Number($('hourlyIncome').value||0)*4) + (Number($('monthlyIncome').value||0)>=6000?8:4);
   const _twoRaw = (Number($('hourlyIncome').value||0)*8) + (Number($('monthlyIncome').value||0)>=6000?8:4);
   $('oneBudgetText').textContent = _suppDeduct>0
-    ? `${currency(Math.max(5,_oneRaw-_suppDeduct))} (${currency(_oneRaw)} − ${currency(_suppDeduct)} supl.)`
+    ? `${currency(Math.max(5,_oneRaw-_suppDeduct))} (${currency(_oneRaw)} − ${currency(_suppDeduct)} supp.)`
     : currency(Math.max(5,_oneRaw));
   $('twoBudgetText').textContent = _suppDeduct>0
-    ? `${currency(Math.max(5,_twoRaw-_suppDeduct))} (${currency(_twoRaw)} − ${currency(_suppDeduct)} supl.)`
+    ? `${currency(Math.max(5,_twoRaw-_suppDeduct))} (${currency(_twoRaw)} − ${currency(_suppDeduct)} supp.)`
     : currency(Math.max(5,_twoRaw));
   // Budget labels
   const ob = $('oneBudgetText').parentElement;
@@ -2150,11 +2150,11 @@ Object.keys(suppI18nKeys).forEach(lang=>{
   <div class="suppHeader">
     <div class="suppHeaderIcon">🏥</div>
     <div class="suppHeaderText">
-      <h2 data-i18n="suppTitle">Seguros Suplementarios</h2>
+      <h2 data-i18n="suppTitle">Supplemental Insurance</h2>
       <p>A71 · A74 · H34 · C10 · C20</p>
     </div>
     <div class="suppStateWrap">
-      <label data-i18n="suppState">Estado</label>
+      <label data-i18n="suppState">State</label>
       <select id="suppState" onchange="calcSupp()">
         <option value="FL" selected>Florida (FL)</option>
         <option value="MI">Michigan (MI)</option>
@@ -2174,39 +2174,39 @@ Object.keys(suppI18nKeys).forEach(lang=>{
           <span class="suppBadge">A71</span>
           <label class="inBudgetBtn" id="lbl_a71_budget">
             <input type="checkbox" id="a71_inbudget" onchange="updateBudgetBtn('a71');calcSupp()">
-            <span data-i18n="inBudget">En Presupuesto</span>
+            <span data-i18n="inBudget">In Budget</span>
           </label>
         </div>
-        <div class="suppCardTitle" data-i18n="a71CardTitle">Beneficios de Accidente</div>
+        <div class="suppCardTitle" data-i18n="a71CardTitle">Accident Benefits</div>
         <div class="suppCardSub">Hospital · AD&amp;D · Accident Only</div>
       </div>
       <div class="suppBody">
         <div class="suppRow">
-          <label data-i18n="suppWho">¿Quién?</label>
+          <label data-i18n="suppWho">Who?</label>
           <select id="a71_who" onchange="calcSupp()">
             <option value="none">—</option>
-            <option value="IND" selected>Principal</option>
-            <option value="FAM">Principal + Cónyuge</option>
+            <option value="IND" selected>Main</option>
+            <option value="FAM">Main + Spouse</option>
           </select>
         </div>
         <div class="suppRow">
-          <label data-i18n="suppDaily">Diario Hosp.</label>
+          <label data-i18n="suppDaily">Hosp/Day</label>
           <select id="a71_daily" onchange="calcSupp()">
-            <option value="100">$100/día</option>
-            <option value="200" selected>$200/día</option>
-            <option value="300">$300/día</option>
+            <option value="100">$100/day</option>
+            <option value="200" selected>$200/day</option>
+            <option value="300">$300/day</option>
           </select>
         </div>
         <div class="suppRow">
           <label data-i18n="suppRider">Rider</label>
           <select id="a71_rider" onchange="calcSupp()">
             <option value="BASE">Base</option>
-            <option value="BM000_DOUBLE">Doble Accidente</option>
+            <option value="BM000_DOUBLE">Double Accident</option>
           </select>
         </div>
         <div class="suppPrice">
           <div class="suppPriceTop">
-            <span class="suppPriceLabel" data-i18n="suppMonthly">Mensual</span>
+            <span class="suppPriceLabel" data-i18n="suppMonthly">Monthly</span>
             <span class="suppPriceAmt" id="a71_price">$0.00</span>
           </div>
           <div class="suppPriceBreak" id="a71_break">—</div>
@@ -2221,24 +2221,24 @@ Object.keys(suppI18nKeys).forEach(lang=>{
           <span class="suppBadge">A74</span>
           <label class="inBudgetBtn" id="lbl_a74_budget">
             <input type="checkbox" id="a74_inbudget" onchange="updateBudgetBtn('a74');calcSupp()">
-            <span data-i18n="inBudget">En Presupuesto</span>
+            <span data-i18n="inBudget">In Budget</span>
           </label>
         </div>
-        <div class="suppCardTitle" data-i18n="a74CardTitle">Muerte Accidental</div>
+        <div class="suppCardTitle" data-i18n="a74CardTitle">Accidental Death</div>
         <div class="suppCardSub">Disability · AD&amp;D · Ages 18–60</div>
       </div>
       <div class="suppBody">
         <div class="suppRow">
-          <label data-i18n="suppUnits">Unidades</label>
+          <label data-i18n="suppUnits">Units</label>
           <select id="a74_units" onchange="calcSupp()">
             <option value="0">—</option>
-            <option value="1">1 unidad — $10k</option>
-            <option value="2" selected>2 unidades — $20k</option>
+            <option value="1">1 unit — $10k</option>
+            <option value="2" selected>2 units — $20k</option>
           </select>
         </div>
         <div class="suppPrice">
           <div class="suppPriceTop">
-            <span class="suppPriceLabel" data-i18n="suppMonthly">Mensual</span>
+            <span class="suppPriceLabel" data-i18n="suppMonthly">Monthly</span>
             <span class="suppPriceAmt" id="a74_price">$0.00</span>
           </div>
           <div class="suppPriceBreak" id="a74_break">—</div>
@@ -2254,37 +2254,37 @@ Object.keys(suppI18nKeys).forEach(lang=>{
           <span class="suppBadge">H34</span>
           <label class="inBudgetBtn" id="lbl_h34_budget">
             <input type="checkbox" id="h34_inbudget" onchange="updateBudgetBtn('h34');calcSupp()">
-            <span data-i18n="inBudget">En Presupuesto</span>
+            <span data-i18n="inBudget">In Budget</span>
           </label>
         </div>
-        <div class="suppCardTitle" data-i18n="h34CardTitle">Hospitalización</div>
+        <div class="suppCardTitle" data-i18n="h34CardTitle">Hospital Indemnity</div>
         <div class="suppCardSub">Cash/Night · Any Reason</div>
       </div>
       <div class="suppBody">
         <div class="suppRow">
-          <label data-i18n="suppWho">¿Quién?</label>
+          <label data-i18n="suppWho">Who?</label>
           <select id="h34_who" onchange="calcSupp()">
             <option value="none">—</option>
-            <option value="main" selected>Principal</option>
-            <option value="both">Principal + Cónyuge</option>
+            <option value="main" selected>Main</option>
+            <option value="both">Main + Spouse</option>
           </select>
         </div>
         <div class="suppRow">
-          <label data-i18n="suppNightly">Noche</label>
+          <label data-i18n="suppNightly">Per Night</label>
           <select id="h34_daily" onchange="calcSupp()">
-            <option value="50">$50/noche</option>
-            <option value="75">$75/noche</option>
-            <option value="100">$100/noche</option>
-            <option value="150" selected>$150/noche</option>
+            <option value="50">$50/night</option>
+            <option value="75">$75/night</option>
+            <option value="100">$100/night</option>
+            <option value="150" selected>$150/night</option>
           </select>
         </div>
         <label class="suppToggleRow">
           <input type="checkbox" id="h34_recup" onchange="calcSupp()">
-          <span data-i18n="suppRecup">+ Rider Recuperación</span>
+          <span data-i18n="suppRecup">+ Recovery Rider</span>
         </label>
         <div class="suppPrice">
           <div class="suppPriceTop">
-            <span class="suppPriceLabel" data-i18n="suppMonthly">Mensual</span>
+            <span class="suppPriceLabel" data-i18n="suppMonthly">Monthly</span>
             <span class="suppPriceAmt" id="h34_price">$0.00</span>
           </div>
           <div class="suppPriceBreak" id="h34_break">—</div>
@@ -2300,20 +2300,20 @@ Object.keys(suppI18nKeys).forEach(lang=>{
           <span class="suppBadge">C10</span>
           <label class="inBudgetBtn" id="lbl_c10_budget">
             <input type="checkbox" id="c10_inbudget" onchange="updateBudgetBtn('c10');calcSupp()">
-            <span data-i18n="inBudget">En Presupuesto</span>
+            <span data-i18n="inBudget">In Budget</span>
           </label>
         </div>
-        <div class="suppCardTitle" data-i18n="c10CardTitle">Seguro de Cáncer</div>
+        <div class="suppCardTitle" data-i18n="c10CardTitle">Cancer Insurance</div>
         <div class="suppCardSub">Cancer · Detection Rider</div>
       </div>
       <div class="suppBody">
         <div class="suppRow">
-          <label data-i18n="suppUnits">Unidades</label>
+          <label data-i18n="suppUnits">Units</label>
           <select id="c10_units" onchange="calcSupp()">
             <option value="0">—</option>
-            <option value="10">10u · $100/tto</option>
-            <option value="15">15u · $150/tto</option>
-            <option value="20" selected>20u · $200/tto ✓</option>
+            <option value="10">10u · $100/trt</option>
+            <option value="15">15u · $150/trt</option>
+            <option value="20" selected>20u · $200/trt ✓</option>
           </select>
         </div>
         <div class="suppRow" id="c10DetRow">
@@ -2325,7 +2325,7 @@ Object.keys(suppI18nKeys).forEach(lang=>{
         </div>
         <div class="suppPrice">
           <div class="suppPriceTop">
-            <span class="suppPriceLabel" data-i18n="suppMonthly">Mensual</span>
+            <span class="suppPriceLabel" data-i18n="suppMonthly">Monthly</span>
             <span class="suppPriceAmt" id="c10_price">$0.00</span>
           </div>
           <div class="suppPriceBreak" id="c10_break">—</div>
@@ -2341,15 +2341,15 @@ Object.keys(suppI18nKeys).forEach(lang=>{
           <span class="suppBadge">C20</span>
           <label class="inBudgetBtn" id="lbl_c20_budget">
             <input type="checkbox" id="c20_inbudget" onchange="updateBudgetBtn('c20');calcSupp()">
-            <span data-i18n="inBudget">En Presupuesto</span>
+            <span data-i18n="inBudget">In Budget</span>
           </label>
         </div>
-        <div class="suppCardTitle" data-i18n="c20CardTitle">Cáncer Familiar</div>
+        <div class="suppCardTitle" data-i18n="c20CardTitle">Cancer Family</div>
         <div class="suppCardSub">Cancer Family · C20</div>
       </div>
       <div class="suppBody">
         <div class="suppRow">
-          <label data-i18n="suppBenefit">Beneficio</label>
+          <label data-i18n="suppBenefit">Benefit</label>
           <select id="c20_benefit" onchange="calcSupp()">
             <option value="0">—</option>
             <option value="10000">$10,000</option>
@@ -2359,7 +2359,7 @@ Object.keys(suppI18nKeys).forEach(lang=>{
         </div>
         <div class="suppPrice">
           <div class="suppPriceTop">
-            <span class="suppPriceLabel" data-i18n="suppMonthly">Mensual</span>
+            <span class="suppPriceLabel" data-i18n="suppMonthly">Monthly</span>
             <span class="suppPriceAmt" id="c20_price">$0.00</span>
           </div>
           <div class="suppPriceBreak" id="c20_break">—</div>
@@ -2372,12 +2372,12 @@ Object.keys(suppI18nKeys).forEach(lang=>{
 
   <!-- Payout Scenarios -->
   <div id="payoutPanel">
-    <div class="payoutTitle" data-i18n="payoutTitle">📋 Escenarios de Pago</div>
+    <div class="payoutTitle" data-i18n="payoutTitle">📋 Payout Scenarios</div>
     <div class="payoutGrid">
-      <div class="payoutScen"><h4 data-i18n="scenDeath">☠ Muerte por Enfermedad</h4><div id="payout_death"></div></div>
-      <div class="payoutScen"><h4 data-i18n="scenAccident">⚡ Muerte Accidental</h4><div id="payout_accident"></div></div>
-      <div class="payoutScen"><h4 data-i18n="scenTerminal">🎗 Diagnóstico Terminal (TIR)</h4><div id="payout_terminal"></div></div>
-      <div class="payoutScen"><h4 data-i18n="scenHospital">🏥 Hospital 30 Noches</h4><div id="payout_hospital"></div></div>
+      <div class="payoutScen"><h4 data-i18n="scenDeath">☠ Death by Illness</h4><div id="payout_death"></div></div>
+      <div class="payoutScen"><h4 data-i18n="scenAccident">⚡ Accidental Death</h4><div id="payout_accident"></div></div>
+      <div class="payoutScen"><h4 data-i18n="scenTerminal">🎗 Terminal Diagnosis (TIR)</h4><div id="payout_terminal"></div></div>
+      <div class="payoutScen"><h4 data-i18n="scenHospital">🏥 Hospital 30 Nights</h4><div id="payout_hospital"></div></div>
     </div>
   </div>
 
@@ -2476,7 +2476,7 @@ function calcSupp(){
     const cur = sel.value;
     const avail = {TX:[5,10],NC:[5,10],MI:[10,15,20],FL:[5,10,15,20,30],MD:[5,10,15,20]}[suppState]||[5,10];
     sel.innerHTML = '<option value="0">—</option>' +
-      avail.map(u=>`<option value="${u}"${String(u)===cur?' selected':''}>${u}u · $${u*10}/tto</option>`).join('');
+      avail.map(u=>`<option value="${u}"${String(u)===cur?' selected':''}>${u}u · $${u*10}/trt</option>`).join('');
     if(cur!=='0' && !avail.includes(Number(cur))) sel.value='0';
   })();
 
@@ -2586,13 +2586,13 @@ function calcSupp(){
     if(row){
       c10Total += Number(row.monthly_rate);
       const dxNote = c10Detect>0?` + $${c10Detect*1000} dx`:'';
-      c10Lines.push(`<b>${c10Units}u cáncer ($${c10Units*10}/tto${dxNote}):</b> ${currency(row.monthly_rate)}/mo`);
+      c10Lines.push(`<b>${c10Units}u cáncer ($${c10Units*10}/trt${dxNote}):</b> ${currency(row.monthly_rate)}/mo`);
     } else {
       c10NA.style.display='';
       c10NA.textContent=currentLang==='es'?`C10 no disponible edad ${mIn.age}.`:`C10 not available at age ${mIn.age}.`;
     }
     const feeRow = rows.find(r=>r.rider==='ADD_PER_POLICY'&&Number(r.units)===c10Units);
-    if(feeRow){ c10Total+=Number(feeRow.monthly_rate); c10Lines.push(`<b>Fee póliza:</b> ${currency(feeRow.monthly_rate)}/mo`); }
+    if(feeRow){ c10Total+=Number(feeRow.monthly_rate); c10Lines.push(`<b>Policy fee:</b> ${currency(feeRow.monthly_rate)}/mo`); }
   }
   setPrice('c10',c10Total,c10Lines);
 
