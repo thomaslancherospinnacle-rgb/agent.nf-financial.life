@@ -214,6 +214,11 @@
   }
   .btn-calendly:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(201,168,76,0.4); }
   .btn-calendly svg { flex-shrink: 0; }
+  .btn-quotizar {
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+    margin-top: 10px;
+  }
+  .btn-quotizar:hover { box-shadow: 0 8px 28px rgba(37,99,235,0.4); }
   .skip-link {
     font-size: 12px; color: var(--muted); cursor: pointer;
     text-decoration: underline; text-underline-offset: 3px; background: none; border: none;
@@ -771,6 +776,13 @@
         </svg>
         Abrir Calendly en Nueva Pestaña
       </a>
+
+      <a id="quotizarBtn" href="#" target="_blank" rel="noopener" class="btn-calendly btn-quotizar" onclick="openQuoter(event)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8h4M7 11h2M13 8l2 2-2 2"/>
+        </svg>
+        Quotizar
+      </a>
     </div>
     <div class="cal-btn-row">
       <button type="button" class="btn btn-secondary" onclick="showStep(3)">← Atrás</button>
@@ -953,6 +965,35 @@
 
   function openCalendly(e) {
     // href already set — just let the browser open it; no extra logic needed
+  }
+
+  function openQuoter(e) {
+    e.preventDefault();
+    const firstName = document.getElementById("firstName").value.trim();
+    const lastName  = document.getElementById("lastName").value.trim();
+    const fullName  = [firstName, lastName].filter(Boolean).join(" ");
+    const dob       = document.getElementById("dob").value;
+    const gender    = document.getElementById("gender").value;
+
+    // Calculate age from DOB
+    let age = '';
+    if (dob) {
+      const today = new Date();
+      const birth = new Date(dob);
+      age = today.getFullYear() - birth.getFullYear();
+      const m = today.getMonth() - birth.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+      age = String(age);
+    }
+
+    const params = new URLSearchParams();
+    if (fullName) params.set('name', fullName);
+    if (age)      params.set('age',  age);
+    if (gender)   params.set('sex',  gender);
+
+    const url = 'quotetool/index.html' + (params.toString() ? '?' + params.toString() : '');
+    document.getElementById('quotizarBtn').href = url;
+    window.open(url, '_blank');
   }
 
   async function submitFormOnly() {
