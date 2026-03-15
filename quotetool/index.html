@@ -1016,8 +1016,7 @@ function priceCoverage(personInput, coverage){
   }
 
   // A71 cost is now handled by the supplemental section (AIL Master Ratebook)
-  // It is no longer priced as a flat $20/$22.50/$35.25 here
-  const a71Monthly = 0;
+  a71Monthly = 0; // already declared above
 
   monthly += annualToMonthly(annualTotal);
   return { monthly, annualTotal, notes, wlMonthly, termMonthly, adbMonthly, a71Monthly };
@@ -1946,6 +1945,37 @@ loadRates().catch(err=>{
 });
 applyLang();
 refreshAll();
+
+// Supplemental i18n keys — added here so LANGS is in scope
+const suppI18nKeys = {
+  es:{
+    suppTitle:'Seguros Suplementarios',suppState:'Estado',
+    inBudget:'En Presupuesto',suppMonthly:'Mensual',
+    suppWho:'¿Quién?',suppDaily:'Diario Hosp.',suppRider:'Rider',
+    suppUnits:'Unidades',suppNightly:'Noche',suppRecup:'+ Rider Recuperación',
+    suppDetect:'Detection',suppBenefit:'Beneficio',
+    a71CardTitle:'Beneficios de Accidente',a74CardTitle:'Muerte Accidental',
+    h34CardTitle:'Hospitalización',c10CardTitle:'Seguro de Cáncer',c20CardTitle:'Cáncer Familiar',
+    payoutTitle:'📋 Escenarios de Pago',scenDeath:'☠ Muerte por Enfermedad',
+    scenAccident:'⚡ Muerte Accidental',scenTerminal:'🎗 Diagnóstico Terminal (TIR)',
+    scenHospital:'🏥 Hospital 30 Noches',
+  },
+  en:{
+    suppTitle:'Supplemental Insurance',suppState:'State',
+    inBudget:'In Budget',suppMonthly:'Monthly',
+    suppWho:'Who?',suppDaily:'Hosp/Day',suppRider:'Rider',
+    suppUnits:'Units',suppNightly:'Per Night',suppRecup:'+ Recovery Rider',
+    suppDetect:'Detection',suppBenefit:'Benefit',
+    a71CardTitle:'Accident Benefits',a74CardTitle:'Accidental Death',
+    h34CardTitle:'Hospital Indemnity',c10CardTitle:'Cancer Insurance',c20CardTitle:'Cancer Family',
+    payoutTitle:'📋 Payout Scenarios',scenDeath:'☠ Death by Illness',
+    scenAccident:'⚡ Accidental Death',scenTerminal:'🎗 Terminal Diagnosis (TIR)',
+    scenHospital:'🏥 Hospital 30 Nights',
+  }
+};
+Object.keys(suppI18nKeys).forEach(lang=>{
+  if(LANGS[lang]) Object.assign(LANGS[lang], suppI18nKeys[lang]);
+});
 </script>
 
 <!-- ═══════════════════════════════════════════════════════════════
@@ -2674,47 +2704,6 @@ function buildPayouts({a71Total,a74Total,h34Total,c10Total,c20Total}){
 ].forEach(id=>{
   const el=document.getElementById(id);
   if(el) el.addEventListener('change', calcSupp);
-});
-
-// ── i18n additions ─────────────────────────────────────────────
-const suppI18nKeys = {
-  es:{
-    suppTitle:'Seguros Suplementarios',suppState:'Estado',
-    inBudget:'En Presupuesto',suppMonthly:'Mensual',
-    suppWho:'¿Quién?',suppDaily:'Diario Hosp.',suppRider:'Rider',
-    suppUnits:'Unidades',suppNightly:'Noche',suppRecup:'+ Rider Recuperación',
-    suppDetect:'Detection',suppBenefit:'Beneficio',
-    a71CardTitle:'Beneficios de Accidente',
-    a74CardTitle:'Muerte Accidental',
-    h34CardTitle:'Hospitalización',
-    c10CardTitle:'Seguro de Cáncer',
-    c20CardTitle:'Cáncer Familiar',
-    payoutTitle:'📋 Escenarios de Pago',
-    scenDeath:'☠ Muerte por Enfermedad',
-    scenAccident:'⚡ Muerte Accidental',
-    scenTerminal:'🎗 Diagnóstico Terminal (TIR)',
-    scenHospital:'🏥 Hospital 30 Noches',
-  },
-  en:{
-    suppTitle:'Supplemental Insurance',suppState:'State',
-    inBudget:'In Budget',suppMonthly:'Monthly',
-    suppWho:'Who?',suppDaily:'Hosp/Day',suppRider:'Rider',
-    suppUnits:'Units',suppNightly:'Per Night',suppRecup:'+ Recovery Rider',
-    suppDetect:'Detection',suppBenefit:'Benefit',
-    a71CardTitle:'Accident Benefits',
-    a74CardTitle:'Accidental Death',
-    h34CardTitle:'Hospital Indemnity',
-    c10CardTitle:'Cancer Insurance',
-    c20CardTitle:'Cancer Family',
-    payoutTitle:'📋 Payout Scenarios',
-    scenDeath:'☠ Death by Illness',
-    scenAccident:'⚡ Accidental Death',
-    scenTerminal:'🎗 Terminal Diagnosis (TIR)',
-    scenHospital:'🏥 Hospital 30 Nights',
-  }
-};
-Object.keys(suppI18nKeys).forEach(lang=>{
-  if(LANGS[lang]) Object.assign(LANGS[lang], suppI18nKeys[lang]);
 });
 
 // Initial calc
