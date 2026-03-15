@@ -991,6 +991,54 @@ function findBestAutoMix(card, person, budgetOverride){
     }
   }
 
+  // ── FILL-TO-CEILING PASS ────────────────────────────────────────────────────
+  // After WL + term + ADB are locked, if budget is still unused try to use it.
+  // Priority: push term up → push WL up a bracket → add/increase ADB.
+  // Goal: total should equal ceiling (1hr or 2hr wage budget).
+  {
+    let spent = priceCoverage(input, { wl: chosenWL, term: chosenTerm, adb: chosenADB }).monthly;
+    let leftover = ceiling - spent;
+
+    // Push term up with leftover
+    if(leftover >= 1.0 && termRow && chosenTerm > 0){
+      const maxTerm = round1000(income * 18);
+      for(let t = chosenTerm + 1000; t <= maxTerm; t += 1000){
+        const u = t / 1000;
+        const newTermCost = annualToMonthly(u * termRow.base_rate + termRow.policy_fee_annual + termRow.volume_adjustment_annual);
+        const oldTermCost = annualToMonthly(chosenTerm / 1000 * termRow.base_rate + termRow.policy_fee_annual + termRow.volume_adjustment_annual);
+        if(newTermCost - oldTermCost <= leftover){
+          chosenTerm = t;
+          leftover -= (newTermCost - oldTermCost);
+        } else break;
+      }
+    }
+
+    // Push WL up to next bracket with leftover
+    spent = priceCoverage(input, { wl: chosenWL, term: chosenTerm, adb: chosenADB }).monthly;
+    leftover = ceiling - spent;
+    if(leftover >= 1.0){
+      const BRACKET_ENTRIES = [120000, 60000, 35000, 25000, 20000, 15000];
+      for(const entry of BRACKET_ENTRIES){
+        if(entry <= chosenWL) break;
+        const newCost = priceCoverage(input, { wl: entry, term: chosenTerm, adb: chosenADB }).monthly;
+        if(newCost <= ceiling){ chosenWL = entry; break; }
+      }
+    }
+
+    // Add ADB with any remaining
+    spent = priceCoverage(input, { wl: chosenWL, term: chosenTerm, adb: chosenADB }).monthly;
+    leftover = ceiling - spent;
+    if(leftover >= 1.0 && chosenADB === 0 && age < 55 && chosenWL >= 25000){
+      const adbRow = findADBRate(input.age);
+      if(adbRow){
+        for(const a of [25000, 20000, 15000, 10000]){
+          const cost = annualToMonthly((a / 1000) * adbRow.base_rate);
+          if(cost <= leftover){ chosenADB = a; break; }
+        }
+      }
+    }
+  }
+
   return { wl: chosenWL, term: chosenTerm, adb: chosenADB };
 }
 
@@ -1189,30 +1237,51 @@ function autoChangePermanent(card, person){
 }
 
 function autoFillCard(card){
+  const income = Number($('monthlyIncome').value || 0);
+  const grace  = income >= 6000 ? 8 : 4;
+  const total  = cardBudgetTotal(card);
+  const ceiling = total + grace;
+
   if(!state.spouseIncluded){
-    // Solo: main gets the full budget
-    const mainBest = findBestAutoMix(card, 'main');
+    const mainBest = findBestAutoMix(card, 'main', ceiling);
     setCoverage(card, 'main', mainBest);
     refreshAll();
     return;
   }
 
-  const GRACE = 4.0;
-  const total = cardBudgetTotal(card);
-
-  // ── Step 1: Price spouse at their WL-anchor (cheapest meaningful coverage)
-  //    Spouse one-hour = WL floor only. Two-hour = WL + term + ADB.
-  const spouseBest = findBestAutoMix(card, 'spouse');
+  // ── Step 1: Fill spouse first at their anchor
+  const spouseBest = findBestAutoMix(card, 'spouse', ceiling);
   setCoverage(card, 'spouse', spouseBest);
 
-  // ── Step 2: Measure what spouse actually costs
+  // ── Step 2: Measure actual spouse cost
   const spInput = getPersonInput('spouse');
   const spCost  = priceCoverage(spInput, spouseBest).monthly;
 
-  // ── Step 3: Give main everything remaining from the household budget
-  const mainBudget = Math.max(10, (total + GRACE) - spCost);
+  // ── Step 3: Main gets everything left — hit the ceiling
+  const mainBudget = Math.max(10, ceiling - spCost);
   const mainBest = findBestAutoMix(card, 'main', mainBudget);
   setCoverage(card, 'main', mainBest);
+
+  // ── Step 4: Check if household total hits ceiling — if leftover, push main WL up
+  const mainInput  = getPersonInput('main');
+  const mainCov    = getCoverage(card, 'main');
+  const householdCost = priceCoverage(mainInput, mainCov).monthly + spCost;
+  const leftover   = ceiling - householdCost;
+
+  if(leftover >= 1.0){
+    // Try to push main WL to the next bracket up using leftover
+    const permOptions = buildPermanentOptions(mainInput.age, mainInput.sex, mainInput.tob);
+    const BRACKET_ENTRIES = [120000, 60000, 35000, 25000, 20000, 15000];
+    for(const entry of BRACKET_ENTRIES){
+      if(entry <= mainCov.wl) break; // already at or above this
+      const testCov = { ...mainCov, wl: entry };
+      const testCost = priceCoverage(mainInput, testCov).monthly;
+      if(testCost + spCost <= ceiling){
+        setCoverage(card, 'main', testCov);
+        break;
+      }
+    }
+  }
 
   refreshAll();
 }
