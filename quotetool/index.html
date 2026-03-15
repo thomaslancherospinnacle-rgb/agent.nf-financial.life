@@ -3611,5 +3611,45 @@ refreshAll = function(){
     cardDeathSummary.innerHTML = summaryHtml;
   }
 };
+
+// ── Auto-fill from URL params — runs last so nothing overwrites it ──
+(function prefillFromURL() {
+  const p = new URLSearchParams(window.location.search);
+  if (!p.toString()) return;
+
+  const age    = p.get('age');
+  const sex    = p.get('sex');
+  const tob    = p.get('tob');
+  const income = p.get('income');
+
+  if (age) {
+    const ageVal = Math.min(80, Math.max(18, parseInt(age, 10)));
+    if (!isNaN(ageVal)) $('main_age').value = ageVal;
+  }
+
+  if (sex) {
+    const sexSel = $('main_sex');
+    for (let i = 0; i < sexSel.options.length; i++) {
+      if (sexSel.options[i].value === sex) { sexSel.value = sex; break; }
+    }
+  }
+
+  if (tob) {
+    const tobSel = $('main_tob');
+    for (let i = 0; i < tobSel.options.length; i++) {
+      if (tobSel.options[i].value === tob || tobSel.options[i].text === tob) {
+        tobSel.value = tobSel.options[i].value; break;
+      }
+    }
+  }
+
+  if (income) {
+    const inc = parseFloat(income);
+    if (!isNaN(inc) && inc > 0) $('monthlyIncome').value = inc.toFixed(2);
+  }
+
+  // Re-render so the UI reflects the new values
+  refreshAll();
+})();
 </script>
 </body>
