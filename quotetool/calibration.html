@@ -676,8 +676,9 @@ function getRecommendedTargets(card, person){
   const months = getCardSSPMonths(card);
   const sspMode = isSSPMode();
   const grace = income >= 6000 ? 8 : 4;
+  const married = state.spouseIncluded;
 
-  // SSP: WL = loss*months + optional cremation. Nothing else.
+  // ── SSP: WL = loss×months + optional cremation. Term=0. ADB=0. ────────────
   if(sspMode){
     const scenarioLoss = person === 'main' ? ssp.lossIfMainDies : ssp.lossIfSpouseDies;
     const cremBonus = $(`crem_${card}_${person}`)?.checked ? 2500 : 0;
@@ -685,61 +686,132 @@ function getRecommendedTargets(card, person){
     return { paneBudget, grace, minWL: targetWL, targetWL, termTarget: 0, adbTarget: 0, sspMode, sspMonths: months };
   }
 
-  // WL — target derived from income, minWL is budget-aware (no static floors that blow the budget)
-  let targetWL, minWL;
+  /*
+    ══════════════════════════════════════════════════════════════════
+    MARRIED vs SOLO — the core logic branch
+    ══════════════════════════════════════════════════════════════════
+
+    SOLO (no spouse):
+      Nobody else depends on them → budget goes into WL first.
+      WL is the priority, term is secondary.
+      At young ages WL rates are cheap → fill WL aggressively.
+      Formula: targetWL = budget-max WL, term fills remaining.
+      WL cap = income × youthWLCap(age) to prevent absurd multiples.
+
+    MARRIED:
+      Spouse depends on income → term is critical, WL is still anchor.
+      Main WL is conservative (leaves room for term + spouse WL).
+      Term always present if budget allows — min 3 months.
+      Spouse one-hour = WL only anchor ($15k floor).
+
+    ══════════════════════════════════════════════════════════════════
+  */
+
+  // Youth WL cap — prevents 28× multiples at cheap young ages
+  // At 18: max 10× income in WL. Rises to 14× at 35+.
+  // Solo gets more room, married gets less (budget shared).
+  function youthWLCap(age, married){
+    const base = married ? 8 : 12;  // married: 8× max, solo: 12× max
+    // Older ages: WL is more expensive so naturally stays lower
+    // Cap rises slightly with age because WL gets pricier = natural brake
+    return base + Math.max(0, age - 25) * 0.1;
+  }
+
+  // Cost-per-$1k WL estimate by age (from real ratebook data)
+  // Used only for minWL estimation — waterfall uses actual rates
+  function wlCostPer1k(age){
+    if(age >= 55) return 6.0;
+    if(age >= 50) return 5.5;
+    if(age >= 45) return 3.5;
+    if(age >= 40) return 2.8;
+    if(age >= 30) return 2.0;
+    return 1.6;  // 18–29 — cheap
+  }
+
+  let targetWL, minWL, termTarget = 0, adbTarget = 0;
+
+  // ── ONE HOUR ─────────────────────────────────────────────────────────────
   if(card === 'one'){
     if(person === 'main'){
-      // $3k→15k, $5k→35k smooth ramp
-      const raw = Math.min(35000, 15000 + Math.max(0, income - 3000) * 10);
-      targetWL = round5000(raw);
-      // minWL: ideally 25k, but only if it can realistically fit budget.
-      // We estimate: if WL at 25k alone costs more than 70% of ceiling, drop to 15k, then 10k.
-      // The waterfall will find the true best — this just sets the search floor.
-      const ceilEst = paneBudgetShare(card, person) + grace;
-      const a71est  = personInputHasA71(person) ? 20 : 0;
-      // Rough WL-per-$1k cost estimate by age (from real data): age<40≈1.8, 40-49≈2.8, 50-59≈5.5, 60+≈7
-      const wlPer1k = age >= 60 ? 7 : age >= 50 ? 5.5 : age >= 40 ? 2.8 : 1.8;
-      const cost25k = 25 * wlPer1k;
-      const cost15k = 15 * wlPer1k;
-      if(cost25k <= ceilEst * 0.70 - a71est)      minWL = 25000;
-      else if(cost15k <= ceilEst * 0.70 - a71est) minWL = 15000;
-      else                                          minWL = 5000; // just find max WL for budget
-    } else {
-      targetWL = round5000(Math.min(35000, 15000 + Math.max(0, income - 5000) * 2.5));
-      minWL = 15000;
-    }
-  } else {
-    // Two-hour: income×14 target, no hard floor — waterfall finds what fits
-    targetWL = Math.min(100000, round5000(income * 14));
-    // Rough estimate: floor is 70k only if premiums allow; otherwise let waterfall decide
-    const wlPer1k = age >= 60 ? 7 : age >= 50 ? 5.5 : age >= 40 ? 2.8 : 1.8;
-    const cost70k = 70 * wlPer1k;
-    const ceilEst = paneBudgetShare(card, person) + grace;
-    minWL = cost70k <= ceilEst * 0.65 ? 25000 : 5000;
-  }
-  minWL = Math.min(minWL, targetWL);
-  minWL = Math.max(5000, minWL);
+      const ceiling = paneBudget + grace;
+      const a71cost = personInputHasA71(person) ? (age <= 59 ? 20 : age <= 64 ? 22.5 : 35.25) : 0;
+      const wlBudget = ceiling - a71cost;
+      const costPer1k = wlCostPer1k(age);
+      const cap = youthWLCap(age, married);
 
-  // TERM — min 3 months always, spouse one-hour = 0
-  let termTarget = 0;
-  if(age < 65){
-    if(card === 'one' && person === 'main'){
-      const baseMonths = clamp(6 + Math.max(0, income - 3000) / 1000 * 3, 6, 12);
-      termTarget = round1000(income * Math.max(3, baseMonths * termTaper));
-    } else if(card === 'two'){
-      if(person === 'main'){
-        termTarget = round1000(income * Math.max(3, 18 * termTaper));
-      } else if(state.spouseIncluded){
-        termTarget = round1000(income * clamp(3 + Math.max(0, income - 5000) / 1000, 3, 6) * termTaper);
+      if(!married){
+        // ── SOLO: fill budget with WL, cap by income multiple ──────────────
+        // Target = as much WL as budget allows, capped at income × cap
+        const maxAffordable = round5000(Math.min((wlBudget / costPer1k) * 1000, income * cap));
+        targetWL = maxAffordable;
+        minWL = round5000(Math.min(targetWL, Math.max(5000, income * 3)));
+        // Term: only if budget genuinely left after WL
+        // Solo one-hour term is a nice-to-have, not the priority
+        const baseMonths = clamp(6 + Math.max(0, income - 3000) / 1000 * 3, 4, 12);
+        termTarget = round1000(income * Math.max(3, baseMonths * termTaper));
+        // Will naturally drop to 0 if WL fills the budget (waterfall handles it)
+      } else {
+        // ── MARRIED: conservative WL, prioritise term ──────────────────────
+        // WL ramp: $3k→15k, $4k→25k, $5k→35k (capped)
+        const raw = Math.min(35000, 15000 + Math.max(0, income - 3000) * 10);
+        targetWL = round5000(raw * Math.min(ageMult, 1.15)); // mild age bump only
+        // minWL: budget-aware. Don't set a floor that blows the budget.
+        const cost25k = 25 * costPer1k;
+        const cost15k = 15 * costPer1k;
+        // Reserve ~35% of budget for term before locking WL floor
+        const wlAllowance = wlBudget * 0.65;
+        if(cost25k <= wlAllowance)      minWL = 25000;
+        else if(cost15k <= wlAllowance) minWL = 15000;
+        else                             minWL = 5000;
+        // Term: always present for married. Min 3 months.
+        const baseMonths = clamp(6 + Math.max(0, income - 3000) / 1000 * 3, 6, 12);
+        termTarget = round1000(income * Math.max(3, baseMonths * termTaper));
       }
+    } else {
+      // ── SPOUSE one-hour: WL anchor only ─────────────────────────────────
+      const spouseBase = 15000 + Math.max(0, income - 5000) * 2.5;
+      targetWL = round5000(Math.min(35000, spouseBase));
+      minWL = 15000;
+      termTarget = 0;  // spouse one-hour never gets term
+    }
+
+  // ── TWO HOUR ─────────────────────────────────────────────────────────────
+  } else {
+    if(person === 'main'){
+      const costPer1k = wlCostPer1k(age);
+      const cap = youthWLCap(age, married);
+
+      if(!married){
+        // Solo two-hour: aggressive WL, cap at income × cap
+        const ceiling = paneBudget + grace;
+        const a71cost = personInputHasA71(person) ? 20 : 0;
+        const wlBudget = ceiling - a71cost;
+        targetWL = round5000(Math.min((wlBudget * 0.60 / costPer1k) * 1000, income * cap * 2));
+        minWL = round5000(Math.max(5000, income * 4));
+      } else {
+        // Married two-hour: income×14, age-bumped
+        targetWL = Math.min(100000, round5000(income * 14 * Math.min(ageMult, 1.3)));
+        const cost70k = 70 * costPer1k;
+        const ceilEst = paneBudget + grace;
+        minWL = cost70k <= ceilEst * 0.65 ? 25000 : 5000;
+      }
+      termTarget = round1000(income * Math.max(3, 18 * termTaper));
+
+    } else {
+      // Spouse two-hour
+      targetWL = Math.min(100000, round5000(income * 14 * Math.min(ageMult, 1.3)));
+      const costPer1k = wlCostPer1k(age);
+      const cost70k = 70 * costPer1k;
+      const ceilEst = paneBudget + grace;
+      minWL = cost70k <= ceilEst * 0.65 ? 25000 : 5000;
+      termTarget = round1000(income * clamp(3 + Math.max(0, income - 5000) / 1000, 3, 6) * termTaper);
     }
   }
 
-  // ADB — only eligible after WL>=25k AND term>=6mo, filled last
-  let adbTarget = 0;
+  // ── ADB — sprinkle, always last ──────────────────────────────────────────
   if(age < 55){
     if(card === 'two'){
-      const m = person === 'main' ? 10 : (state.spouseIncluded ? 9 : 10);
+      const m = person === 'main' ? 10 : (married ? 9 : 10);
       adbTarget = round1000(income * m * (age >= 45 ? 0.8 : 1.0));
       if(personInputHasA71(person)) adbTarget = Math.max(0, adbTarget - 50000);
       if(income < 8000) adbTarget = Math.min(adbTarget, 100000);
@@ -749,9 +821,17 @@ function getRecommendedTargets(card, person){
     }
   }
 
-  return { paneBudget, grace, minWL, targetWL: Math.max(minWL, targetWL),
-           termTarget: Math.max(0, termTarget), adbTarget: Math.max(0, adbTarget),
-           sspMode, sspMonths: months };
+  minWL = Math.min(minWL, targetWL);
+  minWL = Math.max(5000, minWL);
+
+  return {
+    paneBudget, grace,
+    minWL,
+    targetWL: Math.max(minWL, targetWL),
+    termTarget: Math.max(0, termTarget),
+    adbTarget:  Math.max(0, adbTarget),
+    sspMode, sspMonths: months,
+  };
 }
 
 function personInputHasA71(person){
@@ -789,10 +869,13 @@ function buildPermanentOptions(age, sex, tob){
 */
 function findBestAutoMix(card, person, budgetOverride){
   const input = getPersonInput(person);
-  const age = input.age;
+  const age   = input.age;
   const targets = getRecommendedTargets(card, person);
   const { minWL, targetWL, termTarget, adbTarget, sspMode, grace } = targets;
-  const income = Number($('monthlyIncome').value || 0);
+  const income  = Number($('monthlyIncome').value || 0);
+  const married = state.spouseIncluded && person === 'main' ? true :
+                  person === 'spouse' ? true : false;
+
   const rawBudget = (budgetOverride !== undefined && budgetOverride !== null)
     ? budgetOverride : targets.paneBudget;
   const ceiling = rawBudget + grace;
@@ -800,27 +883,70 @@ function findBestAutoMix(card, person, budgetOverride){
   if(sspMode) return { wl: targetWL, term: 0, adb: 0 };
 
   const permOptions = buildPermanentOptions(input.age, input.sex, input.tob);
-
-  // Pre-calc cost of 3 months term to reserve budget space for it
-  let minTermCost = 0;
   const termRow = find10RCRate(input.age, input.sex, input.tob);
-  if(termTarget > 0 && termRow){
+
+  /*
+    ── BRACKET-AWARE WL SELECTION ─────────────────────────────────────────────
+    Priority: try each bracket entry point from highest to lowest.
+    Bracket entries (from ratebook):
+      SL: $120,000  ← top tier
+      EX: $60,000
+      PR: $35,000  (entry is ~$15,100 but $35k is the meaningful jump)
+      WL: best face within $1k–$34,999
+
+    Rule:
+    1. Reserve budget for min term FIRST (if term is needed)
+    2. Try SL entry ($120k) → EX entry ($60k) → PR entry ($35k) → best WL
+    3. At each bracket entry: check if it fits the wlCeiling
+    4. If it fits → use that face, fill remaining with term
+    5. If nothing at a bracket entry fits → go to next lower bracket
+    6. Always pick the HIGHEST face within the winning bracket that still fits
+  ─────────────────────────────────────────────────────────────────────────── */
+
+  // Reserve space for minimum meaningful term if applicable
+  // Married: always reserve for min term. Solo: only if termTarget > 0.
+  const needsTerm = termTarget > 0;
+  let minTermCost = 0;
+  if(needsTerm && termRow){
     const minTerm = round1000(income * 3);
     const u = minTerm / 1000;
     minTermCost = annualToMonthly(u * termRow.base_rate + termRow.policy_fee_annual + termRow.volume_adjustment_annual);
   }
+  const wlCeiling = ceiling - minTermCost;
 
-  // STEP 1: WL — highest face <= targetWL that fits, leaving room for min term
-  const wlCeiling = ceiling - (termTarget > 0 ? minTermCost : 0);
+  // Bracket entry faces in descending order — always try highest value first
+  const BRACKET_ENTRIES = [120000, 60000, 35000, 25000, 15000, 10000, 5000, 1000];
+
   let chosenWL = 0;
-  const wlCandidates = [...permOptions]
-    .filter(o => o.face >= minWL && o.face <= targetWL)
-    .sort((a,b) => b.face - a.face);
-  for(const opt of wlCandidates){
-    const cost = priceCoverage(input, { wl: opt.face, term: 0, adb: 0 }).monthly;
-    if(cost <= wlCeiling){ chosenWL = opt.face; break; }
+
+  // Walk bracket entries from highest to lowest
+  for(const entry of BRACKET_ENTRIES){
+    if(entry < minWL) continue;
+    if(entry > targetWL && targetWL > 0) continue; // don't overshoot target
+
+    // Check if this bracket entry fits
+    const entryOpt = permOptions.find(o => o.face === entry);
+    if(!entryOpt) continue;
+    const entryCost = priceCoverage(input, { wl: entry, term: 0, adb: 0 }).monthly;
+    if(entryCost > wlCeiling) continue;
+
+    // Entry fits — now find the HIGHEST face within this bracket that still fits
+    // (go as high as possible within the bracket before the next entry point)
+    const nextEntry = BRACKET_ENTRIES[BRACKET_ENTRIES.indexOf(entry) - 1] || 999999;
+    const bracketMax = Math.min(nextEntry - 1000, targetWL > 0 ? targetWL : 500000);
+
+    const bracketOpts = permOptions
+      .filter(o => o.face >= entry && o.face <= bracketMax)
+      .sort((a,b) => b.face - a.face);
+
+    for(const opt of bracketOpts){
+      const cost = priceCoverage(input, { wl: opt.face, term: 0, adb: 0 }).monthly;
+      if(cost <= wlCeiling){ chosenWL = opt.face; break; }
+    }
+    if(chosenWL) break; // found a winner in this bracket
   }
-  // Fallback: max WL that fits at all
+
+  // Last resort fallback — any WL that fits
   if(!chosenWL){
     for(const opt of [...permOptions].sort((a,b) => b.face - a.face)){
       if(opt.face < 1000) continue;
@@ -833,12 +959,16 @@ function findBestAutoMix(card, person, budgetOverride){
   const wlCost = priceCoverage(input, { wl: chosenWL, term: 0, adb: 0 }).monthly;
   let remaining = ceiling - wlCost;
 
-  // STEP 2: TERM — highest amount <= termTarget that fits remaining budget
+  // ── STEP 2: TERM — fill remaining budget ────────────────────────────────────
+  // Not a fixed target — just as much term as fits after WL is locked
   let chosenTerm = 0;
-  if(termTarget > 0 && remaining > 0 && termRow){
-    const minTerm = round1000(income * 3);
-    const termSteps = new Set([minTerm, termTarget]);
-    for(let t = minTerm; t <= termTarget; t += 1000) termSteps.add(round1000(t));
+  if(remaining > 0 && termRow && (needsTerm || remaining > minTermCost)){
+    const minTerm  = round1000(income * 3);
+    const maxTerm  = termTarget > 0 ? termTarget : round1000(income * 18);
+    const termSteps = new Set();
+    for(let t = minTerm; t <= maxTerm; t += 1000) termSteps.add(round1000(t));
+    termSteps.add(minTerm);
+    termSteps.add(maxTerm);
     for(const t of [...termSteps].sort((a,b)=>b-a)){
       if(t < minTerm) continue;
       const u = t / 1000;
@@ -847,10 +977,10 @@ function findBestAutoMix(card, person, budgetOverride){
     }
   }
 
-  // STEP 3: ADB — only after WL>=25k AND term>=6mo income
+  // ── STEP 3: ADB — sprinkle only after WL≥25k AND term≥6mo ──────────────────
   let chosenADB = 0;
   const wlGate   = chosenWL >= 25000;
-  const termGate = termTarget === 0 || chosenTerm >= round1000(income * 6);
+  const termGate = !needsTerm || chosenTerm >= round1000(income * 6);
   if(adbTarget > 0 && wlGate && termGate && remaining > 0 && age < 55){
     const adbRow = findADBRate(input.age);
     if(adbRow){
