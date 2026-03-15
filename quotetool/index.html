@@ -758,6 +758,7 @@ const state = {
   rates: [],
   loaded: false,
   spouseIncluded: false,
+  autoLive: false,  // true after Auto Complete runs; re-runs on budget change
 };
 
 const $ = (id) => document.getElementById(id);
@@ -1047,9 +1048,11 @@ const round5000 = n => Math.max(0, Math.round((Number(n)||0) / 5000) * 5000);
 // ─── Budget ───────────────────────────────────────────────────────────────────
 // Total household budget for the card
 function cardBudgetTotal(card){
-  const hourly = Number($('hourlyIncome').value || 0);
-  const raw = card === 'one' ? hourly * 4 : hourly * 8;
-  const deduct = (typeof suppInBudgetDeduction === 'function') ? suppInBudgetDeduction() : 0;
+  const hourly  = Number($('hourlyIncome').value || 0);
+  const income  = Number($('monthlyIncome').value || 0);
+  const grace   = income >= 6000 ? 8 : 4;
+  const raw     = (card === 'one' ? hourly * 4 : hourly * 8) + grace;
+  const deduct  = (typeof suppInBudgetDeduction === 'function') ? suppInBudgetDeduction() : 0;
   return Math.max(5, raw - deduct);
 }
 
@@ -1200,7 +1203,8 @@ function getRecommendedTargets(card, person){
   const ssp = getSSPScenario();
   const months = getCardSSPMonths(card);
   const sspMode = isSSPMode();
-  const grace = income >= 6000 ? 8 : 4;
+  // grace is already included in paneBudget via cardBudgetTotal()
+  const grace = 0;   // kept for compatibility; value is already in paneBudget
   const married = state.spouseIncluded;
 
   // ── SSP: WL = loss×months + optional cremation. Term=0. ADB=0. ────────────
@@ -1479,11 +1483,10 @@ function autoFillCard(card){
     return;
   }
 
-  const income   = Number($("monthlyIncome").value || 0);
-  const hourly   = Number($("hourlyIncome").value || 0);
-  const grace    = income >= 6000 ? 8 : 4;
-  const hoursRaw = card === 'one' ? 4 : 8;
-  const totalBudget = hourly * hoursRaw + grace;
+  const income      = Number($("monthlyIncome").value || 0);
+  const hourly      = Number($("hourlyIncome").value || 0);
+  const grace       = income >= 6000 ? 8 : 4;
+  const totalBudget = cardBudgetTotal(card);   // includes grace + supp deductions
 
   const mIn  = getPersonInput('main');
   const spIn = state.spouseIncluded ? getPersonInput('spouse') : null;
@@ -1658,6 +1661,7 @@ function autoFillCard(card){
   setCoverage(card, 'main',   { wl: mWL,  term: mTerm,  adb: adbFace });
   if(spIn) setCoverage(card, 'spouse', { wl: spWL, term: 0,      adb: 0 });
 
+  state.autoLive = true;
   refreshAll();
 }
 
@@ -1783,8 +1787,15 @@ function renderBottom(card){
 function refreshAll(){
   const monthly = Number($('monthlyIncome').value || 0);
   const hourly = Number($('hourlyIncome').value || 0);
-  $('oneBudgetText').textContent = currency(cardBudgetTotal('one'));
-  $('twoBudgetText').textContent = currency(cardBudgetTotal('two'));
+  const _suppDeduct = (typeof suppInBudgetDeduction==='function') ? suppInBudgetDeduction() : 0;
+  const _oneRaw = (Number($('hourlyIncome').value||0)*4) + (Number($('monthlyIncome').value||0)>=6000?8:4);
+  const _twoRaw = (Number($('hourlyIncome').value||0)*8) + (Number($('monthlyIncome').value||0)>=6000?8:4);
+  $('oneBudgetText').textContent = _suppDeduct>0
+    ? `${currency(Math.max(5,_oneRaw-_suppDeduct))} (${currency(_oneRaw)} − ${currency(_suppDeduct)} supl.)`
+    : currency(Math.max(5,_oneRaw));
+  $('twoBudgetText').textContent = _suppDeduct>0
+    ? `${currency(Math.max(5,_twoRaw-_suppDeduct))} (${currency(_twoRaw)} − ${currency(_suppDeduct)} supl.)`
+    : currency(Math.max(5,_twoRaw));
   // Budget labels
   const ob = $('oneBudgetText').parentElement;
   const tb = $('twoBudgetText').parentElement;
@@ -1924,8 +1935,8 @@ $('hourlyIncome').addEventListener('input', ()=>{
 
 document.querySelectorAll('.pane').forEach(pane=>{
   pane.querySelectorAll('[data-input]').forEach(inp=>{
-    inp.addEventListener('input', refreshAll);
-    inp.addEventListener('change', refreshAll);
+    inp.addEventListener('input', ()=>{ state.autoLive=false; refreshAll(); });
+    inp.addEventListener('change', ()=>{ state.autoLive=false; refreshAll(); });
   });
   pane.querySelector('[data-action="autochg"]').addEventListener('click', ()=> autoChangePermanent(pane.dataset.card, pane.dataset.person));
   pane.querySelector('[data-action="clear"]').addEventListener('click', ()=> {
@@ -2385,6 +2396,13 @@ function updateBudgetBtn(id){
   const cb  = document.getElementById(id+'_inbudget');
   const lbl = document.getElementById('lbl_'+id+'_budget');
   if(lbl) lbl.classList.toggle('active', cb.checked);
+  // Recalculate WL/Term/ADB for both option cards whenever in-budget changes
+  // (budget ceiling changes, so coverage amounts need to update)
+  if(state.autoLive){
+    autoFillCard('one');
+    autoFillCard('two');
+  }
+  refreshAll();
 }
 
 // ── A71 payout table by daily_benefit ─────────────────────────
