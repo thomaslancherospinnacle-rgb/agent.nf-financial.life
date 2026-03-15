@@ -2573,14 +2573,10 @@ function suppInBudgetDeduction(){
 function updateBudgetBtn(id){
   const cb  = document.getElementById(id+'_inbudget');
   const lbl = document.getElementById('lbl_'+id+'_budget');
-  if(lbl) lbl.classList.toggle('active', cb.checked);
-  // Recalculate WL/Term/ADB for both option cards whenever in-budget changes
-  // (budget ceiling changes, so coverage amounts need to update)
-  if(state.autoLive){
-    autoFillCard('one');
-    autoFillCard('two');
-  }
-  refreshAll();
+  if(lbl) lbl.classList.toggle('active', cb && cb.checked);
+  // NOTE: do NOT call refreshAll() here — the onchange always calls calcSupp()
+  // right after, which calls refreshAll() at the end with fresh prices already set.
+  // Calling refreshAll() here reads stale prices for A74/H34/C10/C20.
 }
 
 // ── A71 payout table by daily_benefit ─────────────────────────
@@ -2929,6 +2925,11 @@ function calcSupp(){
   setPrice('c20',c20Total,c20Lines);
 
   buildPayouts({a71Total,a74Total,h34Total,c10Total,c20Total});
+  // If auto-complete is active, re-run so WL/Term adjusts to new budget ceiling
+  if(state.autoLive){
+    autoFillCard('one');
+    autoFillCard('two');
+  }
   refreshAll();
 }
 
