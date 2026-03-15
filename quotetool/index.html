@@ -1015,12 +1015,9 @@ function priceCoverage(personInput, coverage){
     }
   }
 
-  if(personInput.a71){
-    if(personInput.age >= 18 && personInput.age <= 59) a71Monthly = 20;
-    else if(personInput.age >= 60 && personInput.age <= 64) a71Monthly = 22.5;
-    else if(personInput.age >= 65 && personInput.age <= 80) a71Monthly = 35.25;
-    monthly += a71Monthly;
-  }
+  // A71 cost is now handled by the supplemental section (AIL Master Ratebook)
+  // It is no longer priced as a flat $20/$22.50/$35.25 here
+  const a71Monthly = 0;
 
   monthly += annualToMonthly(annualTotal);
   return { monthly, annualTotal, notes, wlMonthly, termMonthly, adbMonthly, a71Monthly };
@@ -1256,8 +1253,7 @@ function getRecommendedTargets(card, person){
   if(card === 'one'){
     if(person === 'main'){
       const ceiling = paneBudget + grace;
-      const a71cost = personInputHasA71(person) ? (age <= 59 ? 20 : age <= 64 ? 22.5 : 35.25) : 0;
-      const wlBudget = ceiling - a71cost;
+      const wlBudget = ceiling; // A71 cost now handled by supplemental budget override
       const costPer1k = wlCostPer1k(age);
       const cap = youthWLCap(age, married);
 
@@ -1306,8 +1302,7 @@ function getRecommendedTargets(card, person){
       if(!married){
         // Solo two-hour: aggressive WL, cap at income × cap
         const ceiling = paneBudget + grace;
-        const a71cost = personInputHasA71(person) ? 20 : 0;
-        const wlBudget = ceiling - a71cost;
+        const wlBudget = ceiling; // A71 now in supplemental budget
         targetWL = round5000(Math.min((wlBudget * 0.60 / costPer1k) * 1000, income * cap * 2));
         minWL = round5000(Math.max(5000, income * 4));
       } else {
@@ -1447,12 +1442,7 @@ function priceADB(personInput, face){
 }
 
 // A71 monthly cost
-function a71Cost(personInput){
-  if(!personInput.a71) return 0;
-  if(personInput.age <= 59) return 20;
-  if(personInput.age <= 64) return 22.5;
-  return 35.25;
-}
+// A71 cost is now handled by supplemental section — no flat rate here
 
 // Find the highest face <= faceTarget that costs <= budget for a person
 // Searches ratebook in $1k steps
@@ -1503,16 +1493,16 @@ function autoFillCard(card){
   if(mIn.age >= 55) adbFace = 0;
 
   const adbCostMonthly = priceADB(mIn, adbFace);
-  const a71Monthly     = a71Cost(mIn);
-  const spA71Monthly   = spIn ? a71Cost(spIn) : 0;
+  // A71 cost is now in supplemental section — not deducted here
+  // Budget reduction for supplementals happens via cardBudgetTotal override in calcSupp
 
-  // Budget available for WL + Term (after fixed costs)
-  let budget = totalBudget - adbCostMonthly - a71Monthly - spA71Monthly;
+  // Budget available for WL + Term (after ADB)
+  let budget = totalBudget - adbCostMonthly;
 
-  // If ADB alone blows the budget, scale it down proportionally
+  // If ADB alone blows the budget, scale it down
   if(budget < 0){
-    adbFace  = 0;
-    budget   = totalBudget - a71Monthly - spA71Monthly;
+    adbFace = 0;
+    budget  = totalBudget;
   }
   budget = Math.max(0, budget);
 
@@ -1888,18 +1878,7 @@ $('hourlyIncome').addEventListener('input', ()=>{
 });
 
 // ── A71 info card show/hide ───────────────────────────────────
-function updateA71Cards(){
-  const mainOn = document.getElementById('main_a71').checked;
-  const spOn   = document.getElementById('sp_a71')?.checked;
-  const mc = document.getElementById('a71InfoMain');
-  const sc = document.getElementById('a71InfoSpouse');
-  if(mc){ mc.classList.toggle('visible', mainOn); }
-  if(sc){ sc.classList.toggle('visible', !!spOn); }
-}
-
-document.getElementById('main_a71').addEventListener('change', updateA71Cards);
-document.getElementById('sp_a71')?.addEventListener('change', updateA71Cards);
-
+// A71 hidden inputs — no UI listeners needed (controlled by calcSupp)
 ['main_age','main_sex','main_tob','main_a71','sp_age','sp_sex','sp_tob','sp_a71'].forEach(id=>{
   $(id)?.addEventListener('input', refreshAll);
   $(id)?.addEventListener('change', refreshAll);
