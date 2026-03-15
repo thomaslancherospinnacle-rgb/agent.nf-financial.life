@@ -1901,7 +1901,7 @@ function renderBottom(card){
 
   // Count active supplemental policies — each carries a $8.50 first-month policy fee
   const SUPP_POLICY_FEE = 8.50;
-  const activeSuppCount = ['a71','a74','h34','c10','c20'].filter(id => {
+  const activeSuppCount = ['a71','a74','h34','c10','c20','ci'].filter(id => {
     const ctrl = document.getElementById(id+'_controls');
     return ctrl && ctrl.style.display !== 'none';
   }).length;
@@ -2251,7 +2251,7 @@ function suppInBudgetDeduction(){ return 0; }
   font:inherit;font-size:12px;font-weight:600;}
 
 /* Cards grid */
-.suppGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
+.suppGrid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;}
 @media(max-width:1300px){.suppGrid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:860px){.suppGrid{grid-template-columns:1fr}}
 
@@ -2279,6 +2279,8 @@ function suppInBudgetDeduction(){ return 0; }
 .ch34 .suppBadge{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0}
 .cc10 .suppBadge{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
 .cc20 .suppBadge{background:#fffbeb;color:#92400e;border:1px solid #fde68a}
+.cci::before{background:linear-gradient(90deg,#1e1b4b,#4f46e5,#a78bfa)}
+.cci .suppBadge{background:#eef2ff;color:#3730a3;border:1px solid #c7d2fe}
 
 /* Include in budget toggle */
 .inBudgetBtn{display:flex;align-items:center;gap:4px;padding:3px 8px;
@@ -2657,6 +2659,48 @@ function suppInBudgetDeduction(){ return 0; }
       </div>
     </div>
 
+
+    <!-- CI — Critical Illness -->
+    <div class="suppCard cci" id="card_ci">
+      <div class="suppCardHead">
+        <div class="suppCardTopRow">
+          <span class="suppBadge">CI</span>
+          <label class="inBudgetBtn" id="lbl_ci_budget">
+            <input type="checkbox" id="ci_inbudget" onchange="updateBudgetBtn('ci');calcSupp()">
+            <span data-i18n="inBudget">In Budget</span>
+          </label>
+        </div>
+        <div class="suppCardTitle">Critical Illness</div>
+        <div class="suppCardSub">Lump Sum · Unisex · Ages 20–59</div>
+      </div>
+      <div class="suppBody">
+        <button id="ci_activate" onclick="toggleSupp('ci')" style="width:100%;padding:7px 10px;border-radius:7px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer;letter-spacing:.3px;text-transform:uppercase;transition:all .18s;background:var(--bg-2);border:1px solid var(--line-2);color:var(--muted);">＋ Activate CI</button>
+        <div id="ci_controls" style="display:none;margin-top:6px;">
+          <div class="suppRow">
+            <label>Benefit</label>
+            <select id="ci_benefit" onchange="calcSupp()">
+              <option value="0">—</option>
+              <option value="10000">$10,000</option>
+              <option value="25000" selected>$25,000</option>
+              <option value="50000">$50,000</option>
+            </select>
+          </div>
+          <label id="ci_spouse_row" class="suppToggleRow" style="display:none;">
+            <input type="checkbox" id="ci_spouse" onchange="calcSupp()">
+            <span>Include Spouse (same benefit, her age rate)</span>
+          </label>
+        </div>
+        <div class="suppPrice" id="ci_priceBox" style="display:none;margin-top:auto;">
+          <div class="suppPriceTop">
+            <span class="suppPriceLabel" data-i18n="suppMonthly">Monthly</span>
+            <span class="suppPriceAmt" id="ci_price">$0.00</span>
+          </div>
+          <div class="suppPriceBreak" id="ci_break">—</div>
+        </div>
+        <div class="suppNA" id="ci_na" style="display:none"></div>
+      </div>
+    </div>
+
   </div><!-- .suppGrid -->
 
   <!-- Detailed Payout Scenarios Roadmap -->
@@ -2683,7 +2727,7 @@ function inRange(age, r){ return Number(r.age_min)<=age && age<=Number(r.age_max
 // Returns total monthly supplemental cost marked "in budget"
 function suppInBudgetDeduction(){
   let deduct = 0;
-  ['a71','a74','h34','c10','c20'].forEach(id => {
+  ['a71','a74','h34','c10','c20','ci'].forEach(id => {
     // Only count if card is activated
     const ctrl = document.getElementById(id+'_controls');
     if(!ctrl || ctrl.style.display === 'none') return;
@@ -2748,6 +2792,7 @@ function toggleSupp(id){
       h34:()=>{ document.getElementById('h34_recup').checked=false; },
       c10:()=>{ /* keep units, just hide */ },
       c20:()=>{ /* keep benefit, just hide */ },
+      ci:()=>{ /* keep benefit, just hide */ },
     };
     if(resetMap[id]) resetMap[id]();
   } else {
@@ -2784,7 +2829,7 @@ function toggleA71Spouse(){
 function syncSpouseToggles(){
   const show = state.spouseIncluded;
   // For each card: show spouse toggle only when card is active AND spouse is added
-  ['a71','a74','h34','c10','c20'].forEach(id => {
+  ['a71','a74','h34','c10','c20','ci'].forEach(id => {
     const row     = document.getElementById(id+'_spouse_row');
     const ctrl    = document.getElementById(id+'_controls');
     const isActive = ctrl && ctrl.style.display !== 'none';
@@ -3050,7 +3095,53 @@ function calcSupp(){
   }
   setPrice('c20',c20Total,c20Lines);
 
-  buildPayouts({a71Total,a74Total,h34Total,c10Total,c20Total});
+  // ── CI — Critical Illness (hardcoded unisex rates) ───────────────────────
+  // Rates per month by age band and benefit amount
+  const CI_RATES = {
+    50000: { '20-39':15.25, '40-44':30.25, '45-49':50.25, '50-54':75.25, '55-59':110.25 },
+    25000: { '20-39': 7.75, '40-44':15.25, '45-49':25.25, '50-54':37.75, '55-59': 55.25 },
+    10000: { '20-39': 3.25, '40-44': 6.25, '45-49':10.25, '50-54':15.25, '55-59': 22.10 },
+  };
+  function ciRate(age, benefit){
+    const tbl = CI_RATES[benefit];
+    if(!tbl) return null;
+    if(age >= 20 && age <= 39) return tbl['20-39'];
+    if(age >= 40 && age <= 44) return tbl['40-44'];
+    if(age >= 45 && age <= 49) return tbl['45-49'];
+    if(age >= 50 && age <= 54) return tbl['50-54'];
+    if(age >= 55 && age <= 59) return tbl['55-59'];
+    return null; // outside eligible range
+  }
+
+  let ciTotal=0, ciLines=[];
+  const ciNA = document.getElementById('ci_na');
+  if(ciNA) ciNA.style.display = 'none';
+  if(isOn('ci')){
+    const benefit      = Number(document.getElementById('ci_benefit').value);
+    const withSpouse   = spouseOn('ci') && !!spIn;
+    if(benefit > 0){
+      const mRate = ciRate(mIn.age, benefit);
+      if(mRate !== null){
+        ciTotal += mRate;
+        ciLines.push(`<b>Main ${money0(benefit)} (age ${mIn.age}):</b> ${currency(mRate)}/mo`);
+        if(withSpouse){
+          const spRate = ciRate(spIn.age, benefit);
+          if(spRate !== null){
+            ciTotal += spRate;
+            ciLines.push(`<b>Spouse ${money0(benefit)} (age ${spIn.age}):</b> ${currency(spRate)}/mo`);
+          } else {
+            ciLines.push(`<b>Spouse:</b> outside age range (20–59)`);
+          }
+        }
+      } else {
+        if(ciNA){ ciNA.style.display=''; ciNA.textContent=`CI not available at age ${mIn.age} (eligible: 20–59).`; }
+      }
+    }
+  }
+  setPrice('ci', ciTotal, ciLines);
+
+
+  buildPayouts({a71Total,a74Total,h34Total,c10Total,c20Total,ciTotal});
   // If auto-complete is active, re-run so WL/Term adjusts to new budget ceiling
   if(state.autoLive){
     autoFillCard('one');
@@ -3060,7 +3151,7 @@ function calcSupp(){
 }
 
 // ── buildPayouts — Detailed worst-case scenario roadmap ──────────────────
-function buildPayouts({a71Total,a74Total,h34Total,c10Total,c20Total}){
+function buildPayouts({a71Total,a74Total,h34Total,c10Total,c20Total,ciTotal=0}){
   const panel   = document.getElementById('payoutPanel');
   const roadmap = document.getElementById('payoutRoadmap');
   if(!panel || !roadmap) return;
@@ -3072,6 +3163,7 @@ function buildPayouts({a71Total,a74Total,h34Total,c10Total,c20Total}){
     h34: document.getElementById('h34_controls')?.style.display !== 'none' && h34Total > 0,
     c10: document.getElementById('c10_controls')?.style.display !== 'none' && c10Total > 0,
     c20: document.getElementById('c20_controls')?.style.display !== 'none' && c20Total > 0,
+    ci:  document.getElementById('ci_controls')?.style.display  !== 'none' && ciTotal  > 0,
   };
   const anyActive = Object.values(active).some(Boolean);
 
@@ -3099,6 +3191,9 @@ function buildPayouts({a71Total,a74Total,h34Total,c10Total,c20Total}){
   const c10DetAmt = c10Detect * 1000; // detection benefit
 
   const c20Ben    = active.c20 ? Number(document.getElementById('c20_benefit')?.value||0) : 0;
+  const ciBen     = active.ci  ? Number(document.getElementById('ci_benefit')?.value||0)  : 0;
+  const spInBP    = (()=>{ try{ return getPersonInput('spouse'); }catch(e){ return null; } })();
+  const ciSpouseOn = active.ci && document.getElementById('ci_spouse')?.checked && !!spInBP?.age;
   const c20SpouseChk = active.c20 && document.getElementById('c20_spouse')?.checked;
 
   // Get WL+Term+ADB for each option card
@@ -3136,6 +3231,15 @@ function buildPayouts({a71Total,a74Total,h34Total,c10Total,c20Total}){
     if(active.c20 && c20Ben > 0){
       diagnosisItems.push({ label:`C20 Cancer Payout — ${money0(c20Ben)}`, amount: c20Ben, note:'Lump sum at diagnosis' });
       runningTotal += c20Ben;
+    }
+    if(active.ci && ciBen > 0){
+      diagnosisItems.push({ label:`CI Critical Illness — ${money0(ciBen)}`, amount: ciBen, note:'Lump sum on critical illness diagnosis' });
+      runningTotal += ciBen;
+      if(ciSpouseOn){
+        const spIn2 = getPersonInput('spouse');
+        diagnosisItems.push({ label:`CI Spouse — ${money0(ciBen)} (age ${spIn2.age})`, amount: ciBen, note:'Same benefit amount, spouse age rate' });
+        runningTotal += ciBen;
+      }
     }
     if(diagnosisItems.length) phases.push({ phase:'Diagnosis', emoji:'🔬', items: diagnosisItems, subtotal: runningTotal });
 
@@ -3404,7 +3508,7 @@ function buildPayouts({a71Total,a74Total,h34Total,c10Total,c20Total}){
 
     const activeList = [
       active.a71?'A71':null, active.a74?'A74':null, active.h34?'H34':null,
-      active.c10?'C10':null, active.c20?'C20':null,
+      active.c10?'C10':null, active.c20?'C20':null, active.ci?'CI':null,
     ].filter(Boolean).join(' · ');
 
     return `
@@ -3469,7 +3573,8 @@ function buildPayouts({a71Total,a74Total,h34Total,c10Total,c20Total}){
  'a74_units', 'a74_spouse',
  'h34_daily','h34_recup','h34_spouse',
  'c10_units','c10_detect','c10_spouse',
- 'c20_benefit','c20_spouse'
+ 'c20_benefit','c20_spouse',
+ 'ci_benefit','ci_spouse'
 ].forEach(id=>{
   const el=document.getElementById(id);
   if(el) el.addEventListener('change', calcSupp);
