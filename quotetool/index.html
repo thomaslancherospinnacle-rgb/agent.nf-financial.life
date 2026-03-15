@@ -431,7 +431,7 @@ body{
         <div class="personTitle"><div class="summary" id="mainSummary">MAIN (MALE) AGE: 35 NTU A71 OFF</div><button type="button" class="alt">MAIN</button></div>
         <div class="grid">
           <div><label data-i18n="age">Edad</label><input id="main_age" type="number" min="18" max="80" value="35"></div>
-          <div><label data-i18n="gender">Género</label><select id="main_sex"><option data-i18n-opt="male">Hombre</option><option data-i18n-opt="female">Mujer</option></select></div>
+          <div><label data-i18n="gender">Género</label><select id="main_sex"><option value="Male" data-i18n-opt="male">Hombre</option><option value="Female" data-i18n-opt="female">Mujer</option></select></div>
           <div class="full"><label data-i18n="tobacco">Usuario de Tabaco</label><select id="main_tob"><option>NTU</option><option>TU</option></select></div>
 
         </div>
@@ -441,7 +441,7 @@ body{
         <div class="personTitle"><div class="summary" id="spSummary">SPOUSE NOT INCLUDED</div><button type="button" id="spouseBtn" class="gold">Add spouse</button></div>
         <div class="grid hidden" id="spouseGrid">
           <div><label data-i18n="age">Edad</label><input id="sp_age" type="number" min="18" max="80" value="33"></div>
-          <div><label data-i18n="gender">Género</label><select id="sp_sex"><option data-i18n-opt="female">Mujer</option><option data-i18n-opt="male">Hombre</option></select></div>
+          <div><label data-i18n="gender">Género</label><select id="sp_sex"><option value="Female" data-i18n-opt="female">Mujer</option><option value="Male" data-i18n-opt="male">Hombre</option></select></div>
           <div class="full"><label data-i18n="tobacco">Usuario de Tabaco</label><select id="sp_tob"><option>NTU</option><option>TU</option></select></div>
 
         </div>
@@ -583,7 +583,7 @@ body{
 const LANGS = {
   es: {
     // Labels
-    age:'Edad', gender:'Género', tobacco:'Usuario de Tabaco',
+    age:'Edad', gender:'Género', tobacco:'Usuario de Tabaco', male:'Hombre', female:'Mujer',
     monthlyIncome:'Ingreso Mensual', hourlyIncome:'Ingreso por Hora',
     mainSSI:'SSI Principal', spouseSSI:'SSI Cónyuge', sspMonths:'Meses SSP',
     // Toggles
@@ -645,7 +645,7 @@ const LANGS = {
     wordmark:'Cotizador de Seguros', langLabel:'English', langFlag:'🇺🇸',
   },
   en: {
-    age:'Age', gender:'Gender', tobacco:'Tobacco User',
+    age:'Age', gender:'Gender', tobacco:'Tobacco User', male:'Male', female:'Female',
     monthlyIncome:'Monthly Income', hourlyIncome:'Hourly Income',
     mainSSI:'Main SSI', spouseSSI:'Spouse SSI', sspMonths:'SSP Months Set',
     sspModeLabel:'SSP Mode (Social Security Protection)',
@@ -709,6 +709,11 @@ function applyLang(){
     if(L[key] === undefined) return;
     if(htmlKeys.has(key)) el.innerHTML = L[key];
     else el.textContent = L[key];
+  });
+  // Translate <option data-i18n-opt> text while preserving value= attribute
+  document.querySelectorAll('[data-i18n-opt]').forEach(el => {
+    const key = el.dataset.i18nOpt;
+    if(L[key] !== undefined) el.textContent = L[key];
   });
   // Cover line labels (text nodes before the span)
   document.querySelectorAll('[data-i18n-wrap]').forEach(el => {
@@ -1043,7 +1048,9 @@ const round5000 = n => Math.max(0, Math.round((Number(n)||0) / 5000) * 5000);
 // Total household budget for the card
 function cardBudgetTotal(card){
   const hourly = Number($('hourlyIncome').value || 0);
-  return card === 'one' ? hourly * 4 : hourly * 8;
+  const raw = card === 'one' ? hourly * 4 : hourly * 8;
+  const deduct = (typeof suppInBudgetDeduction === 'function') ? suppInBudgetDeduction() : 0;
+  return Math.max(5, raw - deduct);
 }
 
 // Per-pane budget:
@@ -1776,8 +1783,8 @@ function renderBottom(card){
 function refreshAll(){
   const monthly = Number($('monthlyIncome').value || 0);
   const hourly = Number($('hourlyIncome').value || 0);
-  $('oneBudgetText').textContent = currency(hourly * 4);
-  $('twoBudgetText').textContent = currency(hourly * 8);
+  $('oneBudgetText').textContent = currency(cardBudgetTotal('one'));
+  $('twoBudgetText').textContent = currency(cardBudgetTotal('two'));
   // Budget labels
   const ob = $('oneBudgetText').parentElement;
   const tb = $('twoBudgetText').parentElement;
@@ -2122,8 +2129,8 @@ Object.keys(suppI18nKeys).forEach(lang=>{
     <div class="suppStateWrap">
       <label data-i18n="suppState">Estado</label>
       <select id="suppState" onchange="calcSupp()">
+        <option value="FL" selected>Florida (FL)</option>
         <option value="MI">Michigan (MI)</option>
-        <option value="FL">Florida (FL)</option>
         <option value="TX">Texas (TX)</option>
         <option value="NC">North Carolina (NC)</option>
         <option value="MD">Maryland (MD)</option>
@@ -2361,19 +2368,17 @@ function suppByState(state, product){
 function inRange(age, r){ return Number(r.age_min)<=age && age<=Number(r.age_max); }
 
 // ── Budget integration ─────────────────────────────────────────
-// Patch cardBudgetTotal to subtract supplemental costs when "in budget"
-const _baseBudget = cardBudgetTotal;
-function cardBudgetTotal(card){
-  const base = _baseBudget(card);
+// Returns total monthly supplemental cost marked "in budget"
+function suppInBudgetDeduction(){
   let deduct = 0;
   ['a71','a74','h34','c10','c20'].forEach(id => {
     const cb = document.getElementById(id+'_inbudget');
     if(cb && cb.checked){
-      const amt = parseFloat((document.getElementById(id+'_price')||{}).textContent||'0') || 0;
-      deduct += amt;
+      const el = document.getElementById(id+'_price');
+      if(el) deduct += parseFloat(el.textContent.replace(/[^0-9.]/g,'')) || 0;
     }
   });
-  return Math.max(5, base - deduct);
+  return deduct;
 }
 
 function updateBudgetBtn(id){
@@ -2405,26 +2410,62 @@ function a74Benefits(units){
 
 // ── Main calc ─────────────────────────────────────────────────
 function calcSupp(){
-  const state = document.getElementById('suppState').value;
-  const mIn   = getPersonInput('main');
-  const spIn  = state.spouseIncluded ? getPersonInput('spouse') : null;
+  const suppState = document.getElementById('suppState').value;
+  const mIn = getPersonInput('main');
+  const spIn = state.spouseIncluded ? getPersonInput('spouse') : null;
 
-  // Sync hidden checkboxes for WL engine
+  // Sync A71 checkboxes for WL engine
   const a71Who = document.getElementById('a71_who').value;
-  const mainA71El = document.getElementById('main_a71');
-  const spA71El   = document.getElementById('sp_a71');
-  if(mainA71El) mainA71El.checked = a71Who !== 'none';
-  if(spA71El)   spA71El.checked   = a71Who === 'FAM' && !!spIn;
+  if(document.getElementById('main_a71')) document.getElementById('main_a71').checked = a71Who !== 'none';
+  if(document.getElementById('sp_a71'))   document.getElementById('sp_a71').checked   = a71Who === 'FAM' && !!spIn;
 
-  // ── A71 ────────────────────────────────────────────────────
+  // ── A71 rider options (state-specific) ────────────────────
+  (function(){
+    const sel = document.getElementById('a71_rider');
+    if(!sel) return;
+    const cur = sel.value;
+    const opts = {
+      TX:[['BASE','Base'],['BM000','Accidente'],['BM000_DOUBLE','Doble Accidente']],
+      FL:[['BASE','Base'],['BM000','Accidente'],['BM000_DOUBLE','Doble Accidente']],
+      MI:[['BASE','Base'],['BM000_DOUBLE','Doble Accidente']],
+      NC:[['BASE','Base'],['RECUP','+ Recuperación'],['DOUBLE_RECUP','Doble Recuperación']],
+      MD:[['BASE','Base'],['RECUP','+ Recuperación'],['SINGLE_RECUP','Recup Simple'],['DOUBLE_RECUP','Doble Recuperación']],
+    }[suppState] || [['BASE','Base']];
+    sel.innerHTML = opts.map(([v,l])=>`<option value="${v}"${v===cur?' selected':''}>${l}</option>`).join('');
+    if(!opts.find(([v])=>v===cur)) sel.value='BASE';
+  })();
+
+  // ── C10 units options (state-specific) ────────────────────
+  (function(){
+    const sel = document.getElementById('c10_units');
+    if(!sel) return;
+    const cur = sel.value;
+    const avail = {TX:[5,10],NC:[5,10],MI:[10,15,20],FL:[5,10,15,20,30],MD:[5,10,15,20]}[suppState]||[5,10];
+    sel.innerHTML = '<option value="0">—</option>' +
+      avail.map(u=>`<option value="${u}"${String(u)===cur?' selected':''}>${u}u · $${u*10}/tto</option>`).join('');
+    if(cur!=='0' && !avail.includes(Number(cur))) sel.value='0';
+  })();
+
+  // ── H34 recup availability (FL has no RECUP rider) ────────
+  const h34RecupChk = document.getElementById('h34_recup');
+  const h34RecupLbl = h34RecupChk ? h34RecupChk.closest('label') : null;
+  const h34HasRecup = suppState !== 'FL';
+  if(h34RecupLbl) h34RecupLbl.style.display = h34HasRecup ? '' : 'none';
+  if(!h34HasRecup && h34RecupChk) h34RecupChk.checked = false;
+
+  // ── A71 ───────────────────────────────────────────────────
   let a71Total=0, a71Lines=[];
   if(a71Who !== 'none'){
     const daily = document.getElementById('a71_daily').value;
     const rider = document.getElementById('a71_rider').value;
-    const rows  = suppByState(state,'A71');
-    const mRow  = rows.find(r=>r.coverage_type===a71Who && r.rider===rider
-                              && String(r.daily_benefit)===String(daily)
-                              && inRange(mIn.age,r));
+    const rows  = suppByState(suppState,'A71');
+    // FL uses units field (1/2/3/4); all other states use daily_benefit (100/200/300)
+    const flUnitMap = {'100':'1','200':'2','300':'3','400':'4'};
+    const mRow = rows.find(r =>
+      r.coverage_type===a71Who && r.rider===rider && inRange(mIn.age,r) &&
+      (suppState==='FL' ? String(r.units)===(flUnitMap[daily]||daily)
+                        : String(r.daily_benefit)===String(daily))
+    );
     if(mRow){
       a71Total += Number(mRow.monthly_rate);
       const who = a71Who==='FAM'
@@ -2435,12 +2476,12 @@ function calcSupp(){
   }
   setPrice('a71',a71Total,a71Lines);
 
-  // ── A74 ────────────────────────────────────────────────────
+  // ── A74 ───────────────────────────────────────────────────
   let a74Total=0, a74Lines=[];
   const a74Units = Number(document.getElementById('a74_units').value);
   const a74NA = document.getElementById('a74_na');
   if(a74Units>0){
-    const rows = suppByState(state,'A74');
+    const rows = suppByState(suppState,'A74');
     const row  = rows.find(r=>Number(r.units)===a74Units && inRange(mIn.age,r));
     if(row){
       a74Total += Number(row.monthly_rate);
@@ -2458,48 +2499,40 @@ function calcSupp(){
   } else { a74NA.style.display='none'; }
   setPrice('a74',a74Total,a74Lines);
 
-  // ── H34 ────────────────────────────────────────────────────
+  // ── H34 ───────────────────────────────────────────────────
   let h34Total=0, h34Lines=[];
-  const h34Who  = document.getElementById('h34_who').value;
-  const h34Daily= document.getElementById('h34_daily').value;
-  const h34Recup= document.getElementById('h34_recup').checked;
-  const h34NA   = document.getElementById('h34_na');
+  const h34Who   = document.getElementById('h34_who').value;
+  const h34Daily = document.getElementById('h34_daily').value;
+  const h34Recup = h34HasRecup && h34RecupChk && h34RecupChk.checked;
+  const h34NA    = document.getElementById('h34_na');
   h34NA.style.display='none';
 
   if(h34Who!=='none'){
-    const rows   = suppByState(state,'H34');
+    const rows   = suppByState(suppState,'H34');
     const people = h34Who==='both'&&spIn ? [mIn,spIn] : [mIn];
     people.forEach((p,i)=>{
       const g   = p.sex==='Male'?'MALE':'FEMALE';
-      const who = i===0?(currentLang==='es'?'Principal':'Main')
-                       :(currentLang==='es'?'Cónyuge':'Spouse');
-      const baseRow = rows.find(r=>r.gender===g&&r.rider==='BASE'
-                                  &&String(r.daily_benefit)===String(h34Daily)
-                                  &&inRange(p.age,r));
+      const who = i===0?(currentLang==='es'?'Principal':'Main'):(currentLang==='es'?'Cónyuge':'Spouse');
+      const baseRow = rows.find(r=>r.gender===g&&r.rider==='BASE'&&String(r.daily_benefit)===String(h34Daily)&&inRange(p.age,r));
       if(baseRow){
-        const base=Number(baseRow.monthly_rate);
-        h34Total+=base;
-        let line=`<b>$${h34Daily}/noche·${who}:</b> ${currency(base)}/mo`;
+        h34Total += Number(baseRow.monthly_rate);
+        let line = `<b>$${h34Daily}/noche·${who}:</b> ${currency(baseRow.monthly_rate)}/mo`;
         if(h34Recup){
-          const recupRow=rows.find(r=>r.gender===g&&r.rider==='RECUP'
-                                     &&r.daily_benefit==='50'&&inRange(p.age,r));
-          if(recupRow){
-            const rs=Number(recupRow.monthly_rate)*(Number(h34Daily)/50);
-            h34Total+=rs; line+=` + Recup ${currency(rs)}/mo`;
-          }
+          const rr   = rows.find(r=>r.gender===g&&r.rider==='RECUP'&&String(r.daily_benefit)===String(h34Daily)&&inRange(p.age,r));
+          const rr50 = !rr && rows.find(r=>r.gender===g&&r.rider==='RECUP'&&r.daily_benefit==='50'&&inRange(p.age,r));
+          if(rr)  { h34Total+=Number(rr.monthly_rate); line+=` + Recup ${currency(rr.monthly_rate)}/mo`; }
+          else if(rr50){ const rs=Number(rr50.monthly_rate)*(Number(h34Daily)/50); h34Total+=rs; line+=` + Recup ${currency(rs)}/mo`; }
         }
         h34Lines.push(line);
       } else {
         h34NA.style.display='';
-        h34NA.textContent=currentLang==='es'
-          ?`No disponible ${who} edad ${p.age}.`
-          :`Not available for ${who} age ${p.age}.`;
+        h34NA.textContent=currentLang==='es'?`No disponible ${who} edad ${p.age}.`:`Not available for ${who} age ${p.age}.`;
       }
     });
   }
   setPrice('h34',h34Total,h34Lines);
 
-  // ── C10 ────────────────────────────────────────────────────
+  // ── C10 ───────────────────────────────────────────────────
   let c10Total=0, c10Lines=[];
   const c10Units  = Number(document.getElementById('c10_units').value);
   const c10Detect = Number(document.getElementById('c10_detect').value);
@@ -2507,72 +2540,52 @@ function calcSupp(){
   document.getElementById('c10DetRow').style.display = c10Units>0?'':'none';
   c10NA.style.display='none';
 
-  const c10Avail = SUPP_RATES.some(r=>r.state===state&&r.product==='C10');
+  const c10Avail = SUPP_RATES.some(r=>r.state===suppState&&r.product==='C10');
   document.getElementById('card_c10').classList.toggle('unavailable',!c10Avail);
   if(!c10Avail){
     c10NA.style.display='';
-    c10NA.textContent=currentLang==='es'
-      ?`C10 no disponible en ${state}.`:`C10 not available in ${state}.`;
+    c10NA.textContent=currentLang==='es'?`C10 no disponible en ${suppState}.`:`C10 not available in ${suppState}.`;
   } else if(c10Units>0){
-    const rows = suppByState(state,'C10');
+    const rows = suppByState(suppState,'C10');
     const g    = mIn.sex==='Male'?'MALE':'FEMALE';
-    // Cancer units
-    const cancRow=rows.find(r=>r.gender===g&&r.coverage_type==='ONE_ADULT'
-                               &&Number(r.units)===c10Units&&(!r.rider||r.rider==='')
-                               &&inRange(mIn.age,r));
-    if(cancRow){
-      c10Total+=Number(cancRow.monthly_rate);
-      c10Lines.push(`<b>${c10Units}u cáncer ($${c10Units*10}/tto):</b> ${currency(cancRow.monthly_rate)}/mo`);
+    const row  = rows.find(r=>r.gender===g&&r.coverage_type==='ONE_ADULT'&&Number(r.units)===c10Units&&(!r.rider||r.rider==='')&&inRange(mIn.age,r));
+    if(row){
+      c10Total += Number(row.monthly_rate);
+      const dxNote = c10Detect>0?` + $${c10Detect*1000} dx`:'';
+      c10Lines.push(`<b>${c10Units}u cáncer ($${c10Units*10}/tto${dxNote}):</b> ${currency(row.monthly_rate)}/mo`);
+    } else {
+      c10NA.style.display='';
+      c10NA.textContent=currentLang==='es'?`C10 no disponible edad ${mIn.age}.`:`C10 not available at age ${mIn.age}.`;
     }
-    // Detection units (separate rate row at same units count)
-    if(c10Detect>0){
-      const detRow=rows.find(r=>r.gender===g&&r.coverage_type==='ONE_ADULT'
-                                &&Number(r.units)===c10Detect&&(!r.rider||r.rider==='')
-                                &&inRange(mIn.age,r));
-      if(detRow){
-        c10Total+=Number(detRow.monthly_rate);
-        c10Lines.push(`<b>${c10Detect}u detección ($${c10Detect*1000} dx):</b> ${currency(detRow.monthly_rate)}/mo`);
-      }
-    }
-    // Policy fee
-    const feeRow=rows.find(r=>r.rider==='ADD_PER_POLICY'&&Number(r.units)===c10Units);
-    if(feeRow){ c10Total+=Number(feeRow.monthly_rate);
-      c10Lines.push(`<b>Fee:</b> ${currency(feeRow.monthly_rate)}/mo`); }
+    const feeRow = rows.find(r=>r.rider==='ADD_PER_POLICY'&&Number(r.units)===c10Units);
+    if(feeRow){ c10Total+=Number(feeRow.monthly_rate); c10Lines.push(`<b>Fee póliza:</b> ${currency(feeRow.monthly_rate)}/mo`); }
   }
   setPrice('c10',c10Total,c10Lines);
 
-  // ── C20 ────────────────────────────────────────────────────
+  // ── C20 ───────────────────────────────────────────────────
   let c20Total=0, c20Lines=[];
   const c20Benefit = Number(document.getElementById('c20_benefit').value);
   const c20NA      = document.getElementById('c20_na');
   c20NA.style.display='none';
-
   if(c20Benefit>0){
-    const rows = suppByState(state,'C20');
+    const rows = suppByState(suppState,'C20');
     const g    = mIn.sex==='Male'?'MALE':'FEMALE';
-    const row  = rows.find(r=>r.gender===g&&r.coverage_type==='IND'
-                              &&Number(r.benefit_amount)===c20Benefit
-                              &&inRange(mIn.age,r));
+    const row  = rows.find(r=>r.gender===g&&r.coverage_type==='IND'&&Number(r.benefit_amount)===c20Benefit&&inRange(mIn.age,r));
     if(row){
-      c20Total+=Number(row.monthly_rate);
+      c20Total += Number(row.monthly_rate);
       c20Lines.push(`<b>${money0(c20Benefit)}:</b> ${currency(row.monthly_rate)}/mo`);
-      const childRow=rows.find(r=>r.gender==='CHILD'&&Number(r.benefit_amount)===c20Benefit);
+      const childRow = rows.find(r=>r.gender==='CHILD'&&Number(r.benefit_amount)===c20Benefit);
       if(childRow) c20Lines.push(`<b>+ Niño disponible:</b> ${currency(childRow.monthly_rate)}/mo c/u`);
     } else {
       c20NA.style.display='';
-      c20NA.textContent=currentLang==='es'
-        ?`No disponible edad ${mIn.age}.`:`Not available at age ${mIn.age}.`;
+      c20NA.textContent=currentLang==='es'?`No disponible edad ${mIn.age}.`:`Not available at age ${mIn.age}.`;
     }
   }
   setPrice('c20',c20Total,c20Lines);
 
-  // ── Payout Scenarios ───────────────────────────────────────
-  buildPayouts({a71Total,a74Total,h34Total,c10Total,c20Total,state});
-
-  // Refresh WL/Term engine (budget may have changed)
+  buildPayouts({a71Total,a74Total,h34Total,c10Total,c20Total});
   refreshAll();
 }
-
 function setPrice(id,total,lines){
   const pe=document.getElementById(id+'_price');
   const br=document.getElementById(id+'_break');
