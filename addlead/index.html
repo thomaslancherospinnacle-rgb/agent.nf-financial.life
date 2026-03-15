@@ -812,7 +812,7 @@
 
 <script>
   // ── CONFIGURACIÓN ─────────────────────────────────────────────────
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzmVHKKs3IIY6odVWnInKEujHmHwZ0P5WgcSBgur9LkPPhgAb3K2i0QsFjppf8MWhCNdw/exec";
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwXLdxjpOeIsicDCka4yZuVsrPNu-2seKpur03RKwtm3MJSgp52vBX1DVaBiQ3L7G6Vpg/exec";
   const CALENDLY_URL    = "https://calendly.com/thomaslancheros-ail/30min";
   // ─────────────────────────────────────────────────────────────────
 
@@ -1012,7 +1012,7 @@
     if (tob)      params.set('tob',    tob);
     if (income)   params.set('income', income);
 
-    const url = '../quotetool/index.html' + (params.toString() ? '?' + params.toString() : '');
+    const url = '../quotetool/' + (params.toString() ? '?' + params.toString() : '');
     document.getElementById('quotizarBtn').href = url;
     window.open(url, '_blank');
   }
