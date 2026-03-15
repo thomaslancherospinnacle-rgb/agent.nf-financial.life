@@ -794,6 +794,22 @@ function num(v){
   return Number.isFinite(x) ? x : null;
 }
 
+async function loadSuppRates(){
+  const suppStatus = document.getElementById('suppLoadStatus');
+  if(suppStatus) suppStatus.textContent = 'Loading supplemental rates…';
+  try {
+    const res = await fetch('AIL_MASTER_RATEBOOK.csv');
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    SUPP_RATES = parseCSV(text);
+    if(suppStatus) suppStatus.textContent = '';
+    calcSupp();
+  } catch(err) {
+    console.error('Could not load AIL_MASTER_RATEBOOK.csv:', err);
+    if(suppStatus) suppStatus.textContent = '⚠ Could not load supplemental rates — place AIL_MASTER_RATEBOOK.csv in the same folder as this file.';
+  }
+}
+
 async function loadRates(){
   const res = await fetch('Rates.csv');
   if(!res.ok) throw new Error('Could not load Rates.csv');
@@ -2526,22 +2542,6 @@ Object.keys(suppI18nKeys).forEach(lang=>{
 // ══════════════════════════════════════════════════════════════
 let SUPP_RATES = [];
 
-async function loadSuppRates(){
-  const suppStatus = document.getElementById('suppLoadStatus');
-  if(suppStatus) suppStatus.textContent = 'Loading supplemental rates…';
-  try {
-    const res = await fetch('AIL_MASTER_RATEBOOK.csv');
-    if(!res.ok) throw new Error('HTTP ' + res.status);
-    const text = await res.text();
-    SUPP_RATES = parseCSV(text);
-    if(suppStatus) suppStatus.textContent = '';
-    calcSupp();
-  } catch(err) {
-    console.error('Could not load AIL_MASTER_RATEBOOK.csv:', err);
-    if(suppStatus) suppStatus.textContent = '⚠ Could not load supplemental rates — place AIL_MASTER_RATEBOOK.csv in the same folder as this file.';
-  }
-}
-
 function suppByState(state, product){
   return SUPP_RATES.filter(r => r.state===state && r.product===product);
 }
@@ -2674,6 +2674,19 @@ function syncSpouseToggles(){
     if(a71Disp) a71Disp.textContent = a71Sel.value === 'FAM' ? 'Main + Spouse' : a71Sel.value === 'none' ? '—' : 'Main';
   }
 }
+// ── setPrice helper — updates price display for a supplemental card ───────
+function setPrice(id, total, lines){
+  const priceAmt   = document.getElementById(id+'_price');
+  const priceBreak = document.getElementById(id+'_break');
+  const priceBox   = document.getElementById(id+'_priceBox');
+  const isOn = document.getElementById(id+'_controls')?.style.display !== 'none';
+
+  if(priceAmt)   priceAmt.textContent  = currency(total);
+  if(priceBreak) priceBreak.innerHTML  = lines.length ? lines.join('<br>') : '—';
+  if(priceBox)   priceBox.style.display = (isOn && total > 0) ? '' : (isOn ? '' : 'none');
+}
+
+
 function calcSupp(){
   const suppState = document.getElementById('suppState').value;
   const mIn  = getPersonInput('main');
