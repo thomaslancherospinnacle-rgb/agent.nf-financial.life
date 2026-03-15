@@ -2246,32 +2246,73 @@ function suppInBudgetDeduction(){ return 0; }
 .suppNA{padding:7px 10px;background:var(--bg-2);border:1px solid var(--line);
   border-radius:6px;font-size:10px;color:var(--muted-2);text-align:center;font-style:italic;}
 
-/* ── Payout Scenarios ─────────────────────────────────────────── */
-#payoutPanel{margin-top:16px;padding:16px 20px;background:var(--white);
-  border:1px solid var(--line);border-radius:13px;
-  box-shadow:0 2px 8px rgba(7,17,31,.06);}
-.payoutTitle{font-family:'Cormorant Garamond',Georgia,serif;
-  font-size:18px;font-weight:600;color:var(--navy);
-  margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--line);}
-.payoutGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
-@media(max-width:900px){.payoutGrid{grid-template-columns:repeat(2,1fr)}}
-.payoutScen{padding:12px 14px;border-radius:10px;
-  border:1px solid var(--line);background:var(--surface);}
-.payoutScen h4{font-size:10px;font-weight:700;color:var(--muted);
-  text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
-.pLine{display:flex;justify-content:space-between;align-items:baseline;
-  font-size:11.5px;margin-bottom:3px;gap:6px;}
-.pProd{color:var(--muted-2);font-size:9.5px;flex-shrink:0;}
-.pAmt{font-weight:700;color:var(--ink);font-family:'Cormorant Garamond',serif;
-  font-size:14px;white-space:nowrap;}
-.pDivider{border-top:1px solid var(--line);margin:6px 0;}
-.pTotal{display:flex;justify-content:space-between;align-items:baseline;margin-top:4px;}
-.pTotalLabel{font-size:9.5px;font-weight:700;color:var(--muted);
-  text-transform:uppercase;letter-spacing:.5px;}
-.pTotalAmt{font-family:'Cormorant Garamond',serif;
-  font-size:22px;font-weight:700;color:var(--navy);}
-.pNote{margin-top:6px;font-size:9px;color:var(--muted-2);
-  font-style:italic;line-height:1.5;}
+/* ── Roadmap Scenario Styles ───────────────────────────── */
+#payoutPanel{margin-top:24px;}
+
+.rd-header{display:flex;align-items:center;gap:14px;padding:16px 22px;
+  background:linear-gradient(90deg,var(--navy-3),var(--navy-2));
+  border-radius:14px 14px 0 0;border:1px solid rgba(176,128,48,.2);
+  border-bottom:none;}
+.rd-header-icon{font-size:24px;}
+.rd-header-title{font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:20px;font-weight:700;color:#e8d9a0;letter-spacing:.3px;}
+.rd-header-sub{font-size:11px;color:rgba(200,182,130,.6);margin-top:2px;letter-spacing:.3px;}
+
+.rd-card-group{background:var(--white);border:1px solid var(--line);
+  border-top:none;padding:20px 22px;margin-bottom:12px;}
+.rd-card-group:last-child{border-radius:0 0 14px 14px;margin-bottom:0;}
+.rd-card-label{font-size:9px;font-weight:800;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--muted);margin-bottom:16px;
+  padding-bottom:8px;border-bottom:1px solid var(--line);}
+
+.rd-scenario{margin-bottom:24px;border-radius:12px;
+  border:1px solid var(--line);overflow:hidden;}
+.rd-scenario:last-child{margin-bottom:0;}
+
+.rd-scenario-header{display:flex;align-items:center;gap:14px;
+  padding:14px 18px;background:var(--surface);
+  border-bottom:1px solid var(--line);}
+.rd-scenario-icon{font-size:22px;flex-shrink:0;}
+.rd-scenario-meta{flex:1;min-width:0;}
+.rd-scenario-title{font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:16px;font-weight:700;color:var(--navy);line-height:1.2;}
+.rd-scenario-sub{font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:.3px;}
+.rd-scenario-grand{text-align:right;flex-shrink:0;}
+.rd-scenario-grand-label{font-size:9px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.8px;color:var(--muted);margin-bottom:2px;}
+.rd-scenario-grand-amt{font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:24px;font-weight:700;line-height:1;}
+
+.rd-timeline{padding:16px 18px;background:var(--white);}
+
+.rd-phase{display:flex;gap:14px;position:relative;padding-bottom:20px;}
+.rd-phase:not(.rd-phase-last)::before{content:'';position:absolute;
+  left:18px;top:38px;bottom:0;width:2px;
+  background:linear-gradient(to bottom,var(--line),transparent);}
+.rd-phase-last{padding-bottom:0;}
+.rd-phase-dot{width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;z-index:1;box-shadow:0 2px 8px rgba(0,0,0,.1);}
+.rd-phase-content{flex:1;min-width:0;padding-top:6px;}
+.rd-phase-title{font-size:11px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.8px;color:var(--navy);margin-bottom:8px;}
+
+.rd-items{background:var(--surface);border-radius:8px;
+  border:1px solid var(--line);overflow:hidden;margin-bottom:8px;}
+.rd-item{display:flex;justify-content:space-between;align-items:baseline;
+  padding:7px 12px;gap:10px;border-bottom:1px solid var(--line-2);}
+.rd-item:last-child{border-bottom:none;}
+.rd-item-label{font-size:12px;color:var(--ink-2);flex:1;min-width:0;}
+.rd-item-note{display:block;font-size:10px;color:var(--muted);margin-top:1px;font-style:italic;}
+.rd-item-amount{font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:15px;font-weight:700;color:var(--ink);
+  white-space:nowrap;font-variant-numeric:tabular-nums;}
+
+.rd-running-total{font-size:10.5px;color:var(--muted);
+  padding:5px 0;border-top:1px dashed var(--line);}
+.rd-running-total strong{color:var(--navy);font-weight:700;
+  font-family:'Cormorant Garamond',Georgia,serif;font-size:13px;}
+
 
 /* Card death summary */
 .cardDeathBox{padding:12px 16px;background:var(--surface);border:1px solid var(--line);border-radius:10px;}
@@ -2537,17 +2578,9 @@ function suppInBudgetDeduction(){ return 0; }
 
   </div><!-- .suppGrid -->
 
-  <!-- Payout Scenarios -->
-  <div id="payoutPanel">
-    <div class="payoutTitle" data-i18n="payoutTitle">📋 Payout Scenarios</div>
-    <!-- Per-card death summary row -->
-    <div id="cardDeathSummary" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;"></div>
-    <div class="payoutGrid">
-      <div class="payoutScen"><h4 data-i18n="scenDeath">☠ Death by Illness</h4><div id="payout_death"></div></div>
-      <div class="payoutScen"><h4 data-i18n="scenAccident">⚡ Accidental Death</h4><div id="payout_accident"></div></div>
-      <div class="payoutScen"><h4 data-i18n="scenTerminal">🎗 Terminal Diagnosis (TIR)</h4><div id="payout_terminal"></div></div>
-      <div class="payoutScen"><h4 data-i18n="scenHospital">🏥 Hospital 30 Nights</h4><div id="payout_hospital"></div></div>
-    </div>
+  <!-- Detailed Payout Scenarios Roadmap -->
+  <div id="payoutPanel" style="display:none;">
+    <div id="payoutRoadmap"></div>
   </div>
 
 </div><!-- #suppSection -->
@@ -2945,43 +2978,304 @@ function calcSupp(){
   refreshAll();
 }
 
-// ── buildPayouts — updates the standalone payout panel ───────────────────
+// ── buildPayouts — Detailed worst-case scenario roadmap ──────────────────
 function buildPayouts({a71Total,a74Total,h34Total,c10Total,c20Total}){
-  const mIn   = getPersonInput('main');
-  const a71Active = document.getElementById('a71_controls')?.style.display !== 'none'
-                    && document.getElementById('a71_who')?.value !== 'none';
-  const a71Daily  = a71Active ? Number(document.getElementById('a71_daily')?.value||0) : 0;
-  const a71Bens   = a71Active && a71Daily ? a71AddBenefits(a71Daily) : null;
+  const panel   = document.getElementById('payoutPanel');
+  const roadmap = document.getElementById('payoutRoadmap');
+  if(!panel || !roadmap) return;
 
-  const a74Active = document.getElementById('a74_controls')?.style.display !== 'none';
-  const a74Units  = a74Active ? Number(document.getElementById('a74_units')?.value||0) : 0;
-  const a74Bens   = a74Units > 0 ? a74Benefits(a74Units) : null;
+  // Gather active plans
+  const active = {
+    a71: document.getElementById('a71_controls')?.style.display !== 'none' && a71Total > 0,
+    a74: document.getElementById('a74_controls')?.style.display !== 'none' && a74Total > 0,
+    h34: document.getElementById('h34_controls')?.style.display !== 'none' && h34Total > 0,
+    c10: document.getElementById('c10_controls')?.style.display !== 'none' && c10Total > 0,
+    c20: document.getElementById('c20_controls')?.style.display !== 'none' && c20Total > 0,
+  };
+  const anyActive = Object.values(active).some(Boolean);
 
-  const c20Active = document.getElementById('c20_controls')?.style.display !== 'none'
-                    && c20Total > 0;
-  const c20Ben    = c20Active ? (Number(document.getElementById('c20_benefit')?.value)||0) : 0;
+  // Hide panel if nothing active
+  panel.style.display = anyActive ? '' : 'none';
+  if(!anyActive){ roadmap.innerHTML = ''; return; }
 
-  const h34Active = document.getElementById('h34_controls')?.style.display !== 'none' && h34Total > 0;
-  const h34Daily  = h34Active ? Number(document.getElementById('h34_daily')?.value||0) : 0;
+  // Gather benefit values
+  const mIn = getPersonInput('main');
 
-  // For each option card, get coverage
-  ['one','two'].forEach(card => {
-    const cov = getCoverage(card,'main');
-    const wl = cov.wl||0, term = cov.term||0, adb = cov.adb||0;
-    const deathSick = (wl+term) + c20Ben;
-    const deathAcc  = deathSick + adb + (a71Bens?a71Bens.ad:0) + (a74Bens?a74Bens.ad:0);
-    const deathAuto = deathSick + adb + (a71Bens?a71Bens.auto:0) + (a74Bens?a74Bens.auto:0);
-    const deathComm = deathSick + adb + (a71Bens?a71Bens.common:0) + (a74Bens?a74Bens.common:0);
-    const hosp30    = h34Daily * 30;
+  const a71Daily  = active.a71 ? Number(document.getElementById('a71_daily')?.value||0) : 0;
+  const a71Bens   = active.a71 && a71Daily ? a71AddBenefits(a71Daily) : null;
 
-    // The receipt already renders payout scenarios inline — nothing extra needed here
-    // But if a separate panel element exists, update it
-    const el = document.getElementById('payout_death');
-    if(el) el.textContent = deathSick > 0 ? money0(deathSick) : '—';
-    const el2 = document.getElementById('payout_accident');
-    if(el2) el2.textContent = deathAcc > 0 ? money0(deathAcc) : '—';
-  });
+  const a74Units  = active.a74 ? Number(document.getElementById('a74_units')?.value||0) : 0;
+  const a74Bens   = active.a74 && a74Units ? a74Benefits(a74Units) : null;
+  const a74Spouse = active.a74 && document.getElementById('a74_spouse')?.checked;
+
+  const h34Daily  = active.h34 ? Number(document.getElementById('h34_daily')?.value||0) : 0;
+  const h34Recup  = active.h34 && document.getElementById('h34_recup')?.checked;
+  const h34SpouseChk = active.h34 && document.getElementById('h34_spouse')?.checked;
+
+  const c10Units  = active.c10 ? Number(document.getElementById('c10_units')?.value||0) : 0;
+  const c10Detect = active.c10 ? Number(document.getElementById('c10_detect')?.value||0) : 0;
+  const c10PerTrt = c10Units * 10;   // $ per treatment
+  const c10DetAmt = c10Detect * 1000; // detection benefit
+
+  const c20Ben    = active.c20 ? Number(document.getElementById('c20_benefit')?.value||0) : 0;
+  const c20SpouseChk = active.c20 && document.getElementById('c20_spouse')?.checked;
+
+  // Get WL+Term+ADB for each option card
+  function cardCov(card){
+    try{
+      const cov = getCoverage(card,'main');
+      return { wl:cov.wl||0, term:cov.term||0, adb:cov.adb||0 };
+    } catch(e){ return {wl:0,term:0,adb:0}; }
+  }
+  const c1 = cardCov('one'), c2 = cardCov('two');
+
+  // ── Scenario builder ──────────────────────────────────────────────────────
+  function buildScenario(title, icon, color, accentColor, coverageObj, scenarioFn){
+    const { wl, term, adb } = coverageObj;
+    const result = scenarioFn({ wl, term, adb, a71Bens, a74Bens, h34Daily, h34Recup,
+                                  c10PerTrt, c10DetAmt, c20Ben, a71Daily, a74Units,
+                                  a71Total, a74Total, h34Total, c10Total, c20Total });
+    return { title, icon, color, accentColor, wl, term, adb, ...result };
+  }
+
+  // ── Scenario definitions ──────────────────────────────────────────────────
+
+  // SCENARIO 1: Cancer Diagnosis — worst case hospital + treatment + death
+  function scenarioCancer({ wl, term, adb, a71Bens, a74Bens, h34Daily, h34Recup,
+                             c10PerTrt, c10DetAmt, c20Ben }){
+    const phases = [];
+    let runningTotal = 0;
+
+    // Phase 1: Diagnosis
+    const diagnosisItems = [];
+    if(active.c10 && c10DetAmt > 0){
+      diagnosisItems.push({ label:'C10 Cancer Detection Rider', amount: c10DetAmt, note:'One-time lump sum' });
+      runningTotal += c10DetAmt;
+    }
+    if(active.c20 && c20Ben > 0){
+      diagnosisItems.push({ label:`C20 Cancer Payout — ${money0(c20Ben)}`, amount: c20Ben, note:'Lump sum at diagnosis' });
+      runningTotal += c20Ben;
+    }
+    if(diagnosisItems.length) phases.push({ phase:'Diagnosis', emoji:'🔬', items: diagnosisItems, subtotal: runningTotal });
+
+    // Phase 2: Treatment (assume 12 treatments / chemotherapy sessions)
+    const treatItems = [];
+    const TREATMENTS = 12;
+    if(active.c10 && c10PerTrt > 0){
+      const trtTotal = c10PerTrt * TREATMENTS;
+      treatItems.push({ label:`C10 Cancer Treatment (${TREATMENTS}× $${c10PerTrt}/trt)`, amount: trtTotal, note:`$${c10PerTrt} per treatment` });
+      runningTotal += trtTotal;
+    }
+    if(treatItems.length) phases.push({ phase:`Treatment (${TREATMENTS} sessions)`, emoji:'💊', items: treatItems, subtotal: runningTotal });
+
+    // Phase 3: Hospitalization — 365 nights (worst case)
+    const hospItems = [];
+    const HOSP_NIGHTS = 365;
+    if(active.h34 && h34Daily > 0){
+      const hospTotal = h34Daily * HOSP_NIGHTS;
+      hospItems.push({ label:`H34 Hospital Indemnity (${HOSP_NIGHTS} nights × $${h34Daily})`, amount: hospTotal, note:`$${h34Daily}/night cash benefit` });
+      runningTotal += hospTotal;
+      if(h34Recup){
+        const recupNights = Math.round(HOSP_NIGHTS * 0.5);
+        const recupTotal = h34Daily * recupNights;
+        hospItems.push({ label:`H34 Recovery Rider (${recupNights} nights × $${h34Daily})`, amount: recupTotal, note:'50% of hospital nights in rehab' });
+        runningTotal += recupTotal;
+      }
+      if(h34SpouseChk && h34Total > 0){
+        const spouseNights = Math.round(HOSP_NIGHTS * 0.3);
+        hospItems.push({ label:`H34 Spouse (caregiver hospitalization, ${spouseNights} nights)`, amount: h34Daily * spouseNights, note:'Estimated spouse hospital days' });
+        runningTotal += h34Daily * spouseNights;
+      }
+    }
+    if(active.a71 && a71Bens){
+      const erVisits = 6;
+      const erTotal  = a71Bens.er * erVisits;
+      const icuNights = 30;
+      const icuTotal  = a71Bens.icu * icuNights;
+      const regNights = HOSP_NIGHTS - icuNights;
+      const regTotal  = a71Bens.hospital * regNights;
+      hospItems.push({ label:`A71 ER Visits (${erVisits}× $${a71Bens.er})`, amount: erTotal, note:'Emergency room benefit' });
+      hospItems.push({ label:`A71 ICU (${icuNights} nights × $${a71Bens.icu})`, amount: icuTotal, note:'Double rate in ICU' });
+      hospItems.push({ label:`A71 Hospital (${regNights} nights × $${a71Bens.hospital})`, amount: regTotal, note:'Regular hospital nights' });
+      runningTotal += erTotal + icuTotal + regTotal;
+    }
+    if(hospItems.length) phases.push({ phase:'Hospitalization (365 days)', emoji:'🏥', items: hospItems, subtotal: runningTotal });
+
+    // Phase 4: Disability during illness
+    const disItems = [];
+    const DIS_WEEKS = 52;
+    if(active.a74 && a74Bens && a74Bens.disability > 0){
+      const disTotal = a74Bens.disability * DIS_WEEKS;
+      disItems.push({ label:`A74 Disability Pay (${DIS_WEEKS} wks × $${a74Bens.disability}/wk)`, amount: disTotal, note:'Weekly disability benefit' });
+      runningTotal += disTotal;
+    }
+    if(disItems.length) phases.push({ phase:'Disability (1 year)', emoji:'🩼', items: disItems, subtotal: runningTotal });
+
+    // Phase 5: Death (illness)
+    const deathItems = [];
+    if(wl > 0){ deathItems.push({ label:`WL Death Benefit`, amount: wl, note:'Whole life — permanent' }); runningTotal += wl; }
+    if(term > 0){ deathItems.push({ label:`Term Death Benefit`, amount: term, note:'Term life coverage' }); runningTotal += term; }
+    if(deathItems.length) phases.push({ phase:'Death (by illness)', emoji:'☠️', items: deathItems, subtotal: runningTotal });
+
+    return { phases, grandTotal: runningTotal };
+  }
+
+  // SCENARIO 2: Auto Accident → Hospital → Death
+  function scenarioAutoAccident({ wl, term, adb, a71Bens, a74Bens, h34Daily, h34Recup,
+                                    c10PerTrt, c10DetAmt, c20Ben }){
+    const phases = [];
+    let runningTotal = 0;
+
+    // Phase 1: Emergency — accident
+    const erItems = [];
+    if(active.a71 && a71Bens){
+      erItems.push({ label:`A71 ER Visit ($${a71Bens.er})`, amount: a71Bens.er, note:'Accident ER benefit' });
+      runningTotal += a71Bens.er;
+    }
+    if(erItems.length) phases.push({ phase:'Emergency Room', emoji:'🚨', items: erItems, subtotal: runningTotal });
+
+    // Phase 2: Hospitalization — 90 nights
+    const hospItems = [];
+    const HOSP_NIGHTS = 90;
+    if(active.h34 && h34Daily > 0){
+      const icuNights = 14;
+      hospItems.push({ label:`H34 ICU (14 nights × $${h34Daily})`, amount: h34Daily * icuNights, note:'Hospital indemnity in ICU' });
+      hospItems.push({ label:`H34 Hospital (${HOSP_NIGHTS-icuNights} nights × $${h34Daily})`, amount: h34Daily * (HOSP_NIGHTS-icuNights), note:'Regular hospital nights' });
+      runningTotal += h34Daily * HOSP_NIGHTS;
+      if(h34Recup){
+        const recupNights = 30;
+        hospItems.push({ label:`H34 Recovery Rider (30 nights)`, amount: h34Daily * recupNights, note:'Rehab/recovery facility' });
+        runningTotal += h34Daily * recupNights;
+      }
+    }
+    if(active.a71 && a71Bens){
+      const icuNights = 14;
+      const regNights = HOSP_NIGHTS - icuNights;
+      hospItems.push({ label:`A71 ICU (14 nights × $${a71Bens.icu})`, amount: a71Bens.icu * icuNights, note:'Double rate in ICU' });
+      hospItems.push({ label:`A71 Hospital (${regNights} nights × $${a71Bens.hospital})`, amount: a71Bens.hospital * regNights, note:'Regular hospital nights' });
+      runningTotal += a71Bens.icu * icuNights + a71Bens.hospital * regNights;
+    }
+    if(hospItems.length) phases.push({ phase:'Hospitalization (90 days)', emoji:'🏥', items: hospItems, subtotal: runningTotal });
+
+    // Phase 3: Disability
+    const disItems = [];
+    const DIS_WEEKS = 26;
+    if(active.a74 && a74Bens){
+      disItems.push({ label:`A74 Disability (${DIS_WEEKS} wks × $${a74Bens.disability}/wk)`, amount: a74Bens.disability * DIS_WEEKS, note:'Accident disability pay' });
+      runningTotal += a74Bens.disability * DIS_WEEKS;
+    }
+    if(disItems.length) phases.push({ phase:'Disability (6 months)', emoji:'🩼', items: disItems, subtotal: runningTotal });
+
+    // Phase 4: Accidental Death (auto)
+    const deathItems = [];
+    if(wl > 0){ deathItems.push({ label:'WL Death Benefit', amount: wl, note:'Whole life' }); runningTotal += wl; }
+    if(term > 0){ deathItems.push({ label:'Term Death Benefit', amount: term, note:'Term life' }); runningTotal += term; }
+    if(adb > 0){ deathItems.push({ label:'ADB Accidental Death', amount: adb, note:'Accident death benefit' }); runningTotal += adb; }
+    if(active.a71 && a71Bens){ deathItems.push({ label:`A71 AD&D (Auto 2×)`, amount: a71Bens.auto, note:'Auto accident multiplier' }); runningTotal += a71Bens.auto; }
+    if(active.a74 && a74Bens){ deathItems.push({ label:`A74 Auto Accident`, amount: a74Bens.auto, note:'Auto accident payout' }); runningTotal += a74Bens.auto; }
+    if(deathItems.length) phases.push({ phase:'Accidental Death (Auto)', emoji:'🚗', items: deathItems, subtotal: runningTotal });
+
+    return { phases, grandTotal: runningTotal };
+  }
+
+  // SCENARIO 3: Common Carrier (plane crash)
+  function scenarioCommonCarrier({ wl, term, adb, a71Bens, a74Bens }){
+    const phases = [];
+    let runningTotal = 0;
+    const deathItems = [];
+    if(wl > 0){ deathItems.push({ label:'WL Death Benefit', amount: wl, note:'Whole life' }); runningTotal += wl; }
+    if(term > 0){ deathItems.push({ label:'Term Death Benefit', amount: term, note:'Term life' }); runningTotal += term; }
+    if(adb > 0){ deathItems.push({ label:'ADB Accidental Death', amount: adb, note:'Accident death benefit' }); runningTotal += adb; }
+    if(active.a71 && a71Bens){ deathItems.push({ label:`A71 AD&D (Common Carrier 5×)`, amount: a71Bens.common, note:'Plane/bus/train multiplier' }); runningTotal += a71Bens.common; }
+    if(active.a74 && a74Bens){ deathItems.push({ label:`A74 Common Carrier`, amount: a74Bens.common, note:'Common carrier payout' }); runningTotal += a74Bens.common; }
+    if(deathItems.length) phases.push({ phase:'Death — Common Carrier', emoji:'✈️', items: deathItems, subtotal: runningTotal });
+    return { phases, grandTotal: runningTotal };
+  }
+
+  // ── Render function ───────────────────────────────────────────────────────
+  function renderTimeline(scenario, cardLabel, colorClass){
+    const { title, icon, accentColor, phases, grandTotal, wl, term, adb } = scenario;
+    if(!phases || phases.length === 0) return '';
+
+    const phaseHtml = phases.map((ph, pi) => {
+      const itemHtml = ph.items.map(item => `
+        <div class="rd-item">
+          <div class="rd-item-label">${item.label}<span class="rd-item-note">${item.note}</span></div>
+          <div class="rd-item-amount">${money0(item.amount)}</div>
+        </div>`).join('');
+      const isLast = pi === phases.length - 1;
+      return `
+        <div class="rd-phase${isLast?' rd-phase-last':''}">
+          <div class="rd-phase-dot" style="background:${accentColor};">${ph.emoji}</div>
+          <div class="rd-phase-content">
+            <div class="rd-phase-title">${ph.phase}</div>
+            <div class="rd-items">${itemHtml}</div>
+            <div class="rd-running-total">Running total after this phase: <strong>${money0(ph.subtotal)}</strong></div>
+          </div>
+        </div>`;
+    }).join('');
+
+    const activeList = [
+      active.a71 ? 'A71' : null,
+      active.a74 ? 'A74' : null,
+      active.h34 ? 'H34' : null,
+      active.c10 ? 'C10' : null,
+      active.c20 ? 'C20' : null,
+    ].filter(Boolean).join(' · ');
+
+    return `
+      <div class="rd-scenario">
+        <div class="rd-scenario-header" style="border-left:4px solid ${accentColor};">
+          <div class="rd-scenario-icon">${icon}</div>
+          <div class="rd-scenario-meta">
+            <div class="rd-scenario-title">${title}</div>
+            <div class="rd-scenario-sub">${cardLabel} — Active plans: ${activeList}</div>
+          </div>
+          <div class="rd-scenario-grand">
+            <div class="rd-scenario-grand-label">Total Benefits</div>
+            <div class="rd-scenario-grand-amt" style="color:${accentColor};">${money0(grandTotal)}</div>
+          </div>
+        </div>
+        <div class="rd-timeline">${phaseHtml}</div>
+      </div>`;
+  }
+
+  // ── Build for each option card ────────────────────────────────────────────
+  const scenarios1 = [
+    buildScenario('Worst Case: Cancer + 365 Days Hospital', '🎗', '#b30000', '#ff6b6b', c1, scenarioCancer),
+    buildScenario('Auto Accident → Hospital → Death', '🚗', '#b06000', '#ffaa44', c1, scenarioAutoAccident),
+    buildScenario('Common Carrier Accident (Plane/Train)', '✈️', '#004a99', '#5badff', c1, scenarioCommonCarrier),
+  ];
+  const scenarios2 = [
+    buildScenario('Worst Case: Cancer + 365 Days Hospital', '🎗', '#b30000', '#ff6b6b', c2, scenarioCancer),
+    buildScenario('Auto Accident → Hospital → Death', '🚗', '#b06000', '#ffaa44', c2, scenarioAutoAccident),
+    buildScenario('Common Carrier Accident (Plane/Train)', '✈️', '#004a99', '#5badff', c2, scenarioCommonCarrier),
+  ];
+
+  const hasCard1 = c1.wl > 0 || c1.term > 0 || c1.adb > 0;
+  const hasCard2 = c2.wl > 0 || c2.term > 0 || c2.adb > 0;
+
+  // ── Summary pill for each scenario ───────────────────────────────────────
+  function summaryPills(scenarios, cardLabel){
+    return scenarios.map(s => s.phases.length > 0 ? renderTimeline(s, cardLabel) : '').join('');
+  }
+
+  const html1 = hasCard1 ? summaryPills(scenarios1, 'Option 1') : '';
+  const html2 = hasCard2 ? summaryPills(scenarios2, 'Option 2') : '';
+
+  roadmap.innerHTML = `
+    <div class="rd-header">
+      <div class="rd-header-icon">📋</div>
+      <div>
+        <div class="rd-header-title">Detailed Payout Scenarios</div>
+        <div class="rd-header-sub">Worst-case benefit roadmap — only active plans shown</div>
+      </div>
+    </div>
+    ${hasCard1 && html1 ? `<div class="rd-card-group"><div class="rd-card-label">Option 1</div>${html1}</div>` : ''}
+    ${hasCard2 && html2 ? `<div class="rd-card-group"><div class="rd-card-label">Option 2</div>${html2}</div>` : ''}
+  `;
 }
+
 
 // ── Wire up all supp controls ──────────────────────────────────
 ['a71_who','a71_daily','a71_rider',
