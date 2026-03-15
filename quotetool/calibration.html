@@ -249,12 +249,75 @@ body{
 .cremRow{transition:opacity .2s}
 .cremRow.cremHidden{display:none!important}
 
-@media(max-width:1260px){
-  .layout{grid-template-columns:1fr}
-  .leftRail:after{display:none}
-  .card{min-height:auto}
-  .infoBox{margin-top:16px}
+/* ── A71 Info Card ─────────────────────────────────────────── */
+.a71InfoCard{
+  display:none;
+  margin-top:6px;
+  padding:10px 12px;
+  background:linear-gradient(135deg,rgba(176,128,48,.1) 0%,rgba(176,128,48,.04) 100%);
+  border:1px solid rgba(176,128,48,.3);
+  border-left:2px solid var(--gold-3);
+  border-radius:8px;
+  animation:a71Reveal .22s ease;
 }
+.a71InfoCard.visible{display:block}
+@keyframes a71Reveal{
+  from{opacity:0;transform:translateY(-4px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.a71InfoHeader{
+  display:flex;align-items:center;gap:7px;margin-bottom:7px;
+}
+.a71Badge{
+  display:inline-block;
+  padding:1px 7px;
+  background:linear-gradient(135deg,var(--gold-3) 0%,var(--gold) 100%);
+  color:#1a0f00;font-size:9.5px;font-weight:800;
+  border-radius:4px;letter-spacing:.8px;
+  font-family:'Inter',sans-serif;flex-shrink:0;
+}
+.a71Title{
+  font-size:10.5px;font-weight:600;
+  color:rgba(220,195,130,.9);
+  letter-spacing:.2px;line-height:1.3;
+}
+.a71Bullets{
+  list-style:none;padding:0;margin:0;
+  display:flex;flex-direction:column;gap:4px;
+}
+.a71Bullets li{
+  font-size:10.5px;color:rgba(195,182,148,.8);
+  padding-left:12px;position:relative;line-height:1.4;
+}
+.a71Bullets li::before{
+  content:'·';position:absolute;left:2px;
+  color:var(--gold-2);font-weight:700;
+}
+.a71Bullets li strong{color:rgba(228,200,128,.95);font-weight:700}
+
+/* TIR highlight */
+.a71Tir{
+  margin-top:3px;
+  padding:6px 8px 6px 10px !important;
+  background:rgba(176,128,48,.08);
+  border:1px solid rgba(176,128,48,.2);
+  border-radius:5px;
+  list-style:none !important;
+}
+.a71Tir::before{display:none !important}
+.a71TirBadge{
+  display:inline-block;
+  padding:0px 5px;
+  background:rgba(176,128,48,.25);
+  color:var(--gold-3);
+  font-size:8.5px;font-weight:800;
+  border-radius:3px;letter-spacing:.8px;
+  font-family:'Inter',sans-serif;
+  margin-right:5px;vertical-align:middle;
+  border:1px solid rgba(176,128,48,.35);
+}
+
+@media(max-width:1260px){.leftRail:after{display:none}}
 </style>
 </head>
 <body>
@@ -371,6 +434,21 @@ body{
           <div><label data-i18n="gender">Género</label><select id="main_sex"><option data-i18n-opt="male">Hombre</option><option data-i18n-opt="female">Mujer</option></select></div>
           <div class="full"><label data-i18n="tobacco">Usuario de Tabaco</label><select id="main_tob"><option>NTU</option><option>TU</option></select></div>
           <div class="full inlineToggle"><input id="main_a71" type="checkbox"><span data-i18n="a71Main">A71 en Principal</span></div>
+          <div class="full a71InfoCard" id="a71InfoMain">
+            <div class="a71InfoHeader">
+              <span class="a71Badge">A71</span>
+              <span class="a71Title" data-i18n="a71InfoTitle">Beneficios de Vida — Cobertura de Enfermedad Terminal</span>
+            </div>
+            <ul class="a71Bullets">
+              <li data-i18n="a71Bullet1">Urgencias / Visita de cuidado urgente: <strong>$250</strong></li>
+              <li data-i18n="a71Bullet2">Hospitalización noches 1–14: <strong>$1,000/noche</strong></li>
+              <li data-i18n="a71Bullet3">Hospitalización noches 15–365: <strong>$500/noche</strong></li>
+              <li class="a71Tir" data-i18n="a71Tir">
+                <span class="a71TirBadge">TIR</span>
+                Si es diagnosticado con menos de 2 años de vida, recibe el <strong>50% del valor de la póliza de vida entera</strong> en vida.
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
 
@@ -381,6 +459,21 @@ body{
           <div><label data-i18n="gender">Género</label><select id="sp_sex"><option data-i18n-opt="female">Mujer</option><option data-i18n-opt="male">Hombre</option></select></div>
           <div class="full"><label data-i18n="tobacco">Usuario de Tabaco</label><select id="sp_tob"><option>NTU</option><option>TU</option></select></div>
           <div class="full inlineToggle"><input id="sp_a71" type="checkbox"><span data-i18n="a71Spouse">A71 en Cónyuge</span></div>
+          <div class="full a71InfoCard" id="a71InfoSpouse">
+            <div class="a71InfoHeader">
+              <span class="a71Badge">A71</span>
+              <span class="a71Title" data-i18n="a71InfoTitle">Beneficios de Vida — Cobertura de Enfermedad Terminal</span>
+            </div>
+            <ul class="a71Bullets">
+              <li data-i18n="a71Bullet1">Urgencias / Visita de cuidado urgente: <strong>$250</strong></li>
+              <li data-i18n="a71Bullet2">Hospitalización noches 1–14: <strong>$1,000/noche</strong></li>
+              <li data-i18n="a71Bullet3">Hospitalización noches 15–365: <strong>$500/noche</strong></li>
+              <li class="a71Tir" data-i18n="a71Tir">
+                <span class="a71TirBadge">TIR</span>
+                Si es diagnosticado con menos de 2 años de vida, recibe el <strong>50% del valor de la póliza de vida entera</strong> en vida.
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
 
@@ -526,6 +619,11 @@ const LANGS = {
     // Toggles
     sspModeLabel:'Modo SSP (Protección Seguro Social)',
     a71Main:'A71 en Principal', a71Spouse:'A71 en Cónyuge',
+    a71InfoTitle:'Beneficios de Vida — Cobertura de Enfermedad Terminal',
+    a71Bullet1:'Urgencias / Visita de cuidado urgente: <strong>$250</strong>',
+    a71Bullet2:'Hospitalización noches 1–14: <strong>$1,000/noche</strong>',
+    a71Bullet3:'Hospitalización noches 15–365: <strong>$500/noche</strong>',
+    a71Tir:'<span class="a71TirBadge">TIR</span> Si es diagnosticado con menos de 2 años de vida, recibe el <strong>50% del valor de la póliza de vida entera</strong> en vida.',
     // Cover lines
     wlLabel:'Vida Entera:', termLabel:'Término:', adbLabel:'Accidental:', a71Label:'A71:',
     monthlyLabel:'Mensual', weeklyLabel:'Semanal',
@@ -582,6 +680,11 @@ const LANGS = {
     mainSSI:'Main SSI', spouseSSI:'Spouse SSI', sspMonths:'SSP Months Set',
     sspModeLabel:'SSP Mode (Social Security Protection)',
     a71Main:'A71 on Main', a71Spouse:'A71 on Spouse',
+    a71InfoTitle:'Living Benefits — Terminal Illness Rider',
+    a71Bullet1:'ER / Urgent Care visit: <strong>$250</strong>',
+    a71Bullet2:'Hospital nights 1–14: <strong>$1,000/night</strong>',
+    a71Bullet3:'Hospital nights 15–365: <strong>$500/night</strong>',
+    a71Tir:'<span class="a71TirBadge">TIR</span> If diagnosed with less than 2 years to live, receive <strong>50% of whole life face value</strong> paid out immediately.',
     wlLabel:'WL:', termLabel:'TERM:', adbLabel:'ACCIDENTAL:', a71Label:'A71:',
     monthlyLabel:'Monthly', weeklyLabel:'Weekly',
     wlShort:'WL', termShort:'TERM', adbShort:'ADB',
@@ -629,10 +732,13 @@ function t(key){ return LANGS[currentLang][key] || LANGS['en'][key] || key; }
 
 function applyLang(){
   const L = LANGS[currentLang];
-  // Static data-i18n elements
+  // Static data-i18n elements — use innerHTML for items that contain HTML tags
+  const htmlKeys = new Set(['a71Bullet1','a71Bullet2','a71Bullet3','a71Tir']);
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.dataset.i18n;
-    if(L[key] !== undefined) el.textContent = L[key];
+    if(L[key] === undefined) return;
+    if(htmlKeys.has(key)) el.innerHTML = L[key];
+    else el.textContent = L[key];
   });
   // Cover line labels (text nodes before the span)
   document.querySelectorAll('[data-i18n-wrap]').forEach(el => {
@@ -1810,6 +1916,19 @@ $('hourlyIncome').addEventListener('input', ()=>{
   $('monthlyIncome').value = hourly ? (hourly * 160).toFixed(2) : '';
   refreshAll();
 });
+
+// ── A71 info card show/hide ───────────────────────────────────
+function updateA71Cards(){
+  const mainOn = document.getElementById('main_a71').checked;
+  const spOn   = document.getElementById('sp_a71')?.checked;
+  const mc = document.getElementById('a71InfoMain');
+  const sc = document.getElementById('a71InfoSpouse');
+  if(mc){ mc.classList.toggle('visible', mainOn); }
+  if(sc){ sc.classList.toggle('visible', !!spOn); }
+}
+
+document.getElementById('main_a71').addEventListener('change', updateA71Cards);
+document.getElementById('sp_a71')?.addEventListener('change', updateA71Cards);
 
 ['main_age','main_sex','main_tob','main_a71','sp_age','sp_sex','sp_tob','sp_a71'].forEach(id=>{
   $(id)?.addEventListener('input', refreshAll);
