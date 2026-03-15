@@ -878,7 +878,11 @@ function findBestAutoMix(card, person, budgetOverride){
 
   const rawBudget = (budgetOverride !== undefined && budgetOverride !== null)
     ? budgetOverride : targets.paneBudget;
-  const ceiling = rawBudget + grace;
+  // If caller passed an explicit budget it already includes grace — don't add again.
+  // If using the internal pane estimate, add grace.
+  const ceiling = (budgetOverride !== undefined && budgetOverride !== null)
+    ? rawBudget
+    : rawBudget + grace;
 
   if(sspMode) return { wl: targetWL, term: 0, adb: 0 };
 
