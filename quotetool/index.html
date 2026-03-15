@@ -1920,7 +1920,7 @@ function renderBottom(card){
 }
 
 function refreshAll(){
-  syncSpouseToggles();
+  if(typeof syncSpouseToggles === 'function') syncSpouseToggles();
   const monthly = Number($('monthlyIncome').value || 0);
   const hourly = Number($('hourlyIncome').value || 0);
   const _suppDeduct = (typeof suppInBudgetDeduction==='function') ? suppInBudgetDeduction() : 0;
@@ -2132,7 +2132,7 @@ const suppI18nKeys = {
 Object.keys(suppI18nKeys).forEach(lang=>{
   if(LANGS[lang]) Object.assign(LANGS[lang], suppI18nKeys[lang]);
 });
-</script>
+
 
 <!-- ═══════════════════════════════════════════════════════════════
      SUPPLEMENTAL QUOTER — A71 / A74 / H34 / C10 / C20
@@ -2542,7 +2542,7 @@ Object.keys(suppI18nKeys).forEach(lang=>{
 
 </div><!-- #suppSection -->
 
-<script>
+
 // ══════════════════════════════════════════════════════════════
 //  SUPPLEMENTAL ENGINE
 // ══════════════════════════════════════════════════════════════
@@ -2931,6 +2931,44 @@ function calcSupp(){
     autoFillCard('two');
   }
   refreshAll();
+}
+
+// ── buildPayouts — updates the standalone payout panel ───────────────────
+function buildPayouts({a71Total,a74Total,h34Total,c10Total,c20Total}){
+  const mIn   = getPersonInput('main');
+  const a71Active = document.getElementById('a71_controls')?.style.display !== 'none'
+                    && document.getElementById('a71_who')?.value !== 'none';
+  const a71Daily  = a71Active ? Number(document.getElementById('a71_daily')?.value||0) : 0;
+  const a71Bens   = a71Active && a71Daily ? a71AddBenefits(a71Daily) : null;
+
+  const a74Active = document.getElementById('a74_controls')?.style.display !== 'none';
+  const a74Units  = a74Active ? Number(document.getElementById('a74_units')?.value||0) : 0;
+  const a74Bens   = a74Units > 0 ? a74Benefits(a74Units) : null;
+
+  const c20Active = document.getElementById('c20_controls')?.style.display !== 'none'
+                    && c20Total > 0;
+  const c20Ben    = c20Active ? (Number(document.getElementById('c20_benefit')?.value)||0) : 0;
+
+  const h34Active = document.getElementById('h34_controls')?.style.display !== 'none' && h34Total > 0;
+  const h34Daily  = h34Active ? Number(document.getElementById('h34_daily')?.value||0) : 0;
+
+  // For each option card, get coverage
+  ['one','two'].forEach(card => {
+    const cov = getCoverage(card,'main');
+    const wl = cov.wl||0, term = cov.term||0, adb = cov.adb||0;
+    const deathSick = (wl+term) + c20Ben;
+    const deathAcc  = deathSick + adb + (a71Bens?a71Bens.ad:0) + (a74Bens?a74Bens.ad:0);
+    const deathAuto = deathSick + adb + (a71Bens?a71Bens.auto:0) + (a74Bens?a74Bens.auto:0);
+    const deathComm = deathSick + adb + (a71Bens?a71Bens.common:0) + (a74Bens?a74Bens.common:0);
+    const hosp30    = h34Daily * 30;
+
+    // The receipt already renders payout scenarios inline — nothing extra needed here
+    // But if a separate panel element exists, update it
+    const el = document.getElementById('payout_death');
+    if(el) el.textContent = deathSick > 0 ? money0(deathSick) : '—';
+    const el2 = document.getElementById('payout_accident');
+    if(el2) el2.textContent = deathAcc > 0 ? money0(deathAcc) : '—';
+  });
 }
 
 // ── Wire up all supp controls ──────────────────────────────────
