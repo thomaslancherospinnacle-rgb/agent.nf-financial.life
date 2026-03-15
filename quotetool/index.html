@@ -1777,12 +1777,15 @@ function renderBottom(card){
       receiptLines.push([`${label} ADB ${money0(coverage.adb)}`, priced.adbMonthly]);
   });
 
-  // ── Supplemental lines (only ones > $0) ───────────────────────────────────
+  // ── Supplemental lines (only activated cards with price > $0) ─────────────
   const suppIds = ['a71','a74','h34','c10','c20'];
   const suppLabels = {a71:'A71',a74:'A74',h34:'H34',c10:'C10',c20:'C20'};
   let suppLineTotal = 0;
   suppIds.forEach(id => {
-    const el = document.getElementById(id+'_price');
+    // Only include if the card is activated (controls visible)
+    const ctrl = document.getElementById(id+'_controls');
+    if(!ctrl || ctrl.style.display === 'none') return;
+    const el   = document.getElementById(id+'_price');
     const brEl = document.getElementById(id+'_break');
     if(!el) return;
     const amt = parseFloat(el.textContent.replace(/[^0-9.]/g,'')) || 0;
@@ -1790,7 +1793,6 @@ function renderBottom(card){
     // Build a compact label from the break element
     let detail = '';
     if(brEl && brEl.textContent && brEl.textContent !== '—'){
-      // strip HTML, get first meaningful chunk
       const txt = brEl.innerHTML.replace(/<b>/g,'').replace(/<\/b>/g,'').split('<br>')[0].trim();
       detail = txt.length > 0 ? ` — ${txt}` : '';
     }
@@ -1803,13 +1805,17 @@ function renderBottom(card){
   const mainCov = getCoverage(card,'main');
   const mainDeath = calcDeathTotals(mainIn, mainCov);
   const wl = mainCov.wl, term = mainCov.term, adb = mainCov.adb;
-  const a71Active = document.getElementById('a71_who').value !== 'none';
+  const a71Active = document.getElementById('a71_controls')?.style.display !== 'none'
+                    && document.getElementById('a71_who').value !== 'none';
   const a71Daily  = Number(document.getElementById('a71_daily').value);
   const a71Bens   = a71Active ? a71AddBenefits(a71Daily) : null;
-  const a74Units  = Number(document.getElementById('a74_units').value);
+  const a74Active = document.getElementById('a74_controls')?.style.display !== 'none';
+  const a74Units  = a74Active ? Number(document.getElementById('a74_units').value) : 0;
   const a74Bens   = a74Units > 0 ? a74Benefits(a74Units) : null;
-  const c20Ben    = Number(document.getElementById('c20_benefit').value) || 0;
-  const c20Active = c20Ben > 0 && (parseFloat(document.getElementById('c20_price')?.textContent?.replace(/[^0-9.]/,''))||0) > 0;
+  const c20Active = document.getElementById('c20_controls')?.style.display !== 'none'
+                    && (Number(document.getElementById('c20_benefit').value) || 0) > 0
+                    && (parseFloat(document.getElementById('c20_price')?.textContent?.replace(/[^0-9.]/,''))||0) > 0;
+  const c20Ben    = c20Active ? (Number(document.getElementById('c20_benefit').value) || 0) : 0;
 
   const deathSick = (wl+term) + (c20Active?c20Ben:0);
   const deathAcc  = deathSick + adb + (a71Bens?a71Bens.ad:0) + (a74Bens?a74Bens.ad:0);
@@ -2552,6 +2558,9 @@ function inRange(age, r){ return Number(r.age_min)<=age && age<=Number(r.age_max
 function suppInBudgetDeduction(){
   let deduct = 0;
   ['a71','a74','h34','c10','c20'].forEach(id => {
+    // Only count if card is activated
+    const ctrl = document.getElementById(id+'_controls');
+    if(!ctrl || ctrl.style.display === 'none') return;
     const cb = document.getElementById(id+'_inbudget');
     if(cb && cb.checked){
       const el = document.getElementById(id+'_price');
