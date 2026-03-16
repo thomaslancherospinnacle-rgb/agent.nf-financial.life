@@ -735,9 +735,7 @@ async function loadRates() {
     const res = await fetch('./Rates.csv');
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const text = await res.text();
-    const lines = text.replace(/^﻿/, '').split(/
-?
-/).filter(Boolean);
+    const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/).filter(Boolean);
     const headers = parseCSVLine(lines[0]).map(h => h.trim());
 
     rates = lines.slice(1).map(line => {
