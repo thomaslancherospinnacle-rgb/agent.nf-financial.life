@@ -319,6 +319,9 @@
     margin-top: 6px;
   }
 
+  .metric-sub.warn { color: #9b6b15; }
+  .metric-sub.error { color: #9a3d3d; }
+
   /* CHART AREA */
   .chart-wrapper {
     background: var(--card);
@@ -623,6 +626,16 @@
       <div class="metric-sub" id="mPlan">—</div>
     </div>
     <div class="metric-card">
+      <div class="metric-label">Monthly Premium</div>
+      <div class="metric-value"><span class="currency">$</span><span id="mMonthlyVal">—</span></div>
+      <div class="metric-sub" id="mMonthlySub">CSV rate lookup pending</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Total Paid Until PU</div>
+      <div class="metric-value"><span class="currency">$</span><span id="mTotalPaidVal">—</span></div>
+      <div class="metric-sub" id="mTotalPaidSub">—</div>
+    </div>
+    <div class="metric-card">
       <div class="metric-label">CV at Year 10</div>
       <div class="metric-value" id="mCV10"><span class="currency">$</span><span id="mCV10Val">—</span></div>
       <div class="metric-sub" id="mCV10Pct">—</div>
@@ -683,6 +696,136 @@
 
 <script>
 // ============================================================
+// CSV PREMIUM DATA
+// ============================================================
+let rates = [];
+let ratesLoaded = false;
+let ratesError = '';
+
+function cleanMoney(value) {
+  return Number(String(value || '').replace(/[$,\s]/g, '')) || 0;
+}
+
+function parseCSVLine(line) {
+  const out = [];
+  let cur = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        cur += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (ch === ',' && !inQuotes) {
+      out.push(cur);
+      cur = '';
+    } else {
+      cur += ch;
+    }
+  }
+  out.push(cur);
+  return out;
+}
+
+async function loadRates() {
+  try {
+    const res = await fetch('./Rates.csv');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text = await res.text();
+    const lines = text.replace(/^﻿/, '').split(/
+?
+/).filter(Boolean);
+    const headers = parseCSVLine(lines[0]).map(h => h.trim());
+
+    rates = lines.slice(1).map(line => {
+      const cols = parseCSVLine(line);
+      const row = {};
+      headers.forEach((h, i) => row[h] = (cols[i] ?? '').trim());
+      return {
+        record_type: row.record_type,
+        plan_code: row.plan_code,
+        plan_name: row.plan_name,
+        age: Number(row.age),
+        sex: row.sex.toLowerCase(),
+        tobacco: row.tobacco.toLowerCase(),
+        base_rate: Number(row.base_rate || 0),
+        policy_fee_annual: Number(row.policy_fee_annual || 0),
+        volume_adjustment_annual: Number(row.volume_adjustment_annual || 0),
+        monthly_direct_total: cleanMoney(row.monthly_direct_total),
+        annual_premium_total: cleanMoney(row.annual_premium_total),
+        face_min: Number(row.face_min || 0),
+        face_max: Number(row.face_max || 0),
+      };
+    }).filter(r => r.record_type === 'rate');
+
+    ratesLoaded = true;
+    ratesError = '';
+  } catch (err) {
+    ratesLoaded = false;
+    ratesError = `Rates.csv could not be loaded (${err.message}).`;
+    console.error(err);
+  }
+}
+
+function getPlanCodeForPremium(plan) {
+  if (plan === '65') return 'LPU65';
+  if (plan === '20') return 'WL';
+  return null;
+}
+
+function getPremiumRate(plan, age, gender, tobacco, faceAmount) {
+  if (!ratesLoaded) {
+    return { found: false, reason: ratesError || 'Rates.csv is still loading.' };
+  }
+
+  const planCode = getPlanCodeForPremium(plan);
+  if (!planCode) {
+    return { found: false, reason: 'No matching premium plan exists in Rates.csv for this CV table.' };
+  }
+
+  const row = rates.find(r =>
+    r.plan_code === planCode &&
+    r.age === age &&
+    r.sex === gender &&
+    r.tobacco === tobacco
+  );
+
+  if (!row) {
+    return { found: false, reason: 'Matching age / gender / tobacco rate not found in Rates.csv.' };
+  }
+
+  if (row.face_min && faceAmount < row.face_min) {
+    return { found: false, reason: `Minimum face amount for ${row.plan_code} is $${fmt(row.face_min)}.` };
+  }
+  if (row.face_max && faceAmount > row.face_max) {
+    return { found: false, reason: `Maximum face amount for ${row.plan_code} is $${fmt(row.face_max)}.` };
+  }
+
+  const units = faceAmount / 1000;
+  const annualBase = row.base_rate * units;
+  const annualTotal = annualBase + row.policy_fee_annual + row.volume_adjustment_annual;
+  const monthlyPremium = annualTotal / 12;
+
+  let yearsToPU = null;
+  if (plan === '20') yearsToPU = 20;
+  if (plan === '65') yearsToPU = Math.max(0, 65 - age);
+
+  return {
+    found: true,
+    row,
+    planCode,
+    annualBase,
+    annualTotal,
+    monthlyPremium,
+    yearsToPU,
+    totalPaid: yearsToPU !== null ? monthlyPremium * 12 * yearsToPU : null,
+  };
+}
+
+// ============================================================
 // RATE DATA
 // ============================================================
 const cv5male   = [0,0,0.22,0.68,1.14,1.62,2.1,2.58,3.05,3.48,3.84,4.1,4.21,4.18,4.18,4.25,4.45,4.83,5.45,6.13,6.87,7.7,8.67,9.74,10.86,12.07,13.34,14.51,15.63,16.74,17.75,18.67,19.55,20.39,21.22,22.15,23.2,24.37,25.66,27.05,28.55,30.16,31.89,33.77,35.8,37.92,40.12,42.37,44.61,46.89,49.19,51.57,54.13,56.92,59.96,63.24,66.69,70.2,73.73,77.24,80.76,84.34,88.1,92.09,96.35,100.84,105.5,110.2,116.97,124.14,131.29,138.49,145.87,153.56,161.63,170.09,178.78,187.59,196.35,204.83,212.73];
@@ -707,23 +850,6 @@ const cv65femaletu= [474.57,471.82,468.94,465.91,462.74,459.4,455.92,452.27,448.
 const cv70female  = [494.05,493.12,492.09,490.99,489.84,488.65,487.4,486.11,484.75,483.33,481.85,480.31,478.71,477.03,475.28,473.48,471.65,469.78,467.83,465.8,463.68,461.45,459.11,456.67,454.11,451.43,448.62,445.67,442.59,439.38,436.01,432.49,428.79,424.94,420.94,416.77,412.44,407.94,403.25,398.34,393.17,387.71,381.95,375.85,369.38,362.53,355.27,347.58,339.44,330.82,321.68,312.01,301.78,290.96,279.52,267.43,254.59,240.95,226.4,210.86,194.23,176.41,157.33,136.85,114.86,91.19,65.65,38.03,8.07];
 const cv70femaletu= [551.13,548.79,546.33,543.74,541.03,538.18,535.2,532.09,528.81,525.37,521.74,517.93,513.92,509.71,505.28,500.61,495.74,490.65,485.32,479.77,473.97,467.91,461.54,454.82,447.72,440.2,432.24,423.78,414.82,405.35,395.33,384.72,373.48,361.56,348.92,335.5,321.25,306.11,290.02,272.91,254.72,235.39,214.82,192.96,169.71,144.98,120.06,94.47,67.32,38.48,7.8];
 
-// Starting ages for each array (index 0 = this age)
-const arrayStartAge = {
-  cv5:  0,
-  cv10: 0,
-  cv20: 0,
-  cv65: 0,
-  cv70: 0,
-};
-
-// For 65 and 70 plans, the array index represents policy year
-// The CV tables index by AGE (0-based from age 0 for 5/10/20, and by policy year for 65/70)
-// Actually all arrays start at issue age 0 (age 0 for 5/10/20) and index = age
-// For cv65/cv70 - they represent values for someone insured at birth paying to 65/70
-
-// More accurately: all arrays are indexed by age (starting from age 0)
-// So for a person issued at age 35, we look at arr[35] for year 0, arr[36] for year 1, etc.
-
 function getArray(plan, gender, tobacco) {
   const g = gender;
   const t = tobacco === 'tu';
@@ -737,7 +863,17 @@ function getArray(plan, gender, tobacco) {
 let chart = null;
 
 function fmt(n) {
-  return n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  return Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+function fmtMoney(n) {
+  return Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function setMetricSub(id, text, cls='') {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className = 'metric-sub' + (cls ? ' ' + cls : '');
 }
 
 function calculate() {
@@ -750,7 +886,6 @@ function calculate() {
   const arr = getArray(plan, gender, tobacco);
   const units = faceAmount / 1000;
 
-  // Build rows: starting at issue age, up to end of array
   const rows = [];
   for (let i = age; i < arr.length; i++) {
     const cvPer1k = arr[i];
@@ -765,7 +900,12 @@ function calculate() {
     return;
   }
 
-  // Metrics
+  const premium = getPremiumRate(plan, age, gender, tobacco, faceAmount);
+  let breakEven = null;
+  if (premium.found && premium.monthlyPremium > 0) {
+    breakEven = rows.find(r => r.cvTotal >= premium.monthlyPremium * 12 * r.policyYear) || null;
+  }
+
   const cv10row = rows.find(r => r.policyYear === 10);
   const cv20row = rows.find(r => r.policyYear === 20);
   const peak    = rows.reduce((a, b) => b.cvTotal > a.cvTotal ? b : a, rows[0]);
@@ -779,16 +919,30 @@ function calculate() {
   document.getElementById('mPeakVal').textContent = fmt(peak.cvTotal);
   document.getElementById('mPeakYear').textContent= `Year ${peak.policyYear} · Age ${peak.attainedAge}`;
 
-  // Show elements
+  if (premium.found) {
+    document.getElementById('mMonthlyVal').textContent = fmtMoney(premium.monthlyPremium);
+    setMetricSub('mMonthlySub', `${premium.planCode} from Rates.csv · annual total $${fmtMoney(premium.annualTotal)}`);
+    document.getElementById('mTotalPaidVal').textContent = premium.totalPaid !== null ? fmtMoney(premium.totalPaid) : '—';
+    if (breakEven) {
+      setMetricSub('mTotalPaidSub', `Break-even around Year ${breakEven.policyYear} · Age ${breakEven.attainedAge}`);
+    } else if (premium.yearsToPU !== null) {
+      setMetricSub('mTotalPaidSub', `Paid for ${premium.yearsToPU} years until PU`);
+    } else {
+      setMetricSub('mTotalPaidSub', 'Paid-up timing unavailable for this plan', 'warn');
+    }
+  } else {
+    document.getElementById('mMonthlyVal').textContent = '—';
+    document.getElementById('mTotalPaidVal').textContent = '—';
+    setMetricSub('mMonthlySub', premium.reason, 'warn');
+    setMetricSub('mTotalPaidSub', 'Premium metric unavailable', 'warn');
+  }
+
   document.getElementById('metricsRow').classList.add('visible');
   document.getElementById('chartWrapper').classList.add('visible');
   document.getElementById('tableWrapper').classList.add('visible');
 
-  // Chart
-  buildChart(rows, faceAmount, plan, gender, tobacco);
-
-  // Table
-  buildTable(rows, faceAmount);
+  buildChart(rows, faceAmount, premium);
+  buildTable(rows, faceAmount, premium);
 }
 
 function planLabel(p) {
@@ -799,15 +953,19 @@ function planLabel(p) {
   if (p === '70') return 'Paid Up at Age 70';
 }
 
-function buildChart(rows, faceAmount, plan, gender, tobacco) {
+function buildChart(rows, faceAmount, premium) {
   const labels = rows.map(r => `Yr ${r.policyYear}`);
   const cvData  = rows.map(r => parseFloat(r.cvTotal.toFixed(2)));
   const faceArr = rows.map(() => faceAmount);
+  const paidInData = premium.found && premium.monthlyPremium > 0
+    ? rows.map(r => parseFloat((premium.monthlyPremium * 12 * r.policyYear).toFixed(2)))
+    : [];
 
   const legend = document.getElementById('chartLegend');
   legend.innerHTML = `
     <div class="legend-item"><div class="legend-dot" style="background:#c9a84c"></div>Cash Value</div>
     <div class="legend-item"><div class="legend-dot" style="background:rgba(13,13,13,0.15);"></div>Face Amount</div>
+    ${premium.found ? '<div class="legend-item"><div class="legend-dot" style="background:#0d0d0d"></div>Total Paid-In</div>' : ''}
   `;
 
   if (chart) { chart.destroy(); }
@@ -818,39 +976,53 @@ function buildChart(rows, faceAmount, plan, gender, tobacco) {
   gradient.addColorStop(0, 'rgba(201,168,76,0.18)');
   gradient.addColorStop(1, 'rgba(201,168,76,0)');
 
+  const datasets = [
+    {
+      label: 'Cash Value',
+      data: cvData,
+      borderColor: '#c9a84c',
+      backgroundColor: gradient,
+      borderWidth: 2,
+      fill: true,
+      tension: 0.4,
+      pointRadius: rows.length > 40 ? 0 : 3,
+      pointHoverRadius: 6,
+      pointBackgroundColor: '#c9a84c',
+      pointBorderColor: '#f7f4ef',
+      pointBorderWidth: 2,
+    },
+    {
+      label: 'Face Amount',
+      data: faceArr,
+      borderColor: 'rgba(13,13,13,0.15)',
+      backgroundColor: 'transparent',
+      borderWidth: 1.5,
+      borderDash: [6, 4],
+      fill: false,
+      tension: 0,
+      pointRadius: 0,
+      pointHoverRadius: 0,
+    }
+  ];
+
+  if (premium.found) {
+    datasets.push({
+      label: 'Total Paid-In',
+      data: paidInData,
+      borderColor: '#0d0d0d',
+      backgroundColor: 'transparent',
+      borderWidth: 1.75,
+      borderDash: [2, 3],
+      fill: false,
+      tension: 0.15,
+      pointRadius: 0,
+      pointHoverRadius: 0,
+    });
+  }
+
   chart = new Chart(ctx, {
     type: 'line',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: 'Cash Value',
-          data: cvData,
-          borderColor: '#c9a84c',
-          backgroundColor: gradient,
-          borderWidth: 2,
-          fill: true,
-          tension: 0.4,
-          pointRadius: rows.length > 40 ? 0 : 3,
-          pointHoverRadius: 6,
-          pointBackgroundColor: '#c9a84c',
-          pointBorderColor: '#f7f4ef',
-          pointBorderWidth: 2,
-        },
-        {
-          label: 'Face Amount',
-          data: faceArr,
-          borderColor: 'rgba(13,13,13,0.15)',
-          backgroundColor: 'transparent',
-          borderWidth: 1.5,
-          borderDash: [6, 4],
-          fill: false,
-          tension: 0,
-          pointRadius: 0,
-          pointHoverRadius: 0,
-        }
-      ]
-    },
+    data: { labels, datasets },
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -871,10 +1043,7 @@ function buildChart(rows, faceAmount, plan, gender, tobacco) {
               const r = rows[items[0].dataIndex];
               return `Policy Year ${r.policyYear}  ·  Age ${r.attainedAge}`;
             },
-            label: (item) => {
-              if (item.datasetIndex === 0) return `  Cash Value:    $${fmt(item.raw)}`;
-              if (item.datasetIndex === 1) return `  Face Amount:  $${fmt(item.raw)}`;
-            }
+            label: (item) => `  ${item.dataset.label}:  $${fmt(item.raw)}`
           }
         }
       },
@@ -903,7 +1072,7 @@ function buildChart(rows, faceAmount, plan, gender, tobacco) {
   });
 }
 
-function buildTable(rows, faceAmount) {
+function buildTable(rows, faceAmount, premium) {
   const tbody = document.getElementById('tableBody');
   tbody.innerHTML = '';
 
@@ -912,6 +1081,7 @@ function buildTable(rows, faceAmount) {
   rows.forEach(r => {
     const pct = ((r.cvTotal / faceAmount) * 100).toFixed(1);
     const isMilestone = milestones.has(r.policyYear);
+    const paidIn = premium.found ? premium.monthlyPremium * 12 * r.policyYear : null;
     const tr = document.createElement('tr');
     if (isMilestone) tr.classList.add('milestone');
     tr.innerHTML = `
@@ -919,15 +1089,15 @@ function buildTable(rows, faceAmount) {
       <td style="text-align:right">${r.attainedAge}</td>
       <td style="text-align:right" class="${isMilestone ? 'cv-gold' : 'cv-highlight'}">$${r.cvPer1k.toFixed(2)}</td>
       <td style="text-align:right" class="${isMilestone ? 'cv-gold' : 'cv-highlight'}">$${fmt(r.cvTotal)}</td>
-      <td style="text-align:right">${pct}%</td>
+      <td style="text-align:right">${pct}%${paidIn !== null ? ` · Paid-In $${fmt(paidIn)}` : ''}</td>
     `;
     tbody.appendChild(tr);
   });
 }
 
-// Auto-calculate on load
-window.addEventListener('DOMContentLoaded', () => {
-  setTimeout(calculate, 300);
+window.addEventListener('DOMContentLoaded', async () => {
+  await loadRates();
+  setTimeout(calculate, 150);
 });
 </script>
 
