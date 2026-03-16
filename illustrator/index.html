@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIL Cash Value Illustrator</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Outfit:wght@200;300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --ink: #0d0d0d;
+    --paper: #f7f4ef;
+    --cream: #ede9e1;
+    --gold: #c9a84c;
+    --gold-light: #e8d49a;
+    --gold-dim: rgba(201,168,76,0.15);
+    --muted: #7a7265;
+    --border: rgba(13,13,13,0.1);
+    --card: rgba(255,255,255,0.7);
+    --shadow: 0 4px 40px rgba(0,0,0,0.07);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Outfit', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse at 20% 10%, rgba(201,168,76,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 90%, rgba(201,168,76,0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  header {
+    padding: 56px 0 40px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 48px;
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .brand-line {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 300;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+    letter-spacing: 0.02em;
+    margin-top: 8px;
+  }
+
+  .header-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+
+  /* CONTROLS PANEL */
+  .controls-panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 36px;
+    margin-bottom: 36px;
+    backdrop-filter: blur(12px);
+    box-shadow: var(--shadow);
+  }
+
+  .controls-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 24px;
+    margin-bottom: 28px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .field label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .field input,
+  .field select {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 10px 14px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  .field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a7265' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+
+  .field input:focus,
+  .field select:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px var(--gold-dim);
+  }
+
+  .controls-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 28px 0;
+  }
+
+  .toggle-group {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .toggle-group input[type="radio"] { display: none; }
+
+  .toggle-group label {
+    flex: 1;
+    padding: 9px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-align: center;
+    cursor: pointer;
+    color: var(--muted);
+    background: var(--paper);
+    border-right: 1px solid var(--border);
+    transition: all 0.2s;
+    user-select: none;
+  }
+
+  .toggle-group label:last-child { border-right: none; }
+
+  .toggle-group input[type="radio"]:checked + label {
+    background: var(--ink);
+    color: var(--gold);
+  }
+
+  .toggle-row {
+    display: flex;
+    gap: 32px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .toggle-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    min-width: 160px;
+  }
+
+  .toggle-field label.group-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* CALCULATE BUTTON */
+  .calc-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--ink);
+    color: var(--gold);
+    border: none;
+    padding: 13px 32px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.25s;
+    margin-top: 8px;
+  }
+
+  .calc-btn:hover {
+    background: var(--gold);
+    color: var(--ink);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(201,168,76,0.3);
+  }
+
+  .calc-btn svg { transition: transform 0.25s; }
+  .calc-btn:hover svg { transform: translateX(3px); }
+
+  /* METRICS ROW */
+  .metrics-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 36px;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.5s, transform 0.5s;
+  }
+
+  .metrics-row.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .metric-card {
+    background: var(--card);
+    padding: 24px 28px;
+    backdrop-filter: blur(12px);
+  }
+
+  .metric-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .metric-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    font-weight: 300;
+    color: var(--ink);
+    line-height: 1;
+  }
+
+  .metric-value .currency {
+    font-size: 18px;
+    color: var(--gold);
+    vertical-align: super;
+    margin-right: 2px;
+  }
+
+  .metric-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  /* CHART AREA */
+  .chart-wrapper {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 36px;
+    margin-bottom: 36px;
+    backdrop-filter: blur(12px);
+    box-shadow: var(--shadow);
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.5s 0.1s, transform 0.5s 0.1s;
+  }
+
+  .chart-wrapper.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .chart-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 300;
+  }
+
+  .chart-title span {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .legend {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+
+  .legend-dot {
+    width: 24px;
+    height: 2px;
+    border-radius: 1px;
+  }
+
+  .chart-canvas-wrap {
+    position: relative;
+    height: 380px;
+  }
+
+  /* TABLE */
+  .table-wrapper {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 36px;
+    backdrop-filter: blur(12px);
+    box-shadow: var(--shadow);
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.5s 0.2s, transform 0.5s 0.2s;
+  }
+
+  .table-wrapper.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .table-header {
+    padding: 22px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .table-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 300;
+  }
+
+  .table-mono {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .table-scroll { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead th {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 12px 20px;
+    text-align: right;
+    border-bottom: 1px solid var(--border);
+    background: rgba(247,244,239,0.6);
+    white-space: nowrap;
+  }
+
+  thead th:first-child { text-align: left; }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(13,13,13,0.04);
+    transition: background 0.15s;
+  }
+
+  tbody tr:hover { background: rgba(201,168,76,0.05); }
+  tbody tr:last-child { border-bottom: none; }
+
+  tbody td {
+    padding: 11px 20px;
+    text-align: right;
+    font-weight: 300;
+    white-space: nowrap;
+  }
+
+  tbody td:first-child {
+    text-align: left;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .cv-highlight {
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .cv-gold {
+    color: var(--gold);
+    font-weight: 500;
+  }
+
+  tbody tr.milestone {
+    background: rgba(201,168,76,0.06);
+  }
+
+  tbody tr.milestone td:first-child {
+    color: var(--gold);
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 0 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .footer-note {
+    font-size: 11px;
+    color: var(--muted);
+    max-width: 480px;
+    line-height: 1.7;
+  }
+
+  .footer-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-style: italic;
+    color: var(--gold);
+    opacity: 0.6;
+  }
+
+  /* PLACEHOLDER STATE */
+  .placeholder {
+    text-align: center;
+    padding: 80px 32px;
+    color: var(--muted);
+  }
+
+  .placeholder-icon {
+    font-size: 40px;
+    margin-bottom: 16px;
+    opacity: 0.3;
+  }
+
+  .placeholder p {
+    font-size: 14px;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 18px;
+  }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .container { padding: 0 20px; }
+    header { padding: 40px 0 28px; }
+    .controls-panel { padding: 24px 20px; }
+    .chart-wrapper, .table-wrapper { padding: 24px 16px; }
+    .chart-canvas-wrap { height: 280px; }
+    .metric-value { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-inner">
+      <div>
+        <div class="brand-line">American Income Life · Policy Illustration</div>
+        <h1>Cash Value <em>Illustrator</em></h1>
+        <p class="subtitle">Whole Life insurance growth projections per $1,000 of face amount</p>
+      </div>
+      <div class="header-badge">AIL Rate Tables · 2024</div>
+    </div>
+  </header>
+
+  <!-- CONTROLS -->
+  <div class="controls-panel">
+    <div class="controls-grid">
+      <div class="field">
+        <label>Issue Age</label>
+        <input type="number" id="age" value="35" min="0" max="80" placeholder="e.g. 35">
+      </div>
+      <div class="field">
+        <label>Face Amount ($)</label>
+        <input type="number" id="faceAmount" value="50000" min="1000" step="1000" placeholder="e.g. 50000">
+      </div>
+      <div class="field">
+        <label>Plan</label>
+        <select id="plan">
+          <option value="20">20-Pay Whole Life</option>
+          <option value="10">10-Pay Whole Life</option>
+          <option value="5">5-Pay Whole Life</option>
+          <option value="65">Paid Up at 65</option>
+          <option value="70">Paid Up at 70</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="controls-divider"></div>
+
+    <div class="toggle-row">
+      <div class="toggle-field">
+        <label class="group-label">Gender</label>
+        <div class="toggle-group">
+          <input type="radio" name="gender" id="gm" value="male" checked>
+          <label for="gm">Male</label>
+          <input type="radio" name="gender" id="gf" value="female">
+          <label for="gf">Female</label>
+        </div>
+      </div>
+      <div class="toggle-field">
+        <label class="group-label">Tobacco Status</label>
+        <div class="toggle-group">
+          <input type="radio" name="tobacco" id="tntu" value="ntu" checked>
+          <label for="tntu">Non-Tobacco</label>
+          <input type="radio" name="tobacco" id="ttu" value="tu">
+          <label for="ttu">Tobacco</label>
+        </div>
+      </div>
+      <button class="calc-btn" onclick="calculate()">
+        Generate Illustration
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M1 7h12M8 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- METRICS -->
+  <div class="metrics-row" id="metricsRow">
+    <div class="metric-card">
+      <div class="metric-label">Face Amount</div>
+      <div class="metric-value" id="mFace"><span class="currency">$</span><span id="mFaceVal">—</span></div>
+      <div class="metric-sub" id="mPlan">—</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">CV at Year 10</div>
+      <div class="metric-value" id="mCV10"><span class="currency">$</span><span id="mCV10Val">—</span></div>
+      <div class="metric-sub" id="mCV10Pct">—</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">CV at Year 20</div>
+      <div class="metric-value"><span class="currency">$</span><span id="mCV20Val">—</span></div>
+      <div class="metric-sub" id="mCV20Pct">—</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Peak Cash Value</div>
+      <div class="metric-value"><span class="currency">$</span><span id="mPeakVal">—</span></div>
+      <div class="metric-sub" id="mPeakYear">—</div>
+    </div>
+  </div>
+
+  <!-- CHART -->
+  <div class="chart-wrapper" id="chartWrapper">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">Cash Value <span>Growth Curve</span></div>
+      </div>
+      <div class="legend" id="chartLegend"></div>
+    </div>
+    <div class="chart-canvas-wrap">
+      <canvas id="cvChart"></canvas>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrapper" id="tableWrapper">
+    <div class="table-header">
+      <div class="table-title">Policy <span style="font-style:italic; color:var(--gold)">Year-by-Year</span> Detail</div>
+      <div class="table-mono">Illustration Schedule</div>
+    </div>
+    <div class="table-scroll">
+      <table id="cvTable">
+        <thead>
+          <tr>
+            <th>Policy Year</th>
+            <th>Attained Age</th>
+            <th>Cash Value (per $1k)</th>
+            <th>Total Cash Value</th>
+            <th>% of Face</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>
+    <p class="footer-note">This illustration is based on AIL rate tables and is for informational purposes only. Values shown are per $1,000 of face amount scaled to the selected face amount. Actual policy values may vary. Not a contract.</p>
+    <div class="footer-logo">American Income Life</div>
+  </footer>
+
+</div>
+
+<script>
+// ============================================================
+// RATE DATA
+// ============================================================
+const cv5male   = [0,0,0.22,0.68,1.14,1.62,2.1,2.58,3.05,3.48,3.84,4.1,4.21,4.18,4.18,4.25,4.45,4.83,5.45,6.13,6.87,7.7,8.67,9.74,10.86,12.07,13.34,14.51,15.63,16.74,17.75,18.67,19.55,20.39,21.22,22.15,23.2,24.37,25.66,27.05,28.55,30.16,31.89,33.77,35.8,37.92,40.12,42.37,44.61,46.89,49.19,51.57,54.13,56.92,59.96,63.24,66.69,70.2,73.73,77.24,80.76,84.34,88.1,92.09,96.35,100.84,105.5,110.2,116.97,124.14,131.29,138.49,145.87,153.56,161.63,170.09,178.78,187.59,196.35,204.83,212.73];
+const cv5maletu = [11.4,12.23,13.11,14.05,15.08,16.2,17.42,18.76,20.16,21.58,23,24.4,25.79,27.18,28.58,30,31.43,32.8,34.13,35.43,36.74,38.13,39.73,41.55,43.58,45.79,48.15,50.58,53.06,55.62,58.22,60.89,63.6,66.34,69.1,71.87,74.6,77.26,79.81,82.17,84.31,86.21,87.85,89.25,92.84,96.5,100.26,104.11,107.95,111.58,114.81,117.53,119.85,122.07,124.69,128.19,132.96,139.21,146.95,156.27,166.34,175.87,184.31];
+const cv10male  = [14.11,15.22,16.28,17.34,18.37,19.34,20.23,20.98,21.58,22.18,22.79,23.41,24.08,24.83,25.69,26.69,27.89,29.44,31.31,33.3,35.45,37.75,40.11,42.53,45,47.48,49.93,52.26,54.52,56.78,59.05,61.36,63.75,66.23,68.83,71.63,74.66,77.96,81.53,85.33,89.36,93.59,98.01,102.59,107.35,112.26,117.35,122.67,128.24,134.09,140.21,146.6,153.25,160.16,167.33,174.76,182.45,190.4,198.62,207.11,215.87,224.9,234.18,243.67,253.32,263.1,273,283.01,294.87,307.27,319.85,332.55,345.37,358.26,371.09,383.62,395.5,406.26,415.33,422.24,426.65];
+const cv10maletu= [45.42,47.74,50.22,52.83,55.57,58.4,61.33,64.38,67.5,70.68,73.89,77.1,80.27,83.42,86.57,89.78,93.08,96.55,100.21,104.06,108.11,112.4,116.98,121.85,127.02,132.43,138.06,143.84,149.73,155.76,161.87,168.06,174.27,180.47,186.58,192.57,198.38,203.98,209.35,214.5,219.5,224.35,229.06,233.55,239.68,245.5,250.95,256.11,261.17,266.37,271.96,278.17,285.25,293.47,303.27,314.34,325.89,337.6,348.92,359.17,367.63,373.67,376.88];
+const cv20male  = [50.02,51.86,53.69,55.6,57.6,59.67,61.86,64.24,66.79,69.46,72.3,75.3,78.4,81.64,85.04,88.58,92.3,96.22,100.39,104.67,109.12,113.74,118.51,123.4,128.44,133.69,139.13,144.7,150.44,156.41,162.58,168.97,175.61,182.46,189.57,196.99,204.77,212.97,221.61,230.69,240.17,250.04,260.24,270.79,281.65,292.81,304.3,316.14,328.35,340.94,353.9,367.2,380.82,394.7,408.81,423.09,437.53,452.13,466.9,481.83,496.86,511.94,527.04,542.1,556.98,571.5,585.4,598.38,611.07,622.42,632.11,640.05,646.33,651.1,654.74,658.05,661.22,663.67,665.16,665.32,663.74];
+const cv20maletu= [133.96,139.43,145.02,150.71,156.51,162.44,168.56,174.92,181.52,188.33,195.35,202.56,210,217.66,225.57,233.74,242.16,250.84,259.76,268.93,278.34,287.97,297.84,307.89,318.08,328.32,338.56,348.71,358.74,368.67,378.52,388.29,397.95,407.41,416.55,425.27,433.53,441.36,448.91,456.36,463.92,471.81,480.16,489.12,500.25,511.95,523.64,535.13,546.19,556.48,565.66,573.48,579.83,584.74,588.43,591.22,593.64,596.71,600.66,604.64,608.24,610.89,611.95];
+const cv65male  = [455.09,453.87,452.55,451.17,449.71,448.19,446.6,444.93,443.19,441.37,439.47,437.49,435.43,433.29,431.08,428.84,426.56,424.29,422.02,419.66,417.21,414.65,411.97,409.15,406.19,403.08,399.8,396.28,392.55,388.61,384.45,380.05,375.44,370.62,365.57,360.31,354.85,349.18,343.27,337.11,330.63,323.82,316.66,309.13,301.2,292.81,283.93,274.5,264.49,253.87,242.57,230.56,217.82,204.32,189.99,174.76,158.51,141.11,122.43,102.36,80.76,57.53,32.58,5.78];
+const cv65maletu= [501.93,499.14,496.23,493.19,490.01,486.68,483.19,479.55,475.71,471.66,467.38,462.86,458.08,453.03,447.72,442.14,436.28,430.11,423.62,416.8,409.64,402.13,394.27,386.05,377.44,368.39,358.85,348.71,337.95,326.52,314.37,301.44,287.67,273.01,257.39,240.74,222.96,203.98,183.72,162.07,138.94,114.23,87.85,59.72,32.28,3.24];
+const cv70male  = [535.18,534.15,533.02,531.84,530.6,529.3,527.94,526.52,525.03,523.48,521.86,520.17,518.41,516.58,514.71,512.79,510.85,508.91,506.97,504.96,502.87,500.69,498.4,496,493.47,490.82,488.02,485.02,481.84,478.48,474.93,471.17,467.25,463.13,458.82,454.34,449.68,444.84,439.8,434.54,429.02,423.21,417.1,410.68,403.92,396.76,389.18,381.14,372.6,363.54,353.9,343.66,332.79,321.28,309.05,296.06,282.19,267.35,251.42,234.3,215.87,196.06,174.78,151.92,127.34,100.84,72.22,41.18,9.85];
+const cv70maletu= [579.04,576.68,574.22,571.65,568.96,566.15,563.2,560.12,556.87,553.45,549.84,546.02,541.97,537.71,533.22,528.51,523.55,518.34,512.85,507.09,501.04,494.68,488.04,481.1,473.82,466.17,458.11,449.54,440.44,430.78,420.51,409.59,397.95,385.56,372.36,358.28,343.26,327.22,310.09,291.79,272.24,251.36,229.06,205.29,182.09,157.55,131.58,104.11,75.06,44.3,11.63];
+
+const cv5female   = [0,0,0,0,0,0,0.18,0.6,1.03,1.47,1.87,2.21,2.51,2.78,3.07,3.43,3.91,4.48,5.11,5.77,6.46,7.17,7.92,8.68,9.44,10.22,11.03,11.85,12.68,13.51,14.31,15.09,15.84,16.59,17.41,18.34,19.4,20.61,21.98,23.5,25.12,26.83,28.61,30.43,32.3,34.21,36.15,38.11,40.09,42.08,44.07,46.11,48.24,50.53,52.99,55.66,58.53,61.54,64.68,67.94,71.31,74.83,78.54,82.49,86.71,91.19,95.91,100.82,105.87,110.99,116.2,124.03,132.06,140.29,148.61,156.86,164.84,172.7,180.82,189.25,197.06];
+const cv5femaletu = [10.79,11.68,12.57,13.49,14.46,15.48,16.57,17.73,18.92,20.14,21.39,22.63,23.83,25,26.12,27.18,28.25,29.42,30.68,32.1,33.7,35.48,37.4,39.42,41.47,43.55,45.63,47.71,49.81,51.96,54.17,56.42,58.72,61.06,63.41,65.76,68.09,70.38,72.62,74.79,76.9,78.94,80.89,82.79,84.67,86.55,89.98,94.47,99.17,104.19,109.65,115.54,121.91,128.81,136.19,143.99,152.24,160.62,168.45,175.25,180.6,184.33,187.54];
+const cv10female  = [10.35,11.33,12.24,13.14,14.06,14.95,15.82,16.66,17.49,18.36,19.27,20.24,21.25,22.3,23.41,24.63,25.99,27.47,29.04,30.65,32.32,34.03,35.81,37.62,39.44,41.26,43.09,44.92,46.78,48.7,50.71,52.85,55.11,57.54,60.18,63.04,66.14,69.46,73,76.73,80.63,84.65,88.78,93,97.28,101.63,106.09,110.67,115.44,120.41,125.6,131.05,136.75,142.74,149.04,155.68,162.65,169.98,177.67,185.76,194.23,203.08,212.33,221.95,231.94,242.25,252.87,263.74,274.81,285.94,297.01,309.83,322.59,335.6,348.81,361.33,372.85,383.93,394.31,403.75,412.25];
+const cv10femaletu= [43.1,45.32,47.62,50,52.46,55.02,57.64,60.3,62.99,65.67,68.34,71.02,73.77,76.6,79.56,82.64,85.92,89.44,93.17,97.1,101.25,105.6,110.11,114.75,119.5,124.36,129.29,134.3,139.39,144.59,149.88,155.23,160.63,166.07,171.52,176.96,182.37,187.75,193.1,198.44,203.8,209.25,214.82,220.52,226.45,232.74,240.68,249.86,259.62,269.99,280.98,292.64,304.67,316.56,327.9,338.28,347.65,356.64,364.49,370.34,374.61,376.93,377.3];
+const cv20female  = [42.35,44.38,46.38,48.41,50.52,52.72,55.02,57.42,59.9,62.46,65.11,67.87,70.74,73.68,76.69,79.81,83.06,86.45,89.94,93.54,97.28,101.18,105.26,109.54,114.02,118.72,123.63,128.76,134.12,139.71,145.54,151.59,157.85,164.34,171.08,178.08,185.36,192.95,200.89,209.16,217.75,226.66,235.87,245.37,255.17,265.29,275.75,286.58,297.84,309.53,321.68,334.29,347.36,360.87,374.82,389.2,403.95,419.05,434.43,450,465.61,481.12,496.63,512.32,528.15,543.44,557.96,572.08,585.62,598.34,610.2,622.28,633.53,643.94,653.76,663.32,672.37,680.32,686.86,691.6,693.98];
+const cv20femaletu= [125.59,130.49,135.52,140.7,146.07,151.64,157.45,163.52,169.79,176.25,182.87,189.68,196.68,203.88,211.27,218.85,226.67,234.75,243.07,251.64,260.44,269.44,278.61,287.89,297.23,306.64,316.06,325.49,334.95,344.45,354.02,363.69,373.48,383.36,393.41,403.71,414.3,425.19,436.4,447.97,459.92,472.31,484.94,497.43,509.52,521.03,532.7,544.71,556.11,566.36,575.79,584.21,591.52,597.79,603.05,607.26,610.77,614.19,617.27,619.4,620.53,620.78,620.9];
+const cv65female  = [416.87,415.8,414.61,413.35,412.02,410.64,409.21,407.71,406.15,404.52,402.81,401.04,399.19,397.25,395.24,393.17,391.06,388.9,386.66,384.31,381.86,379.29,376.61,373.79,370.84,367.75,364.51,361.11,357.56,353.86,349.98,345.92,341.66,337.22,332.6,327.81,322.82,317.63,312.22,306.56,300.6,294.31,287.67,280.64,273.19,265.29,256.92,248.06,238.68,228.74,218.21,207.07,195.27,182.8,169.62,155.68,140.89,125.16,108.39,90.48,71.31,50.78,28.78,5.18];
+const cv65femaletu= [474.57,471.82,468.94,465.91,462.74,459.4,455.92,452.27,448.44,444.41,440.16,435.7,431.01,426.08,420.89,415.43,409.72,403.76,397.53,391.03,384.25,377.15,369.69,361.82,353.51,344.71,335.39,325.49,315.01,303.92,292.19,279.77,266.61,252.65,237.86,222.15,205.48,187.75,168.91,148.88,127.59,104.96,80.89,55.3,28.08];
+const cv70female  = [494.05,493.12,492.09,490.99,489.84,488.65,487.4,486.11,484.75,483.33,481.85,480.31,478.71,477.03,475.28,473.48,471.65,469.78,467.83,465.8,463.68,461.45,459.11,456.67,454.11,451.43,448.62,445.67,442.59,439.38,436.01,432.49,428.79,424.94,420.94,416.77,412.44,407.94,403.25,398.34,393.17,387.71,381.95,375.85,369.38,362.53,355.27,347.58,339.44,330.82,321.68,312.01,301.78,290.96,279.52,267.43,254.59,240.95,226.4,210.86,194.23,176.41,157.33,136.85,114.86,91.19,65.65,38.03,8.07];
+const cv70femaletu= [551.13,548.79,546.33,543.74,541.03,538.18,535.2,532.09,528.81,525.37,521.74,517.93,513.92,509.71,505.28,500.61,495.74,490.65,485.32,479.77,473.97,467.91,461.54,454.82,447.72,440.2,432.24,423.78,414.82,405.35,395.33,384.72,373.48,361.56,348.92,335.5,321.25,306.11,290.02,272.91,254.72,235.39,214.82,192.96,169.71,144.98,120.06,94.47,67.32,38.48,7.8];
+
+// Starting ages for each array (index 0 = this age)
+const arrayStartAge = {
+  cv5:  0,
+  cv10: 0,
+  cv20: 0,
+  cv65: 0,
+  cv70: 0,
+};
+
+// For 65 and 70 plans, the array index represents policy year
+// The CV tables index by AGE (0-based from age 0 for 5/10/20, and by policy year for 65/70)
+// Actually all arrays start at issue age 0 (age 0 for 5/10/20) and index = age
+// For cv65/cv70 - they represent values for someone insured at birth paying to 65/70
+
+// More accurately: all arrays are indexed by age (starting from age 0)
+// So for a person issued at age 35, we look at arr[35] for year 0, arr[36] for year 1, etc.
+
+function getArray(plan, gender, tobacco) {
+  const g = gender;
+  const t = tobacco === 'tu';
+  if (plan === '5')  return t ? (g==='male' ? cv5maletu   : cv5femaletu)   : (g==='male' ? cv5male   : cv5female);
+  if (plan === '10') return t ? (g==='male' ? cv10maletu  : cv10femaletu)  : (g==='male' ? cv10male  : cv10female);
+  if (plan === '20') return t ? (g==='male' ? cv20maletu  : cv20femaletu)  : (g==='male' ? cv20male  : cv20female);
+  if (plan === '65') return t ? (g==='male' ? cv65maletu  : cv65femaletu)  : (g==='male' ? cv65male  : cv65female);
+  if (plan === '70') return t ? (g==='male' ? cv70maletu  : cv70femaletu)  : (g==='male' ? cv70male  : cv70female);
+}
+
+let chart = null;
+
+function fmt(n) {
+  return n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+function calculate() {
+  const age        = parseInt(document.getElementById('age').value) || 35;
+  const faceAmount = parseFloat(document.getElementById('faceAmount').value) || 50000;
+  const plan       = document.getElementById('plan').value;
+  const gender     = document.querySelector('input[name="gender"]:checked').value;
+  const tobacco    = document.querySelector('input[name="tobacco"]:checked').value;
+
+  const arr = getArray(plan, gender, tobacco);
+  const units = faceAmount / 1000;
+
+  // Build rows: starting at issue age, up to end of array
+  const rows = [];
+  for (let i = age; i < arr.length; i++) {
+    const cvPer1k = arr[i];
+    const cvTotal = cvPer1k * units;
+    const policyYear = i - age + 1;
+    const attainedAge = age + policyYear - 1;
+    rows.push({ policyYear, attainedAge, cvPer1k, cvTotal });
+  }
+
+  if (rows.length === 0) {
+    alert('No data available for this age/plan combination.');
+    return;
+  }
+
+  // Metrics
+  const cv10row = rows.find(r => r.policyYear === 10);
+  const cv20row = rows.find(r => r.policyYear === 20);
+  const peak    = rows.reduce((a, b) => b.cvTotal > a.cvTotal ? b : a, rows[0]);
+
+  document.getElementById('mFaceVal').textContent = fmt(faceAmount);
+  document.getElementById('mPlan').textContent    = planLabel(plan);
+  document.getElementById('mCV10Val').textContent = cv10row ? fmt(cv10row.cvTotal) : '—';
+  document.getElementById('mCV10Pct').textContent = cv10row ? `${((cv10row.cvTotal/faceAmount)*100).toFixed(1)}% of face amount` : '—';
+  document.getElementById('mCV20Val').textContent = cv20row ? fmt(cv20row.cvTotal) : '—';
+  document.getElementById('mCV20Pct').textContent = cv20row ? `${((cv20row.cvTotal/faceAmount)*100).toFixed(1)}% of face amount` : '—';
+  document.getElementById('mPeakVal').textContent = fmt(peak.cvTotal);
+  document.getElementById('mPeakYear').textContent= `Year ${peak.policyYear} · Age ${peak.attainedAge}`;
+
+  // Show elements
+  document.getElementById('metricsRow').classList.add('visible');
+  document.getElementById('chartWrapper').classList.add('visible');
+  document.getElementById('tableWrapper').classList.add('visible');
+
+  // Chart
+  buildChart(rows, faceAmount, plan, gender, tobacco);
+
+  // Table
+  buildTable(rows, faceAmount);
+}
+
+function planLabel(p) {
+  if (p === '5')  return '5-Pay Whole Life';
+  if (p === '10') return '10-Pay Whole Life';
+  if (p === '20') return '20-Pay Whole Life';
+  if (p === '65') return 'Paid Up at Age 65';
+  if (p === '70') return 'Paid Up at Age 70';
+}
+
+function buildChart(rows, faceAmount, plan, gender, tobacco) {
+  const labels = rows.map(r => `Yr ${r.policyYear}`);
+  const cvData  = rows.map(r => parseFloat(r.cvTotal.toFixed(2)));
+  const faceArr = rows.map(() => faceAmount);
+
+  const legend = document.getElementById('chartLegend');
+  legend.innerHTML = `
+    <div class="legend-item"><div class="legend-dot" style="background:#c9a84c"></div>Cash Value</div>
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(13,13,13,0.15);"></div>Face Amount</div>
+  `;
+
+  if (chart) { chart.destroy(); }
+
+  const ctx = document.getElementById('cvChart').getContext('2d');
+
+  const gradient = ctx.createLinearGradient(0, 0, 0, 380);
+  gradient.addColorStop(0, 'rgba(201,168,76,0.18)');
+  gradient.addColorStop(1, 'rgba(201,168,76,0)');
+
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Cash Value',
+          data: cvData,
+          borderColor: '#c9a84c',
+          backgroundColor: gradient,
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4,
+          pointRadius: rows.length > 40 ? 0 : 3,
+          pointHoverRadius: 6,
+          pointBackgroundColor: '#c9a84c',
+          pointBorderColor: '#f7f4ef',
+          pointBorderWidth: 2,
+        },
+        {
+          label: 'Face Amount',
+          data: faceArr,
+          borderColor: 'rgba(13,13,13,0.15)',
+          backgroundColor: 'transparent',
+          borderWidth: 1.5,
+          borderDash: [6, 4],
+          fill: false,
+          tension: 0,
+          pointRadius: 0,
+          pointHoverRadius: 0,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { intersect: false, mode: 'index' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#0d0d0d',
+          titleColor: '#c9a84c',
+          bodyColor: '#f7f4ef',
+          borderColor: 'rgba(201,168,76,0.3)',
+          borderWidth: 1,
+          padding: 14,
+          titleFont: { family: 'DM Mono', size: 11, weight: '400' },
+          bodyFont: { family: 'Outfit', size: 13, weight: '300' },
+          callbacks: {
+            title: (items) => {
+              const r = rows[items[0].dataIndex];
+              return `Policy Year ${r.policyYear}  ·  Age ${r.attainedAge}`;
+            },
+            label: (item) => {
+              if (item.datasetIndex === 0) return `  Cash Value:    $${fmt(item.raw)}`;
+              if (item.datasetIndex === 1) return `  Face Amount:  $${fmt(item.raw)}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(13,13,13,0.04)', drawBorder: false },
+          ticks: {
+            font: { family: 'DM Mono', size: 10 },
+            color: '#7a7265',
+            maxTicksLimit: 12,
+            maxRotation: 0,
+          },
+          border: { display: false }
+        },
+        y: {
+          grid: { color: 'rgba(13,13,13,0.05)', drawBorder: false },
+          ticks: {
+            font: { family: 'DM Mono', size: 10 },
+            color: '#7a7265',
+            callback: v => '$' + fmt(v),
+          },
+          border: { display: false }
+        }
+      }
+    }
+  });
+}
+
+function buildTable(rows, faceAmount) {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+
+  const milestones = new Set([5, 10, 15, 20, 25, 30]);
+
+  rows.forEach(r => {
+    const pct = ((r.cvTotal / faceAmount) * 100).toFixed(1);
+    const isMilestone = milestones.has(r.policyYear);
+    const tr = document.createElement('tr');
+    if (isMilestone) tr.classList.add('milestone');
+    tr.innerHTML = `
+      <td>Year ${r.policyYear}${isMilestone ? ' ★' : ''}</td>
+      <td style="text-align:right">${r.attainedAge}</td>
+      <td style="text-align:right" class="${isMilestone ? 'cv-gold' : 'cv-highlight'}">$${r.cvPer1k.toFixed(2)}</td>
+      <td style="text-align:right" class="${isMilestone ? 'cv-gold' : 'cv-highlight'}">$${fmt(r.cvTotal)}</td>
+      <td style="text-align:right">${pct}%</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// Auto-calculate on load
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(calculate, 300);
+});
+</script>
+
+</body>
+</html>
