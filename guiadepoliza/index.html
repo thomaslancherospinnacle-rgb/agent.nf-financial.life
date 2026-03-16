@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIL Referencia de Pólizas Suplementarias — American Income Life</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:        #0d0d0d;
+    --ink-2:      #1a1a1a;
+    --ink-3:      #2c2c2c;
+    --fog:        #f5f3ef;
+    --fog-2:      #edeae4;
+    --fog-3:      #e2ddd5;
+    --parchment:  #faf8f4;
+    --gold:       #8b6914;
+    --gold-2:     #a07c1e;
+    --gold-light: #c9a84c;
+    --gold-pale:  #f0e6cc;
+    --rule:       rgba(139,105,20,0.18);
+    --rule-dark:  rgba(139,105,20,0.35);
+    --muted:      #6b6560;
+    --muted-2:    #9c9590;
+    --danger:     #7a2020;
+    --safe:       #1a4a2e;
+
+    --a71: #6b3a2a;
+    --a74: #2a3a5a;
+    --c10: #1a4a2e;
+    --c20: #2a3a5a;
+    --ci:  #5a2a2a;
+    --h34: #2a3a4a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--parchment);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+    font-weight: 400;
+    line-height: 1.65;
+    min-height: 100vh;
+  }
+
+  /* ─── MASTHEAD ─── */
+  .masthead {
+    background: var(--ink);
+    color: var(--fog);
+    border-bottom: 3px solid var(--gold);
+    position: relative;
+    overflow: hidden;
+  }
+  .masthead::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 60px,
+      rgba(255,255,255,0.012) 60px,
+      rgba(255,255,255,0.012) 61px
+    );
+    pointer-events: none;
+  }
+  .masthead-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 48px;
+    display: flex;
+    align-items: stretch;
+    min-height: 72px;
+  }
+  .masthead-brand {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 20px 0;
+    border-right: 1px solid rgba(255,255,255,0.1);
+    padding-right: 32px;
+    margin-right: 32px;
+    flex-shrink: 0;
+  }
+  .brand-emblem {
+    width: 36px; height: 36px;
+    border: 1.5px solid var(--gold-light);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .brand-emblem svg { width: 18px; height: 18px; fill: var(--gold-light); }
+  .brand-text {}
+  .brand-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fog);
+    line-height: 1;
+    display: block;
+  }
+  .brand-sub {
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    display: block;
+    margin-top: 4px;
+  }
+  .masthead-nav {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex: 1;
+  }
+  .nav-btn {
+    background: none; border: none; cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    padding: 8px 20px;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -3px;
+    transition: color 0.2s, border-color 0.2s;
+    white-space: nowrap;
+  }
+  .nav-btn:hover { color: var(--fog); }
+  .nav-btn.active { color: var(--gold-light); border-bottom-color: var(--gold-light); }
+
+  /* ─── HERO BANNER ─── */
+  .hero {
+    background: var(--ink-2);
+    padding: 56px 48px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: 'AMERICAN INCOME LIFE';
+    position: absolute;
+    right: -20px; bottom: -30px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 120px;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.025);
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+  }
+  .hero-inner { max-width: 1200px; margin: 0 auto; }
+  .hero-eyebrow {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--gold-light);
+    margin-bottom: 18px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    width: 32px; height: 1px;
+    background: var(--gold-light);
+    display: block;
+  }
+  .hero h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 300;
+    line-height: 1.05;
+    color: var(--fog);
+    letter-spacing: -0.01em;
+    margin-bottom: 20px;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--gold-light);
+  }
+  .hero-desc {
+    font-size: 13px;
+    color: var(--muted-2);
+    max-width: 540px;
+    line-height: 1.75;
+    margin-bottom: 36px;
+  }
+  .hero-products {
+    display: flex; flex-wrap: wrap; gap: 0;
+    border: 1px solid rgba(255,255,255,0.1);
+    width: fit-content;
+  }
+  .hero-product {
+    padding: 10px 20px;
+    border-right: 1px solid rgba(255,255,255,0.1);
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    transition: color 0.2s, background 0.2s;
+  }
+  .hero-product:last-child { border-right: none; }
+  .hero-product span { color: var(--gold-light); display: block; font-size: 13px; font-weight: 600; letter-spacing: 0.04em; margin-bottom: 1px; }
+
+  /* ─── PAGE ─── */
+  .page { max-width: 1200px; margin: 0 auto; padding: 0 48px 100px; }
+
+  /* ─── SECTION DIVIDER ─── */
+  .section-divider {
+    display: flex; align-items: center; gap: 20px;
+    margin: 52px 0 28px;
+  }
+  .section-divider::before, .section-divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--rule);
+  }
+  .section-divider::before { max-width: 40px; }
+  .section-title-inner {
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--gold);
+    white-space: nowrap;
+  }
+
+  /* ═══════════════════════════════
+     QUICK BOOK
+  ═══════════════════════════════ */
+  .book-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+  }
+  .book-card {
+    background: var(--parchment);
+    padding: 24px 22px 20px;
+    position: relative;
+    transition: background 0.2s;
+  }
+  .book-card:hover { background: white; }
+  .book-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--product-color, var(--gold));
+  }
+  .bc-code {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 30px;
+    font-weight: 500;
+    color: var(--product-color, var(--gold));
+    line-height: 1;
+    margin-bottom: 2px;
+    letter-spacing: -0.01em;
+  }
+  .bc-form {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    margin-bottom: 16px;
+  }
+  .bc-rows { border-top: 1px solid var(--fog-3); }
+  .bc-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--fog-3);
+  }
+  .bc-row:last-child { border-bottom: none; }
+  .bc-key {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .bc-val {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--ink-3);
+    text-align: right;
+    line-height: 1.3;
+  }
+  .bc-renew {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--rule);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--muted-2);
+    text-transform: uppercase;
+  }
+  .bc-renew strong {
+    color: var(--product-color, var(--gold));
+    display: block;
+    font-size: 11px;
+    margin-top: 2px;
+  }
+
+  /* Comparison Table */
+  .compare-wrap {
+    border: 1px solid var(--rule-dark);
+    overflow-x: auto;
+    margin-top: 4px;
+  }
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+  .compare-table thead {
+    background: var(--ink);
+  }
+  .compare-table th {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    padding: 12px 16px;
+    text-align: left;
+    border-right: 1px solid rgba(255,255,255,0.06);
+    white-space: nowrap;
+  }
+  .compare-table th:last-child { border-right: none; }
+  .compare-table tbody tr {
+    border-bottom: 1px solid var(--fog-3);
+    transition: background 0.15s;
+  }
+  .compare-table tbody tr:hover { background: var(--gold-pale); }
+  .compare-table tbody tr:last-child { border-bottom: none; }
+  .compare-table td {
+    padding: 10px 16px;
+    border-right: 1px solid var(--fog-3);
+    vertical-align: middle;
+    color: var(--ink-3);
+  }
+  .compare-table td:last-child { border-right: none; }
+  .compare-table td:first-child {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--product-color, var(--gold));
+    white-space: nowrap;
+  }
+  .yes {
+    color: var(--safe);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+  }
+  .no {
+    color: var(--danger);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+  }
+
+  /* ═══════════════════════════════
+     SUMMARY CARDS
+  ═══════════════════════════════ */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 20px;
+  }
+  .scard {
+    background: white;
+    border: 1px solid var(--fog-3);
+    border-top: 3px solid var(--product-color, var(--gold));
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .scard:hover {
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+  }
+  .scard-header {
+    padding: 22px 26px 18px;
+    border-bottom: 1px solid var(--fog-3);
+    display: flex; align-items: flex-start; gap: 16px;
+  }
+  .scard-code-block {
+    flex-shrink: 0;
+  }
+  .scard-code {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 40px; font-weight: 500;
+    color: var(--product-color, var(--gold));
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .scard-form {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    margin-top: 2px;
+  }
+  .scard-header-text { flex: 1; padding-top: 4px; }
+  .scard-header-text h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+  .scard-header-text p {
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .scard-body { padding: 22px 26px; }
+  .scard-desc {
+    font-size: 13px;
+    color: var(--ink-3);
+    line-height: 1.72;
+    margin-bottom: 20px;
+  }
+  .scard-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .stat-box {
+    background: var(--fog);
+    padding: 10px 14px;
+    border-left: 2px solid var(--product-color, var(--gold));
+  }
+  .stat-box .s-label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted-2);
+    margin-bottom: 4px;
+  }
+  .stat-box .s-val {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+  .stat-box .s-val.accent { color: var(--product-color, var(--gold)); font-weight: 600; }
+
+  /* ═══════════════════════════════
+     DEEP DIVE
+  ═══════════════════════════════ */
+  .deep-container { display: flex; flex-direction: column; gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+
+  .deep-card { background: var(--parchment); }
+  .deep-card.open { background: white; }
+
+  .deep-card-header {
+    padding: 22px 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    cursor: pointer;
+    user-select: none;
+    border-left: 3px solid var(--product-color, var(--gold));
+    transition: background 0.15s;
+  }
+  .deep-card-header:hover { background: var(--gold-pale); }
+  .deep-card.open .deep-card-header { border-bottom: 1px solid var(--rule); }
+
+  .deep-badge {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    font-weight: 500;
+    color: var(--product-color, var(--gold));
+    line-height: 1;
+    width: 56px;
+    flex-shrink: 0;
+  }
+  .deep-meta { flex: 1; }
+  .deep-meta h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--ink);
+    margin-bottom: 3px;
+    line-height: 1.2;
+  }
+  .deep-meta p {
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .deep-chevron {
+    font-size: 11px;
+    color: var(--muted-2);
+    transition: transform 0.3s;
+    flex-shrink: 0;
+    letter-spacing: 0.05em;
+    font-weight: 500;
+  }
+  .deep-card.open .deep-chevron { transform: rotate(180deg); }
+
+  .deep-body {
+    display: none;
+    padding: 36px 32px 36px 115px;
+  }
+  .deep-card.open .deep-body { display: block; }
+
+  .deep-section { margin-bottom: 32px; }
+  .deep-section:last-child { margin-bottom: 0; }
+
+  .deep-section-title {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .deep-section-title::after {
+    content: ''; flex: 1; height: 1px; background: var(--rule);
+  }
+
+  .deep-section p {
+    font-size: 13px;
+    color: var(--ink-3);
+    line-height: 1.75;
+    max-width: 680px;
+  }
+
+  .benefit-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1px;
+    background: var(--fog-3);
+    border: 1px solid var(--fog-3);
+  }
+  .benefit-item {
+    background: white;
+    padding: 14px 18px;
+    border-left: 2px solid var(--product-color, var(--gold));
+  }
+  .b-name {
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .b-val {
+    font-size: 12.5px;
+    color: var(--ink-3);
+    line-height: 1.55;
+  }
+
+  .exclusion-list { list-style: none; max-width: 640px; }
+  .exclusion-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--fog-3);
+    font-size: 12.5px;
+    color: var(--ink-3);
+    line-height: 1.5;
+  }
+  .exclusion-list li:last-child { border-bottom: none; }
+  .excl-mark {
+    flex-shrink: 0;
+    width: 16px; height: 16px;
+    border: 1px solid var(--danger);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px;
+    color: var(--danger);
+    font-weight: 700;
+    margin-top: 1px;
+  }
+
+  .key-points {
+    background: var(--fog);
+    border: 1px solid var(--rule-dark);
+    border-left: 3px solid var(--gold);
+    padding: 20px 24px;
+    max-width: 700px;
+  }
+  .kp-title {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 14px;
+  }
+  .kp-list { list-style: none; }
+  .kp-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--rule);
+    font-size: 12.5px;
+    color: var(--ink-3);
+    line-height: 1.55;
+  }
+  .kp-list li:last-child { border-bottom: none; }
+  .kp-mark {
+    flex-shrink: 0;
+    color: var(--gold);
+    font-size: 10px;
+    margin-top: 3px;
+  }
+
+  /* ─── VIEWS ─── */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ─── BOTTOM NAV ─── */
+  .bottom-nav {
+    position: fixed;
+    bottom: 24px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink);
+    border: 1px solid rgba(201,168,76,0.3);
+    display: flex;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+    z-index: 99;
+    overflow: hidden;
+  }
+  .bottom-nav button {
+    background: none; border: none; cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    padding: 12px 24px;
+    border-right: 1px solid rgba(255,255,255,0.07);
+    transition: color 0.2s, background 0.2s;
+  }
+  .bottom-nav button:last-child { border-right: none; }
+  .bottom-nav button:hover { color: rgba(255,255,255,0.8); }
+  .bottom-nav button.active {
+    background: var(--gold);
+    color: var(--ink);
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 768px) {
+    .masthead-inner { padding: 0 20px; }
+    .hero { padding: 40px 20px 36px; }
+    .hero::after { display: none; }
+    .page { padding: 0 20px 100px; }
+    .hero-products { display: none; }
+    .masthead-brand { display: none; }
+    .summary-grid { grid-template-columns: 1fr; }
+    .deep-body { padding: 24px 20px; }
+    .deep-card-header { padding: 18px 20px; }
+    .deep-badge { width: 44px; font-size: 26px; }
+    .book-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 480px) {
+    .book-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="masthead-brand">
+      <div class="brand-emblem">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L3 7v5c0 5.25 3.75 10.15 9 11.35C17.25 22.15 21 17.25 21 12V7L12 2zm0 2.18l7 3.89V12c0 4.34-2.96 8.42-7 9.72-4.04-1.3-7-5.38-7-9.72V8.07l7-3.89z"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">American Income Life</span>
+        <span class="brand-sub">Referencia de Pólizas Suplementarias</span>
+      </div>
+    </div>
+    <nav class="masthead-nav">
+      <button class="nav-btn active" onclick="switchView('quickbook')">Referencia Rápida</button>
+      <button class="nav-btn" onclick="switchView('summary')">Resumen de Productos</button>
+      <button class="nav-btn" onclick="switchView('deepdive')">Guía Completa</button>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Material de Capacitación para Agentes</div>
+    <h1>Referencia de<br><em>Pólizas Suplementarias</em></h1>
+    <p class="hero-desc">Una guía completa de los seis productos suplementarios de AIL — desde referencia rápida en el campo hasta análisis completo de pólizas para certificación de agentes y consulta con clientes.</p>
+    <div class="hero-products">
+      <div class="hero-product"><span>A71</span>Solo Accidente</div>
+      <div class="hero-product"><span>A74</span>Accidente + Incapacidad</div>
+      <div class="hero-product"><span>C10</span>Cáncer Diario</div>
+      <div class="hero-product"><span>C20</span>Cáncer Global</div>
+      <div class="hero-product"><span>CI</span>Enfermedad Crítica</div>
+      <div class="hero-product"><span>H34</span>Indemnidad Hospitalaria</div>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+<!-- ══════════════════════════════════
+     QUICK BOOK VIEW
+══════════════════════════════════ -->
+<div id="view-quickbook" class="view active">
+
+  <div class="section-divider"><div class="section-title-inner">Referencia de un Vistazo</div></div>
+
+  <div class="book-grid">
+
+    <!-- A71 -->
+    <div class="book-card" style="--product-color: var(--a71)">
+      <div class="bc-code">A71</div>
+      <div class="bc-form">Formulario A71000 · Solo Accidente</div>
+      <div class="bc-rows">
+        <div class="bc-row"><span class="bc-key">Hospital</span><span class="bc-val">$100/día · 365 días</span></div>
+        <div class="bc-row"><span class="bc-key">UCI</span><span class="bc-val">2× Hospital · 14 días</span></div>
+        <div class="bc-row"><span class="bc-key">Emergencia</span><span class="bc-val">Hasta $50</span></div>
+        <div class="bc-row"><span class="bc-key">MAD Completo</span><span class="bc-val">$10,000 adultoo</span></div>
+        <div class="bc-row"><span class="bc-key">MAD Parcial</span><span class="bc-val">$5,000 adulto</span></div>
+        <div class="bc-row"><span class="bc-key">Dependiente</span><span class="bc-val">$2,000 / $1,000</span></div>
+        <div class="bc-row"><span class="bc-key">Accidente Auto</span><span class="bc-val">2× todos los beneficios</span></div>
+        <div class="bc-row"><span class="bc-key">Transp. Público</span><span class="bc-val">5× todos los beneficios</span></div>
+      </div>
+      <div class="bc-renew">Renovación Garantizada<strong>Hasta los 70 años</strong></div>
+    </div>
+
+    <!-- A74 -->
+    <div class="book-card" style="--product-color: var(--a74)">
+      <div class="bc-code">A74</div>
+      <div class="bc-form">Formulario A74000 · Accidente + Incapacidad</div>
+      <div class="bc-rows">
+        <div class="bc-row"><span class="bc-key">Incapacidad</span><span class="bc-val">$100/sem · máx 26 sem</span></div>
+        <div class="bc-row"><span class="bc-key">Período elim.</span><span class="bc-val">Período de espera de 7 días</span></div>
+        <div class="bc-row"><span class="bc-key">Emergencia</span><span class="bc-val">Hasta $100</span></div>
+        <div class="bc-row"><span class="bc-key">MAD Regular</span><span class="bc-val">$10,000 completo / $5,000</span></div>
+        <div class="bc-row"><span class="bc-key">MAD Auto</span><span class="bc-val">$25,000 / $12,500</span></div>
+        <div class="bc-row"><span class="bc-key">MAD Transporte</span><span class="bc-val">$50,000 / $25,000</span></div>
+      </div>
+      <div class="bc-renew">Renovación Garantizada<strong>Hasta los 70 años</strong></div>
+    </div>
+
+    <!-- C10 -->
+    <div class="book-card" style="--product-color: var(--c10)">
+      <div class="bc-code">C10</div>
+      <div class="bc-form">Formulario C10000 · Indemnidad de Cáncer Diaria</div>
+      <div class="bc-rows">
+        <div class="bc-row"><span class="bc-key">Hospital</span><span class="bc-val">Diario × 500 días lifetime</span></div>
+        <div class="bc-row"><span class="bc-key">Ambulatorio</span><span class="bc-val">Diario × 500 días lifetime</span></div>
+        <div class="bc-row"><span class="bc-key">Covers</span><span class="bc-val">Cirugía, Quimio, Radiación, Sangre, Rayos X</span></div>
+        <div class="bc-row"><span class="bc-key">Gov't Hospital</span><span class="bc-val">Beneficio diario separado</span></div>
+        <div class="bc-row"><span class="bc-key">Período de Espera</span><span class="bc-val">30 días</span></div>
+        <div class="bc-row"><span class="bc-key">Cáncer Previo</span><span class="bc-val">No elegible</span></div>
+        <div class="bc-row"><span class="bc-key">Optional Rider</span><span class="bc-val">BH-102 Suma global al Dx</span></div>
+      </div>
+      <div class="bc-renew">Renovación Garantizada<strong>De por vida (sin límite de edad)</strong></div>
+    </div>
+
+    <!-- C20 -->
+    <div class="book-card" style="--product-color: var(--c20)">
+      <div class="bc-code">C20</div>
+      <div class="bc-form">Formulario C20000 · Primer Diagnóstico de Cáncer</div>
+      <div class="bc-rows">
+        <div class="bc-row"><span class="bc-key">Benefit</span><span class="bc-val">Suma global única al Dx</span></div>
+        <div class="bc-row"><span class="bc-key">Pays</span><span class="bc-val">Una vez — luego cobertura termina</span></div>
+        <div class="bc-row"><span class="bc-key">Período de Espera</span><span class="bc-val">30 días</span></div>
+        <div class="bc-row"><span class="bc-key">Age 65+</span><span class="bc-val">Beneficios reducidos</span></div>
+        <div class="bc-row"><span class="bc-key">Skin Cáncer</span><span class="bc-val">NO cubierto</span></div>
+        <div class="bc-row"><span class="bc-key">Carcinoma in Situ</span><span class="bc-val">NO cubierto</span></div>
+        <div class="bc-row"><span class="bc-key">Cáncer Previo</span><span class="bc-val">No elegible</span></div>
+      </div>
+      <div class="bc-renew">Renovación Garantizada<strong>Hasta los 80 años</strong></div>
+    </div>
+
+    <!-- CI -->
+    <div class="book-card" style="--product-color: var(--ci)">
+      <div class="bc-code">CI</div>
+      <div class="bc-form">Formulario CI0000 · Enfermedad Crítica</div>
+      <div class="bc-rows">
+        <div class="bc-row"><span class="bc-key">Ataque Cardíaco</span><span class="bc-val">✓ Cubierto</span></div>
+        <div class="bc-row"><span class="bc-key">Derrame Cerebral</span><span class="bc-val">✓ Cubierto</span></div>
+        <div class="bc-row"><span class="bc-key">Renal Failure</span><span class="bc-val">✓ Cubierto</span></div>
+        <div class="bc-row"><span class="bc-key">Organ Transplant</span><span class="bc-val">✓ Cubierto</span></div>
+        <div class="bc-row"><span class="bc-key">Loss Hearing/Sight</span><span class="bc-val">✓ Cubierto</span></div>
+        <div class="bc-row"><span class="bc-key">Benefit</span><span class="bc-val">Suma global única al Dx</span></div>
+        <div class="bc-row"><span class="bc-key">Age 65+</span><span class="bc-val">Reducción del 50%</span></div>
+        <div class="bc-row"><span class="bc-key">Período de Espera</span><span class="bc-val">30 días</span></div>
+        <div class="bc-row"><span class="bc-key">US Only</span><span class="bc-val">Dx debe ser en EE.UU.</span></div>
+      </div>
+      <div class="bc-renew">Renovación Garantizada<strong>Hasta los 80 años</strong></div>
+    </div>
+
+    <!-- H34 -->
+    <div class="book-card" style="--product-color: var(--h34)">
+      <div class="bc-code">H34</div>
+      <div class="bc-form">Formulario H34007 · Indemnidad de Confinamiento Hospitalario</div>
+      <div class="bc-rows">
+        <div class="bc-row"><span class="bc-key">Hospital</span><span class="bc-val">Beneficio diario · 365 días</span></div>
+        <div class="bc-row"><span class="bc-key">Coverage</span><span class="bc-val">Cualquier causa (accidente o enf.)</span></div>
+        <div class="bc-row"><span class="bc-key">Ambulatorio Surgery</span><span class="bc-val">Tarifa diaria por cronograma</span></div>
+        <div class="bc-row"><span class="bc-key">At-Home</span><span class="bc-val">1 sem por día en hospital · máx 12 sem</span></div>
+        <div class="bc-row"><span class="bc-key">At-Home Requires</span><span class="bc-val">Enfermería especializada / terapia Rx por médico</span></div>
+        <div class="bc-row"><span class="bc-key">Preexistente</span><span class="bc-val">Revisión de 2 años</span></div>
+        <div class="bc-row"><span class="bc-key">Optional Rider</span><span class="bc-val">BM-200 Recuperación</span></div>
+      </div>
+      <div class="bc-renew">Renovación Garantizada<strong>De por vida — No cancelable</strong></div>
+    </div>
+
+  </div><!-- end book-grid -->
+
+  <!-- Comparison Table -->
+  <div class="section-divider"><div class="section-title-inner">Matriz Comparativa de Productos</div></div>
+  <div class="compare-wrap">
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Evento Activador</th>
+          <th>¿Pagos Múltiples?</th>
+          <th>¿Cubre Cáncer?</th>
+          <th>¿Cubre Enfermedad?</th>
+          <th>Renueva Hasta</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="--product-color: var(--a71)">
+          <td>A71</td>
+          <td>Solo accidente</td>
+          <td class="yes">Sí — por accidente</td>
+          <td class="no">No</td>
+          <td class="no">No</td>
+          <td>70 años</td>
+        </tr>
+        <tr style="--product-color: var(--a74)">
+          <td>A74</td>
+          <td>Solo accidente</td>
+          <td class="yes">Sí — por accidente</td>
+          <td class="no">No</td>
+          <td class="no">No</td>
+          <td>70 años</td>
+        </tr>
+        <tr style="--product-color: var(--c10)">
+          <td>C10</td>
+          <td>Días de tratamiento de cáncer</td>
+          <td class="yes">Sí — beneficio diario</td>
+          <td class="yes">Sí</td>
+          <td class="no">No</td>
+          <td>De por vida</td>
+        </tr>
+        <tr style="--product-color: var(--c20)">
+          <td>C20</td>
+          <td>Primer diagnóstico de cáncer</td>
+          <td class="no">No — un solo pago</td>
+          <td class="yes">Sí</td>
+          <td class="no">No</td>
+          <td>80 años</td>
+        </tr>
+        <tr style="--product-color: var(--ci)">
+          <td>CI</td>
+          <td>Primer Dx de enf. crítica</td>
+          <td class="no">No — un solo pago</td>
+          <td class="no">No (usar C10/C20)</td>
+          <td class="no">No</td>
+          <td>80 años</td>
+        </tr>
+        <tr style="--product-color: var(--h34)">
+          <td>H34</td>
+          <td>Confinamiento hospitalario</td>
+          <td class="yes">Sí — por estadía</td>
+          <td class="yes">Sí (cualquier causa)</td>
+          <td class="yes">Sí</td>
+          <td>De por vida</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div><!-- end quickbook -->
+
+
+<!-- ══════════════════════════════════
+     SUMMARY VIEW
+══════════════════════════════════ -->
+<div id="view-summary" class="view">
+  <div class="section-divider"><div class="section-title-inner">Resúmenes de Productos en Lenguaje Sencillo</div></div>
+  <div class="summary-grid">
+
+    <!-- A71 -->
+    <div class="scard" style="--product-color: var(--a71)">
+      <div class="scard-header">
+        <div class="scard-code-block">
+          <div class="scard-code">A71</div>
+          <div class="scard-form">Formulario A71000</div>
+        </div>
+        <div class="scard-header-text">
+          <h3>Solo Accidente</h3>
+          <p>Hospital Cash & AD&D</p>
+        </div>
+      </div>
+      <div class="scard-body">
+        <p class="scard-desc">El A71 es la póliza de accidente básica de AIL — un beneficio diario fijo en efectivo para hospitalizaciones por accidentes, con un duplicador de UCI y cobertura de muerte y desmembramiento accidental. Ideal para clientes que desean protección significativa ante accidentes a un precio accesible. No cubre ninguna enfermedad o dolencia.</p>
+        <div class="scard-stats">
+          <div class="stat-box"><div class="s-label">Beneficio Hospital</div><div class="s-val accent">$100/día</div></div>
+          <div class="stat-box"><div class="s-label">Multiplicador UCI</div><div class="s-val accent">2× · hasta 14 días</div></div>
+          <div class="stat-box"><div class="s-label">AD&D Full Loss</div><div class="s-val">$10,000 adultoo</div></div>
+          <div class="stat-box"><div class="s-label">Accidente Auto</div><div class="s-val">2× todos los beneficios</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A74 -->
+    <div class="scard" style="--product-color: var(--a74)">
+      <div class="scard-header">
+        <div class="scard-code-block">
+          <div class="scard-code">A74</div>
+          <div class="scard-form">Formulario A74000</div>
+        </div>
+        <div class="scard-header-text">
+          <h3>Accidente + Incapacidad</h3>
+          <p>Reemplazo de Ingresos por Accidente</p>
+        </div>
+      </div>
+      <div class="scard-body">
+        <p class="scard-desc">El A74 es el producto de accidente mejorado. En lugar de un beneficio diario por hospitalización, provee reemplazo semanal de ingresos por incapacidad total causada por accidente — fundamental para clientes en trabajos físicos que no pueden permitirse perder semanas de trabajo. Los límites de MAD son considerablemente más altos, alcanzando $50,000 en transporte público.</p>
+        <div class="scard-stats">
+          <div class="stat-box"><div class="s-label">Incapacidad Semanal</div><div class="s-val accent">$100/sem · 26 semanas</div></div>
+          <div class="stat-box"><div class="s-label">Período Eliminación</div><div class="s-val">7 días</div></div>
+          <div class="stat-box"><div class="s-label">MAD Regular</div><div class="s-val">$10,000</div></div>
+          <div class="stat-box"><div class="s-label">Transp. Público</div><div class="s-val accent">$50,000</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- C10 -->
+    <div class="scard" style="--product-color: var(--c10)">
+      <div class="scard-header">
+        <div class="scard-code-block">
+          <div class="scard-code">C10</div>
+          <div class="scard-form">Formulario C10000</div>
+        </div>
+        <div class="scard-header-text">
+          <h3>Indemnidad de Cáncer — Diaria</h3>
+          <p>Beneficio Diario Durante el Tratamiento</p>
+        </div>
+      </div>
+      <div class="scard-body">
+        <p class="scard-desc">El C10 paga un beneficio diario por cada día que el cliente está hospitalizado o recibiendo tratamiento ambulatorio de cáncer — quimioterapia, radiación, cirugía, transfusiones de sangre, terapia de rayos X. A diferencia de los productos de suma global, el C10 sostiene financieramente a los clientes durante regímenes de tratamiento que duran meses. El límite de 500 días de por vida aplica por separado a hospital y ambulatorio.</p>
+        <div class="scard-stats">
+          <div class="stat-box"><div class="s-label">Hospital</div><div class="s-val accent">Diario × 500 días</div></div>
+          <div class="stat-box"><div class="s-label">Ambulatorio</div><div class="s-val accent">Diario × 500 días</div></div>
+          <div class="stat-box"><div class="s-label">Período de Espera</div><div class="s-val">30 días</div></div>
+          <div class="stat-box"><div class="s-label">Cáncer Previo</div><div class="s-val" style="color:var(--danger)">No elegible</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- C20 -->
+    <div class="scard" style="--product-color: var(--c20)">
+      <div class="scard-header">
+        <div class="scard-code-block">
+          <div class="scard-code">C20</div>
+          <div class="scard-form">Formulario C20000</div>
+        </div>
+        <div class="scard-header-text">
+          <h3>Cáncer — Primer Diagnóstico</h3>
+          <p>Suma Global Única al Diagnóstico</p>
+        </div>
+      </div>
+      <div class="scard-body">
+        <p class="scard-desc">El C20 entrega alivio financiero inmediato — un pago único de suma global al primer diagnóstico de cáncer, luego la cobertura termina. Los clientes usan estos fondos para viajes a especialistas, reemplazo de ingresos, modificaciones del hogar y costos adicionales que surgen antes de comenzar el tratamiento. Los beneficios se reducen después de los 65 años. El cáncer de piel y ciertos diagnósticos en etapa temprana están excluidos.</p>
+        <div class="scard-stats">
+          <div class="stat-box"><div class="s-label">Estructura</div><div class="s-val accent">Suma global · un pago</div></div>
+          <div class="stat-box"><div class="s-label">Cobertura Después</div><div class="s-val">Termina al pagar</div></div>
+          <div class="stat-box"><div class="s-label">Impacto a los 65</div><div class="s-val" style="color:var(--danger)">Beneficios reducidos</div></div>
+          <div class="stat-box"><div class="s-label">Renueva Hasta</div><div class="s-val">80 años</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CI -->
+    <div class="scard" style="--product-color: var(--ci)">
+      <div class="scard-header">
+        <div class="scard-code-block">
+          <div class="scard-code">CI</div>
+          <div class="scard-form">Formulario CI0000</div>
+        </div>
+        <div class="scard-header-text">
+          <h3>Enfermedad Crítica</h3>
+          <p>Heart, Stroke & Major Events</p>
+        </div>
+      </div>
+      <div class="scard-body">
+        <p class="scard-desc">La póliza CI refleja la estructura del C20 — una suma global al primer diagnóstico — pero cubre las enfermedades críticas no relacionadas con cáncer: ataque cardíaco, derrame cerebral, insuficiencia renal terminal, trasplante de órgano, pérdida total de audición o visión. Se posiciona como producto complementario al C20 para brindar cobertura integral del primer evento en categorías de cáncer y cardiovascular.</p>
+        <div class="scard-stats">
+          <div class="stat-box"><div class="s-label">Condiciones Cubiertas</div><div class="s-val accent">6 enfermedades críticas</div></div>
+          <div class="stat-box"><div class="s-label">Cáncer</div><div class="s-val">Excluido — usar C10/C20</div></div>
+          <div class="stat-box"><div class="s-label">Reducción a los 65</div><div class="s-val" style="color:var(--danger)">Reducción del 50%</div></div>
+          <div class="stat-box"><div class="s-label">Renueva Hasta</div><div class="s-val">80 años</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- H34 -->
+    <div class="scard" style="--product-color: var(--h34)">
+      <div class="scard-header">
+        <div class="scard-code-block">
+          <div class="scard-code">H34</div>
+          <div class="scard-form">Formulario H34007</div>
+        </div>
+        <div class="scard-header-text">
+          <h3>Indemnidad de Confinamiento Hospitalario</h3>
+          <p>Efectivo Diario por Cualquier Causa</p>
+        </div>
+      </div>
+      <div class="scard-body">
+        <p class="scard-desc">El H34 es el producto más versátil del portafolio — efectivo diario hospitalario por cualquier causa cubierta, ya sea accidente o enfermedad. Incluye indemnidad quirúrgica ambulatoria y un beneficio único en casa: por cada día en el hospital, el cliente acumula una semana de cobertura de salud en casa después del alta. La compañía no puede cancelar esta póliza bajo ninguna circunstancia — renueva de por vida.</p>
+        <div class="scard-stats">
+          <div class="stat-box"><div class="s-label">Activador</div><div class="s-val accent">Cualquier causa (acc. o enf.)</div></div>
+          <div class="stat-box"><div class="s-label">Beneficio en Casa</div><div class="s-val accent">1 sem por día en hospital</div></div>
+          <div class="stat-box"><div class="s-label">Preexistente</div><div class="s-val">Revisión de 2 años applies</div></div>
+          <div class="stat-box"><div class="s-label">Renovabilidad</div><div class="s-val" style="color:var(--safe)">De por vida — no cancelable</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div><!-- end summary -->
+
+
+<!-- ══════════════════════════════════
+     DEEP DIVE VIEW
+══════════════════════════════════ -->
+<div id="view-deepdive" class="view">
+  <div class="section-divider"><div class="section-title-inner">Análisis Completo de Pólizas — Seleccione para Expandir</div></div>
+  <div class="deep-container">
+
+    <!-- A71 -->
+    <div class="deep-card" id="deep-a71" style="--product-color: var(--a71)">
+      <div class="deep-card-header" onclick="toggleDeep('a71')">
+        <div class="deep-badge">A71</div>
+        <div class="deep-meta">
+          <h2>Solo Accidente — Formulario A71000</h2>
+          <p>Beneficio en hospital · Duplicador UCI · Muerte y desmembramiento accidental</p>
+        </div>
+        <div class="deep-chevron">▾</div>
+      </div>
+      <div class="deep-body">
+
+        <div class="deep-section">
+          <div class="deep-section-title">Descripción General de la Póliza</div>
+          <p>El A71 es una póliza básica de indemnidad por accidente únicamente, que provee beneficios fijos en efectivo cuando el asegurado es hospitalizado, confinado en UCI o tratado en urgencias — pero exclusivamente por accidentes cubiertos. No aplica cobertura por enfermedad. La estructura de multiplicadores para accidentes de automóvil y transporte público la hace especialmente atractiva como punto de conversación con clientes que manejan o viajan con frecuencia.</p>
+        </div>
+
+        <div class="deep-section">
+          <div class="deep-section-title">Tabla Completa de Beneficios</div>
+          <div class="benefit-grid">
+            <div class="benefit-item"><div class="b-name">Confinamiento Hospitalario</div><div class="b-val">$100 por día · máximo 365 días por accidente</div></div>
+            <div class="benefit-item"><div class="b-name">Unidad de Cuidados Intensivos</div><div class="b-val">Beneficio hospitalario duplicado · máximo 14 días por accidente</div></div>
+            <div class="benefit-item"><div class="b-name">Emergencia por Accidente</div><div class="b-val">Hasta $50 for outpatient ER treatment within 72 hours. Not payable if other benefits apply.</div></div>
+            <div class="benefit-item"><div class="b-name">MAD — Pérdida Total</div><div class="b-val">$10,000 adultoo / $2,000 dependent child. Life, both feet/hands, both eyes, one hand + one foot.</div></div>
+            <div class="benefit-item"><div class="b-name">MAD — Pérdida Parcial</div><div class="b-val">$5,000 adulto / $1,000 dependent child. One eye, one foot, or one hand.</div></div>
+            <div class="benefit-item"><div class="b-name">Accidente de Auto Multiplier</div><div class="b-val">Todos los beneficios se duplican cuando la lesión ocurre manejando o como pasajero de automóvil.</div></div>
+            <div class="benefit-item"><div class="b-name">Transp. Público Multiplier</div><div class="b-val">Todos los beneficios se multiplican por 5 como pasajero de pago en transporte público autorizado.</div></div>
+          </div>
+        </div>
+
+        <div class="deep-section">
+          <div class="deep-section-title">Exclusions & Limitations</div>
+          <ul class="exclusion-list">
+            <li><span class="excl-mark">✕</span>Suicidio o cualquier lesión intencional autoinfligida</li>
+            <li><span class="excl-mark">✕</span>Guerra o cualquier acto de guerra, declarada o no; servicio militar en cualquier país</li>
+            <li><span class="excl-mark">✕</span>Viaje aéreo, excepto como pasajero de pago en aerolínea comercial regular</li>
+            <li><span class="excl-mark">✕</span>Hernia de cualquier tipo</li>
+            <li><span class="excl-mark">✕</span>Competencias de carreras, paracaidismo u otras actividades de alto riesgo</li>
+            <li><span class="excl-mark">✕</span>Uso de drogas, narcóticos o alucinógenos</li>
+            <li><span class="excl-mark">✕</span>Enfermedad, dolencia, padecimiento o enfermedad mental</li>
+            <li><span class="excl-mark">✕</span>Cometer o intentar cometer un delito grave o agresión</li>
+          </ul>
+        </div>
+
+        <div class="deep-section">
+          <div class="deep-section-title">Renovabilidad & Optional Riders</div>
+          <p>Renovación garantizada hasta los 70 años. La compañía se reserva el derecho de cambiar las tarifas de prima por clase y estado. Cláusula opcional — <strong>BM-000 Cláusula de Beneficio por Recuperación</strong>: paga un beneficio mensual de recuperación por incapacidad total después del alta hospitalaria por una lesión para la cual se pagaron beneficios hospitalarios. Los beneficios comienzan el primer día después del alta y continúan mientras dure la incapacidad, sin exceder 6 meses por accidente.</p>
+        </div>
+
+        <div class="deep-section">
+          <div class="deep-section-title">Notas de Campo para el Agente</div>
+          <div class="key-points">
+            <div class="kp-title">Posicionamiento de Venta</div>
+            <ul class="kp-list">
+              <li><span class="kp-mark">◆</span>El duplicador de UCI es el beneficio más poderoso para destacar — las estadías en UCI generan los mayores gastos de bolsillo durante cualquier hospitalización por accidente</li>
+              <li><span class="kp-mark">◆</span>El multiplicador 2× de accidente de auto resuena inmediatamente con clientes que manejan o viajan frecuentemente por trabajo</li>
+              <li><span class="kp-mark">◆</span>El 5× de transporte público es un buen punto de apertura: "si algo le pasara en un vuelo o autobús, estos beneficios se multiplican por cinco"</li>
+              <li><span class="kp-mark">◆</span>Mejor posicionado como complemento al Seguro de Vida: "Su seguro de vida cubre la muerte — este cubre la brecha financiera si usted resulta gravemente herido pero sobrevive"</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- A74 -->
+    <div class="deep-card" id="deep-a74" style="--product-color: var(--a74)">
+      <div class="deep-card-header" onclick="toggleDeep('a74')">
+        <div class="deep-badge">A74</div>
+        <div class="deep-meta">
+          <h2>Accidente + Incapacidad — Formulario A74000</h2>
+          <p>Reemplazo semanal de ingresos · MAD mejorado · Beneficios escalonados</p>
+        </div>
+        <div class="deep-chevron">▾</div>
+      </div>
+      <div class="deep-body">
+
+        <div class="deep-section">
+          <div class="deep-section-title">Descripción General de la Póliza</div>
+          <p>El A74 es la variante de protección de ingresos del portafolio de accidentes de AIL. En lugar de un beneficio hospitalario diario, entrega reemplazo semanal de ingresos por incapacidad total causada por accidente — una distinción fundamental para clientes en ocupaciones físicas o manuales que no pueden sostener una interrupción prolongada de ingresos. La estructura de MAD utiliza montos fijos escalonados en tres niveles en lugar de multiplicadores, ofreciendo topes considerablemente más altos especialmente para incidentes de automóvil y transporte público.</p>
+        </div>
+
+        <div class="deep-section">
+          <div class="deep-section-title">Tabla Completa de Beneficios</div>
+          <div class="benefit-grid">
+            <div class="benefit-item"><div class="b-name">Beneficio por Incapacidad Total</div><div class="b-val">$100 semanales por incapacidad total · máximo 26 semanas. Comienza después de un período de eliminación de 7 días.</div></div>
+            <div class="benefit-item"><div class="b-name">Emergencia por Accidente</div><div class="b-val">Hasta $100 for outpatient ER treatment within 72 hours. Not payable if other benefits apply.</div></div>
+            <div class="benefit-item"><div class="b-name">MAD — Accidente Regular</div><div class="b-val">$10,000 pérdida total / $5,000 pérdida parcial</div></div>
+            <div class="benefit-item"><div class="b-name">AD&D — Accidente de Auto</div><div class="b-val">$25,000 pérdida total / $12,500 pérdida parcial</div></div>
+            <div class="benefit-item"><div class="b-name">AD&D — Transp. Público</div><div class="b-val">$50,000 pérdida total / $25,000 pérdida parcial</div></div>
+          </div>
+        </div>
+
+        <div class="deep-section">
+          <div class="deep-section-title">Diferencias Clave vs. A71</div>
+          <p>El A74 reemplaza el beneficio hospitalario diario y el duplicador de UCI por un beneficio semanal de ingresos por incapacidad — una propuesta de valor fundamentalmente diferente enfocada en continuidad de ingresos más que en costos de hospitalización. El beneficio de urgencias mejora de $50 a $100. La estructura de MAD cambia de multiplicadores porcentuales a montos fijos escalonados, brindando máxima claridad para los clientes. La exclusión de drogas y narcóticos es ligeramente más flexible en el A74 (excluye uso excepto si fue recetado por médico).</p>
+        </div>
+
+        <div class="deep-section">
+          <div class="deep-section-title">Exclusions & Limitations</div>
+          <ul class="exclusion-list">
+            <li><span class="excl-mark">✕</span>Suicidio o lesión intencional autoinfligida, en pleno juicio o no</li>
+            <li><span class="excl-mark">✕</span>Guerra o acto de guerra, declarada o no; servicio militar en cualquier país</li>
+            <li><span class="excl-mark">✕</span>Viaje aéreo, excepto como pasajero de pago en aerolínea comercial regular</li>
+            <li><span class="excl-mark">✕</span>Cualquier tipo de hernia</li>
+            <li><span class="excl-mark">✕</span>Competencias de carreras, paracaidismo u otras actividades de alto riesgo</li>
+            <li><span class="excl-mark">✕</span>Uso de drogas o narcóticos, a menos que sean recetados por un médico</li>
+            <li><span class="excl-mark">✕</span>Uso de alucinógenos</li>
+            <li><span class="excl-mark">✕</span>Enfermedad, dolencia, padecimiento o enfermedad mental</li>
+            <li><span class="excl-mark">✕</span>Cometer o intentar cometer un delito grave o agresión</li>
+          </ul>
+        </div>
+
+        <div class="deep-section">
+          <div class="deep-section-title">Notas de Campo para el Agente</div>
+          <div class="key-points">
+            <div class="kp-title">Posicionamiento de Venta</div>
+            <ul class="kp-list">
+              <li><span class="kp-mark">◆</span>Comience con el ingreso por incapacidad: "Si se lastima y no puede trabajar, esto le paga $100 por semana hasta seis meses mientras se recupera"</li>
+              <li><span class="kp-mark">◆</span>Establezca proactivamente la expectativa del período de eliminación de 7 días — los clientes deben entender que la primera semana corre por su cuenta</li>
+              <li><span class="kp-mark">◆</span>El tope de $50,000 de MAD en transporte público es extraordinariamente alto en relación al costo de la prima y debe destacarse prominentemente</li>
+              <li><span class="kp-mark">◆</span>Óptimo para obreros, trabajadores de oficios, personal de entregas o cualquier persona cuyo ingreso depende de su capacidad física</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- C10 -->
+    <div class="deep-card" id="deep-c10" style="--product-color: var(--c10)">
+      <div class="deep-card-header" onclick="toggleDeep('c10')">
+        <div class="deep-badge">C10</div>
+        <div class="deep-meta">
+          <h2>Cáncer Indemnity (Daily) — Formulario C10000</h2>
+          <p>Beneficio diario durante el tratamiento · Cobertura hospitalaria y ambulatoria</p>
+        </div>
+        <div class="deep-chevron">▾</div>
+      </div>
+      <div class="deep-body">
+
+        <div class="deep-section">
+          <div class="deep-section-title">Descripción General de la Póliza</div>
+          <p>El C10 es una póliza de indemnidad de cáncer con beneficio diario — paga por cada día que el asegurado está confinado en un hospital o recibiendo activamente tratamiento ambulatorio de cáncer. A diferencia de los productos de suma global, el C10 sostiene financieramente a los clientes durante regímenes de tratamiento extendido que pueden durar de seis meses a dos años. El monto del beneficio diario se establece al emitir la póliza. Un beneficio hospitalario gubernamental separado aplica para confinamiento en instalaciones de VA u otros hospitales del Gobierno de EE.UU.</p>
+        </div>
+
+        <div class="deep-section">
+          <div class="deep-section-title">Tabla Completa de Beneficios</div>
+          <div class="benefit-grid">
+            <div class="benefit-item"><div class="b-name">Confinamiento Hospitalario</div><div class="b-val">$___ por día (fijado al emitir) · máximo de por vida 500 días · no pagadero en hospitales del Gobierno de EE.UU.</div></div>
+            <div class="benefit-item"><div class="b-name">Ambulatorio Treatment</div><div class="b-val">$___ por día (misma tarifa que hospital) · máximo de por vida 500 días · cubre: cirugía, terapia de cobalto, terapia de rayos X, transfusiones de sangre, quimioterapia</div></div>
+            <div class="benefit-item"><div class="b-name">Hospital del Gobierno</div><div class="b-val">Beneficio diario separado rate for confinement in US Government-operated hospitals · 500-day lifetime maximum</div></div>
+          </div>
+        </div>
+
+        <div class="deep-section">
+          <div class="deep-section-title">Eligibility Rules & Período de Espera</div>
+          <p>The client and all covered family members must have no prior cancer diagnosis. The policy carries a 30-day waiting period from the effective date — any cancer diagnosed within 30 días results in no coverage for that person and a full premium refund. Benefits are not payable for treatment received more than 90 days prior to the required pathological diagnosis. Clinical diagnosis is accepted only when medical judgment prohibits pathological procedures and other conclusive evidence is provided.</p>
+        </div>
+
+        <div class="deep-section">
+          <div class="deep-section-title">Optional Rider — BH-102 Cáncer Detection</div>
+          <p>Proporciona un beneficio de suma única al primer diagnóstico de cáncer. El cáncer de piel recibe un monto de suma global reducido; todos los demás cánceres reciben el beneficio completo de la cláusula. Cuando se combina con C10, crea un producto híbrido: una suma global inicial al diagnóstico más beneficios diarios continuos durante el tratamiento — un paquete integral de protección financiera contra el cáncer.</p>
+        </div>
+
+        <div class="deep-section">
+          <div class="deep-section-title">Notas de Campo para el Agente</div>
+          <div class="key-points">
+            <div class="kp-title">Posicionamiento de Venta</div>
+            <ul class="kp-list">
+              <li><span class="kp-mark">◆</span>"Los regímenes de quimioterapia suelen durar de seis a dieciocho meses — esta póliza le paga cada día que va a tratamiento"</li>
+              <li><span class="kp-mark">◆</span>Ambulatorio coverage is increasingly critical — the majority of modern cancer treatment occurs in outpatient settings, not hospitals</li>
+              <li><span class="kp-mark">◆</span>Combine con la cláusula BH-102 para entregar tanto una suma global inmediata al diagnóstico como beneficios diarios continuos durante el tratamiento</li>
+              <li><span class="kp-mark">◆</span>Always disclose the 30-day waiting period clearly: "Coverage activates 30 días after the policy effective date"</li>
+              <li><span class="kp-mark">◆</span>El límite de 500 días aplica independientemente a hospital y ambulatorio — ambas categorías tienen su propio tope de 500 días</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- C20 -->
+    <div class="deep-card" id="deep-c20" style="--product-color: var(--c20)">
+      <div class="deep-card-header" onclick="toggleDeep('c20')">
+        <div class="deep-badge">C20</div>
+        <div class="deep-meta">
+          <h2>Cáncer First Diagnosis — Formulario C20000</h2>
+          <p>Beneficio de suma global único al primer diagnóstico · Cobertura termina al pagar</p>
+        </div>
+        <div class="deep-chevron">▾</div>
+      </div>
+      <div class="deep-body">
+
+        <div class="deep-section">
+          <div class="deep-section-title">Descripción General de la Póliza</div>
+          <p>El C20 es el producto de cáncer más sencillo en estructura de AIL — un pago único de suma global al primer diagnóstico de cáncer, después del cual la póliza termina. Su propuesta de valor es la inmediatez: en el momento del diagnóstico, antes de que se finalicen las decisiones de tratamiento, el cliente recibe un beneficio en efectivo para abordar la perturbación financiera que antecede a los costos médicos formales — consultas con especialistas, viajes, ingresos perdidos, cuidado de hijos y continuidad del hogar.</p>
+        </div>
+
+        <div class="deep-section">
+          <div class="deep-section-title">El Beneficio</div>
+          <p>Un monto de suma global único establecido al emitir la póliza. La cobertura termina al pagar el beneficio. No hay beneficios recurrentes ni diarios — el producto paga una vez y se cumple. El monto específico en dólares se registra en la póliza al momento de la emisión.</p>
+        </div>
+
+        <div class="deep-section">
+          <div class="deep-section-title">Diagnósticos Excluidos de Cobertura</div>
+          <ul class="exclusion-list">
+            <li><span class="excl-mark">✕</span>Skin cancer of any type</li>
+            <li><span class="excl-mark">✕</span>Carcinoma in Situ</li>
+            <li><span class="excl-mark">✕</span>Estadio 1 de la Enfermedad de Hodgkin</li>
+            <li><span class="excl-mark">✕</span>Stage A Prostate Cáncer</li>
+            <li><span class="excl-mark">✕</span>Melanoma diagnosticado como Nivel de Clark I o II, o medida de Breslow inferior a .75 mm</li>
+          </ul>
+        </div>
+
+        <div class="deep-section">
+          <div class="deep-section-title">Eligibility, Age Reductions & Renovabilidad</div>
+          <p>No prior cancer history for the insured or any covered family member. 30-day waiting period; diagnosis within the first 30 días results in no coverage and full premium refund. Benefits reduce at age 65 — this is a material disclosure for clients approaching that age bracket. Policy is guaranteed renewable to age 80, with rate increases applied only on a statewide class basis.</p>
+        </div>
+
+        <div class="deep-section">
+          <div class="deep-section-title">Notas de Campo para el Agente</div>
+          <div class="key-points">
+            <div class="kp-title">Posicionamiento de Venta</div>
+            <ul class="kp-list">
+              <li><span class="kp-mark">◆</span>"En el momento del diagnóstico, la mayoría de las familias enfrentan inmediatamente costos de viaje, días sin trabajar, cuidado de los hijos — esto pone efectivo en sus manos antes de que llegue la primera factura médica"</li>
+              <li><span class="kp-mark">◆</span>La simplicidad es una ventaja: "Recibe un diagnóstico de cáncer — le enviamos un cheque. Ese es el producto completo."</li>
+              <li><span class="kp-mark">◆</span>Combine con CI para cobertura integral del primer evento: C20 cubre cáncer, CI cubre corazón y derrame</li>
+              <li><span class="kp-mark">◆</span>La reducción de beneficios a los 65 años debe divulgarse proactivamente, especialmente para clientes en sus últimos cincuentas</li>
+              <li><span class="kp-mark">◆</span>La exclusión del cáncer de piel es frecuentemente malentendida — siempre tócala explícitamente antes de que el cliente pregunte</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- CI -->
+    <div class="deep-card" id="deep-ci" style="--product-color: var(--ci)">
+      <div class="deep-card-header" onclick="toggleDeep('ci')">
+        <div class="deep-badge">CI</div>
+        <div class="deep-meta">
+          <h2>Enfermedad Crítica — Formulario CI0000</h2>
+          <p>Lump-sum benefit for heart attack, stroke & five other critical events · Cáncer excluded</p>
+        </div>
+        <div class="deep-chevron">▾</div>
+      </div>
+      <div class="deep-body">
+
+        <div class="deep-section">
+          <div class="deep-section-title">Descripción General de la Póliza</div>
+          <p>The Enfermedad Crítica policy mirrors C20 in structural design — one lump-sum payout at first diagnosis — but addresses the non-cancer critical illness spectrum. Heart attack and stroke represent the most statistically likely triggers. The policy is explicitly designed to complement C20: together, CI and C20 provide complete first-event lump-sum coverage across the two dominant categories of major health events that financially devastate American families.</p>
+        </div>
+
+        <div class="deep-section">
+          <div class="deep-section-title">Covered Enfermedad Críticaes</div>
+          <div class="benefit-grid">
+            <div class="benefit-item"><div class="b-name">Ataque Cardíaco</div><div class="b-val">Primer diagnóstico mientras la póliza está vigente</div></div>
+            <div class="benefit-item"><div class="b-name">Derrame Cerebral</div><div class="b-val">Primer diagnóstico mientras la póliza está vigente</div></div>
+            <div class="benefit-item"><div class="b-name">Insuficiencia Renal Terminal</div><div class="b-val">Primer diagnóstico mientras la póliza está vigente</div></div>
+            <div class="benefit-item"><div class="b-name">Trasplante Mayor de Órgano</div><div class="b-val">Primer diagnóstico mientras la póliza está vigente</div></div>
+            <div class="benefit-item"><div class="b-name">Pérdida Total de Audición</div><div class="b-val">Primer diagnóstico mientras la póliza está vigente</div></div>
+            <div class="benefit-item"><div class="b-name">Pérdida Total de Visión</div><div class="b-val">Primer diagnóstico mientras la póliza está vigente</div></div>
+          </div>
+        </div>
+
+        <div class="deep-section">
+          <div class="deep-section-title">Condiciones Críticas de la Póliza</div>
+          <p>30-day waiting period from policy date. Any covered critical illness manifesting within the first 30 días is not payable. First diagnosis must be made within the United States — diagnoses rendered outside the US are not covered. Benefit amount is reduced by 50% after age 65, which is the most significant age-related provision in the supplemental portfolio. Guaranteed renewable to age 80 with class-level rate adjustment authority only.</p>
+        </div>
+
+        <div class="deep-section">
+          <div class="deep-section-title">Exclusions & Limitations</div>
+          <ul class="exclusion-list">
+            <li><span class="excl-mark">✕</span>Participación en una agresión, delito grave, motín o insurrección</li>
+            <li><span class="excl-mark">✕</span>Trastornos mentales o emocionales</li>
+            <li><span class="excl-mark">✕</span>Suicidio o lesión intencional autoinfligida, en pleno juicio o no</li>
+            <li><span class="excl-mark">✕</span>Guerra o cualquier acto de guerra, declarada o no; servicio militar</li>
+            <li><span class="excl-mark">✕</span>Bajo la influencia de alcohol o cualquier droga o narcótico, a menos que sea recetado por médico</li>
+            <li><span class="excl-mark">✕</span>Cáncer of any kind (covered separately under C10 or C20)</li>
+            <li><span class="excl-mark">✕</span>Primer diagnóstico realizado fuera de los Estados Unidos de América</li>
+          </ul>
+        </div>
+
+        <div class="deep-section">
+          <div class="deep-section-title">Notas de Campo para el Agente</div>
+          <div class="key-points">
+            <div class="kp-title">Posicionamiento de Venta</div>
+            <ul class="kp-list">
+              <li><span class="kp-mark">◆</span>"La enfermedad cardiovascular sigue siendo la principal causa de muerte en Estados Unidos — esto pone un cheque en sus manos al momento del diagnóstico, antes de una sola factura de tratamiento"</li>
+              <li><span class="kp-mark">◆</span>Siempre presente CI junto con C20: "Una póliza cubre el cáncer. La otra cubre ataques cardíacos y derrames. Juntas cubren las dos amenazas de salud más devastadoras financieramente para una familia."</li>
+              <li><span class="kp-mark">◆</span>El requisito de diagnóstico solo en EE.UU. vale la pena mencionarlo con clientes que viajan internacionalmente o tienen familia en el extranjero</li>
+              <li><span class="kp-mark">◆</span>La reducción del 50% a los 65 años es la disposición de edad más impactante del portafolio — divúlguela claramente, a tiempo y sin que se lo pidan</li>
+              <li><span class="kp-mark">◆</span>La póliza paga una vez y termina — posiciónela como alivio financiero inmediato y flexibilidad, no como soporte continuo de tratamiento</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- H34 -->
+    <div class="deep-card" id="deep-h34" style="--product-color: var(--h34)">
+      <div class="deep-card-header" onclick="toggleDeep('h34')">
+        <div class="deep-badge">H34</div>
+        <div class="deep-meta">
+          <h2>Indemnidad de Confinamiento Hospitalario — Formulario H34007</h2>
+          <p>Any-cause hospital daily cash · Ambulatorio surgery · At-home recovery benefit · Non-cancellable for life</p>
+        </div>
+        <div class="deep-chevron">▾</div>
+      </div>
+      <div class="deep-body">
+
+        <div class="deep-section">
+          <div class="deep-section-title">Descripción General de la Póliza</div>
+          <p>El H34 es el producto más versátil del portafolio de suplementarios — provee indemnidad hospitalaria diaria por cualquier causa cubierta de confinamiento, ya sea accidente o enfermedad. A diferencia de todos los demás suplementarios, no restringe la cobertura a un solo tipo de evento. Incorpora de manera única indemnidad quirúrgica ambulatoria, un beneficio de recuperación en casa y cobertura de muerte y desmembramiento accidental. La garantía de renovación no tiene igual: la compañía no puede cancelar esta póliza bajo ninguna circunstancia, brindando protección hospitalaria de por vida.</p>
+        </div>
+
+        <div class="deep-section">
+          <div class="deep-section-title">Tabla Completa de Beneficios</div>
+          <div class="benefit-grid">
+            <div class="benefit-item"><div class="b-name">In-Indemnidad Hospitalaria</div><div class="b-val">$___ beneficio diario durante confinamiento · máximo 365 días por confinamiento · cubre accidente y enfermedad</div></div>
+            <div class="benefit-item"><div class="b-name">Ambulatorio Surgical Indemnity</div><div class="b-val">Daily benefit rate paid as if hospitalized, per a day schedule in the policy. Surgeries not listed are paid a comparable number of days based on severity.</div></div>
+            <div class="benefit-item"><div class="b-name">Beneficio de Indemnidad en Casa</div><div class="b-val">Weekly benefit for medically necessary home health visits. Accrues 1 week per hospital day. Maximum 12 weeks. Must begin within 7 días of discharge. Requires skilled nursing, or physical, speech, hearing, or occupational therapy, prescribed by physician.</div></div>
+            <div class="benefit-item"><div class="b-name">Beneficio de Emergencia por Accidente</div><div class="b-val">Efectivo de emergencia por accidente para tratamiento dentro de 72 horas. No pagadero si aplican otros beneficios bajo esta póliza.</div></div>
+            <div class="benefit-item"><div class="b-name">Accidental Death & Dismemberment</div><div class="b-val">Montos fijados al emitir la póliza. Pagadero por pérdida ocurrida dentro de 90 días del accidente. En lugar de o reducido por otros beneficios pagados.</div></div>
+          </div>
+        </div>
+
+        <div class="deep-section">
+          <div class="deep-section-title">Preexistente Condition Provision</div>
+          <p>This is the most significant limitation of the H34. No benefits are payable for any loss beginning during the first 2 years of coverage if that loss results from a condition for which the insured received or was recommended medical advice or treatment within the 2-year period immediately preceding the policy effective date. This is a strict Revisión de 2 años and 2-year exclusion window — agents must disclose this condition clearly to all clients with recent medical histories.</p>
+        </div>
+
+        <div class="deep-section">
+          <div class="deep-section-title">Renovabilidad — Non-Cancellable for Life</div>
+          <p>El H34 es el único suplementario renovable de por vida para el asegurado con una garantía explícita de no cancelación. La compañía no puede cancelar, terminar ni negar la renovación de esta póliza. Las tarifas de prima solo pueden ajustarse sobre una base de clase estatal — nunca de forma individual. Esto representa la garantía de renovabilidad más sólida en la línea de suplementarios de AIL y es un argumento de valor a largo plazo muy convincente.</p>
+        </div>
+
+        <div class="deep-section">
+          <div class="deep-section-title">Exclusions & Limitations</div>
+          <ul class="exclusion-list">
+            <li><span class="excl-mark">✕</span>War or any act of war, declared or undeclared</li>
+            <li><span class="excl-mark">✕</span>Lesión intencional autoinfligida o suicidio</li>
+            <li><span class="excl-mark">✕</span>Trastorno mental, nervioso o emocional</li>
+            <li><span class="excl-mark">✕</span>Normal pregnancy, normal childbirth, or abortion</li>
+            <li><span class="excl-mark">✕</span>Cometer o intentar cometer un delito grave o agresión</li>
+            <li><span class="excl-mark">✕</span>Viaje aéreo, excepto como pasajero de pago en aerolínea comercial regular</li>
+            <li><span class="excl-mark">✕</span>Condiciones preexistentes: pérdidas que comiencen en los primeros 2 años de póliza por condiciones tratadas/aconsejadas dentro de los 2 años antes de la fecha de vigencia</li>
+          </ul>
+        </div>
+
+        <div class="deep-section">
+          <div class="deep-section-title">Optional Rider — BM-200 Recuperación Indemnity</div>
+          <p>Proporciona un beneficio semanal de recuperación después de un período de hospitalización, pagadero cuando la persona cubierta no puede realizar sus funciones habituales y continúa bajo el cuidado regular de un médico. Se paga una semana de beneficio de recuperación por cada día de hospitalización, hasta un máximo de 12 semanas.</p>
+        </div>
+
+        <div class="deep-section">
+          <div class="deep-section-title">Notas de Campo para el Agente</div>
+          <div class="key-points">
+            <div class="kp-title">Posicionamiento de Venta</div>
+            <ul class="kp-list">
+              <li><span class="kp-mark">◆</span>"A diferencia de las pólizas de accidente, esta lo cubre por cualquier cosa que lo hospitalice — una caída, una enfermedad, una cirugía — cualquier causa cubierta"</li>
+              <li><span class="kp-mark">◆</span>El beneficio en casa es único en el portafolio: "Por cada día que esté en el hospital, acumula una semana de atención médica en casa cubierta después del alta"</li>
+              <li><span class="kp-mark">◆</span>Ambulatorio surgical indemnity is increasingly relevant as more procedures migrate from inpatient to outpatient settings</li>
+              <li><span class="kp-mark">◆</span>"Esta compañía no puede cancelar esta póliza bajo ninguna circunstancia — mientras usted pague la prima, tiene cobertura por el resto de su vida"</li>
+              <li><span class="kp-mark">◆</span>La revisión retroactiva de 2 años y la ventana de exclusión de 2 años deben divulgarse claramente y documentarse — es la fuente más común de disputas con clientes en este producto</li>
+              <li><span class="kp-mark">◆</span>El H34 ocupa una posición única en el portafolio — llena las brechas de cobertura por causas de accidente, enfermedad y quirúrgicas que todos los demás suplementarios dejan abiertas</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- end deep-container -->
+</div><!-- end deepdive -->
+
+</div><!-- end page -->
+
+<!-- BOTTOM NAVIGATION -->
+<div class="bottom-nav">
+  <button class="active" onclick="switchView('quickbook')">Referencia Rápida</button>
+  <button onclick="switchView('summary')">Resúmenes</button>
+  <button onclick="switchView('deepdive')">Guía Completa</button>
+</div>
+
+<script>
+  function switchView(v) {
+    document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+    document.getElementById('view-' + v).classList.add('active');
+    const map = { quickbook:0, summary:1, deepdive:2 };
+    document.querySelectorAll('.nav-btn').forEach((b,i) => b.classList.toggle('active', i === map[v]));
+    document.querySelectorAll('.bottom-nav button').forEach((b,i) => b.classList.toggle('active', i === map[v]));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function toggleDeep(id) {
+    document.getElementById('deep-' + id).classList.toggle('open');
+  }
+</script>
+
+</body>
+</html>
