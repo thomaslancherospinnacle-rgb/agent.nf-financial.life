@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FEX Auto Dialer</title>
+<script src="https://cdn.jsdelivr.net/npm/@twilio/voice-sdk@2.10.0/dist/twilio.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
 
@@ -315,6 +316,14 @@
   </div>
 </div>
 
+<!-- BROWSER AUDIO BAR -->
+<div id="audio-bar" style="background:var(--surface2);border-bottom:1px solid var(--border);padding:8px 20px;display:flex;align-items:center;gap:12px;font-size:12px;font-family:var(--mono);">
+  <span id="device-dot" style="width:8px;height:8px;border-radius:50%;background:var(--text3);display:inline-block;"></span>
+  <span id="device-status" style="color:var(--text3);">BROWSER AUDIO — NOT READY</span>
+  <button onclick="initDevice()" id="connect-btn" style="margin-left:auto;background:none;border:1px solid var(--border2);color:var(--text2);padding:4px 12px;border-radius:4px;font-size:11px;cursor:pointer;font-family:var(--font);">Connect Mic</button>
+  <span id="audio-level" style="color:var(--text3);font-size:11px;"></span>
+</div>
+
 <!-- LAYOUT -->
 <div class="layout">
 
@@ -482,11 +491,7 @@
         <input type="text" id="cfg-worker" placeholder="https://fex-dialer.YOUR-NAME.workers.dev">
         <div class="hint">Your deployed Cloudflare Worker endpoint</div>
       </div>
-      <div class="field">
-        <label>Your Browser / Callback Number</label>
-        <input type="text" id="cfg-browser" placeholder="+15559876543">
-        <div class="hint">Twilio calls YOUR number first, then bridges to the lead</div>
-      </div>
+      <!-- browser audio — no callback number needed, SDK handles it -->
       <div style="border-top:1px solid var(--border);margin:16px 0;"></div>
       <div class="field">
         <label>Google Sheets — Sheet ID</label>
@@ -596,7 +601,7 @@ let stats = { 'Appointment set': 0, 'Callback': 0, 'Not home': 0, 'Bad number': 
 let selectedFromNumber = null; // set by auto-closest or manual override
 
 const cfg = {
-  workerUrl:    localStorage.getItem('workerUrl')    || 'https://fex-dialer.YOUR-NAME.workers.dev',
+  workerUrl:    localStorage.getItem('workerUrl')    || 'https://raspy-math-9a25.thomaslancheros06.workers.dev',
   browserNumber: localStorage.getItem('browserNumber') || '',
   sheetId:      localStorage.getItem('sheetId')      || '',
   sheetTab:     localStorage.getItem('sheetTab')     || 'Leads',
@@ -857,60 +862,120 @@ function skipLead() {
 // ─────────────────────────────────────────────
 // CALL CONTROL
 // ─────────────────────────────────────────────
+// ─────────────────────────────────────────────
+// TWILIO CLIENT (BROWSER AUDIO)
+// ─────────────────────────────────────────────
+let twilioDevice = null;
+let activeConnection = null;
+
+async function initDevice() {
+  if (!cfg.workerUrl) { openConfig(); return; }
+  setDeviceStatus('Fetching token…', 'amber');
+  document.getElementById('connect-btn').disabled = true;
+
+  try {
+    const res  = await fetch(cfg.workerUrl + '/token');
+    const data = await res.json();
+    if (!data.token) throw new Error('No token returned');
+
+    twilioDevice = new Twilio.Device(data.token, {
+      codecPreferences: ['opus', 'pcmu'],
+      fakeLocalDTMF: true,
+      enableRingingState: true,
+      debug: false,
+    });
+
+    twilioDevice.on('registered',   ()  => setDeviceStatus('READY — mic connected', 'green'));
+    twilioDevice.on('unregistered', ()  => setDeviceStatus('DISCONNECTED', 'red'));
+    twilioDevice.on('error',        (e) => { setDeviceStatus('ERROR: ' + e.message, 'red'); console.error(e); });
+
+    twilioDevice.on('incoming', conn => {
+      conn.accept();
+      activeConnection = conn;
+      handleConnectionEvents(conn);
+    });
+
+    await twilioDevice.register();
+    document.getElementById('connect-btn').textContent = 'Reconnect';
+    document.getElementById('connect-btn').disabled = false;
+
+  } catch(e) {
+    setDeviceStatus('Failed: ' + e.message, 'red');
+    document.getElementById('connect-btn').disabled = false;
+    showToast('Device init failed: ' + e.message, 'err');
+  }
+}
+
+function setDeviceStatus(msg, color) {
+  const dot = document.getElementById('device-dot');
+  const lbl = document.getElementById('device-status');
+  lbl.textContent = msg;
+  const colors = { green: 'var(--green)', amber: 'var(--amber)', red: 'var(--red)', gray: 'var(--text3)' };
+  dot.style.background = colors[color] || colors.gray;
+  dot.style.boxShadow = color === 'green' ? '0 0 6px var(--green)' : 'none';
+  if (color === 'amber') { dot.style.animation = 'pulse 1s ease-in-out infinite'; }
+  else { dot.style.animation = color === 'green' ? 'pulse 2s ease-in-out infinite' : 'none'; }
+  lbl.style.color = colors[color] || 'var(--text3)';
+}
+
+function handleConnectionEvents(conn) {
+  conn.on('accept',     ()  => { setStatus('Connected', 'calling'); enableOutcomes(true); startTimer(); });
+  conn.on('disconnect', ()  => { setStatus('Call ended — log outcome', 'idle'); stopTimer(); resetCallUI(); });
+  conn.on('cancel',     ()  => { setStatus('Call cancelled', 'idle'); resetCallUI(); });
+  conn.on('reject',     ()  => { setStatus('Call rejected', 'idle'); resetCallUI(); });
+  conn.on('ringing',    ()  => setStatus('Ringing…', 'calling'));
+  conn.on('error',      (e) => { setStatus('Error: ' + e.message, 'idle'); resetCallUI(); });
+}
+
 async function startCall() {
   if (currentIdx < 0) return;
   if (!cfg.workerUrl) { openConfig(); return; }
   if (!selectedFromNumber) { showToast('Select a From number first', 'err'); return; }
 
+  if (!twilioDevice) {
+    showToast('Click "Connect Mic" first', 'err');
+    return;
+  }
+
   const lead = leads[currentIdx];
-  setStatus('Initiating call…', 'calling');
+  setStatus('Calling…', 'calling');
   document.getElementById('call-btn').classList.add('hidden');
   document.getElementById('hang-btn').classList.add('visible');
   enableOutcomes(false);
-  startTimer();
 
   try {
-    const res = await fetch(`${cfg.workerUrl}/call`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        to: lead.phone,
-        from: selectedFromNumber,
-        bridgeTo: cfg.browserNumber || selectedFromNumber,
+    const conn = await twilioDevice.connect({
+      params: {
+        To:       lead.phone,
+        callerId: selectedFromNumber,
         leadName: lead.name,
-      })
+      }
     });
-    const data = await res.json();
-    if (data.sid) {
-      callSid = data.sid;
-      setStatus(`Connected · SID: ${data.sid.slice(-8)}`, 'calling');
-      enableOutcomes(true);
-    } else {
-      throw new Error(data.error || 'Unknown error');
-    }
+    activeConnection = conn;
+    callSid = conn.parameters?.CallSid || null;
+    handleConnectionEvents(conn);
   } catch(e) {
-    setStatus(`Error: ${e.message}`, 'idle');
+    setStatus('Error: ' + e.message, 'idle');
     resetCall();
-    showToast(`Call failed: ${e.message}`, 'err');
+    showToast('Call failed: ' + e.message, 'err');
   }
 }
 
 async function hangUp() {
-  if (callSid && cfg.workerUrl) {
-    try {
-      await fetch(`${cfg.workerUrl}/hangup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ callSid })
-      });
-    } catch(e) {}
+  if (activeConnection) {
+    activeConnection.disconnect();
+    activeConnection = null;
   }
   callSid = null;
   setStatus('Call ended — log outcome below', 'idle');
   stopTimer();
+  resetCallUI();
+  enableOutcomes(true);
+}
+
+function resetCallUI() {
   document.getElementById('call-btn').classList.remove('hidden');
   document.getElementById('hang-btn').classList.remove('visible');
-  enableOutcomes(true);
 }
 
 function logOutcome(outcome) {
@@ -973,8 +1038,8 @@ async function pushToSheets(entry) {
 function resetCall() {
   stopTimer(); resetTimer();
   callSid = null;
-  document.getElementById('call-btn').classList.remove('hidden');
-  document.getElementById('hang-btn').classList.remove('visible');
+  activeConnection = null;
+  resetCallUI();
   enableOutcomes(false);
   setStatus('', 'idle');
 }
