@@ -257,7 +257,7 @@ input:checked+.tslider::before{transform:translateX(14px);background:#000;}
     </div>
     <!-- LANE B -->
     <div class="dial-card" id="card-b">
-      <div class="dial-lane b">Lane B</div>
+      <div class="dial-lane b">Lane B <span style="font-size:8px;opacity:.6;">↑ bottom-up</span></div>
       <div class="from-row">
         <select class="from-sel" id="from-b" onchange="onFromChange('b')"></select>
         <label class="toggle" title="Auto-closest"><input type="checkbox" id="auto-b" checked onchange="onAutoToggle('b')"><span class="tslider"></span></label>
@@ -821,11 +821,11 @@ function startPowerDialer(){
   document.getElementById('pd-start').style.display='none';
   document.getElementById('pd-stop').style.display='';
   toast('Power dialer started — dual lane');
-  queuePtr=leads.findIndex(l=>!l._done);
-  if(queuePtr<0){toast('All leads complete');stopPowerDialer();return;}
-  // Fire both lanes
+  queuePtr=0;
+  if(!leads.some(l=>!l._done)){toast('All leads complete');stopPowerDialer();return;}
+  // Lane A fires from top, Lane B fires from bottom
   fireNextLead('a');
-  setTimeout(()=>fireNextLead('b'),800); // slight stagger so calls don't overlap exactly
+  setTimeout(()=>fireNextLeadB(),800);
 }
 
 function stopPowerDialer(){
@@ -838,23 +838,35 @@ function stopPowerDialer(){
 
 function fireNextLead(l){
   if(!dialerRunning)return;
-  if(lane[l].conn)return; // lane busy
-  // Find next undone lead not currently being dialed by the other lane
-  const other=l==='a'?'b':'a';
-  const idx=leads.findIndex((lead,i)=>!lead._done&&i!==lane[other].idx&&(i>=queuePtr));
+  if(lane[l].conn)return;
+  if(l==='b'){fireNextLeadB();return;}
+  const other='b';
+  // Lane A: top-down
+  const idx=leads.findIndex((lead,i)=>!lead._done&&i!==lane[other].idx);
   if(idx<0){
-    // Try from beginning for second pass
-    const idx2=leads.findIndex((lead,i)=>!lead._done&&i!==lane[other].idx);
-    if(idx2<0){
-      setLaneStatus(l,'Queue done','');
-      // Check if both lanes done
-      if(!lane[other].conn)stopPowerDialer();
-      return;
-    }
-    dialLead(l,idx2);
-  }else{
-    dialLead(l,idx);
+    setLaneStatus(l,'Queue done','');
+    if(!lane[other].conn)stopPowerDialer();
+    return;
   }
+  dialLead(l,idx);
+  updateProgress();
+}
+
+function fireNextLeadB(){
+  if(!dialerRunning)return;
+  if(lane.b.conn)return;
+  const other='a';
+  // Lane B: bottom-up — find last undone lead not being dialed by A
+  let idx=-1;
+  for(let i=leads.length-1;i>=0;i--){
+    if(!leads[i]._done&&i!==lane[other].idx){idx=i;break;}
+  }
+  if(idx<0){
+    setLaneStatus('b','Queue done','');
+    if(!lane[other].conn)stopPowerDialer();
+    return;
+  }
+  dialLead('b',idx);
   updateProgress();
 }
 
@@ -889,7 +901,8 @@ function scheduleNext(l,sameLead=false){
       if(idx>=0)dialLead(l,idx);
     }else{
       lane[l].idx=-1;
-      fireNextLead(l);
+      if(l==='b')fireNextLeadB();
+      else fireNextLead(l);
     }
     renderQueue();
   },delay);
