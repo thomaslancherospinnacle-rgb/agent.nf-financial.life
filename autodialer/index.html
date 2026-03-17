@@ -3,1566 +3,1134 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FEX Auto Dialer</title>
+<title>FEX Power Dialer</title>
 <script src="https://cdn.jsdelivr.net/npm/@twilio/voice-sdk@2.10.0/dist/twilio.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
-
-  :root {
-    --bg: #0d0f12;
-    --surface: #141720;
-    --surface2: #1c2030;
-    --surface3: #232840;
-    --border: #2a3050;
-    --border2: #3a4570;
-    --text: #e8eaf0;
-    --text2: #8892b0;
-    --text3: #4a5580;
-    --green: #00e676;
-    --green-dim: #00a651;
-    --red: #ff4d6d;
-    --amber: #ffab00;
-    --blue: #4fc3f7;
-    --purple: #b39ddb;
-    --font: 'IBM Plex Sans', sans-serif;
-    --mono: 'IBM Plex Mono', monospace;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; min-height: 100vh; display: flex; flex-direction: column; }
-
-  /* ── TOP BAR ─────────────────────────────── */
-  .topbar {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 12px 20px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-  .topbar-title { font-family: var(--mono); font-size: 13px; color: var(--green); letter-spacing: .08em; font-weight: 500; }
-  .topbar-sep { color: var(--border2); }
-  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text3); display: inline-block; }
-  .status-dot.live { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 2s ease-in-out infinite; }
-  .status-dot.calling { background: var(--amber); box-shadow: 0 0 6px var(--amber); animation: pulse 1s ease-in-out infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
-  .status-label { font-size: 12px; color: var(--text2); font-family: var(--mono); }
-  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
-  .cfg-btn { background: none; border: 1px solid var(--border); color: var(--text2); padding: 5px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; font-family: var(--font); transition: border-color .15s, color .15s; }
-  .cfg-btn:hover { border-color: var(--border2); color: var(--text); }
-
-  /* ── LAYOUT ─────────────────────────────── */
-  .layout { display: grid; grid-template-columns: 320px 1fr 280px; gap: 0; flex: 1; overflow: hidden; }
-
-  /* ── PANEL ─────────────────────────────── */
-  .panel { border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
-  .panel:last-child { border-right: none; }
-  .panel-header { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
-  .panel-title { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); font-weight: 500; }
-  .panel-body { flex: 1; overflow-y: auto; padding: 0; }
-  .panel-body::-webkit-scrollbar { width: 4px; }
-  .panel-body::-webkit-scrollbar-track { background: transparent; }
-  .panel-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-  /* ── QUEUE ─────────────────────────────── */
-  .queue-controls { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; flex-shrink: 0; }
-  .btn-sm { padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; font-family: var(--font); font-weight: 500; border: none; transition: opacity .15s; }
-  .btn-sm:hover { opacity: .85; }
-  .btn-primary { background: var(--green-dim); color: #000; }
-  .btn-danger  { background: #3a1520; color: var(--red); border: 1px solid var(--red); background: none; }
-  .btn-outline { background: none; border: 1px solid var(--border); color: var(--text2); }
-
-  .lead-item {
-    padding: 10px 16px;
-    border-bottom: 1px solid var(--border);
-    cursor: pointer;
-    transition: background .1s;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .lead-item:hover { background: var(--surface2); }
-  .lead-item.active { background: var(--surface3); border-left: 2px solid var(--green); }
-  .lead-item.calling-row { border-left: 2px solid var(--amber); }
-  .lead-item.done { opacity: .45; }
-  .lead-num { font-family: var(--mono); font-size: 10px; color: var(--text3); width: 20px; flex-shrink: 0; }
-  .lead-info { flex: 1; min-width: 0; }
-  .lead-name { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .lead-phone { font-family: var(--mono); font-size: 11px; color: var(--text2); }
-  .lead-tag { font-size: 10px; padding: 2px 6px; border-radius: 3px; font-family: var(--mono); flex-shrink: 0; }
-  .tag-appt  { background: #0a2a1a; color: var(--green); }
-  .tag-cb    { background: #2a2010; color: var(--amber); }
-  .tag-bad   { background: #2a1018; color: var(--red); }
-  .tag-na    { background: #1a1a2a; color: var(--purple); }
-  .tag-queue { color: var(--text3); background: transparent; }
-
-  /* ── IMPORT ZONE ─────────────────────────────── */
-  .import-zone {
-    margin: 12px 16px;
-    border: 1px dashed var(--border2);
-    border-radius: 6px;
-    padding: 16px;
-    text-align: center;
-    cursor: pointer;
-    transition: border-color .15s;
-  }
-  .import-zone:hover { border-color: var(--green-dim); }
-  .import-zone input { display: none; }
-  .import-zone p { font-size: 12px; color: var(--text3); margin-top: 4px; }
-
-  /* ── DIALER CENTER ─────────────────────────────── */
-  .dialer-center { display: flex; flex-direction: column; }
-
-  .active-call-card {
-    margin: 20px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 24px;
-  }
-  .call-label { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; }
-  .call-name { font-size: 24px; font-weight: 300; color: var(--text); margin-bottom: 4px; }
-  .call-phone { font-family: var(--mono); font-size: 16px; color: var(--blue); margin-bottom: 4px; }
-  .call-location { font-size: 12px; color: var(--text2); margin-bottom: 20px; }
-  .call-timer { font-family: var(--mono); font-size: 32px; font-weight: 500; color: var(--green); margin-bottom: 20px; }
-  .call-timer.idle { color: var(--text3); }
-  .call-status { font-size: 12px; font-family: var(--mono); color: var(--text2); margin-bottom: 24px; min-height: 16px; }
-
-  /* dial controls */
-  .dial-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
-  .dial-btn { padding: 10px 20px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; font-family: var(--font); transition: all .15s; }
-  .dial-btn:disabled { opacity: .3; cursor: not-allowed; }
-  .dial-call  { background: var(--green); color: #000; flex: 1; }
-  .dial-call:hover:not(:disabled) { background: #00c853; }
-  .dial-hang  { background: var(--red); color: #fff; flex: 1; display: none; }
-  .dial-hang:hover:not(:disabled) { background: #c62828; }
-  .dial-hang.visible { display: block; }
-  .dial-call.hidden { display: none; }
-
-  /* outcome buttons */
-  .outcome-section { border-top: 1px solid var(--border); padding-top: 16px; }
-  .outcome-label { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
-  .outcome-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .outcome-btn {
-    padding: 10px 12px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    border: 1px solid transparent;
-    font-family: var(--font);
-    transition: all .15s;
-    text-align: left;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .outcome-btn:disabled { opacity: .3; cursor: not-allowed; }
-  .outcome-btn .ob-icon { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .ob-appt  { background: #0a2a1a; border-color: var(--green-dim); color: var(--green); }
-  .ob-appt .ob-icon { background: var(--green); }
-  .ob-appt:hover:not(:disabled)  { background: #0f3a22; }
-  .ob-cb    { background: #2a2010; border-color: #664400; color: var(--amber); }
-  .ob-cb .ob-icon { background: var(--amber); }
-  .ob-cb:hover:not(:disabled) { background: #3a2e12; }
-  .ob-na    { background: #151530; border-color: #3a3a70; color: var(--purple); }
-  .ob-na .ob-icon { background: var(--purple); }
-  .ob-na:hover:not(:disabled) { background: #1c1c40; }
-  .ob-bad   { background: #200a10; border-color: #601020; color: var(--red); }
-  .ob-bad .ob-icon { background: var(--red); }
-  .ob-bad:hover:not(:disabled) { background: #2e0f18; }
-
-  /* auto dial mode */
-  .auto-bar {
-    margin: 0 20px 20px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px 16px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-  .auto-label { font-size: 12px; color: var(--text2); }
-  .toggle { position: relative; display: inline-block; width: 36px; height: 20px; }
-  .toggle input { opacity: 0; width: 0; height: 0; }
-  .toggle-slider { position: absolute; inset: 0; background: var(--border); border-radius: 10px; cursor: pointer; transition: .2s; }
-  .toggle-slider::before { content: ''; position: absolute; left: 2px; top: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--text2); transition: .2s; }
-  input:checked + .toggle-slider { background: var(--green-dim); }
-  input:checked + .toggle-slider::before { transform: translateX(16px); background: #000; }
-  .delay-select { background: var(--surface3); border: 1px solid var(--border); color: var(--text); padding: 4px 8px; border-radius: 4px; font-size: 12px; cursor: pointer; }
-  .auto-bar-right { margin-left: auto; }
-
-  /* skip btn */
-  .skip-btn { background: none; border: 1px solid var(--border); color: var(--text3); padding: 6px 14px; border-radius: 4px; font-size: 12px; cursor: pointer; font-family: var(--font); transition: all .15s; }
-  .skip-btn:hover { border-color: var(--border2); color: var(--text2); }
-
-  /* ── LOG PANEL ─────────────────────────────── */
-  .log-item {
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--border);
-    font-size: 12px;
-  }
-  .log-time { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-bottom: 3px; }
-  .log-name { font-weight: 500; color: var(--text); margin-bottom: 2px; }
-  .log-outcome { font-size: 11px; }
-  .log-duration { font-family: var(--mono); font-size: 10px; color: var(--text3); float: right; }
-
-  /* stats row */
-  .stats-bar {
-    padding: 12px 14px;
-    border-bottom: 1px solid var(--border);
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-    flex-shrink: 0;
-  }
-  .stat { text-align: center; }
-  .stat-n { font-family: var(--mono); font-size: 18px; font-weight: 500; }
-  .stat-l { font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); margin-top: 2px; }
-  .s-appt { color: var(--green); }
-  .s-cb   { color: var(--amber); }
-  .s-na   { color: var(--purple); }
-  .s-bad  { color: var(--red); }
-
-  /* ── CONFIG MODAL ─────────────────────────────── */
-  .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 100; align-items: center; justify-content: center; }
-  .modal-backdrop.open { display: flex; }
-  .modal { background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; width: 480px; max-width: 95vw; }
-  .modal-head { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-  .modal-head h3 { font-size: 14px; font-weight: 500; }
-  .modal-close { background: none; border: none; color: var(--text2); font-size: 18px; cursor: pointer; }
-  .modal-body { padding: 20px; }
-  .field { margin-bottom: 16px; }
-  .field label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); margin-bottom: 6px; }
-  .field input, .field select { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 6px; font-size: 13px; font-family: var(--font); outline: none; }
-  .field input:focus, .field select:focus { border-color: var(--border2); }
-  .field .hint { font-size: 11px; color: var(--text3); margin-top: 4px; }
-  .modal-foot { padding: 12px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
-
-  /* sheets sync indicator */
-  .sync-indicator { font-size: 11px; font-family: var(--mono); color: var(--text3); }
-  .sync-indicator.ok { color: var(--green); }
-  .sync-indicator.err { color: var(--red); }
-
-  /* GSheet row */
-  .sheets-row { display: flex; gap: 8px; align-items: flex-end; }
-  .sheets-row .field { flex: 1; margin-bottom: 0; }
-
-  /* ── EMPTY STATE ─────────────────────────────── */
-  .empty-state { padding: 32px 20px; text-align: center; color: var(--text3); font-size: 13px; line-height: 1.7; }
-  .empty-state .big { font-size: 28px; margin-bottom: 8px; }
-
-  /* phone format auto-add on display */
-  .no-leads-msg { padding: 20px 16px; font-size: 12px; color: var(--text3); text-align: center; }
-
-  /* ── NUMPAD ─────────────────────────────── */
-  .numpad-section { border-top: 1px solid var(--border); padding-top: 14px; margin-top: 4px; }
-  .numpad-display {
-    font-family: var(--mono); font-size: 20px; color: var(--blue);
-    background: var(--surface3); border: 1px solid var(--border);
-    border-radius: 6px; padding: 8px 14px; margin-bottom: 10px;
-    min-height: 40px; letter-spacing: .08em; display: flex;
-    align-items: center; justify-content: space-between;
-  }
-  .numpad-display span { flex: 1; }
-  .numpad-backspace {
-    background: none; border: none; color: var(--text3); font-size: 16px;
-    cursor: pointer; padding: 0 4px; transition: color .15s;
-  }
-  .numpad-backspace:hover { color: var(--red); }
-  .numpad-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px;
-  }
-  .numpad-key {
-    background: var(--surface3); border: 1px solid var(--border);
-    color: var(--text); border-radius: 6px; padding: 10px 0;
-    font-size: 16px; font-family: var(--mono); cursor: pointer;
-    transition: background .1s, border-color .1s;
-    display: flex; flex-direction: column; align-items: center; gap: 1px;
-    line-height: 1;
-  }
-  .numpad-key:hover { background: var(--surface2); border-color: var(--border2); }
-  .numpad-key:active { background: var(--border); }
-  .numpad-key .sub { font-size: 8px; color: var(--text3); letter-spacing: .1em; min-height: 9px; }
-  .numpad-call-btn {
-    width: 100%; padding: 10px; border-radius: 6px; border: none;
-    background: var(--green-dim); color: #000; font-size: 13px; font-weight: 500;
-    font-family: var(--font); cursor: pointer; transition: background .15s;
-  }
-  .numpad-call-btn:hover { background: #00c853; }
-  .numpad-tab-row { display: flex; gap: 0; margin-bottom: 14px; }
-  .numpad-tab {
-    flex: 1; padding: 6px; font-size: 11px; cursor: pointer; border: 1px solid var(--border);
-    background: none; color: var(--text3); font-family: var(--font); transition: all .15s;
-  }
-  .numpad-tab:first-child { border-radius: 4px 0 0 4px; }
-  .numpad-tab:last-child  { border-radius: 0 4px 4px 0; border-left: none; }
-  .numpad-tab.active { background: var(--surface3); color: var(--text); border-color: var(--border2); }
-
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+:root {
+  --bg:#0d0f12;--surface:#141720;--s2:#1c2030;--s3:#232840;
+  --b:#2a3050;--b2:#3a4570;--b3:#4a5580;
+  --text:#e8eaf0;--t2:#8892b0;--t3:#4a5580;
+  --green:#00e676;--gdim:#00a651;--red:#ff4d6d;--amber:#ffab00;--blue:#4fc3f7;--purple:#b39ddb;
+  --font:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;min-height:100vh;display:flex;flex-direction:column;}
+/* TOPBAR */
+.topbar{background:var(--surface);border-bottom:1px solid var(--b);padding:10px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.logo{font-family:var(--mono);font-size:12px;color:var(--green);letter-spacing:.1em;font-weight:500;}
+.sep{color:var(--b2);}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--t3);display:inline-block;flex-shrink:0;}
+.dot.live{background:var(--green);box-shadow:0 0 5px var(--green);animation:pulse 2s infinite;}
+.dot.ring{background:var(--amber);box-shadow:0 0 5px var(--amber);animation:pulse .8s infinite;}
+.dot.err{background:var(--red);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.slabel{font-size:11px;color:var(--t2);font-family:var(--mono);}
+.tbr{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.btn{padding:5px 11px;border-radius:4px;font-size:11px;cursor:pointer;font-family:var(--font);font-weight:500;border:none;transition:opacity .15s;}
+.btn:hover{opacity:.85;} .btn:disabled{opacity:.3;cursor:not-allowed;}
+.btn-g{background:var(--gdim);color:#000;}
+.btn-r{background:none;border:1px solid var(--red);color:var(--red);}
+.btn-o{background:none;border:1px solid var(--b);color:var(--t2);}
+.btn-a{background:none;border:1px solid var(--amber);color:var(--amber);}
+/* AUDIO BAR */
+.abar{background:var(--s2);border-bottom:1px solid var(--b);padding:7px 16px;display:flex;align-items:center;gap:10px;font-size:11px;font-family:var(--mono);flex-shrink:0;}
+#dev-status{color:var(--t3);}
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:300px 1fr 260px;flex:1;overflow:hidden;}
+.panel{border-right:1px solid var(--b);display:flex;flex-direction:column;overflow:hidden;}
+.panel:last-child{border-right:none;}
+.ph{padding:10px 14px;border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.ptitle{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);font-weight:500;}
+.pb{flex:1;overflow-y:auto;}
+.pb::-webkit-scrollbar{width:3px;} .pb::-webkit-scrollbar-thumb{background:var(--b);border-radius:2px;}
+/* QUEUE */
+.qctrl{padding:10px 14px;border-bottom:1px solid var(--b);display:flex;gap:6px;flex-shrink:0;}
+.lead-item{padding:9px 14px;border-bottom:1px solid var(--b);cursor:pointer;transition:background .1s;display:flex;align-items:center;gap:8px;}
+.lead-item:hover{background:var(--s2);}
+.lead-item.active{background:var(--s3);border-left:2px solid var(--green);}
+.lead-item.dialing-a{border-left:2px solid var(--green);background:rgba(0,230,118,.05);}
+.lead-item.dialing-b{border-left:2px solid var(--blue);background:rgba(79,195,247,.05);}
+.lead-item.done{opacity:.4;}
+.lnum{font-family:var(--mono);font-size:9px;color:var(--t3);width:18px;flex-shrink:0;}
+.linfo{flex:1;min-width:0;}
+.lname{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lphone{font-family:var(--mono);font-size:10px;color:var(--t2);}
+.ltag{font-size:9px;padding:2px 5px;border-radius:3px;font-family:var(--mono);flex-shrink:0;}
+.tag-q{color:var(--t3);}
+.tag-appt{background:#0a2a1a;color:var(--green);}
+.tag-cb{background:#2a2010;color:var(--amber);}
+.tag-bad{background:#2a1018;color:var(--red);}
+.tag-na{background:#1a1a2a;color:var(--purple);}
+.tag-vm{background:#1a1020;color:#c084fc;}
+/* DROP ZONE */
+.dropz{margin:12px;border:1px dashed var(--b2);border-radius:6px;padding:16px;text-align:center;cursor:pointer;transition:border-color .15s;}
+.dropz:hover{border-color:var(--gdim);}
+/* CENTER */
+.center{display:flex;flex-direction:column;overflow:hidden;}
+/* POWER BAR */
+.pbar{background:var(--s2);border-bottom:1px solid var(--b);padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex-shrink:0;}
+.pbar-label{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;}
+.dsel{background:var(--s3);border:1px solid var(--b);color:var(--text);padding:4px 7px;border-radius:4px;font-size:11px;cursor:pointer;}
+/* DUAL DIALS */
+.dual{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--b);flex-shrink:0;}
+.dial-card{background:var(--bg);padding:14px 16px;position:relative;}
+.dial-card.active-call{background:var(--s2);}
+.dial-lane{font-size:9px;letter-spacing:.12em;text-transform:uppercase;font-family:var(--mono);margin-bottom:6px;}
+.dial-lane.a{color:var(--green);}
+.dial-lane.b{color:var(--blue);}
+.dial-name{font-size:18px;font-weight:300;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dial-phone{font-family:var(--mono);font-size:12px;color:var(--blue);margin-bottom:2px;}
+.dial-loc{font-size:11px;color:var(--t2);margin-bottom:8px;}
+.dial-timer{font-family:var(--mono);font-size:22px;font-weight:500;color:var(--green);margin-bottom:6px;}
+.dial-timer.idle{color:var(--t3);}
+.dial-status{font-size:11px;font-family:var(--mono);color:var(--t2);min-height:14px;margin-bottom:10px;}
+.dial-from{font-size:10px;color:var(--gdim);font-family:var(--mono);margin-bottom:10px;}
+.dial-actions{display:flex;gap:6px;flex-wrap:wrap;}
+/* FROM SELECT */
+.from-row{display:flex;align-items:center;gap:6px;margin-bottom:8px;}
+.from-sel{background:var(--s3);border:1px solid var(--b);color:var(--text);padding:4px 7px;border-radius:4px;font-size:10px;font-family:var(--mono);cursor:pointer;flex:1;}
+.auto-badge{font-size:9px;font-family:var(--mono);color:var(--t3);}
+/* OUTCOME */
+.outcomes{padding:12px 16px;border-top:1px solid var(--b);flex-shrink:0;}
+.otitle{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:8px;}
+.ogrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+.obtn{padding:8px 6px;border-radius:5px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid transparent;font-family:var(--font);transition:all .15s;text-align:center;}
+.obtn:disabled{opacity:.25;cursor:not-allowed;}
+.ob-appt{background:#0a2a1a;border-color:var(--gdim);color:var(--green);}
+.ob-cb{background:#2a2010;border-color:#664400;color:var(--amber);}
+.ob-na{background:#151530;border-color:#3a3a70;color:var(--purple);}
+.ob-bad{background:#200a10;border-color:#601020;color:var(--red);}
+.ob-vm{background:#1a0a28;border-color:#6030a0;color:#c084fc;}
+/* LEAD INFO DROPDOWN */
+.lead-detail{border-top:1px solid var(--b);flex-shrink:0;}
+.ld-toggle{width:100%;padding:8px 16px;background:none;border:none;color:var(--t2);font-size:11px;font-family:var(--mono);cursor:pointer;text-align:left;display:flex;justify-content:space-between;align-items:center;}
+.ld-toggle:hover{background:var(--s2);}
+.ld-body{display:none;padding:10px 16px;background:var(--s2);max-height:180px;overflow-y:auto;}
+.ld-body.open{display:block;}
+.ld-row{display:flex;gap:8px;margin-bottom:5px;font-size:11px;}
+.ld-key{color:var(--t3);font-family:var(--mono);min-width:100px;flex-shrink:0;}
+.ld-val{color:var(--text);word-break:break-word;}
+/* NUMPAD */
+.npad-section{padding:10px 16px;border-top:1px solid var(--b);flex-shrink:0;}
+.npad-display{font-family:var(--mono);font-size:16px;color:var(--blue);background:var(--s3);border:1px solid var(--b);border-radius:5px;padding:6px 10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+.npad-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px;}
+.npad-key{background:var(--s3);border:1px solid var(--b);color:var(--text);border-radius:5px;padding:8px 0;font-size:14px;font-family:var(--mono);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;transition:background .1s;}
+.npad-key:hover{background:var(--s2);}
+.npad-sub{font-size:7px;color:var(--t3);letter-spacing:.1em;min-height:8px;}
+/* STATS */
+.sbar{padding:10px 14px;border-bottom:1px solid var(--b);display:grid;grid-template-columns:repeat(5,1fr);gap:4px;flex-shrink:0;}
+.stat{text-align:center;}
+.sn{font-family:var(--mono);font-size:16px;font-weight:500;}
+.sl{font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-top:1px;}
+/* LOG */
+.log-item{padding:8px 12px;border-bottom:1px solid var(--b);font-size:11px;}
+.log-time{font-family:var(--mono);font-size:9px;color:var(--t3);margin-bottom:2px;}
+.log-name{font-weight:500;margin-bottom:1px;}
+/* TOGGLE */
+.toggle{position:relative;display:inline-block;width:32px;height:18px;}
+.toggle input{opacity:0;width:0;height:0;}
+.tslider{position:absolute;inset:0;background:var(--b);border-radius:9px;cursor:pointer;transition:.2s;}
+.tslider::before{content:'';position:absolute;left:2px;top:2px;width:14px;height:14px;border-radius:50%;background:var(--t2);transition:.2s;}
+input:checked+.tslider{background:var(--gdim);}
+input:checked+.tslider::before{transform:translateX(14px);background:#000;}
+/* MODAL */
+.mbk{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center;}
+.mbk.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--b2);border-radius:10px;width:460px;max-width:95vw;}
+.mh{padding:14px 18px;border-bottom:1px solid var(--b);display:flex;justify-content:space-between;align-items:center;}
+.mh h3{font-size:13px;font-weight:500;}
+.mc{padding:18px;}
+.mf{padding:10px 18px;border-top:1px solid var(--b);display:flex;justify-content:flex-end;gap:8px;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:5px;}
+.field input{width:100%;background:var(--s2);border:1px solid var(--b);color:var(--text);padding:7px 10px;border-radius:5px;font-size:12px;font-family:var(--font);outline:none;}
+.field input:focus{border-color:var(--b2);}
+.hint{font-size:10px;color:var(--t3);margin-top:3px;}
+/* SYNC */
+.sync{font-size:10px;font-family:var(--mono);} .sync.ok{color:var(--green);} .sync.err{color:var(--red);}
 </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
+<!-- TOPBAR -->
 <div class="topbar">
-  <span class="topbar-title">FEX DIALER</span>
-  <span class="topbar-sep">|</span>
-  <span class="status-dot" id="status-dot"></span>
-  <span class="status-label" id="status-label">IDLE</span>
-  <div class="topbar-right">
-    <span class="sync-indicator" id="sync-indicator">● NOT CONFIGURED</span>
-    <button class="cfg-btn" onclick="openConfig()">⚙ Settings</button>
+  <span class="logo">FEX POWER DIALER</span>
+  <span class="sep">|</span>
+  <span class="dot" id="dev-dot"></span>
+  <span class="slabel" id="dev-status">NOT READY</span>
+  <div class="tbr">
+    <span class="sync" id="sync-ind">● UNCONFIGURED</span>
+    <button class="btn btn-o" onclick="openCfg()">⚙ Settings</button>
   </div>
 </div>
 
-<!-- BROWSER AUDIO BAR -->
-<div id="audio-bar" style="background:var(--surface2);border-bottom:1px solid var(--border);padding:8px 20px;display:flex;align-items:center;gap:12px;font-size:12px;font-family:var(--mono);">
-  <span id="device-dot" style="width:8px;height:8px;border-radius:50%;background:var(--text3);display:inline-block;"></span>
-  <span id="device-status" style="color:var(--text3);">BROWSER AUDIO — NOT READY</span>
-  <button onclick="initDevice()" id="connect-btn" style="margin-left:auto;background:none;border:1px solid var(--border2);color:var(--text2);padding:4px 12px;border-radius:4px;font-size:11px;cursor:pointer;font-family:var(--font);">Connect Mic</button>
-  <span id="audio-level" style="color:var(--text3);font-size:11px;"></span>
+<!-- AUDIO BAR -->
+<div class="abar">
+  <span style="color:var(--t2);">Browser Audio</span>
+  <button class="btn btn-g" id="mic-btn" onclick="initDevice()" style="font-size:10px;padding:4px 10px;">Connect Mic</button>
+  <span id="mic-status" style="color:var(--t3);font-size:10px;"></span>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:10px;">
+    <span style="color:var(--t3);">Vol A</span>
+    <input type="range" id="vol-a" min="0" max="100" value="50" style="width:70px;" oninput="setVolume('a',this.value)">
+    <span style="color:var(--t3);">Vol B</span>
+    <input type="range" id="vol-b" min="0" max="100" value="50" style="width:70px;" oninput="setVolume('b',this.value)">
+  </div>
 </div>
 
 <!-- LAYOUT -->
 <div class="layout">
 
-  <!-- LEFT: LEAD QUEUE -->
-  <div class="panel">
-    <div class="panel-header">
-      <span class="panel-title">Lead Queue</span>
-      <span style="font-family:var(--mono);font-size:11px;color:var(--text3)" id="queue-count">0 leads</span>
-    </div>
+<!-- LEFT: QUEUE -->
+<div class="panel">
+  <div class="ph">
+    <span class="ptitle">Lead Queue</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--t3);" id="qcount">0</span>
+  </div>
+  <div class="qctrl">
+    <label class="btn btn-g" style="cursor:pointer;font-size:11px;">
+      ↑ CSV<input type="file" id="csv-in" accept=".csv" style="display:none" onchange="importCSV(this)">
+    </label>
+    <button class="btn btn-o" onclick="loadSheets()" style="font-size:11px;">⊞ Sheets</button>
+    <button class="btn btn-r" onclick="clearQueue()" style="font-size:11px;">✕</button>
+  </div>
+  <div class="dropz" id="dropz" onclick="document.getElementById('csv-in').click()">
+    <div style="font-size:20px;color:var(--t3);">⬆</div>
+    <div style="font-size:11px;color:var(--t2);margin-top:3px;">Drop CSV or click to import</div>
+    <div style="font-size:10px;color:var(--t3);margin-top:2px;">Any columns — auto-detected</div>
+  </div>
+  <div class="pb" id="lead-list"></div>
+</div>
 
-    <div class="queue-controls">
-      <label class="btn-sm btn-primary" style="cursor:pointer">
-        ↑ CSV
-        <input type="file" id="csv-input" accept=".csv" style="display:none" onchange="importCSV(this)">
-      </label>
-      <button class="btn-sm btn-outline" onclick="loadFromSheets()">⊞ Sheets</button>
-      <button class="btn-sm btn-danger" onclick="clearQueue()">✕ Clear</button>
-    </div>
+<!-- CENTER -->
+<div class="panel center">
 
-    <!-- drag-drop zone when empty -->
-    <div class="import-zone" id="drop-zone" onclick="document.getElementById('csv-input').click()">
-      <div style="font-size:24px;color:var(--text3)">⬆</div>
-      <div style="font-size:12px;color:var(--text2);margin-top:4px">Drop CSV or click to import</div>
-      <p>Name, Phone, City, State columns</p>
+  <!-- POWER BAR -->
+  <div class="pbar">
+    <button class="btn btn-g" id="pd-start" onclick="startPowerDialer()" style="font-size:12px;padding:7px 16px;">▶ Start</button>
+    <button class="btn btn-r" id="pd-stop" onclick="stopPowerDialer()" style="display:none;font-size:12px;padding:7px 16px;">⬛ Stop</button>
+    <div style="display:flex;align-items:center;gap:5px;">
+      <span class="pbar-label">Delay</span>
+      <select class="dsel" id="delay-sel">
+        <option value="2">2s</option><option value="3" selected>3s</option>
+        <option value="5">5s</option><option value="10">10s</option>
+      </select>
     </div>
-
-    <div class="panel-body" id="lead-list"></div>
+    <div style="display:flex;align-items:center;gap:5px;">
+      <span class="pbar-label">Dials/lead</span>
+      <select class="dsel" id="max-att" onchange="MAX_ATT=+this.value;localStorage.setItem('maxAtt',this.value)">
+        <option value="1">1×</option><option value="2" selected>2×</option>
+        <option value="3">3×</option><option value="4">4×</option>
+      </select>
+    </div>
+    <div style="display:flex;align-items:center;gap:5px;">
+      <span class="pbar-label">VM detect</span>
+      <label class="toggle"><input type="checkbox" id="vm-detect" checked><span class="tslider"></span></label>
+    </div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+      <span id="pd-prog" style="font-size:10px;font-family:var(--mono);color:var(--t3);"></span>
+      <button class="btn btn-o" onclick="skipActive()" style="font-size:11px;">Skip →</button>
+    </div>
   </div>
 
-  <!-- CENTER: DIALER -->
-  <div class="panel dialer-center">
-
-    <!-- Power Dialer Bar -->
-    <div class="auto-bar" style="flex-wrap:wrap;gap:10px;">
-      <button id="dialer-start-btn" onclick="startPowerDialer()" style="background:var(--green-dim);color:#000;border:none;padding:7px 16px;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);">▶ Start Power Dialer</button>
-      <button id="dialer-stop-btn"  onclick="stopPowerDialer()"  style="display:none;background:none;border:1px solid var(--red);color:var(--red);padding:7px 16px;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);">⬛ Stop</button>
-      <div style="display:flex;align-items:center;gap:6px;">
-        <span style="font-size:11px;color:var(--text3);">Between calls</span>
-        <select class="delay-select" id="delay-select">
-          <option value="2">2s</option>
-          <option value="3">3s</option>
-          <option value="5" selected>5s</option>
-          <option value="10">10s</option>
-          <option value="15">15s</option>
-        </select>
+  <!-- DUAL DIAL CARDS -->
+  <div class="dual">
+    <!-- LANE A -->
+    <div class="dial-card" id="card-a">
+      <div class="dial-lane a">Lane A</div>
+      <div class="from-row">
+        <select class="from-sel" id="from-a" onchange="onFromChange('a')"></select>
+        <label class="toggle" title="Auto-closest"><input type="checkbox" id="auto-a" checked onchange="onAutoToggle('a')"><span class="tslider"></span></label>
+        <span style="font-size:9px;color:var(--t3);">AUTO</span>
       </div>
-      <div style="display:flex;align-items:center;gap:6px;">
-        <span style="font-size:11px;color:var(--text3);">Dials per lead</span>
-        <select class="delay-select" id="max-attempts" onchange="MAX_ATTEMPTS=parseInt(this.value);localStorage.setItem('maxAttempts',this.value)">
-          <option value="1">1×</option>
-          <option value="2" selected>2×</option>
-          <option value="3">3×</option>
-          <option value="4">4×</option>
-          <option value="5">5×</option>
-        </select>
-      </div>
-      <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
-        <span id="dialer-progress" style="font-size:11px;font-family:var(--mono);color:var(--text3);"></span>
-        <button class="skip-btn" onclick="skipCurrentLead()">Skip →</button>
-      </div>
-    </div>
-
-    <!-- Active call card -->
-    <div class="active-call-card">
-      <div class="call-label">Current Lead</div>
-      <div class="call-name" id="call-name">— Select a lead —</div>
-      <div class="call-phone" id="call-phone"></div>
-      <div class="call-location" id="call-location"></div>
-      <div class="call-timer idle" id="call-timer">0:00</div>
-      <div class="call-status" id="call-status"></div>
-
-      <!-- From number row -->
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
-        <div style="flex:1;">
-          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:5px;">Calling From</div>
-          <select id="from-select" onchange="onFromChange()" style="width:100%;background:var(--surface3);border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:5px;font-size:12px;font-family:var(--mono);cursor:pointer;"></select>
-        </div>
-        <div style="padding-top:18px;">
-          <label class="toggle" title="Auto-select closest number to lead area code">
-            <input type="checkbox" id="closest-toggle" onchange="onClosestToggle()" checked>
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-        <div style="padding-top:18px;font-size:10px;color:var(--text3);">AUTO</div>
-      </div>
-      <div id="closest-badge" style="font-size:11px;font-family:var(--mono);color:var(--text3);margin-bottom:16px;min-height:14px;">—</div>
-
+      <div class="auto-badge" id="badge-a">—</div>
+      <div class="dial-name" id="name-a">—</div>
+      <div class="dial-phone" id="phone-a"></div>
+      <div class="dial-loc" id="loc-a"></div>
+      <div class="dial-timer idle" id="timer-a">0:00</div>
+      <div class="dial-status" id="status-a"></div>
       <div class="dial-actions">
-        <button class="dial-btn dial-call" id="call-btn" onclick="startCall()" disabled>📞 Call</button>
-        <button class="dial-btn dial-hang" id="hang-btn" onclick="hangUp()">⬛ Hang Up</button>
+        <button class="btn btn-g" id="call-a" onclick="manualCall('a')" disabled>📞 Call</button>
+        <button class="btn btn-r" id="hang-a" onclick="hangUp('a')" style="display:none;">⬛ Hang Up</button>
+        <button class="btn btn-a" onclick="forceHangup('a')" title="Force disconnect (debug)" style="font-size:10px;padding:4px 8px;">✕ Force</button>
       </div>
-
-      <!-- Tab switcher -->
-      <div class="numpad-tab-row" style="margin-top:16px;">
-        <button class="numpad-tab active" id="tab-outcome" onclick="switchTab('outcome')">Log Outcome</button>
-        <button class="numpad-tab" id="tab-numpad" onclick="switchTab('numpad')">Numpad</button>
-      </div>
-
-      <!-- Outcome buttons -->
-      <div id="panel-outcome" class="outcome-section" style="border-top:none;padding-top:0;">
-        <div class="outcome-grid">
-          <button class="outcome-btn ob-appt" onclick="logOutcome('Appointment set')" disabled id="ob-appt">
-            <span class="ob-icon"></span> Appointment Set
-          </button>
-          <button class="outcome-btn ob-cb" onclick="logOutcome('Callback')" disabled id="ob-cb">
-            <span class="ob-icon"></span> Callback
-          </button>
-          <button class="outcome-btn ob-na" onclick="logOutcome('Not home')" disabled id="ob-na">
-            <span class="ob-icon"></span> Not Home / No Answer
-          </button>
-          <button class="outcome-btn ob-bad" onclick="logOutcome('Bad number')" disabled id="ob-bad">
-            <span class="ob-icon"></span> Bad Number
-          </button>
-        </div>
-      </div>
-
-      <!-- Numpad -->
-      <div id="panel-numpad" style="display:none;">
-        <div class="numpad-display">
-          <span id="numpad-display">Enter number…</span>
-          <button class="numpad-backspace" onclick="numpadBack()">⌫</button>
-        </div>
-        <div class="numpad-grid">
-          <button class="numpad-key" onclick="numpadPress('1')"><span>1</span><span class="sub"> </span></button>
-          <button class="numpad-key" onclick="numpadPress('2')"><span>2</span><span class="sub">ABC</span></button>
-          <button class="numpad-key" onclick="numpadPress('3')"><span>3</span><span class="sub">DEF</span></button>
-          <button class="numpad-key" onclick="numpadPress('4')"><span>4</span><span class="sub">GHI</span></button>
-          <button class="numpad-key" onclick="numpadPress('5')"><span>5</span><span class="sub">JKL</span></button>
-          <button class="numpad-key" onclick="numpadPress('6')"><span>6</span><span class="sub">MNO</span></button>
-          <button class="numpad-key" onclick="numpadPress('7')"><span>7</span><span class="sub">PQRS</span></button>
-          <button class="numpad-key" onclick="numpadPress('8')"><span>8</span><span class="sub">TUV</span></button>
-          <button class="numpad-key" onclick="numpadPress('9')"><span>9</span><span class="sub">WXYZ</span></button>
-          <button class="numpad-key" onclick="numpadPress('*')"><span>*</span><span class="sub"> </span></button>
-          <button class="numpad-key" onclick="numpadPress('0')"><span>0</span><span class="sub">+</span></button>
-          <button class="numpad-key" onclick="numpadPress('#')"><span>#</span><span class="sub"> </span></button>
-        </div>
-        <button class="numpad-call-btn" onclick="numpadCall()">📞 Call This Number</button>
-      </div>
-
     </div>
-
+    <!-- LANE B -->
+    <div class="dial-card" id="card-b">
+      <div class="dial-lane b">Lane B</div>
+      <div class="from-row">
+        <select class="from-sel" id="from-b" onchange="onFromChange('b')"></select>
+        <label class="toggle" title="Auto-closest"><input type="checkbox" id="auto-b" checked onchange="onAutoToggle('b')"><span class="tslider"></span></label>
+        <span style="font-size:9px;color:var(--t3);">AUTO</span>
+      </div>
+      <div class="auto-badge" id="badge-b">—</div>
+      <div class="dial-name" id="name-b">—</div>
+      <div class="dial-phone" id="phone-b"></div>
+      <div class="dial-loc" id="loc-b"></div>
+      <div class="dial-timer idle" id="timer-b">0:00</div>
+      <div class="dial-status" id="status-b"></div>
+      <div class="dial-actions">
+        <button class="btn btn-g" id="call-b" onclick="manualCall('b')" disabled>📞 Call</button>
+        <button class="btn btn-r" id="hang-b" onclick="hangUp('b')" style="display:none;">⬛ Hang Up</button>
+        <button class="btn btn-a" onclick="forceHangup('b')" title="Force disconnect (debug)" style="font-size:10px;padding:4px 8px;">✕ Force</button>
+      </div>
+    </div>
   </div>
 
-  <!-- RIGHT: LOG + STATS -->
-  <div class="panel" style="border-right:none;">
-    <div class="stats-bar">
-      <div class="stat"><div class="stat-n s-appt" id="s-appt">0</div><div class="stat-l">Appts</div></div>
-      <div class="stat"><div class="stat-n s-cb"   id="s-cb"  >0</div><div class="stat-l">Callbacks</div></div>
-      <div class="stat"><div class="stat-n s-na"   id="s-na"  >0</div><div class="stat-l">Not Home</div></div>
-      <div class="stat"><div class="stat-n s-bad"  id="s-bad" >0</div><div class="stat-l">Bad #</div></div>
+  <!-- OUTCOMES -->
+  <div class="outcomes">
+    <div class="otitle">Log Outcome — <span id="outcome-lane" style="color:var(--green);">select a lane</span></div>
+    <div class="ogrid">
+      <button class="obtn ob-appt" onclick="logOutcome('Appointment set')" disabled id="ob-appt">✓ Appointment</button>
+      <button class="obtn ob-cb"   onclick="logOutcome('Callback')"        disabled id="ob-cb">↩ Callback</button>
+      <button class="obtn ob-na"   onclick="logOutcome('Not home')"        disabled id="ob-na">— Not Home</button>
+      <button class="obtn ob-bad"  onclick="logOutcome('Bad number')"      disabled id="ob-bad">✕ Bad #</button>
     </div>
-    <div class="panel-header">
-      <span class="panel-title">Call Log</span>
-      <button class="btn-sm btn-outline" onclick="exportLog()" style="padding:3px 8px;font-size:11px">↓ Export</button>
+  </div>
+
+  <!-- LEAD INFO DROPDOWN -->
+  <div class="lead-detail" id="lead-detail" style="display:none;">
+    <button class="ld-toggle" onclick="toggleLeadDetail()">
+      <span id="ld-title">Lead Info</span>
+      <span id="ld-arrow">▼</span>
+    </button>
+    <div class="ld-body" id="ld-body"></div>
+  </div>
+
+  <!-- NUMPAD -->
+  <div class="npad-section">
+    <div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">Manual Dial</div>
+    <div class="npad-display">
+      <span id="npad-display" style="color:var(--t3);">Enter number…</span>
+      <button onclick="npadBack()" style="background:none;border:none;color:var(--t3);cursor:pointer;font-size:14px;">⌫</button>
     </div>
-    <div class="panel-body" id="call-log">
-      <div class="empty-state">
-        <div class="big">📋</div>
-        No calls logged yet.
-      </div>
+    <div class="npad-grid">
+      <button class="npad-key" onclick="npadPress('1')"><span>1</span><span class="npad-sub"> </span></button>
+      <button class="npad-key" onclick="npadPress('2')"><span>2</span><span class="npad-sub">ABC</span></button>
+      <button class="npad-key" onclick="npadPress('3')"><span>3</span><span class="npad-sub">DEF</span></button>
+      <button class="npad-key" onclick="npadPress('4')"><span>4</span><span class="npad-sub">GHI</span></button>
+      <button class="npad-key" onclick="npadPress('5')"><span>5</span><span class="npad-sub">JKL</span></button>
+      <button class="npad-key" onclick="npadPress('6')"><span>6</span><span class="npad-sub">MNO</span></button>
+      <button class="npad-key" onclick="npadPress('7')"><span>7</span><span class="npad-sub">PQRS</span></button>
+      <button class="npad-key" onclick="npadPress('8')"><span>8</span><span class="npad-sub">TUV</span></button>
+      <button class="npad-key" onclick="npadPress('9')"><span>9</span><span class="npad-sub">WXYZ</span></button>
+      <button class="npad-key" onclick="npadPress('*')"><span>*</span><span class="npad-sub"> </span></button>
+      <button class="npad-key" onclick="npadPress('0')"><span>0</span><span class="npad-sub">+</span></button>
+      <button class="npad-key" onclick="npadPress('#')"><span>#</span><span class="npad-sub"> </span></button>
     </div>
+    <div style="display:flex;gap:6px;">
+      <button class="btn btn-g" onclick="npadCallLane('a')" style="flex:1;font-size:11px;">📞 Lane A</button>
+      <button class="btn" onclick="npadCallLane('b')" style="flex:1;font-size:11px;background:none;border:1px solid var(--blue);color:var(--blue);">📞 Lane B</button>
+    </div>
+  </div>
+
+</div><!-- /center -->
+
+<!-- RIGHT: STATS + LOG -->
+<div class="panel" style="border-right:none;">
+  <div class="sbar">
+    <div class="stat"><div class="sn" id="s-appt" style="color:var(--green);">0</div><div class="sl">Appts</div></div>
+    <div class="stat"><div class="sn" id="s-cb"   style="color:var(--amber);">0</div><div class="sl">CB</div></div>
+    <div class="stat"><div class="sn" id="s-na"   style="color:var(--purple);">0</div><div class="sl">NA</div></div>
+    <div class="stat"><div class="sn" id="s-vm"   style="color:#c084fc;">0</div><div class="sl">VM</div></div>
+    <div class="stat"><div class="sn" id="s-bad"  style="color:var(--red);">0</div><div class="sl">Bad</div></div>
+  </div>
+  <div class="ph">
+    <span class="ptitle">Call Log</span>
+    <button class="btn btn-o" onclick="exportLog()" style="font-size:10px;padding:3px 7px;">↓ CSV</button>
+  </div>
+  <div class="pb" id="call-log">
+    <div style="padding:20px;text-align:center;color:var(--t3);font-size:12px;">No calls yet</div>
   </div>
 </div>
 
+</div><!-- /layout -->
+
 <!-- CONFIG MODAL -->
-<div class="modal-backdrop" id="modal">
+<div class="mbk" id="cfg-modal">
   <div class="modal">
-    <div class="modal-head">
-      <h3>Dialer Settings</h3>
-      <button class="modal-close" onclick="closeConfig()">✕</button>
-    </div>
-    <div class="modal-body">
+    <div class="mh"><h3>Settings</h3><button onclick="closeCfg()" style="background:none;border:none;color:var(--t2);cursor:pointer;font-size:16px;">✕</button></div>
+    <div class="mc">
       <div class="field">
         <label>Cloudflare Worker URL</label>
-        <input type="text" id="cfg-worker" placeholder="https://fex-dialer.YOUR-NAME.workers.dev">
-        <div class="hint">Your deployed Cloudflare Worker endpoint</div>
-      </div>
-      <!-- browser audio — no callback number needed, SDK handles it -->
-      <div style="border-top:1px solid var(--border);margin:16px 0;"></div>
-      <div class="field">
-        <label>Google Sheets — Sheet ID</label>
-        <div class="sheets-row">
-          <div class="field">
-            <input type="text" id="cfg-sheet-id" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms">
-          </div>
-          <button class="btn-sm btn-outline" onclick="testSheets()" style="flex-shrink:0;margin-bottom:0;">Test</button>
-        </div>
+        <input id="cfg-worker" placeholder="https://raspy-math-9a25.thomaslancheros06.workers.dev">
       </div>
       <div class="field">
-        <label>Sheet Tab Name</label>
-        <input type="text" id="cfg-sheet-tab" placeholder="Leads">
+        <label>Google Sheets ID</label>
+        <input id="cfg-sheet" placeholder="Sheet ID from URL">
+        <div class="hint">Sheet must be publicly shared or use Apps Script</div>
       </div>
       <div class="field">
-        <label>Apps Script Web App URL (for write-back)</label>
-        <input type="text" id="cfg-apps-script" placeholder="https://script.google.com/macros/s/.../exec">
-        <div class="hint">Deploy the Apps Script below to log outcomes to Sheets</div>
+        <label>Apps Script URL (outcome write-back)</label>
+        <input id="cfg-apps" placeholder="https://script.google.com/macros/s/.../exec">
       </div>
     </div>
-    <div class="modal-foot">
-      <button class="btn-sm btn-outline" onclick="closeConfig()">Cancel</button>
-      <button class="btn-sm btn-primary" onclick="saveConfig()">Save Settings</button>
+    <div class="mf">
+      <button class="btn btn-o" onclick="closeCfg()">Cancel</button>
+      <button class="btn btn-g" onclick="saveCfg()">Save</button>
     </div>
   </div>
 </div>
 
 <script>
-// ─────────────────────────────────────────────
-// TWILIO NUMBERS — hardcoded
-// ─────────────────────────────────────────────
-const TWILIO_NUMBERS = [
-  { number: '+15862215707', label: '(586) Mount Clemens', areaCode: '586', lat: 42.5973, lng: -82.8779 },
-  { number: '+18108193812', label: '(810) Brighton',      areaCode: '810', lat: 42.5295, lng: -83.7799 },
-  { number: '+12314442706', label: '(231) Cadillac',      areaCode: '231', lat: 44.2519, lng: -85.4013 },
-  { number: '+13136266971', label: '(313) Detroit',       areaCode: '313', lat: 42.3314, lng: -83.0458 },
-  { number: '+17349844400', label: '(734) Flat Rock',     areaCode: '734', lat: 42.1000, lng: -83.2747 },
-  { number: '+15176189305', label: '(517) Howell',        areaCode: '517', lat: 42.6075, lng: -83.9297 },
+// ═══════════════════════════════════════════════════
+// TWILIO NUMBERS
+// ═══════════════════════════════════════════════════
+const NUMBERS = [
+  {n:'+15862215707',lbl:'(586) Mount Clemens',ac:'586',lat:42.5973,lng:-82.8779},
+  {n:'+18108193812',lbl:'(810) Brighton',      ac:'810',lat:42.5295,lng:-83.7799},
+  {n:'+12314442706',lbl:'(231) Cadillac',       ac:'231',lat:44.2519,lng:-85.4013},
+  {n:'+13136266971',lbl:'(313) Detroit',        ac:'313',lat:42.3314,lng:-83.0458},
+  {n:'+17349844400',lbl:'(734) Flat Rock',      ac:'734',lat:42.1000,lng:-83.2747},
+  {n:'+15176189305',lbl:'(517) Howell',         ac:'517',lat:42.6075,lng:-83.9297},
 ];
-
-// Area code → geographic center coordinates (Michigan + common US)
-// Used to find the closest Twilio number to a lead's area code
-const AREA_CODE_COORDS = {
-  // Michigan
-  '231': { lat: 44.7631, lng: -85.6206 }, // Traverse City
-  '248': { lat: 42.5803, lng: -83.2521 }, // Troy / Oakland County
-  '269': { lat: 42.2917, lng: -85.5872 }, // Kalamazoo
-  '313': { lat: 42.3314, lng: -83.0458 }, // Detroit
-  '517': { lat: 42.7325, lng: -84.5555 }, // Lansing
-  '586': { lat: 42.5803, lng: -82.9071 }, // Sterling Heights / Macomb
-  '616': { lat: 42.9634, lng: -85.6681 }, // Grand Rapids
-  '734': { lat: 42.2808, lng: -83.7430 }, // Ann Arbor / SE Michigan
-  '810': { lat: 43.0125, lng: -83.6875 }, // Flint
-  '906': { lat: 46.4753, lng: -84.9883 }, // Upper Peninsula
-  '947': { lat: 42.5803, lng: -83.2521 }, // Oakland County overlay
-  // Ohio (border leads)
-  '419': { lat: 41.6638, lng: -83.5552 }, // Toledo
-  '567': { lat: 41.6638, lng: -83.5552 }, // Toledo overlay
-  '440': { lat: 41.4993, lng: -81.6944 }, // Cleveland suburbs
-  // Indiana (border)
-  '219': { lat: 41.6834, lng: -86.2520 }, // Gary / NW Indiana
-  '260': { lat: 41.0793, lng: -85.1394 }, // Fort Wayne
-  // Wisconsin (border)
-  '414': { lat: 43.0389, lng: -87.9065 }, // Milwaukee
-  '262': { lat: 43.0389, lng: -88.2274 }, // Waukesha
-  // Default fallback — center of Michigan
-  'default': { lat: 43.3266, lng: -84.5361 },
+const AC_COORDS = {
+  '231':{lat:44.7631,lng:-85.6206},'248':{lat:42.5803,lng:-83.2521},
+  '269':{lat:42.2917,lng:-85.5872},'313':{lat:42.3314,lng:-83.0458},
+  '517':{lat:42.7325,lng:-84.5555},'586':{lat:42.5803,lng:-82.9071},
+  '616':{lat:42.9634,lng:-85.6681},'734':{lat:42.2808,lng:-83.7430},
+  '810':{lat:43.0125,lng:-83.6875},'906':{lat:46.4753,lng:-84.9883},
+  '419':{lat:41.6638,lng:-83.5552},'440':{lat:41.4993,lng:-81.6944},
+  '219':{lat:41.6834,lng:-86.2520},'260':{lat:41.0793,lng:-85.1394},
+  'default':{lat:43.3266,lng:-84.5361},
 };
-
-// ─────────────────────────────────────────────
-// CLOSEST NUMBER LOGIC
-// ─────────────────────────────────────────────
-function haversineDistance(lat1, lng1, lat2, lng2) {
-  const R = 3958.8; // miles
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = Math.sin(dLat/2)**2 +
-            Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) *
-            Math.sin(dLng/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+function haversine(a,b){
+  const R=3958.8,dLat=(b.lat-a.lat)*Math.PI/180,dLng=(b.lng-a.lng)*Math.PI/180;
+  const x=Math.sin(dLat/2)**2+Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+}
+function closestNumber(phone){
+  const ac=phone.replace(/\D/g,'').slice(-10).slice(0,3);
+  const coord=AC_COORDS[ac]||AC_COORDS['default'];
+  let best=NUMBERS[0],bestD=Infinity;
+  for(const n of NUMBERS){const d=haversine(coord,n);if(d<bestD){bestD=d;best=n;}}
+  return {num:best,dist:Math.round(bestD),ac};
 }
 
-function getClosestNumber(leadPhone) {
-  const areaCode = leadPhone.replace(/\D/g,'').slice(-10).slice(0,3);
-  const coords = AREA_CODE_COORDS[areaCode] || AREA_CODE_COORDS['default'];
-
-  let best = TWILIO_NUMBERS[0];
-  let bestDist = Infinity;
-  for (const n of TWILIO_NUMBERS) {
-    const d = haversineDistance(coords.lat, coords.lng, n.lat, n.lng);
-    if (d < bestDist) { bestDist = d; best = n; }
-  }
-  return { number: best, distance: Math.round(bestDist), areaCode };
-}
-
-// ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════════
 // STATE
-// ─────────────────────────────────────────────
-let leads = [];
-let currentIdx = -1;
-let callLog = [];
-let timerInterval = null;
-let timerSeconds = 0;
-let autoTimeout = null;
-let callSid = null;
-let stats = { 'Appointment set': 0, 'Callback': 0, 'Not home': 0, 'Bad number': 0 };
-let selectedFromNumber = null;
+// ═══════════════════════════════════════════════════
+let leads=[], callLog=[], queuePtr=0;
+let stats={'Appointment set':0,'Callback':0,'Not home':0,'VM':0,'Bad number':0};
+let dialerRunning=false;
+let MAX_ATT=parseInt(localStorage.getItem('maxAtt')||'2');
 
-// ── Power dialer engine state ──
-let dialerRunning  = false;   // is the power dialer active?
-let callStartTime  = null;    // when current call connected
-let noAnswerTimer  = null;    // timeout to detect VM / no answer
-let currentAttempt = 0;       // how many times current lead has been dialed this pass
-let MAX_ATTEMPTS   = parseInt(localStorage.getItem('maxAttempts') || '2');
-const NO_ANSWER_TIMEOUT = 28; // seconds before treating as VM/no answer
+// Per-lane state
+const lane={
+  a:{idx:-1,conn:null,sid:null,timer:null,secs:0,startTime:null,naTimer:null,attempt:0,fromNum:null,focusLead:null},
+  b:{idx:-1,conn:null,sid:null,timer:null,secs:0,startTime:null,naTimer:null,attempt:0,fromNum:null,focusLead:null},
+};
+let activeLane='a'; // which lane outcomes apply to
+let focusedLane='a'; // which lane is selected for lead detail
 
-const cfg = {
-  workerUrl:    localStorage.getItem('workerUrl')    || 'https://raspy-math-9a25.thomaslancheros06.workers.dev',
-  browserNumber: localStorage.getItem('browserNumber') || '',
-  sheetId:      localStorage.getItem('sheetId')      || '',
-  sheetTab:     localStorage.getItem('sheetTab')     || 'Leads',
-  appsScriptUrl: localStorage.getItem('appsScriptUrl') || '',
-  autoClosest:  localStorage.getItem('autoClosest') !== 'false', // default ON
+const cfg={
+  workerUrl: localStorage.getItem('workerUrl')||'https://raspy-math-9a25.thomaslancheros06.workers.dev',
+  sheetId:   localStorage.getItem('sheetId')||'',
+  appsUrl:   localStorage.getItem('appsUrl')||'',
 };
 
-// ─────────────────────────────────────────────
-// CONFIG
-// ─────────────────────────────────────────────
-function openConfig() {
-  document.getElementById('cfg-worker').value = cfg.workerUrl;
-  document.getElementById('cfg-browser').value = cfg.browserNumber;
-  document.getElementById('cfg-sheet-id').value = cfg.sheetId;
-  document.getElementById('cfg-sheet-tab').value = cfg.sheetTab;
-  document.getElementById('cfg-apps-script').value = cfg.appsScriptUrl;
-  document.getElementById('modal').classList.add('open');
-}
-function closeConfig() { document.getElementById('modal').classList.remove('open'); }
-function saveConfig() {
-  cfg.workerUrl     = document.getElementById('cfg-worker').value.trim();
-  cfg.browserNumber = document.getElementById('cfg-browser').value.trim();
-  cfg.sheetId       = document.getElementById('cfg-sheet-id').value.trim();
-  cfg.sheetTab      = document.getElementById('cfg-sheet-tab').value.trim();
-  cfg.appsScriptUrl = document.getElementById('cfg-apps-script').value.trim();
-  Object.entries(cfg).forEach(([k,v]) => localStorage.setItem(k, v));
-  updateSyncIndicator();
-  closeConfig();
-  showToast('Settings saved');
-}
+// ═══════════════════════════════════════════════════
+// TWILIO DEVICE
+// ═══════════════════════════════════════════════════
+let device=null;
 
-function updateSyncIndicator() {
-  const el = document.getElementById('sync-indicator');
-  if (cfg.workerUrl) {
-    el.textContent = '● WORKER READY';
-    el.className = 'sync-indicator ok';
-  } else {
-    el.textContent = '● NOT CONFIGURED';
-    el.className = 'sync-indicator err';
+async function initDevice(){
+  if(!cfg.workerUrl){openCfg();return;}
+  setDev('Fetching token…','ring');
+  document.getElementById('mic-btn').disabled=true;
+  try{
+    const r=await fetch(cfg.workerUrl+'/token');
+    const d=await r.json();
+    if(!d.token)throw new Error('No token');
+    device=new Twilio.Device(d.token,{codecPreferences:['opus','pcmu'],enableRingingState:true,debug:false});
+    device.on('registered',  ()=>{setDev('READY','live');document.getElementById('mic-status').textContent='Mic connected ✓';});
+    device.on('unregistered',()=>setDev('DISCONNECTED','err'));
+    device.on('error',       e=>setDev('ERROR: '+e.message,'err'));
+    device.on('incoming',    conn=>{conn.accept();});
+    await device.register();
+    document.getElementById('mic-btn').textContent='Reconnect';
+    document.getElementById('mic-btn').disabled=false;
+  }catch(e){
+    setDev('Failed: '+e.message,'err');
+    document.getElementById('mic-btn').disabled=false;
+    toast('Device failed: '+e.message,'err');
   }
 }
-updateSyncIndicator();
 
-// ─────────────────────────────────────────────
+function setDev(msg,state){
+  const dot=document.getElementById('dev-dot'),lbl=document.getElementById('dev-status');
+  lbl.textContent=msg;
+  dot.className='dot'+(state==='live'?' live':state==='ring'?' ring':state==='err'?' err':'');
+  lbl.style.color=state==='live'?'var(--green)':state==='ring'?'var(--amber)':state==='err'?'var(--red)':'var(--t2)';
+}
+
+function setVolume(l,v){
+  const conn=lane[l].conn;
+  if(conn&&conn.volume)conn.volume(v/100);
+  // Also set via audio element if available
+  if(device&&device._soundcache){
+    // Best effort — Twilio SDK volume
+  }
+}
+
+// ═══════════════════════════════════════════════════
 // CSV IMPORT
-// ─────────────────────────────────────────────
-function importCSV(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const lines = e.target.result.split('\n').filter(l => l.trim());
-    const headers = lines[0].toLowerCase().split(',').map(h => h.trim());
-    const nameIdx  = bestIdx(headers, ['name', 'first name', 'firstname', 'full name']);
-    const phoneIdx = bestIdx(headers, ['phone', 'phone number', 'cell', 'mobile']);
-    const cityIdx  = bestIdx(headers, ['city', 'town']);
-    const stateIdx = bestIdx(headers, ['state', 'st']);
-
-    const imported = [];
-    for (let i = 1; i < lines.length; i++) {
-      const cols = splitCSVRow(lines[i]);
-      if (!cols[phoneIdx]) continue;
+// ═══════════════════════════════════════════════════
+function importCSV(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const lines=e.target.result.split('\n').filter(l=>l.trim());
+    if(!lines.length)return;
+    const headers=lines[0].split(',').map(h=>h.replace(/"/g,'').trim());
+    const phoneIdx=headers.findIndex(h=>/phone|cell|mobile|number/i.test(h));
+    const nameIdx =headers.findIndex(h=>/name|first|last/i.test(h));
+    if(phoneIdx<0){toast('No phone column found','err');return;}
+    const imported=[];
+    for(let i=1;i<lines.length;i++){
+      const cols=splitCSV(lines[i]);
+      const phone=cleanPhone(cols[phoneIdx]||'');
+      if(!phone)continue;
+      // Build a full data object from ALL columns
+      const data={};
+      headers.forEach((h,j)=>{if(cols[j]&&cols[j].trim())data[h]=cols[j].trim();});
       imported.push({
-        id: Date.now() + i,
-        name:  cols[nameIdx]  || 'Unknown',
-        phone: cleanPhone(cols[phoneIdx]),
-        city:  cols[cityIdx]  || '',
-        state: cols[stateIdx] || '',
-        outcome: null,
+        id:Date.now()+i,
+        name: nameIdx>=0?(cols[nameIdx]||'Unknown').trim():'Lead '+(i),
+        phone,
+        city: data.city||data.City||data.town||'',
+        state:data.state||data.State||data.st||'',
+        data, // all fields
+        _done:false,_attempt:0,_outcome:null,
       });
     }
-    leads = [...leads, ...imported];
+    leads=[...leads,...imported];
+    queuePtr=leads.findIndex(l=>!l._done);
     renderQueue();
-    showToast(`Imported ${imported.length} leads`);
-    if (currentIdx === -1 && leads.length > 0) selectLead(0);
+    toast('Imported '+imported.length+' leads');
+    document.getElementById('dropz').style.display='none';
   };
   reader.readAsText(file);
-  input.value = '';
+  input.value='';
 }
-
-function bestIdx(headers, candidates) {
-  for (const c of candidates) {
-    const i = headers.findIndex(h => h.includes(c));
-    if (i >= 0) return i;
+function splitCSV(row){
+  const r=[];let c='',q=false;
+  for(const ch of row){
+    if(ch==='"'){q=!q;}else if(ch===','&&!q){r.push(c.trim());c='';}else{c+=ch;}
   }
-  return 0;
+  r.push(c.trim());return r;
+}
+function cleanPhone(p){
+  const d=p.replace(/\D/g,'');
+  if(d.length===10)return'+1'+d;
+  if(d.length===11&&d[0]==='1')return'+'+d;
+  return p.replace(/\D/g,'').length>6?'+1'+d.slice(-10):'';
 }
 
-function splitCSVRow(row) {
-  const result = []; let cur = ''; let inQ = false;
-  for (const ch of row) {
-    if (ch === '"') { inQ = !inQ; }
-    else if (ch === ',' && !inQ) { result.push(cur.trim()); cur = ''; }
-    else { cur += ch; }
-  }
-  result.push(cur.trim());
-  return result;
-}
-
-function cleanPhone(p) {
-  const digits = p.replace(/\D/g, '');
-  if (digits.length === 10) return `+1${digits}`;
-  if (digits.length === 11 && digits[0] === '1') return `+${digits}`;
-  return p;
-}
-
-// ─────────────────────────────────────────────
-// GOOGLE SHEETS PULL
-// ─────────────────────────────────────────────
-async function loadFromSheets() {
-  if (!cfg.sheetId) { openConfig(); return; }
-  setStatus('Fetching from Sheets…', 'idle');
-  try {
-    // Public Sheets JSON API (sheet must be published or use Apps Script for private)
-    const url = `https://docs.google.com/spreadsheets/d/${cfg.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(cfg.sheetTab)}`;
-    const res = await fetch(url);
-    const text = await res.text();
-    const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/)[1]);
-    const rows = json.table.rows;
-    const cols = json.table.cols.map(c => c.label.toLowerCase());
-    const nameIdx  = bestIdx(cols, ['name', 'first name', 'firstname']);
-    const phoneIdx = bestIdx(cols, ['phone', 'phone number', 'cell', 'mobile']);
-    const cityIdx  = bestIdx(cols, ['city', 'town']);
-    const stateIdx = bestIdx(cols, ['state', 'st']);
-
-    const imported = rows.map((r, i) => ({
-      id: Date.now() + i,
-      name:  r.c[nameIdx]?.v  || 'Unknown',
-      phone: cleanPhone(String(r.c[phoneIdx]?.v || '')),
-      city:  r.c[cityIdx]?.v  || '',
-      state: r.c[stateIdx]?.v || '',
-      outcome: null,
-    })).filter(l => l.phone);
-
-    leads = [...leads, ...imported];
+async function loadSheets(){
+  if(!cfg.sheetId){openCfg();return;}
+  toast('Loading from Sheets…');
+  try{
+    const url=`https://docs.google.com/spreadsheets/d/${cfg.sheetId}/gviz/tq?tqx=out:json`;
+    const r=await fetch(url);
+    const t=await r.text();
+    const j=JSON.parse(t.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/)[1]);
+    const cols=j.table.cols.map(c=>c.label);
+    const phoneIdx=cols.findIndex(h=>/phone|cell|mobile/i.test(h));
+    const nameIdx =cols.findIndex(h=>/name|first/i.test(h));
+    const imported=j.table.rows.map((row,i)=>{
+      const vals=row.c.map(c=>c?String(c.v||''):'');
+      const data={};cols.forEach((h,j)=>{if(vals[j])data[h]=vals[j];});
+      const phone=cleanPhone(vals[phoneIdx]||'');
+      if(!phone)return null;
+      return{id:Date.now()+i,name:nameIdx>=0?(vals[nameIdx]||'Lead '+i):'Lead '+i,
+        phone,city:data.city||data.City||'',state:data.state||data.State||'',
+        data,_done:false,_attempt:0,_outcome:null};
+    }).filter(Boolean);
+    leads=[...leads,...imported];
+    queuePtr=leads.findIndex(l=>!l._done);
     renderQueue();
-    showToast(`Loaded ${imported.length} leads from Sheets`);
-    if (currentIdx === -1 && leads.length > 0) selectLead(0);
-    setStatus('IDLE', 'idle');
-  } catch(e) {
-    showToast('Sheets error — check Sheet ID and make sure it is publicly shared', 'err');
-    setStatus('IDLE', 'idle');
-  }
+    toast('Loaded '+imported.length+' leads');
+    document.getElementById('dropz').style.display='none';
+  }catch(e){toast('Sheets error: '+e.message,'err');}
 }
 
-async function testSheets() {
-  cfg.sheetId  = document.getElementById('cfg-sheet-id').value.trim();
-  cfg.sheetTab = document.getElementById('cfg-sheet-tab').value.trim();
-  try {
-    const url = `https://docs.google.com/spreadsheets/d/${cfg.sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(cfg.sheetTab)}&range=A1:A2`;
-    const res = await fetch(url);
-    const text = await res.text();
-    if (text.includes('google.visualization')) { showToast('✓ Sheets connection OK', 'ok'); }
-    else { throw new Error(); }
-  } catch { showToast('✗ Could not reach sheet — verify ID and sharing', 'err'); }
+function clearQueue(){
+  if(!confirm('Clear all leads?'))return;
+  leads=[];queuePtr=0;
+  lane.a.idx=-1;lane.b.idx=-1;
+  renderQueue();
+  document.getElementById('dropz').style.display='';
+  resetLaneUI('a');resetLaneUI('b');
 }
 
-// ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════════
 // QUEUE RENDER
-// ─────────────────────────────────────────────
-function renderQueue() {
-  const list = document.getElementById('lead-list');
-  const zone = document.getElementById('drop-zone');
-  zone.style.display = leads.length ? 'none' : 'block';
-
-  if (!leads.length) { list.innerHTML = ''; document.getElementById('queue-count').textContent = '0 leads'; return; }
-
-  document.getElementById('queue-count').textContent = `${leads.length} leads`;
-  list.innerHTML = leads.map((l, i) => {
-    const attemptStr = l._attempts ? ' ×' + l._attempts : '';
-    const tag = l.outcome
-      ? `<span class="lead-tag ${outcomeClass(l.outcome)}">${l.outcome}</span>`
-      : l._done
-        ? `<span class="lead-tag tag-na">no ans${attemptStr}</span>`
-        : currentIdx === i && currentAttempt > 0
-          ? `<span class="lead-tag tag-cb">try ${currentAttempt+1}/${MAX_ATTEMPTS}</span>`
-          : `<span class="lead-tag tag-queue">#${i+1}</span>`;
-    const rowClass = i === currentIdx ? 'active' : (l._done ? 'done' : '');
-    return `<div class="lead-item ${rowClass}" onclick="selectLead(${i})">
-      <div class="lead-num">${i+1}</div>
-      <div class="lead-info">
-        <div class="lead-name">${l.name}</div>
-        <div class="lead-phone">${formatPhone(l.phone)}</div>
-      </div>
-      ${tag}
-    </div>`;
+// ═══════════════════════════════════════════════════
+function renderQueue(){
+  const list=document.getElementById('lead-list');
+  document.getElementById('qcount').textContent=leads.length+' leads';
+  if(!leads.length){list.innerHTML='';return;}
+  list.innerHTML=leads.map((l,i)=>{
+    let cls='lead-item';
+    if(i===lane.a.idx)cls+=' dialing-a';
+    else if(i===lane.b.idx)cls+=' dialing-b';
+    else if(l._done)cls+=' done';
+    const tag=l._outcome
+      ?`<span class="ltag ${tagClass(l._outcome)}">${l._outcome}</span>`
+      :l._done
+        ?`<span class="ltag tag-na">×${l._attempt}</span>`
+        :`<span class="ltag tag-q">#${i+1}</span>`;
+    return`<div class="${cls}" onclick="selectLead(${i})">
+      <div class="lnum">${i+1}</div>
+      <div class="linfo">
+        <div class="lname">${l.name}</div>
+        <div class="lphone">${fmt(l.phone)}</div>
+      </div>${tag}</div>`;
   }).join('');
+  updateProgress();
 }
-
-function outcomeClass(o) {
-  if (o === 'Appointment set') return 'tag-appt';
-  if (o === 'Callback') return 'tag-cb';
-  if (o === 'Bad number') return 'tag-bad';
-  return 'tag-na';
+function tagClass(o){
+  return o==='Appointment set'?'tag-appt':o==='Callback'?'tag-cb':o==='Bad number'?'tag-bad':o==='VM'?'tag-vm':'tag-na';
 }
-
-function formatPhone(p) {
-  const d = p.replace(/\D/g,'');
-  if (d.length === 11) return `(${d.slice(1,4)}) ${d.slice(4,7)}-${d.slice(7)}`;
-  if (d.length === 10) return `(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`;
+function fmt(p){
+  const d=p.replace(/\D/g,'');
+  if(d.length===11)return`(${d.slice(1,4)}) ${d.slice(4,7)}-${d.slice(7)}`;
+  if(d.length===10)return`(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`;
   return p;
 }
 
-function selectLead(idx) {
-  currentIdx = idx;
-  const l = leads[idx];
-  document.getElementById('call-name').textContent = l.name;
-  document.getElementById('call-phone').textContent = formatPhone(l.phone);
-  document.getElementById('call-location').textContent = [l.city, l.state].filter(Boolean).join(', ');
-  document.getElementById('call-btn').disabled = false;
-  setStatus('Ready', 'idle');
-  resetTimer();
-  applyClosestNumber(l.phone);
+// ═══════════════════════════════════════════════════
+// LEAD SELECTION + DETAIL
+// ═══════════════════════════════════════════════════
+function selectLead(idx){
+  focusedLane='a'; // default focus
+  loadLeadIntoLane('a',idx);
+}
+
+function loadLeadIntoLane(l,idx){
+  if(idx<0||idx>=leads.length)return;
+  lane[l].idx=idx;
+  const lead=leads[idx];
+  document.getElementById('name-'+l).textContent=lead.name;
+  document.getElementById('phone-'+l).textContent=fmt(lead.phone);
+  document.getElementById('loc-'+l).textContent=[lead.city,lead.state].filter(Boolean).join(', ');
+  document.getElementById('call-'+l).disabled=false;
+  setLaneStatus(l,'Ready','');
+  applyClosest(l,lead.phone);
+  renderLeadDetail(lead);
   renderQueue();
 }
 
-function applyClosestNumber(phone) {
-  if (cfg.autoClosest) {
-    const { number, distance, areaCode } = getClosestNumber(phone);
-    selectedFromNumber = number.number;
-    document.getElementById('from-select').value = selectedFromNumber;
-    document.getElementById('closest-badge').textContent =
-      `▲ Auto: ${number.label} · ${distance} mi from (${areaCode})`;
-    document.getElementById('closest-badge').style.color = 'var(--green)';
-  } else {
-    selectedFromNumber = document.getElementById('from-select').value;
-    document.getElementById('closest-badge').textContent = 'Manual — auto off';
-    document.getElementById('closest-badge').style.color = 'var(--text3)';
+function renderLeadDetail(lead){
+  if(!lead){document.getElementById('lead-detail').style.display='none';return;}
+  document.getElementById('lead-detail').style.display='';
+  document.getElementById('ld-title').textContent='▸ Lead Info: '+lead.name;
+  const body=document.getElementById('ld-body');
+  const entries=Object.entries(lead.data||{});
+  if(!entries.length){body.innerHTML='<div style="color:var(--t3);font-size:11px;">No extra data</div>';return;}
+  body.innerHTML=entries.map(([k,v])=>
+    `<div class="ld-row"><span class="ld-key">${k}</span><span class="ld-val">${v}</span></div>`
+  ).join('');
+}
+
+function toggleLeadDetail(){
+  const body=document.getElementById('ld-body');
+  const arrow=document.getElementById('ld-arrow');
+  const open=body.classList.toggle('open');
+  arrow.textContent=open?'▲':'▼';
+}
+
+// ═══════════════════════════════════════════════════
+// AUTO-CLOSEST NUMBER
+// ═══════════════════════════════════════════════════
+function applyClosest(l,phone){
+  const auto=document.getElementById('auto-'+l).checked;
+  if(auto){
+    const{num,dist,ac}=closestNumber(phone);
+    lane[l].fromNum=num.n;
+    document.getElementById('from-'+l).value=num.n;
+    document.getElementById('badge-'+l).textContent='▲ Auto: '+num.lbl+' · '+dist+'mi from ('+ac+')';
+    document.getElementById('badge-'+l).style.color='var(--green)';
+  }else{
+    lane[l].fromNum=document.getElementById('from-'+l).value;
+    document.getElementById('badge-'+l).textContent='Manual';
+    document.getElementById('badge-'+l).style.color='var(--t3)';
+  }
+}
+function onFromChange(l){
+  lane[l].fromNum=document.getElementById('from-'+l).value;
+  document.getElementById('auto-'+l).checked=false;
+  document.getElementById('badge-'+l).textContent='Manual';
+  document.getElementById('badge-'+l).style.color='var(--t3)';
+}
+function onAutoToggle(l){
+  const idx=lane[l].idx;
+  if(idx>=0)applyClosest(l,leads[idx].phone);
+}
+
+// ═══════════════════════════════════════════════════
+// CALLING
+// ═══════════════════════════════════════════════════
+async function manualCall(l){
+  if(!device){toast('Connect mic first','err');return;}
+  if(lane[l].idx<0){toast('Select a lead first','err');return;}
+  await dialLead(l,lane[l].idx);
+}
+
+async function dialLead(l,idx){
+  if(!device)return;
+  if(lane[l].conn)return; // already on a call
+  lane[l].idx=idx;
+  const lead=leads[idx];
+  loadLeadIntoLane(l,idx);
+  setLaneStatus(l,'Calling…','ring');
+  document.getElementById('call-'+l).style.display='none';
+  document.getElementById('hang-'+l).style.display='';
+  document.getElementById('card-'+l).classList.add('active-call');
+  focusedLane=l;
+  setOutcomeLane(l);
+
+  try{
+    const conn=await device.connect({
+      params:{To:lead.phone,callerId:lane[l].fromNum||NUMBERS[0].n,leadName:lead.name}
+    });
+    lane[l].conn=conn;
+    lane[l].sid=conn.parameters?.CallSid||null;
+    lane[l].attempt++;
+    lead._attempt=lane[l].attempt;
+    bindConnEvents(l,conn);
+  }catch(e){
+    setLaneStatus(l,'Error: '+e.message,'');
+    resetLaneUI(l);
+    if(dialerRunning)scheduleNext(l);
   }
 }
 
-function onFromChange() {
-  selectedFromNumber = document.getElementById('from-select').value;
-  // If user manually changes, turn off auto
-  document.getElementById('closest-toggle').checked = false;
-  cfg.autoClosest = false;
-  localStorage.setItem('autoClosest', 'false');
-  document.getElementById('closest-badge').textContent = 'Manual — auto off';
-  document.getElementById('closest-badge').style.color = 'var(--text3)';
-}
+function bindConnEvents(l,conn){
+  conn.on('ringing',()=>{
+    setLaneStatus(l,'Ringing… ('+lane[l].attempt+'/'+MAX_ATT+')','ring');
+    startNATimer(l);
+  });
 
-function onClosestToggle() {
-  cfg.autoClosest = document.getElementById('closest-toggle').checked;
-  localStorage.setItem('autoClosest', cfg.autoClosest);
-  if (currentIdx >= 0) applyClosestNumber(leads[currentIdx].phone);
-}
-
-function clearQueue() {
-  if (!confirm('Clear all leads?')) return;
-  leads = []; currentIdx = -1;
-  document.getElementById('call-name').textContent = '— Select a lead —';
-  document.getElementById('call-phone').textContent = '';
-  document.getElementById('call-location').textContent = '';
-  document.getElementById('call-btn').disabled = true;
-  renderQueue();
-}
-
-function skipLead() {
-  if (currentIdx < leads.length - 1) selectLead(currentIdx + 1);
-  else showToast('End of queue');
-}
-
-// ─────────────────────────────────────────────
-// CALL CONTROL
-// ─────────────────────────────────────────────
-// ─────────────────────────────────────────────
-// TWILIO CLIENT (BROWSER AUDIO)
-// ─────────────────────────────────────────────
-let twilioDevice = null;
-let activeConnection = null;
-
-async function initDevice() {
-  if (!cfg.workerUrl) { openConfig(); return; }
-  setDeviceStatus('Fetching token…', 'amber');
-  document.getElementById('connect-btn').disabled = true;
-
-  try {
-    const res  = await fetch(cfg.workerUrl + '/token');
-    const data = await res.json();
-    if (!data.token) throw new Error('No token returned');
-
-    twilioDevice = new Twilio.Device(data.token, {
-      codecPreferences: ['opus', 'pcmu'],
-      fakeLocalDTMF: true,
-      enableRingingState: true,
-      debug: false,
-    });
-
-    twilioDevice.on('registered',   ()  => setDeviceStatus('READY — mic connected', 'green'));
-    twilioDevice.on('unregistered', ()  => setDeviceStatus('DISCONNECTED', 'red'));
-    twilioDevice.on('error',        (e) => { setDeviceStatus('ERROR: ' + e.message, 'red'); console.error(e); });
-
-    twilioDevice.on('incoming', conn => {
-      conn.accept();
-      activeConnection = conn;
-      handleConnectionEvents(conn);
-    });
-
-    await twilioDevice.register();
-    document.getElementById('connect-btn').textContent = 'Reconnect';
-    document.getElementById('connect-btn').disabled = false;
-
-  } catch(e) {
-    setDeviceStatus('Failed: ' + e.message, 'red');
-    document.getElementById('connect-btn').disabled = false;
-    showToast('Device init failed: ' + e.message, 'err');
-  }
-}
-
-function setDeviceStatus(msg, color) {
-  const dot = document.getElementById('device-dot');
-  const lbl = document.getElementById('device-status');
-  lbl.textContent = msg;
-  const colors = { green: 'var(--green)', amber: 'var(--amber)', red: 'var(--red)', gray: 'var(--text3)' };
-  dot.style.background = colors[color] || colors.gray;
-  dot.style.boxShadow = color === 'green' ? '0 0 6px var(--green)' : 'none';
-  if (color === 'amber') { dot.style.animation = 'pulse 1s ease-in-out infinite'; }
-  else { dot.style.animation = color === 'green' ? 'pulse 2s ease-in-out infinite' : 'none'; }
-  lbl.style.color = colors[color] || 'var(--text3)';
-}
-
-function handleConnectionEvents(conn) {
-  conn.on('accept', () => {
-    setStatus('Connected ✓', 'calling');
+  conn.on('accept',()=>{
+    clearNATimer(l);
+    lane[l].startTime=Date.now();
+    startLaneTimer(l);
+    setLaneStatus(l,'Connected ✓','live');
+    document.getElementById('card-'+l).style.borderTop='2px solid var(--green)';
+    // Cut the OTHER lane if it's also ringing (not yet answered)
+    const other=l==='a'?'b':'a';
+    if(lane[other].conn&&!lane[other].startTime){
+      // Other lane is ringing but not answered — cut it
+      setLaneStatus(other,'Cut — other lane connected','');
+      lane[other].conn.disconnect();
+    }
+    focusedLane=l;
+    setOutcomeLane(l);
     enableOutcomes(true);
-    startTimer();
-    callStartTime = Date.now();
-    clearNoAnswerTimer(); // answered — cancel VM detection
-    updateDialerProgress();
   });
 
-  conn.on('ringing', () => {
-    setStatus('Ringing… attempt ' + currentAttempt + '/' + MAX_ATTEMPTS, 'calling');
-    // Start no-answer timer — if no pickup in NO_ANSWER_TIMEOUT seconds, treat as VM
-    startNoAnswerTimer();
-  });
+  conn.on('disconnect',()=>{
+    clearNATimer(l);
+    const duration=lane[l].startTime?Math.round((Date.now()-lane[l].startTime)/1000):0;
+    lane[l].startTime=null;
+    stopLaneTimer(l);
+    document.getElementById('card-'+l).style.borderTop='';
+    document.getElementById('card-'+l).classList.remove('active-call');
+    resetLaneUI(l);
+    lane[l].conn=null;
 
-  conn.on('disconnect', () => {
-    clearNoAnswerTimer();
-    const duration = callStartTime ? Math.round((Date.now() - callStartTime) / 1000) : 0;
-    callStartTime = null;
-    stopTimer();
-    resetCallUI();
-
-    if (dialerRunning) {
-      // Was this a real conversation or a VM/no-answer?
-      if (duration >= 8) {
-        // Talked for 8+ seconds — real person, pause and wait for outcome
-        setStatus('Call ended — log outcome', 'idle');
+    if(dialerRunning){
+      if(duration>=8){
+        // Real conversation — wait for outcome, pause dialer on this lane
+        setLaneStatus(l,'Log outcome ↓','');
         enableOutcomes(true);
-        // Don't auto-advance — wait for agent to log outcome
-      } else {
-        // Short call = VM or hangup — log and advance
-        setStatus('No answer / VM — moving on…', 'calling');
-        autoAdvanceAfterNoAnswer();
+        focusedLane=l;
+        setOutcomeLane(l);
+      }else{
+        // VM / no answer
+        const vmDetect=document.getElementById('vm-detect').checked;
+        if(vmDetect){
+          autoLogAndAdvance(l,'VM');
+        }else{
+          autoLogAndAdvance(l,'Not home');
+        }
       }
-    } else {
-      setStatus('Call ended — log outcome', 'idle');
+    }else{
+      setLaneStatus(l,'Call ended — log outcome','');
       enableOutcomes(true);
     }
   });
 
-  conn.on('cancel', () => {
-    clearNoAnswerTimer();
-    resetCallUI();
-    if (dialerRunning) autoAdvanceAfterNoAnswer();
-    else setStatus('Call cancelled', 'idle');
-  });
-
-  conn.on('reject', () => {
-    clearNoAnswerTimer();
-    resetCallUI();
-    if (dialerRunning) autoAdvanceAfterNoAnswer();
-    else setStatus('Call rejected', 'idle');
-  });
-
-  conn.on('error', (e) => {
-    clearNoAnswerTimer();
-    resetCallUI();
-    setStatus('Error: ' + e.message, 'idle');
-    if (dialerRunning) scheduleNextCall();
-  });
+  conn.on('cancel', ()=>{ clearNATimer(l); resetLaneUI(l); lane[l].conn=null; if(dialerRunning)scheduleNext(l,false); });
+  conn.on('reject', ()=>{ clearNATimer(l); resetLaneUI(l); lane[l].conn=null; if(dialerRunning)scheduleNext(l,false); });
+  conn.on('error',  e=>{ clearNATimer(l); resetLaneUI(l); lane[l].conn=null; setLaneStatus(l,'Err: '+e.message,''); if(dialerRunning)scheduleNext(l,false); });
 }
 
-function startNoAnswerTimer() {
-  clearNoAnswerTimer();
-  noAnswerTimer = setTimeout(() => {
-    // Still ringing after NO_ANSWER_TIMEOUT — hang up and move on
-    if (activeConnection) {
-      setStatus('No answer — hanging up…', 'calling');
-      activeConnection.disconnect();
-    }
-  }, NO_ANSWER_TIMEOUT * 1000);
-}
-
-function clearNoAnswerTimer() {
-  if (noAnswerTimer) { clearTimeout(noAnswerTimer); noAnswerTimer = null; }
-}
-
-async function startCall() {
-  if (currentIdx < 0) return;
-  if (!cfg.workerUrl) { openConfig(); return; }
-  if (!selectedFromNumber) { showToast('Select a From number first', 'err'); return; }
-
-  if (!twilioDevice) {
-    showToast('Click "Connect Mic" first', 'err');
-    return;
-  }
-
-  const lead = leads[currentIdx];
-  setStatus('Calling…', 'calling');
-  document.getElementById('call-btn').classList.add('hidden');
-  document.getElementById('hang-btn').classList.add('visible');
-  enableOutcomes(false);
-
-  try {
-    const conn = await twilioDevice.connect({
-      params: {
-        To:       lead.phone,
-        callerId: selectedFromNumber,
-        leadName: lead.name,
-      }
-    });
-    activeConnection = conn;
-    callSid = conn.parameters?.CallSid || null;
-    handleConnectionEvents(conn);
-  } catch(e) {
-    setStatus('Error: ' + e.message, 'idle');
-    resetCall();
-    showToast('Call failed: ' + e.message, 'err');
-  }
-}
-
-async function hangUp() {
-  if (activeConnection) {
-    activeConnection.disconnect();
-    activeConnection = null;
-  }
-  callSid = null;
-  setStatus('Call ended — log outcome below', 'idle');
-  stopTimer();
-  resetCallUI();
+function hangUp(l){
+  if(lane[l].conn){lane[l].conn.disconnect();lane[l].conn=null;}
+  setLaneStatus(l,'Hung up','');
+  resetLaneUI(l);
+  stopLaneTimer(l);
   enableOutcomes(true);
 }
 
-function resetCallUI() {
-  document.getElementById('call-btn').classList.remove('hidden');
-  document.getElementById('hang-btn').classList.remove('visible');
+function forceHangup(l){
+  // Force disconnect — for debug
+  if(lane[l].conn){
+    try{lane[l].conn.disconnect();}catch(e){}
+    try{lane[l].conn.reject();}catch(e){}
+    lane[l].conn=null;
+  }
+  clearNATimer(l);
+  stopLaneTimer(l);
+  resetLaneUI(l);
+  lane[l].startTime=null;
+  setLaneStatus(l,'Force disconnected','');
+  toast('Lane '+l.toUpperCase()+' force disconnected');
 }
 
-function logOutcome(outcome) {
-  if (currentIdx < 0) return;
-  const lead = leads[currentIdx];
-  lead.outcome = outcome;
+// ═══════════════════════════════════════════════════
+// VM DETECTION — no-answer timer
+// ═══════════════════════════════════════════════════
+// Fast VM detect: most carrier VMs pick up in 20-25s
+// Also: if call connects but drops in <4s it's likely an automated VM
+const NA_TIMEOUT=25;
 
-  // Update stats
-  stats[outcome] = (stats[outcome] || 0) + 1;
+function startNATimer(l){
+  clearNATimer(l);
+  lane[l].naTimer=setTimeout(()=>{
+    if(lane[l].conn&&!lane[l].startTime){
+      setLaneStatus(l,'No answer — hanging up','');
+      lane[l].conn.disconnect();
+    }
+  },NA_TIMEOUT*1000);
+}
+function clearNATimer(l){
+  if(lane[l].naTimer){clearTimeout(lane[l].naTimer);lane[l].naTimer=null;}
+}
+
+// ═══════════════════════════════════════════════════
+// POWER DIALER ENGINE
+// ═══════════════════════════════════════════════════
+function startPowerDialer(){
+  if(!device){toast('Connect mic first','err');return;}
+  if(!leads.length){toast('Load leads first','err');return;}
+  dialerRunning=true;
+  document.getElementById('pd-start').style.display='none';
+  document.getElementById('pd-stop').style.display='';
+  toast('Power dialer started — dual lane');
+  queuePtr=leads.findIndex(l=>!l._done);
+  if(queuePtr<0){toast('All leads complete');stopPowerDialer();return;}
+  // Fire both lanes
+  fireNextLead('a');
+  setTimeout(()=>fireNextLead('b'),800); // slight stagger so calls don't overlap exactly
+}
+
+function stopPowerDialer(){
+  dialerRunning=false;
+  document.getElementById('pd-start').style.display='';
+  document.getElementById('pd-stop').style.display='none';
+  document.getElementById('pd-prog').textContent='';
+  toast('Dialer stopped');
+}
+
+function fireNextLead(l){
+  if(!dialerRunning)return;
+  if(lane[l].conn)return; // lane busy
+  // Find next undone lead not currently being dialed by the other lane
+  const other=l==='a'?'b':'a';
+  const idx=leads.findIndex((lead,i)=>!lead._done&&i!==lane[other].idx&&(i>=queuePtr));
+  if(idx<0){
+    // Try from beginning for second pass
+    const idx2=leads.findIndex((lead,i)=>!lead._done&&i!==lane[other].idx);
+    if(idx2<0){
+      setLaneStatus(l,'Queue done','');
+      // Check if both lanes done
+      if(!lane[other].conn)stopPowerDialer();
+      return;
+    }
+    dialLead(l,idx2);
+  }else{
+    dialLead(l,idx);
+  }
+  updateProgress();
+}
+
+function autoLogAndAdvance(l,outcome){
+  const idx=lane[l].idx;
+  if(idx<0)return;
+  const lead=leads[idx];
+  lead._attempt=(lane[l].attempt||1);
+
+  if(lead._attempt>=MAX_ATT){
+    // Max attempts reached — mark done
+    lead._done=true;
+    lead._outcome=outcome;
+    logEntry(lead,outcome,0);
+    lane[l].attempt=0;
+    setLaneStatus(l,outcome+' — moving on','');
+    scheduleNext(l,false);
+  }else{
+    // Retry
+    setLaneStatus(l,'Retry '+lead._attempt+'/'+MAX_ATT+'…','ring');
+    scheduleNext(l,true);
+  }
+}
+
+function scheduleNext(l,sameLead=false){
+  if(!dialerRunning)return;
+  const delay=parseInt(document.getElementById('delay-sel').value)*1000;
+  setTimeout(()=>{
+    if(!dialerRunning)return;
+    if(sameLead){
+      const idx=lane[l].idx;
+      if(idx>=0)dialLead(l,idx);
+    }else{
+      lane[l].idx=-1;
+      fireNextLead(l);
+    }
+    renderQueue();
+  },delay);
+}
+
+function skipActive(){
+  // Skip whichever lane is focused / currently ringing
+  const l=focusedLane;
+  if(lane[l].conn){lane[l].conn.disconnect();}
+  if(lane[l].idx>=0){leads[lane[l].idx]._done=true;}
+  lane[l].attempt=0;
+  resetLaneUI(l);
+  if(dialerRunning)scheduleNext(l,false);
+  renderQueue();
+}
+
+function updateProgress(){
+  const done=leads.filter(l=>l._done).length;
+  document.getElementById('pd-prog').textContent=done+'/'+leads.length;
+}
+
+// ═══════════════════════════════════════════════════
+// OUTCOME LOGGING
+// ═══════════════════════════════════════════════════
+function setOutcomeLane(l){
+  activeLane=l;
+  document.getElementById('outcome-lane').textContent='Lane '+l.toUpperCase()+' — '+((lane[l].idx>=0&&leads[lane[l].idx])?leads[lane[l].idx].name:'');
+  document.getElementById('outcome-lane').style.color=l==='a'?'var(--green)':'var(--blue)';
+}
+
+function enableOutcomes(on){
+  ['ob-appt','ob-cb','ob-na','ob-bad'].forEach(id=>document.getElementById(id).disabled=!on);
+}
+
+function logOutcome(outcome){
+  const l=activeLane;
+  const idx=lane[l].idx;
+  if(idx<0)return;
+  const lead=leads[idx];
+  lead._done=true;
+  lead._outcome=outcome;
+  lead._attempt=lane[l].attempt||1;
+  logEntry(lead,outcome,lane[l].secs);
+  lane[l].attempt=0;
+  resetLaneUI(l);
+  stopLaneTimer(l);
+  enableOutcomes(false);
+  renderQueue();
+  if(dialerRunning)scheduleNext(l,false);
+}
+
+function logEntry(lead,outcome,duration){
+  stats[outcome]=(stats[outcome]||0)+1;
   updateStats();
-
-  // Log entry
-  const entry = {
-    time: new Date(),
-    name: lead.name,
-    phone: lead.phone,
-    outcome,
-    duration: timerSeconds,
-    callSid
-  };
+  const entry={time:new Date(),name:lead.name,phone:lead.phone,outcome,duration,sid:lead._sid||null};
   callLog.unshift(entry);
   renderLog();
-
-  // Write back to Google Sheets if configured
-  if (cfg.appsScriptUrl) pushToSheets(entry);
-
-  // Reset call state
-  resetCall();
-  renderQueue();
-
-  // Mark lead as done
-  lead._done = true;
-  currentAttempt = 0;
-
-  // Auto-advance if power dialer is running
-  if (dialerRunning) {
-    scheduleNextCall(false);
-  } else {
-    const next = leads.findIndex((l, i) => i > currentIdx && !l._done);
-    if (next >= 0) selectLead(next);
-  }
+  if(cfg.appsUrl)pushSheets(entry);
 }
 
-async function pushToSheets(entry) {
-  try {
-    await fetch(cfg.appsScriptUrl, {
-      method: 'POST',
-      body: JSON.stringify({
-        name: entry.name, phone: entry.phone,
-        outcome: entry.outcome,
-        duration: formatDuration(entry.duration),
-        time: entry.time.toISOString(),
-        callSid: entry.callSid
-      })
-    });
-  } catch(e) { console.warn('Sheets write-back failed', e); }
+async function pushSheets(e){
+  try{
+    await fetch(cfg.appsUrl,{method:'POST',body:JSON.stringify({
+      name:e.name,phone:e.phone,outcome:e.outcome,
+      duration:fmtDur(e.duration),time:e.time.toISOString(),sid:e.sid
+    })});
+  }catch(err){console.warn('Sheets write failed',err);}
 }
 
-function resetCall() {
-  stopTimer(); resetTimer();
-  callSid = null;
-  activeConnection = null;
-  resetCallUI();
-  enableOutcomes(false);
-  setStatus('', 'idle');
+// ═══════════════════════════════════════════════════
+// LANE UI HELPERS
+// ═══════════════════════════════════════════════════
+function resetLaneUI(l){
+  document.getElementById('call-'+l).style.display='';
+  document.getElementById('hang-'+l).style.display='none';
+  document.getElementById('card-'+l).classList.remove('active-call');
+  document.getElementById('card-'+l).style.borderTop='';
+  stopLaneTimer(l);
 }
 
-// ─────────────────────────────────────────────
-// POWER DIALER ENGINE
-// ─────────────────────────────────────────────
-function startPowerDialer() {
-  if (!twilioDevice) { showToast('Click "Connect Mic" first', 'err'); return; }
-  if (!leads.length)  { showToast('Load leads first', 'err'); return; }
-
-  dialerRunning = true;
-  currentAttempt = 0;
-  document.getElementById('dialer-start-btn').style.display = 'none';
-  document.getElementById('dialer-stop-btn').style.display  = '';
-  showToast('Power dialer started');
-
-  // Find first unfinished lead
-  const first = leads.findIndex(l => !l._done);
-  if (first >= 0) { selectLead(first); startCall(); }
-  else { showToast('All leads complete ✓'); stopPowerDialer(); }
+function setLaneStatus(l,msg,state){
+  document.getElementById('status-'+l).textContent=msg;
 }
 
-function stopPowerDialer() {
-  dialerRunning = false;
-  clearNoAnswerTimer();
-  if (autoTimeout) { clearTimeout(autoTimeout); autoTimeout = null; }
-  document.getElementById('dialer-start-btn').style.display = '';
-  document.getElementById('dialer-stop-btn').style.display  = 'none';
-  document.getElementById('dialer-progress').textContent    = '';
-  showToast('Power dialer stopped');
-}
-
-function autoAdvanceAfterNoAnswer() {
-  if (!dialerRunning) return;
-  const lead = leads[currentIdx];
-  if (!lead) return;
-
-  currentAttempt++;
-  updateDialerProgress();
-
-  if (currentAttempt < MAX_ATTEMPTS) {
-    // Retry same lead after delay
-    setStatus('Retrying ' + lead.name + ' (' + currentAttempt + '/' + MAX_ATTEMPTS + ')…', 'calling');
-    scheduleNextCall(true); // same lead
-  } else {
-    // Max attempts reached — mark as no answer and move on
-    lead._attempts = currentAttempt;
-    lead._done = true;
-    // Log it silently
-    const entry = {
-      time: new Date(), name: lead.name, phone: lead.phone,
-      outcome: 'Not home', duration: 0, callSid: null,
-    };
-    callLog.unshift(entry);
-    stats['Not home'] = (stats['Not home'] || 0) + 1;
-    updateStats(); renderLog(); renderQueue();
-    if (cfg.appsScriptUrl) pushToSheets(entry);
-    currentAttempt = 0;
-    scheduleNextCall(false); // next lead
-  }
-}
-
-function scheduleNextCall(sameLead = false) {
-  if (!dialerRunning) return;
-  const delay = parseInt(document.getElementById('delay-select').value) * 1000;
-  autoTimeout = setTimeout(() => {
-    if (!dialerRunning) return;
-    if (sameLead) {
-      startCall();
-    } else {
-      const next = leads.findIndex((l, i) => i > currentIdx && !l._done);
-      if (next >= 0) { selectLead(next); currentAttempt = 0; startCall(); }
-      else {
-        // Check if there are any leads that still need more attempts (second pass)
-        const retry = leads.findIndex(l => !l._done);
-        if (retry >= 0) { selectLead(retry); currentAttempt = 0; startCall(); }
-        else { showToast('Queue complete ✓ All leads dialed'); stopPowerDialer(); }
-      }
-    }
-  }, delay);
-}
-
-function updateDialerProgress() {
-  const done  = leads.filter(l => l._done).length;
-  const total = leads.length;
-  const lead  = leads[currentIdx];
-  const attStr = lead ? ' · attempt ' + currentAttempt + '/' + MAX_ATTEMPTS : '';
-  document.getElementById('dialer-progress').textContent = done + '/' + total + attStr;
-}
-
-function skipCurrentLead() {
-  if (currentIdx >= 0) {
-    leads[currentIdx]._done = true;
-    renderQueue();
-  }
-  if (dialerRunning) {
-    clearNoAnswerTimer();
-    if (activeConnection) activeConnection.disconnect();
-    currentAttempt = 0;
-    scheduleNextCall(false);
-  } else {
-    const next = leads.findIndex((l, i) => i > currentIdx && !l._done);
-    if (next >= 0) selectLead(next);
-  }
-}
-
-function skipLead() { skipCurrentLead(); }
-
-// ─────────────────────────────────────────────
-// TIMER
-// ─────────────────────────────────────────────
-function startTimer() {
-  timerSeconds = 0;
-  const el = document.getElementById('call-timer');
+// ═══════════════════════════════════════════════════
+// TIMERS
+// ═══════════════════════════════════════════════════
+function startLaneTimer(l){
+  stopLaneTimer(l);
+  lane[l].secs=0;
+  const el=document.getElementById('timer-'+l);
   el.classList.remove('idle');
-  timerInterval = setInterval(() => {
-    timerSeconds++;
-    el.textContent = formatDuration(timerSeconds);
-  }, 1000);
+  lane[l].timer=setInterval(()=>{
+    lane[l].secs++;
+    el.textContent=fmtDur(lane[l].secs);
+  },1000);
 }
-function stopTimer() { clearInterval(timerInterval); timerInterval = null; }
-function resetTimer() {
-  stopTimer(); timerSeconds = 0;
-  const el = document.getElementById('call-timer');
-  el.textContent = '0:00'; el.classList.add('idle');
+function stopLaneTimer(l){
+  if(lane[l].timer){clearInterval(lane[l].timer);lane[l].timer=null;}
+  document.getElementById('timer-'+l).classList.add('idle');
 }
-function formatDuration(s) {
-  const m = Math.floor(s/60); const sec = s%60;
-  return `${m}:${String(sec).padStart(2,'0')}`;
-}
+function fmtDur(s){const m=Math.floor(s/60);return m+':'+(s%60+'').padStart(2,'0');}
 
-// ─────────────────────────────────────────────
-// STATUS
-// ─────────────────────────────────────────────
-function setStatus(msg, mode) {
-  document.getElementById('call-status').textContent = msg;
-  document.getElementById('status-label').textContent = msg.toUpperCase() || 'IDLE';
-  const dot = document.getElementById('status-dot');
-  dot.className = 'status-dot';
-  if (mode === 'calling') dot.classList.add('calling');
-  if (mode === 'live') dot.classList.add('live');
+// ═══════════════════════════════════════════════════
+// STATS + LOG
+// ═══════════════════════════════════════════════════
+function updateStats(){
+  document.getElementById('s-appt').textContent=stats['Appointment set']||0;
+  document.getElementById('s-cb').textContent  =stats['Callback']||0;
+  document.getElementById('s-na').textContent  =stats['Not home']||0;
+  document.getElementById('s-vm').textContent  =stats['VM']||0;
+  document.getElementById('s-bad').textContent =stats['Bad number']||0;
 }
-
-function enableOutcomes(on) {
-  ['ob-appt','ob-cb','ob-na','ob-bad'].forEach(id => {
-    document.getElementById(id).disabled = !on;
-  });
+function renderLog(){
+  const el=document.getElementById('call-log');
+  if(!callLog.length){el.innerHTML='<div style="padding:20px;text-align:center;color:var(--t3);font-size:12px;">No calls yet</div>';return;}
+  const cls={
+    'Appointment set':'var(--green)','Callback':'var(--amber)',
+    'Not home':'var(--purple)','VM':'#c084fc','Bad number':'var(--red)'
+  };
+  el.innerHTML=callLog.map(e=>`<div class="log-item">
+    <div class="log-time">${e.time.toLocaleTimeString()} · ${fmtDur(e.duration)}</div>
+    <div class="log-name">${e.name}</div>
+    <div style="font-size:10px;color:${cls[e.outcome]||'var(--t2)'};">${e.outcome}</div>
+  </div>`).join('');
 }
-
-// ─────────────────────────────────────────────
-// LOG + STATS
-// ─────────────────────────────────────────────
-function renderLog() {
-  const el = document.getElementById('call-log');
-  if (!callLog.length) {
-    el.innerHTML = '<div class="empty-state"><div class="big">📋</div>No calls logged yet.</div>';
-    return;
-  }
-  el.innerHTML = callLog.map(e => {
-    const cls = e.outcome === 'Appointment set' ? 's-appt' :
-                e.outcome === 'Callback'         ? 's-cb'   :
-                e.outcome === 'Bad number'        ? 's-bad'  : 's-na';
-    return `<div class="log-item">
-      <div class="log-time">${e.time.toLocaleTimeString()} <span class="log-duration">${formatDuration(e.duration)}</span></div>
-      <div class="log-name">${e.name}</div>
-      <div class="log-outcome ${cls}">${e.outcome}</div>
-    </div>`;
-  }).join('');
-}
-
-function updateStats() {
-  document.getElementById('s-appt').textContent = stats['Appointment set'] || 0;
-  document.getElementById('s-cb').textContent   = stats['Callback']        || 0;
-  document.getElementById('s-na').textContent   = stats['Not home']        || 0;
-  document.getElementById('s-bad').textContent  = stats['Bad number']      || 0;
-}
-
-function exportLog() {
-  if (!callLog.length) { showToast('No log to export'); return; }
-  const rows = ['Name,Phone,Outcome,Duration,Time,Call SID',
-    ...callLog.map(e => `${e.name},${e.phone},${e.outcome},${formatDuration(e.duration)},${e.time.toISOString()},${e.callSid||''}`)
-  ].join('\n');
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([rows], {type:'text/csv'}));
-  a.download = `fex-calls-${new Date().toISOString().slice(0,10)}.csv`;
+function exportLog(){
+  if(!callLog.length){toast('No log');return;}
+  const rows=['Name,Phone,Outcome,Duration,Time',...callLog.map(e=>`${e.name},${e.phone},${e.outcome},${fmtDur(e.duration)},${e.time.toISOString()}`)].join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([rows],{type:'text/csv'}));
+  a.download='fex-calls-'+new Date().toISOString().slice(0,10)+'.csv';
   a.click();
 }
 
-// ─────────────────────────────────────────────
-// TOAST
-// ─────────────────────────────────────────────
-function showToast(msg, type = 'ok') {
-  const t = document.createElement('div');
-  t.style.cssText = `position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
-    background:${type==='err'?'#3a1020':'#0a2a0a'};
-    border:1px solid ${type==='err'?'var(--red)':'var(--green-dim)'};
-    color:${type==='err'?'var(--red)':'var(--green)'};
-    padding:8px 18px;border-radius:6px;font-size:13px;font-family:var(--mono);
-    z-index:999;white-space:nowrap;`;
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 3000);
+// ═══════════════════════════════════════════════════
+// NUMPAD
+// ═══════════════════════════════════════════════════
+let npadVal='';
+function npadPress(k){
+  if(k==='0'&&npadVal==='')npadVal='+';
+  else if(npadVal.length<15)npadVal+=k;
+  renderNpad();
 }
-
-// ─────────────────────────────────────────────
-// DRAG & DROP
-// ─────────────────────────────────────────────
-document.addEventListener('dragover', e => e.preventDefault());
-document.addEventListener('drop', e => {
-  e.preventDefault();
-  const file = e.dataTransfer.files[0];
-  if (file && file.name.endsWith('.csv')) {
-    const fakeInput = { files: [file] };
-    importCSV(fakeInput);
-  }
+function npadBack(){npadVal=npadVal.slice(0,-1);renderNpad();}
+function renderNpad(){
+  const el=document.getElementById('npad-display');
+  el.textContent=npadVal||'Enter number…';
+  el.style.color=npadVal?'var(--blue)':'var(--t3)';
+}
+function npadCallLane(l){
+  if(!npadVal){toast('Enter a number','err');return;}
+  let d=npadVal.replace(/\D/g,'');
+  if(d.length===10)d='1'+d;
+  const e164='+'+d;
+  const tmp={id:Date.now(),name:fmt(e164),phone:e164,city:'',state:'',data:{},_done:false,_attempt:0,_outcome:null,_manual:true};
+  leads.unshift(tmp);
+  renderQueue();
+  loadLeadIntoLane(l,0);
+  // Shift all other indices
+  lane.a.idx=lane.a.idx>=0?lane.a.idx+1:lane.a.idx;
+  lane.b.idx=lane.b.idx>=0?lane.b.idx+1:lane.b.idx;
+  lane[l].idx=0;
+  dialLead(l,0);
+  npadVal='';renderNpad();
+}
+document.addEventListener('keydown',e=>{
+  if(document.activeElement.tagName==='INPUT')return;
+  if(/^[0-9*#]$/.test(e.key))npadPress(e.key);
+  else if(e.key==='Backspace')npadBack();
+  else if(e.key==='Enter')npadCallLane('a');
 });
 
-// Populate from-number dropdown
-(function initFromSelect() {
-  const sel = document.getElementById('from-select');
-  TWILIO_NUMBERS.forEach(n => {
-    const opt = document.createElement('option');
-    opt.value = n.number;
-    opt.textContent = `${n.label}  ${n.number}`;
-    sel.appendChild(opt);
+// ═══════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════
+function openCfg(){
+  document.getElementById('cfg-worker').value=cfg.workerUrl;
+  document.getElementById('cfg-sheet').value=cfg.sheetId;
+  document.getElementById('cfg-apps').value=cfg.appsUrl;
+  document.getElementById('cfg-modal').classList.add('open');
+}
+function closeCfg(){document.getElementById('cfg-modal').classList.remove('open');}
+function saveCfg(){
+  cfg.workerUrl=document.getElementById('cfg-worker').value.trim();
+  cfg.sheetId  =document.getElementById('cfg-sheet').value.trim();
+  cfg.appsUrl  =document.getElementById('cfg-apps').value.trim();
+  localStorage.setItem('workerUrl',cfg.workerUrl);
+  localStorage.setItem('sheetId',cfg.sheetId);
+  localStorage.setItem('appsUrl',cfg.appsUrl);
+  updateSync();closeCfg();toast('Settings saved');
+}
+function updateSync(){
+  const el=document.getElementById('sync-ind');
+  el.textContent=cfg.workerUrl?'● WORKER SET':'● UNCONFIGURED';
+  el.className='sync'+(cfg.workerUrl?' ok':' err');
+}
+updateSync();
+
+// ═══════════════════════════════════════════════════
+// INIT FROM SELECTS
+// ═══════════════════════════════════════════════════
+(function init(){
+  ['a','b'].forEach(l=>{
+    const sel=document.getElementById('from-'+l);
+    NUMBERS.forEach(n=>{
+      const o=document.createElement('option');
+      o.value=n.n;o.textContent=n.lbl+' '+n.n;sel.appendChild(o);
+    });
+    lane[l].fromNum=NUMBERS[0].n;
   });
-  selectedFromNumber = TWILIO_NUMBERS[0].number;
-  sel.value = selectedFromNumber;
-  document.getElementById('closest-toggle').checked = cfg.autoClosest;
-  // Restore max attempts
-  const savedAttempts = localStorage.getItem('maxAttempts') || '2';
-  document.getElementById('max-attempts').value = savedAttempts;
-  MAX_ATTEMPTS = parseInt(savedAttempts);
+  document.getElementById('max-att').value=localStorage.getItem('maxAtt')||'2';
+  MAX_ATT=parseInt(document.getElementById('max-att').value);
+  if(!cfg.workerUrl)setTimeout(openCfg,600);
 })();
 
-
-// ─────────────────────────────────────────────
-// NUMPAD
-// ─────────────────────────────────────────────
-let numpadValue = '';
-
-function switchTab(tab) {
-  document.getElementById('tab-outcome').classList.toggle('active', tab === 'outcome');
-  document.getElementById('tab-numpad').classList.toggle('active', tab === 'numpad');
-  document.getElementById('panel-outcome').style.display = tab === 'outcome' ? '' : 'none';
-  document.getElementById('panel-numpad').style.display  = tab === 'numpad'  ? '' : 'none';
-}
-
-function numpadPress(key) {
-  if (key === '0' && numpadValue === '') { numpadValue = '+'; }
-  else if (numpadValue.length < 15) { numpadValue += key; }
-  renderNumpadDisplay();
-}
-
-function numpadBack() {
-  numpadValue = numpadValue.slice(0, -1);
-  renderNumpadDisplay();
-}
-
-function renderNumpadDisplay() {
-  const el = document.getElementById('numpad-display');
-  if (!numpadValue) { el.textContent = 'Enter number…'; el.style.color = 'var(--text3)'; }
-  else { el.textContent = formatNumpadDisplay(numpadValue); el.style.color = 'var(--blue)'; }
-}
-
-function formatNumpadDisplay(v) {
-  const d = v.replace(/\D/g,'');
-  if (v.startsWith('+') && d.length <= 11) {
-    if (d.length > 10) return `+${d[0]} (${d.slice(1,4)}) ${d.slice(4,7)}-${d.slice(7)}`;
-    return v;
-  }
-  if (d.length === 10) return `(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`;
-  if (d.length > 10)   return `+${d.slice(0,1)} (${d.slice(1,4)}) ${d.slice(4,7)}-${d.slice(7)}`;
-  return v;
-}
-
-function numpadCall() {
-  if (!numpadValue) { showToast('Enter a number first', 'err'); return; }
-  // Normalize to E.164
-  let digits = numpadValue.replace(/\D/g,'');
-  if (digits.length === 10) digits = '1' + digits;
-  const e164 = '+' + digits;
-
-  // Inject as a temporary lead and call it
-  const tempLead = {
-    id: Date.now(),
-    name: formatNumpadDisplay(numpadValue),
-    phone: e164,
-    city: '', state: '',
-    outcome: null,
-    _manual: true,
-  };
-  leads.unshift(tempLead);
-  selectLead(0);
-  renderQueue();
-  startCall();
-  // Reset numpad
-  numpadValue = '';
-  renderNumpadDisplay();
-  switchTab('outcome');
-}
-
-// Keyboard support for numpad
-document.addEventListener('keydown', e => {
-  const numpadVisible = document.getElementById('panel-numpad').style.display !== 'none';
-  if (!numpadVisible) return;
-  if (/^[0-9*#]$/.test(e.key)) numpadPress(e.key);
-  else if (e.key === 'Backspace') numpadBack();
-  else if (e.key === 'Enter') numpadCall();
+// ═══════════════════════════════════════════════════
+// DRAG + DROP
+// ═══════════════════════════════════════════════════
+document.addEventListener('dragover',e=>e.preventDefault());
+document.addEventListener('drop',e=>{
+  e.preventDefault();
+  const f=e.dataTransfer.files[0];
+  if(f&&f.name.endsWith('.csv')){importCSV({files:[f]});}
 });
 
-// open config on load if not configured
-window.addEventListener('load', () => { if (!cfg.workerUrl) setTimeout(openConfig, 500); });
-</script>
-
-<!-- ─────────────────────────────────────────────
-     CLOUDFLARE WORKER CODE (deploy separately)
-     Save as worker.js and deploy via wrangler
-     ───────────────────────────────────────────── -->
-<!--
-=============================================
-  WORKER.JS — deploy to Cloudflare Workers
-  
-  wrangler.toml:
-  name = "fex-dialer"
-  main = "worker.js"
-  compatibility_date = "2024-01-01"
-  
-  [vars]
-  TWILIO_ACCOUNT_SID = "ACxxxxxxxxxxxx"
-  TWILIO_AUTH_TOKEN  = "your_auth_token"
-
-  Deploy: npx wrangler deploy
-=============================================
-
-export default {
-  async fetch(request, env) {
-    const corsHeaders = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    };
-    if (request.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
-
-    const url = new URL(request.url);
-    const respond = (data, status = 200) =>
-      new Response(JSON.stringify(data), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-
-    const twilioBase = `https://api.twilio.com/2010-04-01/Accounts/${env.TWILIO_ACCOUNT_SID}`;
-    const authHeader = 'Basic ' + btoa(`${env.TWILIO_ACCOUNT_SID}:${env.TWILIO_AUTH_TOKEN}`);
-
-    // ── POST /call ──────────────────────────
-    if (url.pathname === '/call' && request.method === 'POST') {
-      const { to, from, bridgeTo, leadName } = await request.json();
-
-      // TwiML: call agent's browser number first, then bridge to lead
-      // OR: call lead directly and connect to agent via <Dial>
-      // This version dials the lead and connects your browser number
-      const twiml = `<?xml version="1.0" encoding="UTF-8"?>
-<Response>
-  <Say voice="alice">Connecting your call.</Say>
-  <Dial callerId="${from}" timeout="30" record="false">
-    <Number>${to}</Number>
-  </Dial>
-</Response>`;
-
-      const body = new URLSearchParams({
-        To: bridgeTo,          // calls YOUR number first
-        From: from,
-        Twiml: twiml,
-        StatusCallback: `${url.origin}/status`,
-        StatusCallbackMethod: 'POST',
-      });
-
-      const res = await fetch(`${twilioBase}/Calls.json`, {
-        method: 'POST',
-        headers: { Authorization: authHeader, 'Content-Type': 'application/x-www-form-urlencoded' },
-        body,
-      });
-      const data = await res.json();
-      if (data.sid) return respond({ sid: data.sid, status: data.status });
-      return respond({ error: data.message || 'Twilio error' }, 400);
-    }
-
-    // ── POST /hangup ──────────────────────────
-    if (url.pathname === '/hangup' && request.method === 'POST') {
-      const { callSid } = await request.json();
-      await fetch(`${twilioBase}/Calls/${callSid}.json`, {
-        method: 'POST',
-        headers: { Authorization: authHeader, 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ Status: 'completed' }),
-      });
-      return respond({ ok: true });
-    }
-
-    // ── POST /status (Twilio callback) ──────────────────────────
-    if (url.pathname === '/status') {
-      // Log or handle call status updates from Twilio here
-      return new Response('ok', { headers: corsHeaders });
-    }
-
-    return respond({ error: 'Not found' }, 404);
-  }
-};
-
-
-=============================================
-  APPS SCRIPT — paste in Google Apps Script
-  Deploy as Web App (Anyone can access)
-  for outcome write-back to Sheets
-=============================================
-
-function doPost(e) {
-  const data = JSON.parse(e.postData.contents);
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = ss.getSheetByName('Call Log') || ss.insertSheet('Call Log');
-  
-  if (sheet.getLastRow() === 0) {
-    sheet.appendRow(['Name','Phone','Outcome','Duration','Time','Call SID']);
-  }
-  
-  sheet.appendRow([
-    data.name, data.phone, data.outcome,
-    data.duration, data.time, data.callSid
-  ]);
-  
-  return ContentService
-    .createTextOutput(JSON.stringify({ ok: true }))
-    .setMimeType(ContentService.MimeType.JSON);
+// ═══════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════
+function toast(msg,type='ok'){
+  const t=document.createElement('div');
+  t.style.cssText=`position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+    background:${type==='err'?'#3a1020':'#0a2a0a'};
+    border:1px solid ${type==='err'?'var(--red)':'var(--gdim)'};
+    color:${type==='err'?'var(--red)':'var(--green)'};
+    padding:7px 16px;border-radius:5px;font-size:12px;font-family:var(--mono);
+    z-index:999;white-space:nowrap;pointer-events:none;`;
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),2800);
 }
--->
-
+</script>
 </body>
 </html>
