@@ -356,23 +356,33 @@
   <!-- CENTER: DIALER -->
   <div class="panel dialer-center">
 
-    <!-- Auto-dial bar -->
-    <div class="auto-bar">
-      <span class="auto-label">Auto-dial</span>
-      <label class="toggle">
-        <input type="checkbox" id="auto-toggle" onchange="toggleAuto()">
-        <span class="toggle-slider"></span>
-      </label>
-      <span class="auto-label">Delay</span>
-      <select class="delay-select" id="delay-select">
-        <option value="3">3s</option>
-        <option value="5" selected>5s</option>
-        <option value="10">10s</option>
-        <option value="15">15s</option>
-        <option value="30">30s</option>
-      </select>
-      <div class="auto-bar-right">
-        <button class="skip-btn" onclick="skipLead()">Skip →</button>
+    <!-- Power Dialer Bar -->
+    <div class="auto-bar" style="flex-wrap:wrap;gap:10px;">
+      <button id="dialer-start-btn" onclick="startPowerDialer()" style="background:var(--green-dim);color:#000;border:none;padding:7px 16px;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);">▶ Start Power Dialer</button>
+      <button id="dialer-stop-btn"  onclick="stopPowerDialer()"  style="display:none;background:none;border:1px solid var(--red);color:var(--red);padding:7px 16px;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);">⬛ Stop</button>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="font-size:11px;color:var(--text3);">Between calls</span>
+        <select class="delay-select" id="delay-select">
+          <option value="2">2s</option>
+          <option value="3">3s</option>
+          <option value="5" selected>5s</option>
+          <option value="10">10s</option>
+          <option value="15">15s</option>
+        </select>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="font-size:11px;color:var(--text3);">Dials per lead</span>
+        <select class="delay-select" id="max-attempts" onchange="MAX_ATTEMPTS=parseInt(this.value);localStorage.setItem('maxAttempts',this.value)">
+          <option value="1">1×</option>
+          <option value="2" selected>2×</option>
+          <option value="3">3×</option>
+          <option value="4">4×</option>
+          <option value="5">5×</option>
+        </select>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+        <span id="dialer-progress" style="font-size:11px;font-family:var(--mono);color:var(--text3);"></span>
+        <button class="skip-btn" onclick="skipCurrentLead()">Skip →</button>
       </div>
     </div>
 
@@ -598,7 +608,15 @@ let timerSeconds = 0;
 let autoTimeout = null;
 let callSid = null;
 let stats = { 'Appointment set': 0, 'Callback': 0, 'Not home': 0, 'Bad number': 0 };
-let selectedFromNumber = null; // set by auto-closest or manual override
+let selectedFromNumber = null;
+
+// ── Power dialer engine state ──
+let dialerRunning  = false;   // is the power dialer active?
+let callStartTime  = null;    // when current call connected
+let noAnswerTimer  = null;    // timeout to detect VM / no answer
+let currentAttempt = 0;       // how many times current lead has been dialed this pass
+let MAX_ATTEMPTS   = parseInt(localStorage.getItem('maxAttempts') || '2');
+const NO_ANSWER_TIMEOUT = 28; // seconds before treating as VM/no answer
 
 const cfg = {
   workerUrl:    localStorage.getItem('workerUrl')    || 'https://raspy-math-9a25.thomaslancheros06.workers.dev',
@@ -771,10 +789,15 @@ function renderQueue() {
 
   document.getElementById('queue-count').textContent = `${leads.length} leads`;
   list.innerHTML = leads.map((l, i) => {
+    const attemptStr = l._attempts ? ' ×' + l._attempts : '';
     const tag = l.outcome
       ? `<span class="lead-tag ${outcomeClass(l.outcome)}">${l.outcome}</span>`
-      : `<span class="lead-tag tag-queue">#${i+1}</span>`;
-    const rowClass = i === currentIdx ? 'active' : (l.outcome ? 'done' : '');
+      : l._done
+        ? `<span class="lead-tag tag-na">no ans${attemptStr}</span>`
+        : currentIdx === i && currentAttempt > 0
+          ? `<span class="lead-tag tag-cb">try ${currentAttempt+1}/${MAX_ATTEMPTS}</span>`
+          : `<span class="lead-tag tag-queue">#${i+1}</span>`;
+    const rowClass = i === currentIdx ? 'active' : (l._done ? 'done' : '');
     return `<div class="lead-item ${rowClass}" onclick="selectLead(${i})">
       <div class="lead-num">${i+1}</div>
       <div class="lead-info">
@@ -919,12 +942,81 @@ function setDeviceStatus(msg, color) {
 }
 
 function handleConnectionEvents(conn) {
-  conn.on('accept',     ()  => { setStatus('Connected', 'calling'); enableOutcomes(true); startTimer(); });
-  conn.on('disconnect', ()  => { setStatus('Call ended — log outcome', 'idle'); stopTimer(); resetCallUI(); });
-  conn.on('cancel',     ()  => { setStatus('Call cancelled', 'idle'); resetCallUI(); });
-  conn.on('reject',     ()  => { setStatus('Call rejected', 'idle'); resetCallUI(); });
-  conn.on('ringing',    ()  => setStatus('Ringing…', 'calling'));
-  conn.on('error',      (e) => { setStatus('Error: ' + e.message, 'idle'); resetCallUI(); });
+  conn.on('accept', () => {
+    setStatus('Connected ✓', 'calling');
+    enableOutcomes(true);
+    startTimer();
+    callStartTime = Date.now();
+    clearNoAnswerTimer(); // answered — cancel VM detection
+    updateDialerProgress();
+  });
+
+  conn.on('ringing', () => {
+    setStatus('Ringing… attempt ' + currentAttempt + '/' + MAX_ATTEMPTS, 'calling');
+    // Start no-answer timer — if no pickup in NO_ANSWER_TIMEOUT seconds, treat as VM
+    startNoAnswerTimer();
+  });
+
+  conn.on('disconnect', () => {
+    clearNoAnswerTimer();
+    const duration = callStartTime ? Math.round((Date.now() - callStartTime) / 1000) : 0;
+    callStartTime = null;
+    stopTimer();
+    resetCallUI();
+
+    if (dialerRunning) {
+      // Was this a real conversation or a VM/no-answer?
+      if (duration >= 8) {
+        // Talked for 8+ seconds — real person, pause and wait for outcome
+        setStatus('Call ended — log outcome', 'idle');
+        enableOutcomes(true);
+        // Don't auto-advance — wait for agent to log outcome
+      } else {
+        // Short call = VM or hangup — log and advance
+        setStatus('No answer / VM — moving on…', 'calling');
+        autoAdvanceAfterNoAnswer();
+      }
+    } else {
+      setStatus('Call ended — log outcome', 'idle');
+      enableOutcomes(true);
+    }
+  });
+
+  conn.on('cancel', () => {
+    clearNoAnswerTimer();
+    resetCallUI();
+    if (dialerRunning) autoAdvanceAfterNoAnswer();
+    else setStatus('Call cancelled', 'idle');
+  });
+
+  conn.on('reject', () => {
+    clearNoAnswerTimer();
+    resetCallUI();
+    if (dialerRunning) autoAdvanceAfterNoAnswer();
+    else setStatus('Call rejected', 'idle');
+  });
+
+  conn.on('error', (e) => {
+    clearNoAnswerTimer();
+    resetCallUI();
+    setStatus('Error: ' + e.message, 'idle');
+    if (dialerRunning) scheduleNextCall();
+  });
+}
+
+function startNoAnswerTimer() {
+  clearNoAnswerTimer();
+  noAnswerTimer = setTimeout(() => {
+    // Still ringing after NO_ANSWER_TIMEOUT — hang up and move on
+    if (activeConnection) {
+      setStatus('No answer — hanging up…', 'calling');
+      activeConnection.disconnect();
+    }
+  }, NO_ANSWER_TIMEOUT * 1000);
+}
+
+function clearNoAnswerTimer() {
+  if (noAnswerTimer) { clearTimeout(noAnswerTimer); noAnswerTimer = null; }
 }
 
 async function startCall() {
@@ -1006,16 +1098,15 @@ function logOutcome(outcome) {
   resetCall();
   renderQueue();
 
-  // Auto-advance
-  if (document.getElementById('auto-toggle').checked) {
-    const delay = parseInt(document.getElementById('delay-select').value) * 1000;
-    autoTimeout = setTimeout(() => {
-      const next = leads.findIndex((l, i) => i > currentIdx && !l.outcome);
-      if (next >= 0) { selectLead(next); startCall(); }
-      else showToast('Queue complete ✓');
-    }, delay);
+  // Mark lead as done
+  lead._done = true;
+  currentAttempt = 0;
+
+  // Auto-advance if power dialer is running
+  if (dialerRunning) {
+    scheduleNextCall(false);
   } else {
-    const next = leads.findIndex((l, i) => i > currentIdx && !l.outcome);
+    const next = leads.findIndex((l, i) => i > currentIdx && !l._done);
     if (next >= 0) selectLead(next);
   }
 }
@@ -1045,14 +1136,109 @@ function resetCall() {
 }
 
 // ─────────────────────────────────────────────
-// AUTO DIAL
+// POWER DIALER ENGINE
 // ─────────────────────────────────────────────
-function toggleAuto() {
-  if (!document.getElementById('auto-toggle').checked && autoTimeout) {
-    clearTimeout(autoTimeout);
-    autoTimeout = null;
+function startPowerDialer() {
+  if (!twilioDevice) { showToast('Click "Connect Mic" first', 'err'); return; }
+  if (!leads.length)  { showToast('Load leads first', 'err'); return; }
+
+  dialerRunning = true;
+  currentAttempt = 0;
+  document.getElementById('dialer-start-btn').style.display = 'none';
+  document.getElementById('dialer-stop-btn').style.display  = '';
+  showToast('Power dialer started');
+
+  // Find first unfinished lead
+  const first = leads.findIndex(l => !l._done);
+  if (first >= 0) { selectLead(first); startCall(); }
+  else { showToast('All leads complete ✓'); stopPowerDialer(); }
+}
+
+function stopPowerDialer() {
+  dialerRunning = false;
+  clearNoAnswerTimer();
+  if (autoTimeout) { clearTimeout(autoTimeout); autoTimeout = null; }
+  document.getElementById('dialer-start-btn').style.display = '';
+  document.getElementById('dialer-stop-btn').style.display  = 'none';
+  document.getElementById('dialer-progress').textContent    = '';
+  showToast('Power dialer stopped');
+}
+
+function autoAdvanceAfterNoAnswer() {
+  if (!dialerRunning) return;
+  const lead = leads[currentIdx];
+  if (!lead) return;
+
+  currentAttempt++;
+  updateDialerProgress();
+
+  if (currentAttempt < MAX_ATTEMPTS) {
+    // Retry same lead after delay
+    setStatus('Retrying ' + lead.name + ' (' + currentAttempt + '/' + MAX_ATTEMPTS + ')…', 'calling');
+    scheduleNextCall(true); // same lead
+  } else {
+    // Max attempts reached — mark as no answer and move on
+    lead._attempts = currentAttempt;
+    lead._done = true;
+    // Log it silently
+    const entry = {
+      time: new Date(), name: lead.name, phone: lead.phone,
+      outcome: 'Not home', duration: 0, callSid: null,
+    };
+    callLog.unshift(entry);
+    stats['Not home'] = (stats['Not home'] || 0) + 1;
+    updateStats(); renderLog(); renderQueue();
+    if (cfg.appsScriptUrl) pushToSheets(entry);
+    currentAttempt = 0;
+    scheduleNextCall(false); // next lead
   }
 }
+
+function scheduleNextCall(sameLead = false) {
+  if (!dialerRunning) return;
+  const delay = parseInt(document.getElementById('delay-select').value) * 1000;
+  autoTimeout = setTimeout(() => {
+    if (!dialerRunning) return;
+    if (sameLead) {
+      startCall();
+    } else {
+      const next = leads.findIndex((l, i) => i > currentIdx && !l._done);
+      if (next >= 0) { selectLead(next); currentAttempt = 0; startCall(); }
+      else {
+        // Check if there are any leads that still need more attempts (second pass)
+        const retry = leads.findIndex(l => !l._done);
+        if (retry >= 0) { selectLead(retry); currentAttempt = 0; startCall(); }
+        else { showToast('Queue complete ✓ All leads dialed'); stopPowerDialer(); }
+      }
+    }
+  }, delay);
+}
+
+function updateDialerProgress() {
+  const done  = leads.filter(l => l._done).length;
+  const total = leads.length;
+  const lead  = leads[currentIdx];
+  const attStr = lead ? ' · attempt ' + currentAttempt + '/' + MAX_ATTEMPTS : '';
+  document.getElementById('dialer-progress').textContent = done + '/' + total + attStr;
+}
+
+function skipCurrentLead() {
+  if (currentIdx >= 0) {
+    leads[currentIdx]._done = true;
+    renderQueue();
+  }
+  if (dialerRunning) {
+    clearNoAnswerTimer();
+    if (activeConnection) activeConnection.disconnect();
+    currentAttempt = 0;
+    scheduleNextCall(false);
+  } else {
+    const next = leads.findIndex((l, i) => i > currentIdx && !l._done);
+    if (next >= 0) selectLead(next);
+  }
+}
+
+function skipLead() { skipCurrentLead(); }
 
 // ─────────────────────────────────────────────
 // TIMER
@@ -1174,8 +1360,11 @@ document.addEventListener('drop', e => {
   });
   selectedFromNumber = TWILIO_NUMBERS[0].number;
   sel.value = selectedFromNumber;
-  // Restore auto-closest toggle state
   document.getElementById('closest-toggle').checked = cfg.autoClosest;
+  // Restore max attempts
+  const savedAttempts = localStorage.getItem('maxAttempts') || '2';
+  document.getElementById('max-attempts').value = savedAttempts;
+  MAX_ATTEMPTS = parseInt(savedAttempts);
 })();
 
 
