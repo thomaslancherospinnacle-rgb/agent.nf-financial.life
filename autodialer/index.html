@@ -3,186 +3,241 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FEX Dialer</title>
+<title>FEX Auto Dialer</title>
 <script src="https://cdn.jsdelivr.net/npm/@twilio/voice-sdk@2.10.0/dist/twilio.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
 :root {
-  --bg: #0d0f12; --sf: #141720; --s2: #1c2030; --s3: #232840;
-  --b: #2a3050; --b2: #3a4570;
-  --tx: #e8eaf0; --t2: #8892b0; --t3: #4a5580;
-  --green: #00e676; --gdim: #00a651;
-  --red: #ff4d6d; --amber: #ffab00; --blue: #4fc3f7; --purple: #b39ddb;
-  --fn: 'IBM Plex Sans', sans-serif; --mono: 'IBM Plex Mono', monospace;
+  --bg:#0d0f12; --sf:#141720; --s2:#1c2030; --s3:#232840;
+  --b:#2a3050; --b2:#3a4570; --t3:#4a5580;
+  --tx:#e8eaf0; --t2:#8892b0;
+  --green:#00e676; --gdim:#00a651;
+  --red:#ff4d6d; --amber:#ffab00; --blue:#4fc3f7; --purple:#b39ddb;
+  --fn:'IBM Plex Sans',sans-serif; --mono:'IBM Plex Mono',monospace;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--tx); font-family: var(--fn); font-size: 14px; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--tx);font-family:var(--fn);font-size:14px;min-height:100vh;display:grid;grid-template-columns:1fr 360px;grid-template-rows:auto 1fr;}
 
-.card { background: var(--sf); border: 1px solid var(--b); border-radius: 14px; width: 100%; max-width: 480px; overflow: hidden; }
+/* TOP BAR */
+.topbar{grid-column:1/-1;background:var(--sf);border-bottom:1px solid var(--b);padding:10px 20px;display:flex;align-items:center;gap:12px;}
+.logo{font-family:var(--mono);font-size:13px;color:var(--green);letter-spacing:.1em;}
+.sep{color:var(--b2);}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--t3);display:inline-block;flex-shrink:0;}
+.dot.live{background:var(--green);box-shadow:0 0 6px var(--green);animation:blink 2s infinite;}
+.dot.ring{background:var(--amber);box-shadow:0 0 6px var(--amber);animation:blink .6s infinite;}
+.dot.err{background:var(--red);}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.tlbl{font-size:11px;color:var(--t2);font-family:var(--mono);}
+.tbr{margin-left:auto;display:flex;gap:8px;align-items:center;}
+.btn{padding:6px 13px;border-radius:5px;font-size:11px;cursor:pointer;font-family:var(--fn);font-weight:500;border:none;transition:all .15s;}
+.btn:disabled{opacity:.3;cursor:not-allowed;}
+.btn-g{background:var(--gdim);color:#000;}
+.btn-g:hover:not(:disabled){background:#00c853;}
+.btn-r{background:none;border:1px solid var(--red);color:var(--red);}
+.btn-r:hover:not(:disabled){background:rgba(255,77,109,.1);}
+.btn-o{background:none;border:1px solid var(--b);color:var(--t2);}
+.btn-o:hover:not(:disabled){border-color:var(--b2);color:var(--tx);}
 
-/* STATUS STRIP */
-.strip { padding: 10px 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--b); }
-.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--t3); flex-shrink: 0; }
-.dot.live  { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 2s infinite; }
-.dot.ring  { background: var(--amber); box-shadow: 0 0 6px var(--amber); animation: pulse .7s infinite; }
-.dot.talk  { background: var(--green); box-shadow: 0 0 6px var(--green); }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
-.strip-txt { font-family: var(--mono); font-size: 11px; color: var(--t2); }
-.strip-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+/* LEFT PANEL */
+.left{background:var(--bg);display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--b);}
 
-/* LEAD DISPLAY */
-.lead-block { padding: 28px 24px 20px; text-align: center; min-height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.lead-attempt { font-size: 10px; font-family: var(--mono); color: var(--t3); margin-bottom: 8px; letter-spacing: .1em; min-height: 14px; }
-.lead-name { font-size: 28px; font-weight: 300; color: var(--tx); margin-bottom: 6px; }
-.lead-phone { font-family: var(--mono); font-size: 16px; color: var(--blue); margin-bottom: 4px; }
-.lead-loc { font-size: 12px; color: var(--t2); margin-bottom: 14px; }
-.lead-from { font-size: 10px; font-family: var(--mono); color: var(--gdim); }
+/* DIALER CARD */
+.dialer-card{padding:24px;border-bottom:1px solid var(--b);flex-shrink:0;}
+.dc-meta{font-size:10px;font-family:var(--mono);color:var(--t3);margin-bottom:8px;letter-spacing:.08em;min-height:14px;}
+.dc-name{font-size:26px;font-weight:300;color:var(--tx);margin-bottom:4px;min-height:34px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dc-phone{font-family:var(--mono);font-size:15px;color:var(--blue);margin-bottom:3px;min-height:20px;}
+.dc-loc{font-size:12px;color:var(--t2);margin-bottom:14px;min-height:16px;}
+.dc-from{font-size:10px;font-family:var(--mono);color:var(--gdim);margin-bottom:14px;min-height:14px;}
 
-/* TIMER */
-.timer { font-family: var(--mono); font-size: 42px; font-weight: 500; color: var(--green); padding: 10px 0; }
-.timer.idle { color: var(--t3); font-size: 28px; }
+/* STATUS BAR */
+.status-bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.status-icon{font-size:20px;min-width:28px;}
+.status-text{font-family:var(--mono);font-size:12px;color:var(--t2);flex:1;}
+.timer{font-family:var(--mono);font-size:28px;font-weight:500;color:var(--green);}
+.timer.idle{color:var(--t3);font-size:20px;}
 
-/* STATUS MSG */
-.status-msg { font-family: var(--mono); font-size: 12px; color: var(--t2); min-height: 18px; margin-bottom: 8px; }
+/* BIG ACTION */
+.action-area{margin-top:4px;}
+.big-btn{width:100%;padding:16px;border-radius:8px;font-size:16px;font-weight:500;cursor:pointer;border:none;font-family:var(--fn);transition:all .2s;letter-spacing:.02em;}
+.big-btn:disabled{opacity:.3;cursor:not-allowed;}
+.b-start{background:var(--gdim);color:#000;}
+.b-start:hover:not(:disabled){background:#00c853;transform:translateY(-1px);}
+.b-connected{background:var(--blue);color:#000;}
+.b-connected:hover:not(:disabled){background:#81d4fa;}
+.b-stop{background:none;border:2px solid var(--red);color:var(--red);font-size:13px;padding:10px;}
+.b-stop:hover:not(:disabled){background:rgba(255,77,109,.08);}
 
-/* BIG BUTTONS */
-.btn-row { padding: 0 24px 24px; display: flex; gap: 10px; }
-.big-btn { flex: 1; padding: 14px; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; border: none; font-family: var(--fn); transition: all .15s; }
-.big-btn:disabled { opacity: .3; cursor: not-allowed; }
-.btn-start { background: var(--gdim); color: #000; }
-.btn-start:hover:not(:disabled) { background: #00c853; }
-.btn-stop  { background: none; border: 1px solid var(--red); color: var(--red); }
-.btn-stop:hover:not(:disabled)  { background: rgba(255,77,109,.1); }
-.btn-next  { background: var(--blue); color: #000; }
-.btn-next:hover:not(:disabled)  { background: #81d4fa; }
-.btn-hang  { background: var(--red); color: #fff; }
-.btn-hang:hover:not(:disabled)  { background: #c62828; }
+/* OUTCOME */
+.outcome-area{display:none;margin-top:12px;}
+.outcome-area.show{display:block;}
+.out-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-bottom:8px;}
+.out-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.out-btn{padding:11px 10px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid transparent;font-family:var(--fn);transition:all .15s;text-align:left;display:flex;align-items:center;gap:6px;}
+.out-btn:hover{filter:brightness(1.2);}
+.o-appt{background:#0a2a1a;border-color:var(--gdim);color:var(--green);}
+.o-cb  {background:#2a2010;border-color:#664400;color:var(--amber);}
+.o-ni  {background:#151530;border-color:#3a3a70;color:var(--purple);}
+.o-bad {background:#200a10;border-color:#601020;color:var(--red);}
+.o-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
 
-/* OUTCOME BUTTONS */
-.outcomes { display: none; padding: 0 24px 20px; }
-.outcomes.show { display: block; }
-.out-label { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--t3); margin-bottom: 8px; }
-.out-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.out-btn { padding: 11px; border-radius: 7px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid transparent; font-family: var(--fn); transition: all .15s; text-align: left; }
-.out-btn:hover { filter: brightness(1.2); }
-.o-appt { background: #0a2a1a; border-color: var(--gdim); color: var(--green); }
-.o-cb   { background: #2a2010; border-color: #664400; color: var(--amber); }
-.o-na   { background: #151530; border-color: #3a3a70; color: var(--purple); }
-.o-bad  { background: #200a10; border-color: #601020; color: var(--red); }
+/* LEAD INFO */
+.lead-info{border-top:1px solid var(--b);padding:14px 24px;display:none;flex-shrink:0;}
+.lead-info.show{display:block;}
+.li-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;}
+.li-item{display:flex;flex-direction:column;gap:2px;}
+.li-item.full{grid-column:1/-1;}
+.li-k{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);font-family:var(--mono);}
+.li-v{font-size:12px;color:var(--tx);}
+.li-v a{color:var(--blue);text-decoration:none;}
 
-/* QUEUE BAR */
-.queue-bar { border-top: 1px solid var(--b); padding: 12px 24px; display: flex; align-items: center; gap: 12px; }
-.q-label { font-size: 11px; color: var(--t3); font-family: var(--mono); }
-.q-pill { font-family: var(--mono); font-size: 11px; padding: 3px 8px; border-radius: 4px; }
-.q-done  { background: #0a2a1a; color: var(--green); }
-.q-left  { background: var(--s3); color: var(--t2); }
-.q-vm    { background: #1a0828; color: #c084fc; }
+/* CONTROLS BAR */
+.controls{padding:12px 16px;border-bottom:1px solid var(--b);display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex-shrink:0;background:var(--sf);}
+.ctrl-lbl{font-size:10px;color:var(--t3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;}
+.ctrl-sel{background:var(--s3);border:1px solid var(--b);color:var(--tx);padding:4px 8px;border-radius:4px;font-size:11px;cursor:pointer;}
+.stats-row{display:flex;gap:6px;margin-left:auto;}
+.stat-pill{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:4px;}
+.sp-done{background:#0a2a1a;color:var(--green);}
+.sp-vm  {background:#1a0828;color:#c084fc;}
+.sp-na  {background:#1a1a2a;color:var(--purple);}
+.sp-left{background:var(--s3);color:var(--t2);}
 
-/* IMPORT */
-.import-row { border-top: 1px solid var(--b); padding: 12px 24px; display: flex; gap: 8px; align-items: center; }
-.sm-btn { padding: 6px 12px; border-radius: 5px; font-size: 11px; cursor: pointer; font-family: var(--fn); font-weight: 500; border: none; }
-.sm-g { background: var(--gdim); color: #000; }
-.sm-o { background: none; border: 1px solid var(--b); color: var(--t2); }
-.sm-o:hover { border-color: var(--b2); color: var(--tx); }
+/* CALL LOG */
+.right{background:var(--sf);display:flex;flex-direction:column;overflow:hidden;}
+.rh{padding:10px 16px;border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.rh-title{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);}
+.log-scroll{flex:1;overflow-y:auto;}
+.log-scroll::-webkit-scrollbar{width:3px;}
+.log-scroll::-webkit-scrollbar-thumb{background:var(--b);}
+.log-item{padding:10px 16px;border-bottom:1px solid var(--b);display:flex;align-items:flex-start;gap:10px;transition:background .1s;}
+.log-item.current{background:var(--s2);border-left:2px solid var(--amber);}
+.log-item.done{opacity:.55;}
+.li-num{font-family:var(--mono);font-size:9px;color:var(--t3);width:22px;flex-shrink:0;padding-top:2px;}
+.li-body{flex:1;min-width:0;}
+.li-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.li-ph{font-family:var(--mono);font-size:10px;color:var(--t2);}
+.li-tag{font-size:9px;padding:2px 6px;border-radius:3px;font-family:var(--mono);flex-shrink:0;margin-top:1px;}
+.tag-ring{background:#2a2010;color:var(--amber);animation:blink 1s infinite;}
+.tag-done{background:#0a2a1a;color:var(--green);}
+.tag-vm  {background:#1a0828;color:#c084fc;}
+.tag-na  {background:#1a1a2a;color:var(--purple);}
+.tag-cb  {background:#2a2010;color:var(--amber);}
+.tag-bad {background:#2a1018;color:var(--red);}
+.tag-ni  {background:#151530;color:var(--purple);}
+.tag-skip{background:var(--s3);color:var(--t3);}
+.tag-appt{background:#0a3a1a;color:var(--green);font-weight:500;}
 
-/* SETTINGS */
-.settings-row { border-top: 1px solid var(--b); padding: 10px 24px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.s-lbl { font-size: 10px; color: var(--t3); font-family: var(--mono); }
-.s-sel { background: var(--s3); border: 1px solid var(--b); color: var(--tx); padding: 4px 7px; border-radius: 4px; font-size: 11px; cursor: pointer; }
-.mic-status { margin-left: auto; font-size: 10px; font-family: var(--mono); color: var(--t3); }
+/* IMPORT BAR */
+.import-bar{padding:10px 16px;border-top:1px solid var(--b);display:flex;gap:8px;align-items:center;flex-shrink:0;background:var(--sf);}
 
 /* MODAL */
-.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 50; align-items: center; justify-content: center; }
-.overlay.open { display: flex; }
-.modal { background: var(--sf); border: 1px solid var(--b2); border-radius: 10px; width: 440px; max-width: 95vw; }
-.mh { padding: 14px 18px; border-bottom: 1px solid var(--b); display: flex; justify-content: space-between; align-items: center; }
-.mh h3 { font-size: 13px; font-weight: 500; }
-.mc { padding: 18px; }
-.mf { padding: 10px 18px; border-top: 1px solid var(--b); display: flex; justify-content: flex-end; gap: 8px; }
-.field { margin-bottom: 14px; }
-.field label { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--t3); margin-bottom: 5px; }
-.field input { width: 100%; background: var(--s2); border: 1px solid var(--b); color: var(--tx); padding: 7px 10px; border-radius: 5px; font-size: 12px; font-family: var(--fn); outline: none; }
-.field input:focus { border-color: var(--b2); }
-.hint { font-size: 10px; color: var(--t3); margin-top: 3px; }
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:50;align-items:center;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{background:var(--sf);border:1px solid var(--b2);border-radius:10px;width:440px;max-width:95vw;}
+.mh{padding:14px 18px;border-bottom:1px solid var(--b);display:flex;justify-content:space-between;align-items:center;}
+.mh h3{font-size:13px;font-weight:500;}
+.mc{padding:18px;}
+.mf{padding:10px 18px;border-top:1px solid var(--b);display:flex;justify-content:flex-end;gap:8px;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:5px;}
+.field input{width:100%;background:var(--s2);border:1px solid var(--b);color:var(--tx);padding:7px 10px;border-radius:5px;font-size:12px;font-family:var(--fn);outline:none;}
+.field input:focus{border-color:var(--b2);}
+.hint{font-size:10px;color:var(--t3);margin-top:3px;}
 </style>
 </head>
 <body>
 
-<div class="card">
+<!-- TOP BAR -->
+<div class="topbar">
+  <span class="logo">FEX DIALER</span>
+  <span class="sep">|</span>
+  <span class="dot" id="dev-dot"></span>
+  <span class="tlbl" id="dev-lbl">Mic not connected</span>
+  <div class="tbr">
+    <button class="btn btn-o" id="mic-btn" onclick="initDevice()" style="font-size:10px;">Connect Mic</button>
+    <button class="btn btn-o" onclick="openCfg()" style="font-size:10px;">⚙ Settings</button>
+  </div>
+</div>
 
-  <!-- STATUS -->
-  <div class="strip">
-    <span class="dot" id="dev-dot"></span>
-    <span class="strip-txt" id="dev-lbl">Mic not connected</span>
-    <div class="strip-right">
-      <button class="sm-btn sm-o" onclick="initDevice()" id="mic-btn" style="font-size:10px;padding:4px 10px;">Connect Mic</button>
-      <button class="sm-btn sm-o" onclick="openCfg()" style="font-size:10px;padding:4px 10px;">⚙</button>
+<!-- LEFT -->
+<div class="left">
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <span class="ctrl-lbl">Dials/lead</span>
+    <select class="ctrl-sel" id="max-att" onchange="MAX_ATT=+this.value;save('maxAtt',this.value)">
+      <option value="1">1×</option><option value="2" selected>2×</option>
+      <option value="3">3×</option><option value="4">4×</option>
+    </select>
+    <span class="ctrl-lbl">Delay</span>
+    <select class="ctrl-sel" id="delay-sel">
+      <option value="1">1s</option><option value="2">2s</option>
+      <option value="3" selected>3s</option><option value="5">5s</option>
+    </select>
+    <div class="stats-row">
+      <span class="stat-pill sp-done" id="sp-done">0 done</span>
+      <span class="stat-pill sp-vm"   id="sp-vm"  >0 VM</span>
+      <span class="stat-pill sp-na"   id="sp-na"  >0 NA</span>
+      <span class="stat-pill sp-left" id="sp-left" >0 left</span>
     </div>
   </div>
 
-  <!-- LEAD DISPLAY -->
-  <div class="lead-block">
-    <div class="lead-attempt" id="l-attempt"></div>
-    <div class="lead-name"  id="l-name">Load leads to begin</div>
-    <div class="lead-phone" id="l-phone"></div>
-    <div class="lead-loc"   id="l-loc"></div>
-    <div class="timer idle" id="l-timer">—</div>
-    <div class="status-msg" id="l-status"></div>
-    <div class="lead-from"  id="l-from"></div>
-  </div>
+  <!-- DIALER CARD -->
+  <div class="dialer-card">
+    <div class="dc-meta"   id="dc-meta"></div>
+    <div class="dc-name"   id="dc-name">Load leads to begin</div>
+    <div class="dc-phone"  id="dc-phone"></div>
+    <div class="dc-loc"    id="dc-loc"></div>
+    <div class="dc-from"   id="dc-from"></div>
 
-  <!-- MAIN BUTTONS -->
-  <div class="btn-row" id="main-btns">
-    <button class="big-btn btn-start" id="btn-start" onclick="startDialer()">▶ Start Dialing</button>
-  </div>
+    <div class="status-bar">
+      <div class="status-icon" id="st-icon">💤</div>
+      <div class="status-text" id="st-text">Idle</div>
+      <div class="timer idle"  id="st-timer">—</div>
+    </div>
 
-  <!-- OUTCOME BUTTONS (shown when someone picks up) -->
-  <div class="outcomes" id="outcomes">
-    <div class="out-label">How did it go?</div>
-    <div class="out-grid">
-      <button class="out-btn o-appt" onclick="logOutcome('Appointment set')">✓ Appointment Set</button>
-      <button class="out-btn o-cb"   onclick="logOutcome('Callback')">↩ Call Back Later</button>
-      <button class="out-btn o-na"   onclick="logOutcome('Not interested')">— Not Interested</button>
-      <button class="out-btn o-bad"  onclick="logOutcome('Bad number')">✕ Bad Number</button>
+    <div class="action-area" id="action-area">
+      <button class="big-btn b-start" onclick="startDialer()">▶ Start Auto Dialer</button>
+    </div>
+
+    <div class="outcome-area" id="outcome-area">
+      <div class="out-lbl">How did the call go?</div>
+      <div class="out-grid">
+        <button class="out-btn o-appt" onclick="logOutcome('Appointment set')"><span class="o-dot" style="background:var(--green)"></span>Appointment Set</button>
+        <button class="out-btn o-cb"   onclick="logOutcome('Callback')"><span class="o-dot" style="background:var(--amber)"></span>Call Back Later</button>
+        <button class="out-btn o-ni"   onclick="logOutcome('Not interested')"><span class="o-dot" style="background:var(--purple)"></span>Not Interested</button>
+        <button class="out-btn o-bad"  onclick="logOutcome('Bad number')"><span class="o-dot" style="background:var(--red)"></span>Bad Number</button>
+      </div>
     </div>
   </div>
 
-  <!-- QUEUE BAR -->
-  <div class="queue-bar">
-    <span class="q-label">Queue</span>
-    <span class="q-pill q-done" id="q-done">0 done</span>
-    <span class="q-pill q-left" id="q-left">0 left</span>
-    <span class="q-pill q-vm"   id="q-vm"  >0 VM</span>
+  <!-- LEAD INFO -->
+  <div class="lead-info" id="lead-info">
+    <div class="li-grid" id="li-grid"></div>
   </div>
 
-  <!-- IMPORT -->
-  <div class="import-row">
-    <label class="sm-btn sm-g" style="cursor:pointer;">
+</div>
+
+<!-- RIGHT: CALL LOG -->
+<div class="right">
+  <div class="rh">
+    <span class="rh-title">Call History</span>
+    <div style="display:flex;gap:6px;">
+      <button class="btn btn-o" onclick="exportLog()" style="font-size:10px;padding:4px 8px;">↓ CSV</button>
+      <button class="btn btn-o" onclick="clearLog()"  style="font-size:10px;padding:4px 8px;">Clear</button>
+    </div>
+  </div>
+  <div class="log-scroll" id="call-log">
+    <div style="padding:30px 16px;text-align:center;color:var(--t3);font-size:12px;">Calls will appear here</div>
+  </div>
+  <div class="import-bar">
+    <label class="btn btn-g" style="cursor:pointer;font-size:11px;">
       ↑ Import CSV
       <input type="file" id="csv-in" accept=".csv" style="display:none" onchange="importCSV(this)">
     </label>
-    <button class="sm-btn sm-o" onclick="loadSheets()">⊞ Sheets</button>
-    <button class="sm-btn sm-o" onclick="clearLeads()" style="margin-left:auto;">Clear</button>
+    <button class="btn btn-o" onclick="loadSheets()" style="font-size:11px;">⊞ Sheets</button>
+    <button class="btn btn-r" onclick="clearLeads()" style="font-size:11px;margin-left:auto;">Clear Leads</button>
   </div>
-
-  <!-- SETTINGS -->
-  <div class="settings-row">
-    <span class="s-lbl">Dials/lead</span>
-    <select class="s-sel" id="max-att" onchange="MAX_ATT=+this.value;localStorage.setItem('maxAtt',this.value)">
-      <option value="1">1×</option>
-      <option value="2" selected>2×</option>
-      <option value="3">3×</option>
-    </select>
-    <span class="s-lbl">Delay</span>
-    <select class="s-sel" id="delay-sel">
-      <option value="2">2s</option>
-      <option value="3" selected>3s</option>
-      <option value="5">5s</option>
-    </select>
-    <span class="mic-status" id="sync-lbl"></span>
-  </div>
-
-</div><!-- /card -->
+</div>
 
 <!-- CONFIG MODAL -->
 <div class="overlay" id="cfg-modal">
@@ -195,8 +250,8 @@ body { background: var(--bg); color: var(--tx); font-family: var(--fn); font-siz
       </div>
       <div class="field">
         <label>Google Sheets ID (optional)</label>
-        <input id="cfg-sheet" placeholder="Sheet ID from the URL">
-        <div class="hint">Share the sheet publicly (File → Share → Anyone with link can view)</div>
+        <input id="cfg-sheet" placeholder="Sheet ID from URL">
+        <div class="hint">Share publicly: File → Share → Anyone with link can view</div>
       </div>
       <div class="field">
         <label>Apps Script URL (outcome log, optional)</label>
@@ -204,14 +259,16 @@ body { background: var(--bg); color: var(--tx); font-family: var(--fn); font-siz
       </div>
     </div>
     <div class="mf">
-      <button class="sm-btn sm-o" onclick="closeCfg()">Cancel</button>
-      <button class="sm-btn sm-g" onclick="saveCfg()">Save</button>
+      <button class="btn btn-o" onclick="closeCfg()">Cancel</button>
+      <button class="btn btn-g" onclick="saveCfg()">Save</button>
     </div>
   </div>
 </div>
 
 <script>
-// ── NUMBERS ──────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// NUMBERS + CLOSEST
+// ═══════════════════════════════════════════════════════
 const NUMBERS = [
   {n:'+15862215707',lbl:'(586) Mount Clemens',lat:42.5973,lng:-82.8779},
   {n:'+18108193812',lbl:'(810) Brighton',      lat:42.5295,lng:-83.7799},
@@ -240,18 +297,36 @@ function closest(phone) {
   return best;
 }
 
-// ── STATE ─────────────────────────────────────────
-let leads=[], idx=0, attempt=0, vmCount=0, doneCount=0;
-let running=false, conn=null, naTimer=null, timerInt=null, secs=0, callStart=null;
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let leads = [];         // all leads
+let logEntries = [];    // call history shown on right
+let dialIdx = 0;        // current position in leads array
+let attempt = 0;        // attempt number for current lead
+let running = false;    // is the dialer running?
+let paused  = false;    // paused waiting for outcome?
+let conn    = null;     // active Twilio connection
+let naTimer = null;     // no-answer timeout
+let retryTimer = null;  // between-call delay timer
+let timerInt = null;    // call duration interval
+let secs    = 0;
+let callStart = null;
+let device  = null;
 let MAX_ATT = parseInt(localStorage.getItem('maxAtt')||'2');
+
+// stats
+let stats = { done:0, vm:0, na:0 };
+
 const cfg = {
   workerUrl: localStorage.getItem('workerUrl')||'https://raspy-math-9a25.thomaslancheros06.workers.dev',
   sheetId:   localStorage.getItem('sheetId')||'',
   appsUrl:   localStorage.getItem('appsUrl')||'',
 };
-let device = null;
 
-// ── DEVICE ────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// TWILIO DEVICE
+// ═══════════════════════════════════════════════════════
 async function initDevice() {
   if (!cfg.workerUrl) { openCfg(); return; }
   setDev('Connecting…','ring');
@@ -260,50 +335,67 @@ async function initDevice() {
     const r = await fetch(cfg.workerUrl+'/token');
     const d = await r.json();
     if (!d.token) throw new Error('No token');
-    device = new Twilio.Device(d.token, {codecPreferences:['opus','pcmu'],enableRingingState:true});
-    device.on('registered',   ()=>{ setDev('Ready ✓','live'); document.getElementById('mic-btn').textContent='Reconnect'; });
-    device.on('unregistered', ()=>setDev('Disconnected',''));
-    device.on('error',        e=>setDev('Error: '+e.message,'err'));
+    device = new Twilio.Device(d.token, {
+      codecPreferences:['opus','pcmu'],
+      enableRingingState:true,
+      debug:false,
+    });
+    device.on('registered',   () => { setDev('Mic ready ✓','live'); document.getElementById('mic-btn').textContent='Reconnect'; document.getElementById('mic-btn').disabled=false; });
+    device.on('unregistered', () => setDev('Disconnected',''));
+    device.on('error',        e  => { setDev('Error','err'); toast(e.message,'err'); });
     await device.register();
-    document.getElementById('mic-btn').disabled = false;
   } catch(e) {
     setDev('Failed — check Worker URL','err');
     document.getElementById('mic-btn').disabled = false;
+    toast('Mic failed: '+e.message,'err');
   }
 }
 function setDev(msg, state) {
-  const dot=document.getElementById('dev-dot'), lbl=document.getElementById('dev-lbl');
-  lbl.textContent = msg;
-  dot.className = 'dot' + (state==='live'?' live':state==='ring'?' ring':state==='err'?' err':'');
+  document.getElementById('dev-lbl').textContent = msg;
+  const d = document.getElementById('dev-dot');
+  d.className = 'dot'+(state==='live'?' live':state==='ring'?' ring':state==='err'?' err':'');
 }
 
-// ── IMPORT ────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// IMPORT
+// ═══════════════════════════════════════════════════════
 function importCSV(input) {
   const file = input.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = e => {
-    const lines = e.target.result.split('\n').filter(l=>l.trim());
-    const headers = lines[0].split(',').map(h=>h.replace(/"/g,'').trim().toLowerCase());
-    const pi = headers.findIndex(h=>/phone|cell|mobile/.test(h));
-    const ni = headers.findIndex(h=>/^(name|first)/.test(h));
-    const ci = headers.findIndex(h=>/^city/.test(h));
-    const si = headers.findIndex(h=>/^(state|st)$/.test(h));
+    const raw   = e.target.result.replace(/\r/g,'');
+    const lines = raw.split('\n').filter(l=>l.trim());
+    const rawH  = lines[0].split(',').map(h=>h.replace(/"/g,'').trim());
+    const h     = rawH.map(s=>s.toLowerCase());
+    const pi    = h.findIndex(s=>/phone|cell|mobile|number/.test(s));
+    const ni    = h.findIndex(s=>/name/.test(s));
+    const ai    = h.findIndex(s=>/^addr/.test(s));
+    const ci    = h.findIndex(s=>/^city/.test(s));
+    const si    = h.findIndex(s=>/^(state|st)$/.test(s));
+    const zi    = h.findIndex(s=>/^zip/.test(s));
+    const ei    = h.findIndex(s=>/^email/.test(s));
     if (pi<0) { toast('No phone column found','err'); return; }
     const imported = [];
-    for (let i=1; i<lines.length; i++) {
-      const cols = splitCSV(lines[i]);
-      const phone = cleanPhone(cols[pi]||'');
+    for (let i=1;i<lines.length;i++) {
+      const c = splitCSV(lines[i]);
+      const phone = cleanPhone(c[pi]||'');
       if (!phone) continue;
+      const data = {};
+      rawH.forEach((key,j)=>{ if(key&&c[j]&&c[j].trim()) data[key]=c[j].replace(/^"|"$/g,'').trim(); });
+      const parts = [ai>=0?c[ai]:'',ci>=0?c[ci]:'',si>=0?c[si]:'',zi>=0?c[zi]:''];
       imported.push({
-        name:  (ni>=0 ? cols[ni] : 'Lead '+i).replace(/"/g,'').trim(),
-        phone,
-        loc:   [cols[ci]||'', cols[si]||''].map(s=>s.replace(/"/g,'').trim()).filter(Boolean).join(', '),
-        done:  false, attempt: 0,
+        name:  (ni>=0?c[ni]:'Lead '+i).replace(/^"|"$/g,'').trim()||'Lead '+i,
+        phone, email: ei>=0?(c[ei]||'').replace(/^"|"$/g,'').trim():'',
+        loc:   parts.map(s=>s.replace(/^"|"$/g,'').trim()).filter(Boolean).join(', '),
+        data,
+        attempts:[], // array of {time, result}
+        outcome:null, done:false,
       });
     }
+    const before = leads.length;
     leads = [...leads, ...imported];
-    idx = 0; attempt = 0;
-    updateDisplay();
+    if (!running) dialIdx = leads.findIndex(l=>!l.done);
+    updateStats(); renderLog(); updateCard();
     toast('Imported '+imported.length+' leads');
     input.value='';
   };
@@ -311,198 +403,251 @@ function importCSV(input) {
 }
 function splitCSV(row) {
   const r=[]; let c='',q=false;
-  for (const ch of row) { if(ch==='"'){q=!q;}else if(ch===','&&!q){r.push(c);c='';}else{c+=ch;} }
+  for (const ch of row){if(ch==='"'){q=!q;}else if(ch===','&&!q){r.push(c);c='';}else{c+=ch;}}
   r.push(c); return r;
 }
 function cleanPhone(p) {
   const d=p.replace(/\D/g,'');
-  if(d.length===10) return '+1'+d;
-  if(d.length===11&&d[0]==='1') return '+'+d;
+  if(d.length===10) return'+1'+d;
+  if(d.length===11&&d[0]==='1') return'+'+d;
   return d.length>=10?'+1'+d.slice(-10):'';
 }
 async function loadSheets() {
   if (!cfg.sheetId) { openCfg(); return; }
-  setStatus('Loading from Sheets…');
+  setStatus('💤','Loading from Sheets…');
   try {
-    const r = await fetch('https://docs.google.com/spreadsheets/d/'+cfg.sheetId+'/gviz/tq?tqx=out:json');
-    const t = await r.text();
-    const j = JSON.parse(t.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/)[1]);
-    const cols = j.table.cols.map(c=>c.label.toLowerCase());
-    const pi=cols.findIndex(h=>/phone|cell|mobile/.test(h));
-    const ni=cols.findIndex(h=>/name|first/.test(h));
-    const imported = j.table.rows.map((row,i)=>{
+    const r=await fetch('https://docs.google.com/spreadsheets/d/'+cfg.sheetId+'/gviz/tq?tqx=out:json');
+    const t=await r.text();
+    const j=JSON.parse(t.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/)[1]);
+    const cols=j.table.cols.map(c=>c.label);
+    const h=cols.map(s=>s.toLowerCase());
+    const pi=h.findIndex(s=>/phone|cell|mobile/.test(s));
+    const ni=h.findIndex(s=>/name/.test(s));
+    if(pi<0){toast('No phone column','err');return;}
+    const imported=j.table.rows.map((row,i)=>{
       const v=row.c.map(c=>c?String(c.v||''):'');
       const phone=cleanPhone(v[pi]||'');
       if(!phone)return null;
-      return{name:ni>=0?(v[ni]||'Lead '+i):'Lead '+i,phone,loc:'',done:false,attempt:0};
+      const data={};cols.forEach((k,j)=>{if(v[j])data[k]=v[j];});
+      return{name:ni>=0?(v[ni]||'Lead '+i):'Lead '+i,phone,email:'',loc:'',data,attempts:[],outcome:null,done:false};
     }).filter(Boolean);
-    leads=[...leads,...imported]; idx=0; attempt=0;
-    updateDisplay();
+    leads=[...leads,...imported];
+    if(!running)dialIdx=leads.findIndex(l=>!l.done);
+    updateStats();renderLog();updateCard();
     toast('Loaded '+imported.length+' leads');
-  } catch(e) { setStatus('Sheets error — check Sheet ID'); }
+  } catch(e){toast('Sheets error','err');}
 }
 function clearLeads() {
+  if (running){toast('Stop dialer first','err');return;}
   if (!confirm('Clear all leads?')) return;
-  leads=[]; idx=0; attempt=0; vmCount=0; doneCount=0;
-  running=false; showIdleUI();
-  updateQueueBar(); updateDisplay();
+  leads=[];dialIdx=0;attempt=0;stats={done:0,vm:0,na:0};
+  updateStats();renderLog();updateCard();
+  document.getElementById('lead-info').classList.remove('show');
+  setStatus('💤','Idle');
 }
 
-// ── DIALER ENGINE ─────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// DIALER ENGINE
+// ═══════════════════════════════════════════════════════
 function startDialer() {
-  if (!device)  { toast('Connect mic first','err'); return; }
+  if (!device) { toast('Connect mic first','err'); return; }
   if (!leads.length) { toast('Import leads first','err'); return; }
-  running = true;
-  idx = leads.findIndex(l=>!l.done);
-  if (idx<0) { toast('All leads done'); return; }
-  attempt = 0;
-  document.getElementById('main-btns').innerHTML =
-    `<button class="big-btn btn-stop" onclick="stopDialer()">⬛ Stop</button>`;
+  running = true; paused = false; attempt = 0;
+  dialIdx = leads.findIndex(l=>!l.done);
+  if (dialIdx<0) { toast('All leads done ✓'); return; }
+  showRunningUI();
   dial();
 }
 
 function stopDialer() {
-  running = false;
-  clearNAT();
+  running = false; paused = false;
+  clearNAT(); clearRetry();
   if (conn) { try{conn.disconnect();}catch(e){} conn=null; }
   stopTimer();
+  setStatus('💤','Stopped');
   showIdleUI();
-  setStatus('Stopped');
 }
 
+// Core dial function — called automatically after every outcome/skip/timeout
 async function dial() {
-  if (!running) return;
-  // find next undone lead
-  while (idx < leads.length && leads[idx].done) idx++;
-  if (idx >= leads.length) {
-    // second pass?
+  if (!running || paused) return;
+
+  // Find next undone lead
+  while (dialIdx < leads.length && leads[dialIdx].done) dialIdx++;
+
+  // Wrapped around — all done
+  if (dialIdx >= leads.length) {
     const retry = leads.findIndex(l=>!l.done);
-    if (retry < 0) { toast('All leads dialed ✓'); stopDialer(); return; }
-    idx = retry; attempt = 0;
+    if (retry < 0) {
+      toast('🎉 All leads dialed!');
+      stopDialer(); return;
+    }
+    dialIdx = retry; attempt = 0;
   }
 
-  const lead = leads[idx];
+  const lead = leads[dialIdx];
   attempt++;
-  lead.attempt = attempt;
+  const fromNum = closest(lead.phone);
 
-  const from = closest(lead.phone);
-  document.getElementById('l-name').textContent    = lead.name;
-  document.getElementById('l-phone').textContent   = fmt(lead.phone);
-  document.getElementById('l-loc').textContent     = lead.loc||'';
-  document.getElementById('l-from').textContent    = '▲ from '+from.lbl;
-  document.getElementById('l-attempt').textContent = attempt > 1 ? 'Attempt '+attempt+' of '+MAX_ATT : '';
-  document.getElementById('l-timer').textContent   = '…';
-  document.getElementById('l-timer').className     = 'timer idle';
-  setStatus('Dialing…');
+  // Update card
+  document.getElementById('dc-name').textContent  = lead.name;
+  document.getElementById('dc-phone').textContent = fmt(lead.phone);
+  document.getElementById('dc-loc').textContent   = lead.loc||'';
+  document.getElementById('dc-from').textContent  = '▲ calling from '+fromNum.lbl;
+  document.getElementById('dc-meta').textContent  = attempt>1 ? 'ATTEMPT '+attempt+' OF '+MAX_ATT : '';
+  document.getElementById('st-timer').textContent = '…';
+  document.getElementById('st-timer').className   = 'timer idle';
+  setStatus('📞','Dialing '+lead.name+'…');
+  renderLeadInfo(lead);
+  renderLog(); // highlight current in log
 
   try {
-    conn = await device.connect({ params:{ To:lead.phone, callerId:from.n, leadName:lead.name } });
-    bindEvents(conn, lead, from.n);
+    conn = await device.connect({
+      params:{ To:lead.phone, callerId:fromNum.n, leadName:lead.name }
+    });
+    bindEvents(conn, lead);
   } catch(e) {
-    conn=null; setStatus('Error — skipping');
-    setTimeout(nextLead, 2000);
+    conn = null;
+    recordAttempt(lead, 'error');
+    setStatus('⚠️','Connection error — skipping');
+    scheduleNext();
   }
 }
 
 function bindEvents(c, lead) {
-  c.on('ringing', ()=>{
-    setStatus('Ringing…');
-    // hang up after 25s if no answer
+  // Ringing
+  c.on('ringing', () => {
+    setStatus('🔔','Ringing…');
+    updateLogCurrent('ring');
+    // Hang up after 27s if no answer
     clearNAT();
-    naTimer = setTimeout(()=>{
-      setStatus('No answer — moving on');
-      if(conn){try{conn.disconnect();}catch(e){}conn=null;}
+    naTimer = setTimeout(() => {
+      setStatus('⏱','No answer — moving on');
+      if (conn) { try{conn.disconnect();}catch(e){} conn=null; }
+      recordAttempt(lead,'na');
       handleNoAnswer(lead);
-    }, 25000);
+    }, 27000);
   });
 
-  c.on('accept', ()=>{
+  // Connected
+  c.on('accept', () => {
     clearNAT();
     callStart = Date.now();
     startTimer();
-    setStatus('Connected ✓ — speak now');
-    // show hang up + outcomes
-    document.getElementById('main-btns').innerHTML =
-      `<button class="big-btn btn-hang" onclick="manualHang()">⬛ Hang Up</button>`;
-    document.getElementById('outcomes').classList.remove('show');
+    setStatus('✅','Connected — speaking with '+lead.name);
+    updateLogCurrent('connected');
+    // Show the "Connected" button — user clicks when they've established it's a real person
+    showConnectedUI();
   });
 
-  c.on('disconnect', ()=>{
+  // Disconnected
+  c.on('disconnect', () => {
     clearNAT();
     const dur = callStart ? Math.round((Date.now()-callStart)/1000) : 0;
     callStart = null;
     stopTimer();
     conn = null;
 
-    if (dur >= 8) {
-      // Real conversation — show outcome buttons
-      setStatus('Call ended — how did it go?');
-      document.getElementById('main-btns').innerHTML = '';
-      document.getElementById('outcomes').classList.add('show');
-    } else if (dur > 0 && dur < 5) {
-      // Brief connect = VM auto-pickup
-      setStatus('Voicemail detected — skipping');
-      vmCount++;
+    if (paused) {
+      // User already clicked Connected — show outcome buttons
+      setStatus('📋','Call ended — log outcome');
+      showOutcomeUI();
+      return;
+    }
+
+    if (dur >= 10) {
+      // Talked long enough — pause and ask for outcome
+      paused = true;
+      recordAttempt(lead, 'spoke');
+      setStatus('📋','Call ended — log outcome');
+      showOutcomeUI();
+    } else if (dur > 0 && dur < 6) {
+      // Brief connect = VM
+      recordAttempt(lead,'vm');
+      stats.vm++;
+      setStatus('📬','Voicemail — skipping');
+      updateLogCurrent('vm');
       handleNoAnswer(lead);
     } else {
-      // No answer / ringing timeout
+      // No answer
+      recordAttempt(lead,'na');
       handleNoAnswer(lead);
     }
+    updateStats(); renderLog();
   });
 
-  c.on('cancel', ()=>{ clearNAT(); conn=null; handleNoAnswer(lead); });
-  c.on('reject', ()=>{ clearNAT(); conn=null; handleNoAnswer(lead); });
-  c.on('error',  ()=>{ clearNAT(); conn=null; nextLead(); });
+  c.on('cancel', () => { clearNAT(); conn=null; recordAttempt(lead,'cancel'); handleNoAnswer(lead); });
+  c.on('reject', () => { clearNAT(); conn=null; recordAttempt(lead,'reject'); handleNoAnswer(lead); });
+  c.on('error',  e => { clearNAT(); conn=null; recordAttempt(lead,'error');  setStatus('⚠️','Error — skipping'); scheduleNext(); });
+}
+
+// User clicked "Connected" — pause auto-dial, wait for outcome
+function userClickedConnected() {
+  paused = true;
+  setStatus('🤝','On call — hang up when done');
+  showHangupUI();
+}
+
+// User manually hangs up
+function manualHangup() {
+  if (conn) { try{conn.disconnect();}catch(e){} conn=null; }
+  stopTimer();
+  clearNAT();
+  if (!paused) paused = true;
+  setStatus('📋','Call ended — log outcome');
+  showOutcomeUI();
 }
 
 function handleNoAnswer(lead) {
   if (attempt >= MAX_ATT) {
     lead.done = true;
-    doneCount++;
-    updateQueueBar();
-    idx++;
-    attempt = 0;
+    stats.done++; stats.na++;
+    dialIdx++; attempt = 0;
+    updateStats(); renderLog();
     scheduleNext();
   } else {
-    // retry same lead
-    setStatus('Retrying in a moment…');
+    setStatus('🔄','Retrying '+lead.name+' in a moment…');
     scheduleNext(true);
   }
+}
+
+function recordAttempt(lead, result) {
+  lead.attempts.push({ time: new Date(), result });
 }
 
 function scheduleNext(same=false) {
   if (!running) return;
   const delay = parseInt(document.getElementById('delay-sel').value)*1000;
-  updateQueueBar();
-  setTimeout(()=>{ if(!same)idx=leads.findIndex((l,i)=>!l.done&&i>=idx)||idx; dial(); }, delay);
+  clearRetry();
+  retryTimer = setTimeout(() => {
+    if (!running || paused) return;
+    if (!same) {
+      // advance to next undone
+      if (!leads[dialIdx]?.done) { /* stay */ } else { dialIdx++; }
+    }
+    dial();
+  }, delay);
 }
 
-function nextLead() { idx++; attempt=0; scheduleNext(); }
-
-function manualHang() {
-  if(conn){try{conn.disconnect();}catch(e){}conn=null;}
-  stopTimer(); clearNAT();
-  setStatus('Hung up — how did it go?');
-  document.getElementById('main-btns').innerHTML = '';
-  document.getElementById('outcomes').classList.add('show');
-}
-
-// ── OUTCOMES ─────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// OUTCOME LOGGING
+// ═══════════════════════════════════════════════════════
 function logOutcome(outcome) {
-  document.getElementById('outcomes').classList.remove('show');
-  const lead = leads[idx];
-  if (lead) { lead.done=true; lead.outcome=outcome; }
-  doneCount++;
-  updateQueueBar();
-  if (cfg.appsUrl && lead) pushSheets(lead, outcome);
-  idx++; attempt=0;
-  if (running) {
-    document.getElementById('main-btns').innerHTML =
-      `<button class="big-btn btn-stop" onclick="stopDialer()">⬛ Stop</button>`;
-    scheduleNext();
-  } else {
-    showIdleUI();
+  const lead = leads[dialIdx];
+  if (lead) {
+    lead.done = true;
+    lead.outcome = outcome;
+    recordAttempt(lead, outcome);
+    stats.done++;
+    if (cfg.appsUrl) pushSheets(lead, outcome);
   }
+  paused = false;
+  dialIdx++;
+  attempt = 0;
+  updateStats(); renderLog();
+  showRunningUI();
+  setStatus('➡️','Logged: '+outcome+' — dialing next…');
+  scheduleNext();
 }
 
 async function pushSheets(lead, outcome) {
@@ -513,57 +658,199 @@ async function pushSheets(lead, outcome) {
   } catch(e) {}
 }
 
-// ── UI HELPERS ────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// UI STATE MACHINES
+// ═══════════════════════════════════════════════════════
 function showIdleUI() {
-  document.getElementById('main-btns').innerHTML =
-    `<button class="big-btn btn-start" onclick="startDialer()">▶ Start Dialing</button>`;
-  document.getElementById('outcomes').classList.remove('show');
+  document.getElementById('action-area').innerHTML =
+    `<button class="big-btn b-start" onclick="startDialer()">▶ Start Auto Dialer</button>`;
+  document.getElementById('outcome-area').classList.remove('show');
 }
 
-function updateDisplay() {
+function showRunningUI() {
+  document.getElementById('action-area').innerHTML =
+    `<div style="display:flex;gap:8px;">
+      <button class="big-btn b-connected" onclick="userClickedConnected()" style="flex:2;font-size:14px;">✅ Connected — talking</button>
+      <button class="big-btn b-stop" onclick="stopDialer()" style="flex:1;">⬛ Stop</button>
+    </div>`;
+  document.getElementById('outcome-area').classList.remove('show');
+}
+
+function showConnectedUI() {
+  document.getElementById('action-area').innerHTML =
+    `<button class="big-btn b-stop" onclick="manualHangup()" style="font-size:14px;padding:14px;border:2px solid var(--red);color:var(--red);">⬛ Hang Up</button>`;
+  document.getElementById('outcome-area').classList.remove('show');
+}
+
+function showHangupUI() {
+  document.getElementById('action-area').innerHTML =
+    `<button class="big-btn b-stop" onclick="manualHangup()" style="font-size:14px;padding:14px;border:2px solid var(--red);color:var(--red);">⬛ Hang Up</button>`;
+}
+
+function showOutcomeUI() {
+  document.getElementById('action-area').innerHTML = '';
+  document.getElementById('outcome-area').classList.add('show');
+}
+
+function setStatus(icon, text) {
+  document.getElementById('st-icon').textContent = icon;
+  document.getElementById('st-text').textContent = text;
+}
+
+// ═══════════════════════════════════════════════════════
+// CALL LOG (RIGHT PANEL)
+// ═══════════════════════════════════════════════════════
+function renderLog() {
+  const el = document.getElementById('call-log');
   if (!leads.length) {
-    document.getElementById('l-name').textContent  = 'Load leads to begin';
-    document.getElementById('l-phone').textContent = '';
-    document.getElementById('l-loc').textContent   = '';
-    document.getElementById('l-from').textContent  = '';
+    el.innerHTML = '<div style="padding:30px 16px;text-align:center;color:var(--t3);font-size:12px;">Import leads to begin</div>';
+    return;
   }
-  updateQueueBar();
+
+  const outcomeTag = {
+    'Appointment set': 'tag-appt',
+    'Callback':        'tag-cb',
+    'Not interested':  'tag-ni',
+    'Bad number':      'tag-bad',
+  };
+
+  el.innerHTML = leads.map((l,i) => {
+    const isCurrent = (i === dialIdx && running);
+    const lastAtt   = l.attempts[l.attempts.length-1];
+    let tagHtml='';
+
+    if (l.outcome) {
+      tagHtml = `<span class="li-tag ${outcomeTag[l.outcome]||'tag-done'}">${l.outcome}</span>`;
+    } else if (isCurrent) {
+      tagHtml = `<span class="li-tag tag-ring">dialing</span>`;
+    } else if (lastAtt) {
+      const r=lastAtt.result;
+      if(r==='vm')      tagHtml=`<span class="li-tag tag-vm">VM</span>`;
+      else if(r==='na'||r==='cancel') tagHtml=`<span class="li-tag tag-na">no ans</span>`;
+      else if(r==='spoke') tagHtml=`<span class="li-tag tag-done">spoke</span>`;
+    } else {
+      tagHtml = `<span class="li-tag tag-skip">#${i+1}</span>`;
+    }
+
+    // attempt dots
+    const dots = l.attempts.map(a => {
+      const col = a.result==='vm'?'#c084fc':a.result==='na'||a.result==='cancel'?'var(--purple)':a.result==='spoke'||a.outcome?'var(--green)':'var(--t3)';
+      return `<span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:${col};margin-right:2px;"></span>`;
+    }).join('');
+
+    return `<div class="log-item${isCurrent?' current':l.done?' done':''}" onclick="previewLead(${i})">
+      <div class="li-num">${i+1}</div>
+      <div class="li-body">
+        <div class="li-name">${l.name}</div>
+        <div class="li-ph">${fmt(l.phone)}${dots?'<span style="margin-left:6px;">'+dots+'</span>':''}</div>
+      </div>
+      ${tagHtml}
+    </div>`;
+  }).join('');
+
+  // scroll current into view
+  const cur = el.querySelector('.current');
+  if (cur) cur.scrollIntoView({block:'nearest', behavior:'smooth'});
 }
 
-function updateQueueBar() {
-  const left = leads.filter(l=>!l.done).length;
-  document.getElementById('q-done').textContent = doneCount+' done';
-  document.getElementById('q-left').textContent = left+' left';
-  document.getElementById('q-vm').textContent   = vmCount+' VM';
+function updateLogCurrent(state) { renderLog(); }
+
+function previewLead(i) {
+  renderLeadInfo(leads[i]);
 }
 
-function setStatus(msg) { document.getElementById('l-status').textContent = msg; }
+// ═══════════════════════════════════════════════════════
+// LEAD INFO PANEL
+// ═══════════════════════════════════════════════════════
+function renderLeadInfo(lead) {
+  const panel = document.getElementById('lead-info');
+  const grid  = document.getElementById('li-grid');
+  if (!lead?.data) { panel.classList.remove('show'); return; }
 
-function fmt(p) {
-  const d=p.replace(/\D/g,'');
-  if(d.length===11) return`(${d.slice(1,4)}) ${d.slice(4,7)}-${d.slice(7)}`;
-  if(d.length===10) return`(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`;
-  return p;
+  const priority = ['Full Name','Address','City','State','Zip','Email'];
+  const shown = new Set();
+  let html = '';
+
+  for (const key of priority) {
+    const val = lead.data[key];
+    if (!val || val === lead.phone) continue;
+    const isEmail = key==='Email';
+    const isFull  = key==='Address'||key==='Email';
+    const display = isEmail ? `<a href="mailto:${val}">${val}</a>` : val;
+    html += `<div class="li-item${isFull?' full':''}"><span class="li-k">${key}</span><span class="li-v">${display}</span></div>`;
+    shown.add(key);
+  }
+
+  // remaining columns
+  for (const [key,val] of Object.entries(lead.data)) {
+    if (shown.has(key)||!val||val===lead.phone||val===lead.name) continue;
+    html += `<div class="li-item"><span class="li-k">${key}</span><span class="li-v">${val}</span></div>`;
+  }
+
+  if (html) { grid.innerHTML=html; panel.classList.add('show'); }
+  else panel.classList.remove('show');
 }
 
-// ── TIMER ─────────────────────────────────────────
+function updateCard() {
+  if (!leads.length) {
+    document.getElementById('dc-name').textContent = 'Load leads to begin';
+    ['dc-phone','dc-loc','dc-from','dc-meta'].forEach(id=>document.getElementById(id).textContent='');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// TIMER
+// ═══════════════════════════════════════════════════════
 function startTimer() {
   secs=0;
-  document.getElementById('l-timer').className='timer';
+  const el=document.getElementById('st-timer');
+  el.className='timer';
   timerInt=setInterval(()=>{
     secs++;
-    const m=Math.floor(secs/60), s=secs%60;
-    document.getElementById('l-timer').textContent=m+':'+(s+'').padStart(2,'0');
+    const m=Math.floor(secs/60),s=secs%60;
+    el.textContent=m+':'+(s+'').padStart(2,'0');
   },1000);
 }
 function stopTimer() {
-  clearInterval(timerInt); timerInt=null;
-  document.getElementById('l-timer').className='timer idle';
-  document.getElementById('l-timer').textContent='—';
+  clearInterval(timerInt);timerInt=null;
+  const el=document.getElementById('st-timer');
+  el.className='timer idle'; el.textContent='—';
 }
-function clearNAT() { if(naTimer){clearTimeout(naTimer);naTimer=null;} }
 
-// ── CONFIG ────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════════════
+function updateStats() {
+  const left=leads.filter(l=>!l.done).length;
+  document.getElementById('sp-done').textContent=stats.done+' done';
+  document.getElementById('sp-vm').textContent  =stats.vm  +' VM';
+  document.getElementById('sp-na').textContent  =stats.na  +' NA';
+  document.getElementById('sp-left').textContent=left+' left';
+}
+
+// ═══════════════════════════════════════════════════════
+// EXPORT + CLEAR LOG
+// ═══════════════════════════════════════════════════════
+function exportLog() {
+  const rows = leads.filter(l=>l.attempts.length||l.outcome).map(l=>
+    `${l.name},${l.phone},${l.outcome||''},${l.attempts.length},${l.attempts.map(a=>a.result).join('|')}`
+  );
+  if(!rows.length){toast('No calls yet');return;}
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['Name,Phone,Outcome,Attempts,Results\n'+rows.join('\n')],{type:'text/csv'}));
+  a.download='fex-calls-'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+}
+function clearLog() {
+  if (!confirm('Clear call history?')) return;
+  leads.forEach(l=>{l.attempts=[];l.outcome=null;l.done=false;});
+  stats={done:0,vm:0,na:0};
+  updateStats(); renderLog();
+}
+
+// ═══════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════
 function openCfg() {
   document.getElementById('cfg-worker').value=cfg.workerUrl;
   document.getElementById('cfg-sheet').value=cfg.sheetId;
@@ -572,27 +859,29 @@ function openCfg() {
 }
 function closeCfg() { document.getElementById('cfg-modal').classList.remove('open'); }
 function saveCfg() {
-  cfg.workerUrl = document.getElementById('cfg-worker').value.trim();
-  cfg.sheetId   = document.getElementById('cfg-sheet').value.trim();
-  cfg.appsUrl   = document.getElementById('cfg-apps').value.trim();
-  localStorage.setItem('workerUrl',cfg.workerUrl);
-  localStorage.setItem('sheetId',cfg.sheetId);
-  localStorage.setItem('appsUrl',cfg.appsUrl);
-  document.getElementById('sync-lbl').textContent = cfg.workerUrl ? '● Worker set' : '';
-  document.getElementById('sync-lbl').style.color = 'var(--green)';
-  closeCfg(); toast('Saved');
+  cfg.workerUrl=document.getElementById('cfg-worker').value.trim();
+  cfg.sheetId  =document.getElementById('cfg-sheet').value.trim();
+  cfg.appsUrl  =document.getElementById('cfg-apps').value.trim();
+  save('workerUrl',cfg.workerUrl);save('sheetId',cfg.sheetId);save('appsUrl',cfg.appsUrl);
+  closeCfg(); toast('Settings saved');
 }
+function save(k,v){localStorage.setItem(k,v);}
 
-// ── INIT ──────────────────────────────────────────
-document.getElementById('max-att').value = localStorage.getItem('maxAtt')||'2';
-MAX_ATT = parseInt(document.getElementById('max-att').value);
-if (cfg.workerUrl) {
-  document.getElementById('sync-lbl').textContent='● Worker set';
-  document.getElementById('sync-lbl').style.color='var(--green)';
+// ═══════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════
+function fmt(p){
+  const d=p.replace(/\D/g,'');
+  if(d.length===11)return`(${d.slice(1,4)}) ${d.slice(4,7)}-${d.slice(7)}`;
+  if(d.length===10)return`(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`;
+  return p;
 }
-if (!cfg.workerUrl) setTimeout(openCfg, 400);
+function clearNAT(){if(naTimer){clearTimeout(naTimer);naTimer=null;}}
+function clearRetry(){if(retryTimer){clearTimeout(retryTimer);retryTimer=null;}}
 
-// drag+drop
+// ═══════════════════════════════════════════════════════
+// DRAG + DROP
+// ═══════════════════════════════════════════════════════
 document.addEventListener('dragover',e=>e.preventDefault());
 document.addEventListener('drop',e=>{
   e.preventDefault();
@@ -600,18 +889,27 @@ document.addEventListener('drop',e=>{
   if(f&&f.name.endsWith('.csv'))importCSV({files:[f],value:''});
 });
 
-// ── TOAST ─────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════
 function toast(msg,type='ok'){
   const t=document.createElement('div');
-  t.style.cssText=`position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  t.style.cssText=`position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
     background:${type==='err'?'#3a1020':'#0a2a0a'};
     border:1px solid ${type==='err'?'var(--red)':'var(--gdim)'};
     color:${type==='err'?'var(--red)':'var(--green)'};
     padding:8px 18px;border-radius:6px;font-size:12px;font-family:var(--mono);
     z-index:999;white-space:nowrap;pointer-events:none;`;
   t.textContent=msg;document.body.appendChild(t);
-  setTimeout(()=>t.remove(),2800);
+  setTimeout(()=>t.remove(),3000);
 }
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+document.getElementById('max-att').value=localStorage.getItem('maxAtt')||'2';
+MAX_ATT=parseInt(document.getElementById('max-att').value);
+if(!cfg.workerUrl) setTimeout(openCfg,400);
 </script>
 </body>
 </html>
