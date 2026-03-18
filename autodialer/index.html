@@ -7,367 +7,212 @@
 <script src="https://cdn.jsdelivr.net/npm/@twilio/voice-sdk@2.10.0/dist/twilio.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
-:root{
-  --bg:#0d0f12;--sf:#141720;--s2:#1c2030;--s3:#232840;
-  --b:#2a3050;--b2:#3a4570;--t3:#4a5580;
-  --tx:#e8eaf0;--t2:#8892b0;
-  --green:#00e676;--gdim:#00a651;--red:#ff4d6d;--amber:#ffab00;--blue:#4fc3f7;--purple:#b39ddb;
-  --fn:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
+:root {
+  --bg: #0d0f12; --sf: #141720; --s2: #1c2030; --s3: #232840;
+  --b: #2a3050; --b2: #3a4570;
+  --tx: #e8eaf0; --t2: #8892b0; --t3: #4a5580;
+  --green: #00e676; --gdim: #00a651;
+  --red: #ff4d6d; --amber: #ffab00; --blue: #4fc3f7; --purple: #b39ddb;
+  --fn: 'IBM Plex Sans', sans-serif; --mono: 'IBM Plex Mono', monospace;
 }
-*{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:var(--tx);font-family:var(--fn);font-size:14px;min-height:100vh;display:flex;flex-direction:column;}
-/* TOP */
-.topbar{background:var(--sf);border-bottom:1px solid var(--b);padding:10px 18px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
-.logo{font-family:var(--mono);font-size:12px;color:var(--green);letter-spacing:.1em;}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--t3);display:inline-block;flex-shrink:0;transition:background .3s;}
-.dot.live{background:var(--green);box-shadow:0 0 5px var(--green);animation:pulse 2s infinite;}
-.dot.ring{background:var(--amber);box-shadow:0 0 5px var(--amber);animation:pulse .7s infinite;}
-.dot.err{background:var(--red);}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.slbl{font-size:11px;color:var(--t2);font-family:var(--mono);}
-.tbr{margin-left:auto;display:flex;align-items:center;gap:8px;}
-.btn{padding:5px 11px;border-radius:4px;font-size:11px;cursor:pointer;font-family:var(--fn);font-weight:500;border:none;transition:all .15s;}
-.btn:disabled{opacity:.3;cursor:not-allowed;}
-.btn-g{background:var(--gdim);color:#000;}
-.btn-g:hover:not(:disabled){background:#00c853;}
-.btn-r{background:none;border:1px solid var(--red);color:var(--red);}
-.btn-r:hover:not(:disabled){background:rgba(255,77,109,.1);}
-.btn-o{background:none;border:1px solid var(--b);color:var(--t2);}
-.btn-o:hover:not(:disabled){border-color:var(--b2);color:var(--tx);}
-.btn-a{background:none;border:1px solid var(--amber);color:var(--amber);}
-/* AUDIO BAR */
-.abar{background:var(--s2);border-bottom:1px solid var(--b);padding:7px 18px;display:flex;align-items:center;gap:10px;font-size:11px;font-family:var(--mono);flex-shrink:0;}
-/* LAYOUT */
-.layout{display:grid;grid-template-columns:300px 1fr 260px;flex:1;overflow:hidden;}
-.panel{border-right:1px solid var(--b);display:flex;flex-direction:column;overflow:hidden;}
-.panel:last-child{border-right:none;}
-.ph{padding:9px 14px;border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.ptitle{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);font-weight:500;}
-.pb{flex:1;overflow-y:auto;}
-.pb::-webkit-scrollbar{width:3px;}.pb::-webkit-scrollbar-thumb{background:var(--b);border-radius:2px;}
-/* QUEUE */
-.qctrl{padding:9px 14px;border-bottom:1px solid var(--b);display:flex;gap:6px;flex-shrink:0;}
-.lead-item{padding:9px 14px;border-bottom:1px solid var(--b);cursor:pointer;transition:background .1s;display:flex;align-items:center;gap:8px;}
-.lead-item:hover{background:var(--s2);}
-.lead-item.active{background:var(--s3);border-left:2px solid var(--green);}
-.lead-item.done{opacity:.38;}
-.lead-item.calling{border-left:2px solid var(--amber);background:rgba(255,171,0,.04);}
-.lnum{font-family:var(--mono);font-size:9px;color:var(--t3);width:18px;flex-shrink:0;}
-.linfo{flex:1;min-width:0;}
-.lname{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.lphone{font-family:var(--mono);font-size:10px;color:var(--t2);}
-.ltag{font-size:9px;padding:2px 5px;border-radius:3px;font-family:var(--mono);flex-shrink:0;}
-.tag-q{color:var(--t3);}
-.tag-appt{background:#0a2a1a;color:var(--green);}
-.tag-cb{background:#2a2010;color:var(--amber);}
-.tag-bad{background:#2a1018;color:var(--red);}
-.tag-na{background:#1a1a2a;color:var(--purple);}
-.tag-vm{background:#1a0828;color:#c084fc;}
-.dropz{margin:12px;border:1px dashed var(--b2);border-radius:6px;padding:18px;text-align:center;cursor:pointer;}
-.dropz:hover{border-color:var(--gdim);}
-/* POWER BAR */
-.pbar{background:var(--s2);border-bottom:1px solid var(--b);padding:9px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex-shrink:0;}
-.pbar-lbl{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;}
-.dsel{background:var(--s3);border:1px solid var(--b);color:var(--tx);padding:4px 7px;border-radius:4px;font-size:11px;cursor:pointer;}
-/* CALL CARD */
-.call-card{margin:16px;background:var(--s2);border:1px solid var(--b);border-radius:10px;padding:18px;flex-shrink:0;}
-.call-card.connected{border-color:var(--gdim);}
-.call-card.ringing{border-color:var(--amber);}
-.call-card.voicemail{border-color:#7c3aed;}
-.clabel{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:6px;}
-.cname{font-size:22px;font-weight:300;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.cphone{font-family:var(--mono);font-size:13px;color:var(--blue);margin-bottom:2px;}
-.cloc{font-size:11px;color:var(--t2);margin-bottom:10px;}
-.ctimer{font-family:var(--mono);font-size:28px;font-weight:500;color:var(--green);margin-bottom:4px;}
-.ctimer.idle{color:var(--t3);}
-.cstatus{font-size:11px;font-family:var(--mono);min-height:16px;margin-bottom:12px;}
-/* FROM ROW */
-.from-row{display:flex;align-items:center;gap:6px;margin-bottom:10px;}
-.from-sel{background:var(--s3);border:1px solid var(--b);color:var(--tx);padding:5px 8px;border-radius:4px;font-size:10px;font-family:var(--mono);cursor:pointer;flex:1;}
-.auto-badge{font-size:9px;font-family:var(--mono);color:var(--t3);margin-bottom:10px;min-height:12px;}
-/* DIAL ACTIONS */
-.dactions{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
-/* VM BADGE */
-.vm-badge{display:none;background:rgba(124,58,237,.15);border:1px solid #7c3aed;border-radius:6px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:#c084fc;font-family:var(--mono);}
-.vm-badge.show{display:block;}
-/* OUTCOMES */
-.outcomes{padding:12px 16px;border-top:1px solid var(--b);flex-shrink:0;}
-.otitle{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:8px;}
-.ogrid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;}
-.obtn{padding:10px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid transparent;font-family:var(--fn);transition:all .15s;text-align:left;display:flex;align-items:center;gap:7px;}
-.obtn:disabled{opacity:.25;cursor:not-allowed;}
-.obtn .od{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-.ob-appt{background:#0a2a1a;border-color:var(--gdim);color:var(--green);}
-.ob-appt:hover:not(:disabled){background:#0f3a22;}
-.ob-cb{background:#2a2010;border-color:#664400;color:var(--amber);}
-.ob-cb:hover:not(:disabled){background:#3a2e12;}
-.ob-na{background:#151530;border-color:#3a3a70;color:var(--purple);}
-.ob-na:hover:not(:disabled){background:#1c1c40;}
-.ob-bad{background:#200a10;border-color:#601020;color:var(--red);}
-.ob-bad:hover:not(:disabled){background:#2e0f18;}
-/* LEAD DETAIL */
-.ld-wrap{border-top:1px solid var(--b);flex-shrink:0;}
-.ld-toggle{width:100%;padding:8px 16px;background:none;border:none;color:var(--t2);font-size:11px;font-family:var(--mono);cursor:pointer;text-align:left;display:flex;justify-content:space-between;}
-.ld-toggle:hover{background:var(--s2);}
-.ld-body{display:none;padding:10px 16px;background:var(--s2);max-height:160px;overflow-y:auto;}
-.ld-body.open{display:block;}
-.ld-row{display:flex;gap:8px;margin-bottom:4px;font-size:11px;}
-.ld-key{color:var(--t3);font-family:var(--mono);min-width:110px;flex-shrink:0;}
-.ld-val{color:var(--tx);word-break:break-word;}
-/* NUMPAD */
-.npad{padding:12px 16px;border-top:1px solid var(--b);flex-shrink:0;}
-.npad-lbl{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
-.npad-disp{font-family:var(--mono);font-size:15px;color:var(--blue);background:var(--s3);border:1px solid var(--b);border-radius:5px;padding:6px 10px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center;}
-.npad-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:7px;}
-.nk{background:var(--s3);border:1px solid var(--b);color:var(--tx);border-radius:5px;padding:7px 0;font-size:13px;font-family:var(--mono);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;transition:background .1s;}
-.nk:hover{background:var(--s2);}
-.nk-sub{font-size:7px;color:var(--t3);letter-spacing:.1em;min-height:8px;}
-/* TOGGLE */
-.tog{position:relative;display:inline-block;width:30px;height:17px;}
-.tog input{opacity:0;width:0;height:0;}
-.tsldr{position:absolute;inset:0;background:var(--b);border-radius:9px;cursor:pointer;transition:.2s;}
-.tsldr::before{content:'';position:absolute;left:2px;top:2px;width:13px;height:13px;border-radius:50%;background:var(--t2);transition:.2s;}
-input:checked+.tsldr{background:var(--gdim);}
-input:checked+.tsldr::before{transform:translateX(13px);background:#000;}
-/* STATS */
-.sbar{padding:10px 12px;border-bottom:1px solid var(--b);display:grid;grid-template-columns:repeat(5,1fr);gap:4px;flex-shrink:0;}
-.stat{text-align:center;}
-.sn{font-family:var(--mono);font-size:15px;font-weight:500;}
-.sl{font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-top:1px;}
-/* LOG */
-.log-item{padding:8px 12px;border-bottom:1px solid var(--b);font-size:11px;}
-.log-time{font-family:var(--mono);font-size:9px;color:var(--t3);margin-bottom:2px;}
-.log-name{font-weight:500;margin-bottom:1px;}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--tx); font-family: var(--fn); font-size: 14px; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+
+.card { background: var(--sf); border: 1px solid var(--b); border-radius: 14px; width: 100%; max-width: 480px; overflow: hidden; }
+
+/* STATUS STRIP */
+.strip { padding: 10px 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--b); }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--t3); flex-shrink: 0; }
+.dot.live  { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 2s infinite; }
+.dot.ring  { background: var(--amber); box-shadow: 0 0 6px var(--amber); animation: pulse .7s infinite; }
+.dot.talk  { background: var(--green); box-shadow: 0 0 6px var(--green); }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+.strip-txt { font-family: var(--mono); font-size: 11px; color: var(--t2); }
+.strip-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+
+/* LEAD DISPLAY */
+.lead-block { padding: 28px 24px 20px; text-align: center; min-height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.lead-attempt { font-size: 10px; font-family: var(--mono); color: var(--t3); margin-bottom: 8px; letter-spacing: .1em; min-height: 14px; }
+.lead-name { font-size: 28px; font-weight: 300; color: var(--tx); margin-bottom: 6px; }
+.lead-phone { font-family: var(--mono); font-size: 16px; color: var(--blue); margin-bottom: 4px; }
+.lead-loc { font-size: 12px; color: var(--t2); margin-bottom: 14px; }
+.lead-from { font-size: 10px; font-family: var(--mono); color: var(--gdim); }
+
+/* TIMER */
+.timer { font-family: var(--mono); font-size: 42px; font-weight: 500; color: var(--green); padding: 10px 0; }
+.timer.idle { color: var(--t3); font-size: 28px; }
+
+/* STATUS MSG */
+.status-msg { font-family: var(--mono); font-size: 12px; color: var(--t2); min-height: 18px; margin-bottom: 8px; }
+
+/* BIG BUTTONS */
+.btn-row { padding: 0 24px 24px; display: flex; gap: 10px; }
+.big-btn { flex: 1; padding: 14px; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; border: none; font-family: var(--fn); transition: all .15s; }
+.big-btn:disabled { opacity: .3; cursor: not-allowed; }
+.btn-start { background: var(--gdim); color: #000; }
+.btn-start:hover:not(:disabled) { background: #00c853; }
+.btn-stop  { background: none; border: 1px solid var(--red); color: var(--red); }
+.btn-stop:hover:not(:disabled)  { background: rgba(255,77,109,.1); }
+.btn-next  { background: var(--blue); color: #000; }
+.btn-next:hover:not(:disabled)  { background: #81d4fa; }
+.btn-hang  { background: var(--red); color: #fff; }
+.btn-hang:hover:not(:disabled)  { background: #c62828; }
+
+/* OUTCOME BUTTONS */
+.outcomes { display: none; padding: 0 24px 20px; }
+.outcomes.show { display: block; }
+.out-label { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--t3); margin-bottom: 8px; }
+.out-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.out-btn { padding: 11px; border-radius: 7px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid transparent; font-family: var(--fn); transition: all .15s; text-align: left; }
+.out-btn:hover { filter: brightness(1.2); }
+.o-appt { background: #0a2a1a; border-color: var(--gdim); color: var(--green); }
+.o-cb   { background: #2a2010; border-color: #664400; color: var(--amber); }
+.o-na   { background: #151530; border-color: #3a3a70; color: var(--purple); }
+.o-bad  { background: #200a10; border-color: #601020; color: var(--red); }
+
+/* QUEUE BAR */
+.queue-bar { border-top: 1px solid var(--b); padding: 12px 24px; display: flex; align-items: center; gap: 12px; }
+.q-label { font-size: 11px; color: var(--t3); font-family: var(--mono); }
+.q-pill { font-family: var(--mono); font-size: 11px; padding: 3px 8px; border-radius: 4px; }
+.q-done  { background: #0a2a1a; color: var(--green); }
+.q-left  { background: var(--s3); color: var(--t2); }
+.q-vm    { background: #1a0828; color: #c084fc; }
+
+/* IMPORT */
+.import-row { border-top: 1px solid var(--b); padding: 12px 24px; display: flex; gap: 8px; align-items: center; }
+.sm-btn { padding: 6px 12px; border-radius: 5px; font-size: 11px; cursor: pointer; font-family: var(--fn); font-weight: 500; border: none; }
+.sm-g { background: var(--gdim); color: #000; }
+.sm-o { background: none; border: 1px solid var(--b); color: var(--t2); }
+.sm-o:hover { border-color: var(--b2); color: var(--tx); }
+
+/* SETTINGS */
+.settings-row { border-top: 1px solid var(--b); padding: 10px 24px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.s-lbl { font-size: 10px; color: var(--t3); font-family: var(--mono); }
+.s-sel { background: var(--s3); border: 1px solid var(--b); color: var(--tx); padding: 4px 7px; border-radius: 4px; font-size: 11px; cursor: pointer; }
+.mic-status { margin-left: auto; font-size: 10px; font-family: var(--mono); color: var(--t3); }
+
 /* MODAL */
-.mbk{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center;}
-.mbk.open{display:flex;}
-.modal{background:var(--sf);border:1px solid var(--b2);border-radius:10px;width:460px;max-width:95vw;}
-.mh{padding:14px 18px;border-bottom:1px solid var(--b);display:flex;justify-content:space-between;align-items:center;}
-.mh h3{font-size:13px;font-weight:500;}
-.mc{padding:18px;}
-.mft{padding:10px 18px;border-top:1px solid var(--b);display:flex;justify-content:flex-end;gap:8px;}
-.field{margin-bottom:14px;}
-.field label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:5px;}
-.field input{width:100%;background:var(--s2);border:1px solid var(--b);color:var(--tx);padding:7px 10px;border-radius:5px;font-size:12px;font-family:var(--fn);outline:none;}
-.field input:focus{border-color:var(--b2);}
-.hint{font-size:10px;color:var(--t3);margin-top:3px;}
-.sync{font-size:10px;font-family:var(--mono);}
-.sync.ok{color:var(--green);}.sync.err{color:var(--red);}
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 50; align-items: center; justify-content: center; }
+.overlay.open { display: flex; }
+.modal { background: var(--sf); border: 1px solid var(--b2); border-radius: 10px; width: 440px; max-width: 95vw; }
+.mh { padding: 14px 18px; border-bottom: 1px solid var(--b); display: flex; justify-content: space-between; align-items: center; }
+.mh h3 { font-size: 13px; font-weight: 500; }
+.mc { padding: 18px; }
+.mf { padding: 10px 18px; border-top: 1px solid var(--b); display: flex; justify-content: flex-end; gap: 8px; }
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--t3); margin-bottom: 5px; }
+.field input { width: 100%; background: var(--s2); border: 1px solid var(--b); color: var(--tx); padding: 7px 10px; border-radius: 5px; font-size: 12px; font-family: var(--fn); outline: none; }
+.field input:focus { border-color: var(--b2); }
+.hint { font-size: 10px; color: var(--t3); margin-top: 3px; }
 </style>
 </head>
 <body>
 
-<!-- TOPBAR -->
-<div class="topbar">
-  <span class="logo">FEX DIALER</span>
-  <span style="color:var(--b2);">|</span>
-  <span class="dot" id="dev-dot"></span>
-  <span class="slbl" id="dev-lbl">NOT READY</span>
-  <div class="tbr">
-    <span class="sync" id="sync-ind">● UNCONFIGURED</span>
-    <button class="btn btn-o" onclick="openCfg()">⚙ Settings</button>
-  </div>
-</div>
+<div class="card">
 
-<!-- AUDIO BAR -->
-<div class="abar">
-  <span style="color:var(--t2);">Browser Audio</span>
-  <button class="btn btn-g" id="mic-btn" onclick="initDevice()" style="font-size:10px;padding:4px 10px;">Connect Mic</button>
-  <span id="mic-lbl" style="color:var(--t3);font-size:10px;"></span>
-  <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
-    <span style="color:var(--t3);">AMD</span>
-    <label class="tog"><input type="checkbox" id="amd-toggle" checked><span class="tsldr"></span></label>
-    <span style="color:var(--t3);font-size:10px;" title="Answering Machine Detection — Twilio detects VM before connecting you">VM Detect</span>
+  <!-- STATUS -->
+  <div class="strip">
+    <span class="dot" id="dev-dot"></span>
+    <span class="strip-txt" id="dev-lbl">Mic not connected</span>
+    <div class="strip-right">
+      <button class="sm-btn sm-o" onclick="initDevice()" id="mic-btn" style="font-size:10px;padding:4px 10px;">Connect Mic</button>
+      <button class="sm-btn sm-o" onclick="openCfg()" style="font-size:10px;padding:4px 10px;">⚙</button>
+    </div>
   </div>
-</div>
 
-<!-- LAYOUT -->
-<div class="layout">
-
-<!-- LEFT: QUEUE -->
-<div class="panel">
-  <div class="ph">
-    <span class="ptitle">Lead Queue</span>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--t3);" id="qcount">0 leads</span>
+  <!-- LEAD DISPLAY -->
+  <div class="lead-block">
+    <div class="lead-attempt" id="l-attempt"></div>
+    <div class="lead-name"  id="l-name">Load leads to begin</div>
+    <div class="lead-phone" id="l-phone"></div>
+    <div class="lead-loc"   id="l-loc"></div>
+    <div class="timer idle" id="l-timer">—</div>
+    <div class="status-msg" id="l-status"></div>
+    <div class="lead-from"  id="l-from"></div>
   </div>
-  <div class="qctrl">
-    <label class="btn btn-g" style="cursor:pointer;font-size:11px;">
-      ↑ CSV<input type="file" id="csv-in" accept=".csv" style="display:none" onchange="importCSV(this)">
+
+  <!-- MAIN BUTTONS -->
+  <div class="btn-row" id="main-btns">
+    <button class="big-btn btn-start" id="btn-start" onclick="startDialer()">▶ Start Dialing</button>
+  </div>
+
+  <!-- OUTCOME BUTTONS (shown when someone picks up) -->
+  <div class="outcomes" id="outcomes">
+    <div class="out-label">How did it go?</div>
+    <div class="out-grid">
+      <button class="out-btn o-appt" onclick="logOutcome('Appointment set')">✓ Appointment Set</button>
+      <button class="out-btn o-cb"   onclick="logOutcome('Callback')">↩ Call Back Later</button>
+      <button class="out-btn o-na"   onclick="logOutcome('Not interested')">— Not Interested</button>
+      <button class="out-btn o-bad"  onclick="logOutcome('Bad number')">✕ Bad Number</button>
+    </div>
+  </div>
+
+  <!-- QUEUE BAR -->
+  <div class="queue-bar">
+    <span class="q-label">Queue</span>
+    <span class="q-pill q-done" id="q-done">0 done</span>
+    <span class="q-pill q-left" id="q-left">0 left</span>
+    <span class="q-pill q-vm"   id="q-vm"  >0 VM</span>
+  </div>
+
+  <!-- IMPORT -->
+  <div class="import-row">
+    <label class="sm-btn sm-g" style="cursor:pointer;">
+      ↑ Import CSV
+      <input type="file" id="csv-in" accept=".csv" style="display:none" onchange="importCSV(this)">
     </label>
-    <button class="btn btn-o" onclick="loadSheets()" style="font-size:11px;">⊞ Sheets</button>
-    <button class="btn btn-r" onclick="clearQueue()" style="font-size:11px;">✕ Clear</button>
-  </div>
-  <div class="dropz" id="dropz" onclick="document.getElementById('csv-in').click()">
-    <div style="font-size:20px;color:var(--t3);">⬆</div>
-    <div style="font-size:11px;color:var(--t2);margin-top:3px;">Drop CSV or click to import</div>
-    <div style="font-size:10px;color:var(--t3);margin-top:2px;">All columns auto-parsed</div>
-  </div>
-  <div class="pb" id="lead-list"></div>
-</div>
-
-<!-- CENTER -->
-<div class="panel" style="display:flex;flex-direction:column;overflow-y:auto;">
-
-  <!-- POWER BAR -->
-  <div class="pbar">
-    <button class="btn btn-g" id="pd-start" onclick="startDialer()" style="font-size:12px;padding:7px 16px;">▶ Start</button>
-    <button class="btn btn-r" id="pd-stop"  onclick="stopDialer()"  style="display:none;font-size:12px;padding:7px 16px;">⬛ Stop</button>
-    <div style="display:flex;align-items:center;gap:5px;">
-      <span class="pbar-lbl">Delay</span>
-      <select class="dsel" id="delay-sel">
-        <option value="2">2s</option><option value="3" selected>3s</option>
-        <option value="5">5s</option><option value="10">10s</option>
-      </select>
-    </div>
-    <div style="display:flex;align-items:center;gap:5px;">
-      <span class="pbar-lbl">Dials/lead</span>
-      <select class="dsel" id="max-att" onchange="MAX_ATT=+this.value;localStorage.setItem('maxAtt',this.value)">
-        <option value="1">1×</option><option value="2" selected>2×</option>
-        <option value="3">3×</option><option value="4">4×</option>
-      </select>
-    </div>
-    <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
-      <span id="pd-prog" style="font-size:10px;font-family:var(--mono);color:var(--t3);"></span>
-      <button class="btn btn-o" onclick="skipLead()" style="font-size:11px;">Skip →</button>
-    </div>
+    <button class="sm-btn sm-o" onclick="loadSheets()">⊞ Sheets</button>
+    <button class="sm-btn sm-o" onclick="clearLeads()" style="margin-left:auto;">Clear</button>
   </div>
 
-  <!-- CALL CARD -->
-  <div class="call-card" id="call-card">
-    <div class="clabel">Current Lead</div>
-    <div class="cname" id="c-name">— Select a lead —</div>
-    <div class="cphone" id="c-phone"></div>
-    <div class="cloc" id="c-loc"></div>
-
-    <div class="from-row">
-      <select class="from-sel" id="from-sel" onchange="onFromChange()"></select>
-      <label class="tog" title="Auto-closest number to lead area code">
-        <input type="checkbox" id="auto-closest" checked onchange="onAutoToggle()">
-        <span class="tsldr"></span>
-      </label>
-      <span style="font-size:9px;color:var(--t3);">AUTO</span>
-    </div>
-    <div class="auto-badge" id="auto-badge">—</div>
-
-    <div class="ctimer idle" id="c-timer">0:00</div>
-    <div class="cstatus" id="c-status" style="color:var(--t2);"></div>
-
-    <!-- VM DETECTION BADGE -->
-    <div class="vm-badge" id="vm-badge">
-      🤖 Voicemail detected — skipping automatically…
-    </div>
-
-    <div class="dactions">
-      <button class="btn btn-g" id="call-btn" onclick="manualCall()" disabled style="flex:1;font-size:13px;padding:9px;">📞 Call</button>
-      <button class="btn btn-r" id="hang-btn" onclick="hangUp()" style="display:none;flex:1;font-size:13px;padding:9px;">⬛ Hang Up</button>
-      <button class="btn btn-a" onclick="forceHang()" title="Force disconnect" style="font-size:10px;padding:5px 9px;">✕ Force</button>
-    </div>
+  <!-- SETTINGS -->
+  <div class="settings-row">
+    <span class="s-lbl">Dials/lead</span>
+    <select class="s-sel" id="max-att" onchange="MAX_ATT=+this.value;localStorage.setItem('maxAtt',this.value)">
+      <option value="1">1×</option>
+      <option value="2" selected>2×</option>
+      <option value="3">3×</option>
+    </select>
+    <span class="s-lbl">Delay</span>
+    <select class="s-sel" id="delay-sel">
+      <option value="2">2s</option>
+      <option value="3" selected>3s</option>
+      <option value="5">5s</option>
+    </select>
+    <span class="mic-status" id="sync-lbl"></span>
   </div>
 
-  <!-- OUTCOMES -->
-  <div class="outcomes">
-    <div class="otitle">Log Outcome</div>
-    <div class="ogrid">
-      <button class="obtn ob-appt" onclick="logOutcome('Appointment set')" disabled id="ob-appt">
-        <span class="od" style="background:var(--green);"></span>Appointment Set
-      </button>
-      <button class="obtn ob-cb" onclick="logOutcome('Callback')" disabled id="ob-cb">
-        <span class="od" style="background:var(--amber);"></span>Callback
-      </button>
-      <button class="obtn ob-na" onclick="logOutcome('Not home')" disabled id="ob-na">
-        <span class="od" style="background:var(--purple);"></span>Not Home
-      </button>
-      <button class="obtn ob-bad" onclick="logOutcome('Bad number')" disabled id="ob-bad">
-        <span class="od" style="background:var(--red);"></span>Bad Number
-      </button>
-    </div>
-  </div>
-
-  <!-- LEAD DETAIL DROPDOWN -->
-  <div class="ld-wrap" id="ld-wrap" style="display:none;">
-    <button class="ld-toggle" onclick="toggleDetail()">
-      <span id="ld-title">Lead Info</span><span id="ld-arrow">▼</span>
-    </button>
-    <div class="ld-body" id="ld-body"></div>
-  </div>
-
-  <!-- NUMPAD -->
-  <div class="npad">
-    <div class="npad-lbl">Manual Dial</div>
-    <div class="npad-disp">
-      <span id="npad-disp" style="color:var(--t3);">Enter number…</span>
-      <button onclick="npadBack()" style="background:none;border:none;color:var(--t3);cursor:pointer;font-size:14px;">⌫</button>
-    </div>
-    <div class="npad-grid">
-      <button class="nk" onclick="npadPress('1')"><span>1</span><span class="nk-sub"> </span></button>
-      <button class="nk" onclick="npadPress('2')"><span>2</span><span class="nk-sub">ABC</span></button>
-      <button class="nk" onclick="npadPress('3')"><span>3</span><span class="nk-sub">DEF</span></button>
-      <button class="nk" onclick="npadPress('4')"><span>4</span><span class="nk-sub">GHI</span></button>
-      <button class="nk" onclick="npadPress('5')"><span>5</span><span class="nk-sub">JKL</span></button>
-      <button class="nk" onclick="npadPress('6')"><span>6</span><span class="nk-sub">MNO</span></button>
-      <button class="nk" onclick="npadPress('7')"><span>7</span><span class="nk-sub">PQRS</span></button>
-      <button class="nk" onclick="npadPress('8')"><span>8</span><span class="nk-sub">TUV</span></button>
-      <button class="nk" onclick="npadPress('9')"><span>9</span><span class="nk-sub">WXYZ</span></button>
-      <button class="nk" onclick="npadPress('*')"><span>*</span><span class="nk-sub"> </span></button>
-      <button class="nk" onclick="npadPress('0')"><span>0</span><span class="nk-sub">+</span></button>
-      <button class="nk" onclick="npadPress('#')"><span>#</span><span class="nk-sub"> </span></button>
-    </div>
-    <button class="btn btn-g" onclick="npadCall()" style="width:100%;font-size:12px;padding:9px;">📞 Call This Number</button>
-  </div>
-
-</div><!-- /center -->
-
-<!-- RIGHT: STATS + LOG -->
-<div class="panel" style="border-right:none;">
-  <div class="sbar">
-    <div class="stat"><div class="sn" id="s-appt" style="color:var(--green);">0</div><div class="sl">Appts</div></div>
-    <div class="stat"><div class="sn" id="s-cb"   style="color:var(--amber);">0</div><div class="sl">CB</div></div>
-    <div class="stat"><div class="sn" id="s-na"   style="color:var(--purple);">0</div><div class="sl">NA</div></div>
-    <div class="stat"><div class="sn" id="s-vm"   style="color:#c084fc;">0</div><div class="sl">VM</div></div>
-    <div class="stat"><div class="sn" id="s-bad"  style="color:var(--red);">0</div><div class="sl">Bad</div></div>
-  </div>
-  <div class="ph">
-    <span class="ptitle">Call Log</span>
-    <button class="btn btn-o" onclick="exportLog()" style="font-size:10px;padding:3px 7px;">↓ CSV</button>
-  </div>
-  <div class="pb" id="call-log">
-    <div style="padding:20px;text-align:center;color:var(--t3);font-size:12px;">No calls yet</div>
-  </div>
-</div>
-
-</div><!-- /layout -->
+</div><!-- /card -->
 
 <!-- CONFIG MODAL -->
-<div class="mbk" id="cfg-modal">
+<div class="overlay" id="cfg-modal">
   <div class="modal">
-    <div class="mh"><h3>Settings</h3><button onclick="closeCfg()" style="background:none;border:none;color:var(--t2);cursor:pointer;font-size:16px;">✕</button></div>
+    <div class="mh"><h3>Settings</h3><button onclick="closeCfg()" style="background:none;border:none;color:var(--t2);cursor:pointer;font-size:18px;">✕</button></div>
     <div class="mc">
       <div class="field">
         <label>Cloudflare Worker URL</label>
         <input id="cfg-worker" placeholder="https://raspy-math-9a25.thomaslancheros06.workers.dev">
       </div>
       <div class="field">
-        <label>Google Sheets ID</label>
-        <input id="cfg-sheet" placeholder="Sheet ID from URL">
-        <div class="hint">Sheet must be publicly shared (File → Share → Anyone with link)</div>
+        <label>Google Sheets ID (optional)</label>
+        <input id="cfg-sheet" placeholder="Sheet ID from the URL">
+        <div class="hint">Share the sheet publicly (File → Share → Anyone with link can view)</div>
       </div>
       <div class="field">
-        <label>Apps Script URL (outcome write-back)</label>
+        <label>Apps Script URL (outcome log, optional)</label>
         <input id="cfg-apps" placeholder="https://script.google.com/macros/s/.../exec">
       </div>
     </div>
-    <div class="mft">
-      <button class="btn btn-o" onclick="closeCfg()">Cancel</button>
-      <button class="btn btn-g" onclick="saveCfg()">Save</button>
+    <div class="mf">
+      <button class="sm-btn sm-o" onclick="closeCfg()">Cancel</button>
+      <button class="sm-btn sm-g" onclick="saveCfg()">Save</button>
     </div>
   </div>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════
-// TWILIO NUMBERS
-// ═══════════════════════════════════════════════
-const NUMBERS=[
+// ── NUMBERS ──────────────────────────────────────
+const NUMBERS = [
   {n:'+15862215707',lbl:'(586) Mount Clemens',lat:42.5973,lng:-82.8779},
   {n:'+18108193812',lbl:'(810) Brighton',      lat:42.5295,lng:-83.7799},
   {n:'+12314442706',lbl:'(231) Cadillac',       lat:44.2519,lng:-85.4013},
@@ -375,657 +220,396 @@ const NUMBERS=[
   {n:'+17349844400',lbl:'(734) Flat Rock',      lat:42.1000,lng:-83.2747},
   {n:'+15176189305',lbl:'(517) Howell',         lat:42.6075,lng:-83.9297},
 ];
-const AC_COORDS={
-  '231':{lat:44.7631,lng:-85.6206},'248':{lat:42.5803,lng:-83.2521},
-  '269':{lat:42.2917,lng:-85.5872},'313':{lat:42.3314,lng:-83.0458},
-  '517':{lat:42.7325,lng:-84.5555},'586':{lat:42.5803,lng:-82.9071},
-  '616':{lat:42.9634,lng:-85.6681},'734':{lat:42.2808,lng:-83.7430},
-  '810':{lat:43.0125,lng:-83.6875},'906':{lat:46.4753,lng:-84.9883},
-  '419':{lat:41.6638,lng:-83.5552},'440':{lat:41.4993,lng:-81.6944},
-  '219':{lat:41.6834,lng:-86.2520},'260':{lat:41.0793,lng:-85.1394},
-  'default':{lat:43.3266,lng:-84.5361},
+const AC = {
+  '231':{lat:44.76,lng:-85.62},'248':{lat:42.58,lng:-83.25},'269':{lat:42.29,lng:-85.59},
+  '313':{lat:42.33,lng:-83.05},'517':{lat:42.73,lng:-84.56},'586':{lat:42.58,lng:-82.91},
+  '616':{lat:42.96,lng:-85.67},'734':{lat:42.28,lng:-83.74},'810':{lat:43.01,lng:-83.69},
+  '906':{lat:46.48,lng:-84.99},'419':{lat:41.66,lng:-83.56},'440':{lat:41.50,lng:-81.69},
+  '219':{lat:41.68,lng:-86.25},'260':{lat:41.08,lng:-85.14},'default':{lat:43.33,lng:-84.54},
 };
-function hav(a,b){
-  const R=3958.8,dLat=(b.lat-a.lat)*Math.PI/180,dLng=(b.lng-a.lng)*Math.PI/180;
-  const x=Math.sin(dLat/2)**2+Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLng/2)**2;
-  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
-}
-function closest(phone){
-  const ac=phone.replace(/\D/g,'').slice(-10).slice(0,3);
-  const coord=AC_COORDS[ac]||AC_COORDS['default'];
-  let best=NUMBERS[0],bestD=Infinity;
-  for(const n of NUMBERS){const d=hav(coord,n);if(d<bestD){bestD=d;best=n;}}
-  return{num:best,dist:Math.round(bestD),ac};
+function closest(phone) {
+  const ac = phone.replace(/\D/g,'').slice(-10).slice(0,3);
+  const c  = AC[ac] || AC.default;
+  let best = NUMBERS[0], bestD = Infinity;
+  for (const n of NUMBERS) {
+    const dLat=(n.lat-c.lat)*Math.PI/180, dLng=(n.lng-c.lng)*Math.PI/180;
+    const a=Math.sin(dLat/2)**2+Math.cos(c.lat*Math.PI/180)*Math.cos(n.lat*Math.PI/180)*Math.sin(dLng/2)**2;
+    const d=3958.8*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+    if(d<bestD){bestD=d;best=n;}
+  }
+  return best;
 }
 
-// ═══════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════
-let leads=[],callLog=[],currentIdx=-1;
-let stats={'Appointment set':0,'Callback':0,'Not home':0,'VM':0,'Bad number':0};
-let dialerRunning=false;
-let MAX_ATT=parseInt(localStorage.getItem('maxAtt')||'2');
-let currentAttempt=0;
-let conn=null,callSid=null,callStart=null;
-let timerInterval=null,timerSecs=0;
-let naTimer=null; // no-answer timeout
-let fromNum=NUMBERS[0].n;
-let vmSkipTimeout=null;
-
-const cfg={
-  workerUrl:localStorage.getItem('workerUrl')||'https://raspy-math-9a25.thomaslancheros06.workers.dev',
-  sheetId:localStorage.getItem('sheetId')||'',
-  appsUrl:localStorage.getItem('appsUrl')||'',
+// ── STATE ─────────────────────────────────────────
+let leads=[], idx=0, attempt=0, vmCount=0, doneCount=0;
+let running=false, conn=null, naTimer=null, timerInt=null, secs=0, callStart=null;
+let MAX_ATT = parseInt(localStorage.getItem('maxAtt')||'2');
+const cfg = {
+  workerUrl: localStorage.getItem('workerUrl')||'https://raspy-math-9a25.thomaslancheros06.workers.dev',
+  sheetId:   localStorage.getItem('sheetId')||'',
+  appsUrl:   localStorage.getItem('appsUrl')||'',
 };
+let device = null;
 
-// ═══════════════════════════════════════════════
-// TWILIO DEVICE
-// ═══════════════════════════════════════════════
-let device=null;
-async function initDevice(){
-  if(!cfg.workerUrl){openCfg();return;}
-  setDev('Fetching token…','ring');
-  document.getElementById('mic-btn').disabled=true;
-  try{
-    const r=await fetch(cfg.workerUrl+'/token');
-    const d=await r.json();
-    if(!d.token)throw new Error('No token returned');
-    device=new Twilio.Device(d.token,{codecPreferences:['opus','pcmu'],enableRingingState:true,debug:false});
-    device.on('registered',()=>{setDev('READY','live');document.getElementById('mic-lbl').textContent='Mic connected ✓';});
-    device.on('unregistered',()=>setDev('DISCONNECTED','err'));
-    device.on('error',e=>setDev('ERROR: '+e.message,'err'));
+// ── DEVICE ────────────────────────────────────────
+async function initDevice() {
+  if (!cfg.workerUrl) { openCfg(); return; }
+  setDev('Connecting…','ring');
+  document.getElementById('mic-btn').disabled = true;
+  try {
+    const r = await fetch(cfg.workerUrl+'/token');
+    const d = await r.json();
+    if (!d.token) throw new Error('No token');
+    device = new Twilio.Device(d.token, {codecPreferences:['opus','pcmu'],enableRingingState:true});
+    device.on('registered',   ()=>{ setDev('Ready ✓','live'); document.getElementById('mic-btn').textContent='Reconnect'; });
+    device.on('unregistered', ()=>setDev('Disconnected',''));
+    device.on('error',        e=>setDev('Error: '+e.message,'err'));
     await device.register();
-    document.getElementById('mic-btn').textContent='Reconnect';
-    document.getElementById('mic-btn').disabled=false;
-  }catch(e){
-    setDev('Failed: '+e.message,'err');
-    document.getElementById('mic-btn').disabled=false;
-    toast('Device failed: '+e.message,'err');
+    document.getElementById('mic-btn').disabled = false;
+  } catch(e) {
+    setDev('Failed — check Worker URL','err');
+    document.getElementById('mic-btn').disabled = false;
   }
 }
-function setDev(msg,state){
-  const dot=document.getElementById('dev-dot'),lbl=document.getElementById('dev-lbl');
-  lbl.textContent=msg;
-  dot.className='dot'+(state==='live'?' live':state==='ring'?' ring':state==='err'?' err':'');
-  lbl.style.color=state==='live'?'var(--green)':state==='ring'?'var(--amber)':state==='err'?'var(--red)':'var(--t2)';
+function setDev(msg, state) {
+  const dot=document.getElementById('dev-dot'), lbl=document.getElementById('dev-lbl');
+  lbl.textContent = msg;
+  dot.className = 'dot' + (state==='live'?' live':state==='ring'?' ring':state==='err'?' err':'');
 }
 
-// ═══════════════════════════════════════════════
-// CSV / SHEETS
-// ═══════════════════════════════════════════════
-function importCSV(input){
-  const file=input.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    const lines=e.target.result.split('\n').filter(l=>l.trim());
-    if(!lines.length)return;
-    const headers=lines[0].split(',').map(h=>h.replace(/"/g,'').trim());
-    const phoneIdx=headers.findIndex(h=>/phone|cell|mobile|number/i.test(h));
-    const nameIdx=headers.findIndex(h=>/^(first.?name|name|full.?name)/i.test(h));
-    if(phoneIdx<0){toast('No phone column found','err');return;}
-    const imported=[];
-    for(let i=1;i<lines.length;i++){
-      const cols=splitCSV(lines[i]);
-      const phone=cleanPhone(cols[phoneIdx]||'');
-      if(!phone)continue;
-      const data={};
-      headers.forEach((h,j)=>{if(cols[j]&&cols[j].trim())data[h]=cols[j].replace(/^"|"$/g,'').trim();});
+// ── IMPORT ────────────────────────────────────────
+function importCSV(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const lines = e.target.result.split('\n').filter(l=>l.trim());
+    const headers = lines[0].split(',').map(h=>h.replace(/"/g,'').trim().toLowerCase());
+    const pi = headers.findIndex(h=>/phone|cell|mobile/.test(h));
+    const ni = headers.findIndex(h=>/^(name|first)/.test(h));
+    const ci = headers.findIndex(h=>/^city/.test(h));
+    const si = headers.findIndex(h=>/^(state|st)$/.test(h));
+    if (pi<0) { toast('No phone column found','err'); return; }
+    const imported = [];
+    for (let i=1; i<lines.length; i++) {
+      const cols = splitCSV(lines[i]);
+      const phone = cleanPhone(cols[pi]||'');
+      if (!phone) continue;
       imported.push({
-        id:Date.now()+i,
-        name:nameIdx>=0?(cols[nameIdx]||'Lead '+i).replace(/^"|"$/g,'').trim():'Lead '+i,
-        phone,city:data.city||data.City||data.town||'',
-        state:data.state||data.State||data.st||'',
-        data,_done:false,_attempt:0,_outcome:null,
+        name:  (ni>=0 ? cols[ni] : 'Lead '+i).replace(/"/g,'').trim(),
+        phone,
+        loc:   [cols[ci]||'', cols[si]||''].map(s=>s.replace(/"/g,'').trim()).filter(Boolean).join(', '),
+        done:  false, attempt: 0,
       });
     }
-    leads=[...leads,...imported];
-    renderQueue();
+    leads = [...leads, ...imported];
+    idx = 0; attempt = 0;
+    updateDisplay();
     toast('Imported '+imported.length+' leads');
-    if(currentIdx<0&&leads.length)selectLead(0);
-    document.getElementById('dropz').style.display='none';
+    input.value='';
   };
-  reader.readAsText(file);input.value='';
+  reader.readAsText(file);
 }
-function splitCSV(row){
-  const r=[];let c='',q=false;
-  for(const ch of row){if(ch==='"'){q=!q;}else if(ch===','&&!q){r.push(c);c='';}else{c+=ch;}}
-  r.push(c);return r;
+function splitCSV(row) {
+  const r=[]; let c='',q=false;
+  for (const ch of row) { if(ch==='"'){q=!q;}else if(ch===','&&!q){r.push(c);c='';}else{c+=ch;} }
+  r.push(c); return r;
 }
-function cleanPhone(p){
+function cleanPhone(p) {
   const d=p.replace(/\D/g,'');
-  if(d.length===10)return'+1'+d;
-  if(d.length===11&&d[0]==='1')return'+'+d;
+  if(d.length===10) return '+1'+d;
+  if(d.length===11&&d[0]==='1') return '+'+d;
   return d.length>=10?'+1'+d.slice(-10):'';
 }
-async function loadSheets(){
-  if(!cfg.sheetId){openCfg();return;}
-  toast('Loading from Sheets…');
-  try{
-    const url='https://docs.google.com/spreadsheets/d/'+cfg.sheetId+'/gviz/tq?tqx=out:json';
-    const r=await fetch(url);
-    const t=await r.text();
-    const j=JSON.parse(t.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/)[1]);
-    const cols=j.table.cols.map(c=>c.label);
-    const phoneIdx=cols.findIndex(h=>/phone|cell|mobile/i.test(h));
-    const nameIdx=cols.findIndex(h=>/name|first/i.test(h));
-    const imported=j.table.rows.map((row,i)=>{
-      const vals=row.c.map(c=>c?String(c.v||''):'');
-      const data={};cols.forEach((h,jj)=>{if(vals[jj])data[h]=vals[jj];});
-      const phone=cleanPhone(vals[phoneIdx]||'');
+async function loadSheets() {
+  if (!cfg.sheetId) { openCfg(); return; }
+  setStatus('Loading from Sheets…');
+  try {
+    const r = await fetch('https://docs.google.com/spreadsheets/d/'+cfg.sheetId+'/gviz/tq?tqx=out:json');
+    const t = await r.text();
+    const j = JSON.parse(t.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/)[1]);
+    const cols = j.table.cols.map(c=>c.label.toLowerCase());
+    const pi=cols.findIndex(h=>/phone|cell|mobile/.test(h));
+    const ni=cols.findIndex(h=>/name|first/.test(h));
+    const imported = j.table.rows.map((row,i)=>{
+      const v=row.c.map(c=>c?String(c.v||''):'');
+      const phone=cleanPhone(v[pi]||'');
       if(!phone)return null;
-      return{id:Date.now()+i,name:nameIdx>=0?(vals[nameIdx]||'Lead '+i):'Lead '+i,
-        phone,city:data.city||data.City||'',state:data.state||data.State||'',
-        data,_done:false,_attempt:0,_outcome:null};
+      return{name:ni>=0?(v[ni]||'Lead '+i):'Lead '+i,phone,loc:'',done:false,attempt:0};
     }).filter(Boolean);
-    leads=[...leads,...imported];
-    renderQueue();
+    leads=[...leads,...imported]; idx=0; attempt=0;
+    updateDisplay();
     toast('Loaded '+imported.length+' leads');
-    if(currentIdx<0&&leads.length)selectLead(0);
-    document.getElementById('dropz').style.display='none';
-  }catch(e){toast('Sheets error: '+e.message,'err');}
+  } catch(e) { setStatus('Sheets error — check Sheet ID'); }
 }
-function clearQueue(){
-  if(!confirm('Clear all leads?'))return;
-  leads=[];currentIdx=-1;currentAttempt=0;
-  renderQueue();
-  document.getElementById('dropz').style.display='';
-  resetCardUI();
+function clearLeads() {
+  if (!confirm('Clear all leads?')) return;
+  leads=[]; idx=0; attempt=0; vmCount=0; doneCount=0;
+  running=false; showIdleUI();
+  updateQueueBar(); updateDisplay();
 }
 
-// ═══════════════════════════════════════════════
-// QUEUE RENDER
-// ═══════════════════════════════════════════════
-function renderQueue(){
-  const list=document.getElementById('lead-list');
-  document.getElementById('qcount').textContent=leads.length+' leads';
-  if(!leads.length){list.innerHTML='';return;}
-  list.innerHTML=leads.map((l,i)=>{
-    let cls='lead-item';
-    if(i===currentIdx)cls+=conn?' calling':' active';
-    else if(l._done)cls+=' done';
-    const tag=l._outcome
-      ?`<span class="ltag ${tagCls(l._outcome)}">${l._outcome}</span>`
-      :l._done
-        ?`<span class="ltag tag-na">×${l._attempt}</span>`
-        :i===currentIdx&&currentAttempt>1
-          ?`<span class="ltag tag-cb">try ${currentAttempt}/${MAX_ATT}</span>`
-          :`<span class="ltag tag-q">#${i+1}</span>`;
-    return`<div class="${cls}" onclick="selectLead(${i})">
-      <div class="lnum">${i+1}</div>
-      <div class="linfo">
-        <div class="lname">${l.name}</div>
-        <div class="lphone">${fmt(l.phone)}</div>
-      </div>${tag}</div>`;
-  }).join('');
-  updateProg();
-}
-function tagCls(o){
-  return o==='Appointment set'?'tag-appt':o==='Callback'?'tag-cb':
-    o==='Bad number'?'tag-bad':o==='VM'?'tag-vm':'tag-na';
-}
-function fmt(p){
-  const d=p.replace(/\D/g,'');
-  if(d.length===11)return`(${d.slice(1,4)}) ${d.slice(4,7)}-${d.slice(7)}`;
-  if(d.length===10)return`(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`;
-  return p;
-}
-function updateProg(){
-  const done=leads.filter(l=>l._done).length;
-  document.getElementById('pd-prog').textContent=leads.length?done+'/'+leads.length:'';
+// ── DIALER ENGINE ─────────────────────────────────
+function startDialer() {
+  if (!device)  { toast('Connect mic first','err'); return; }
+  if (!leads.length) { toast('Import leads first','err'); return; }
+  running = true;
+  idx = leads.findIndex(l=>!l.done);
+  if (idx<0) { toast('All leads done'); return; }
+  attempt = 0;
+  document.getElementById('main-btns').innerHTML =
+    `<button class="big-btn btn-stop" onclick="stopDialer()">⬛ Stop</button>`;
+  dial();
 }
 
-// ═══════════════════════════════════════════════
-// LEAD SELECTION
-// ═══════════════════════════════════════════════
-function selectLead(idx){
-  if(idx<0||idx>=leads.length)return;
-  currentIdx=idx;
-  const lead=leads[idx];
-  document.getElementById('c-name').textContent=lead.name;
-  document.getElementById('c-phone').textContent=fmt(lead.phone);
-  document.getElementById('c-loc').textContent=[lead.city,lead.state].filter(Boolean).join(', ');
-  document.getElementById('call-btn').disabled=false;
-  setStatus('Ready','');
-  document.getElementById('call-card').className='call-card';
-  applyClosest(lead.phone);
-  renderDetail(lead);
-  renderQueue();
-}
-
-function applyClosest(phone){
-  if(!document.getElementById('auto-closest').checked){
-    fromNum=document.getElementById('from-sel').value;
-    document.getElementById('auto-badge').textContent='Manual selection';
-    document.getElementById('auto-badge').style.color='var(--t3)';
-    return;
-  }
-  const{num,dist,ac}=closest(phone);
-  fromNum=num.n;
-  document.getElementById('from-sel').value=fromNum;
-  document.getElementById('auto-badge').textContent='▲ Auto: '+num.lbl+' · '+dist+'mi from ('+ac+')';
-  document.getElementById('auto-badge').style.color='var(--green)';
-}
-function onFromChange(){
-  fromNum=document.getElementById('from-sel').value;
-  document.getElementById('auto-closest').checked=false;
-  document.getElementById('auto-badge').textContent='Manual';
-  document.getElementById('auto-badge').style.color='var(--t3)';
-}
-function onAutoToggle(){
-  if(currentIdx>=0)applyClosest(leads[currentIdx].phone);
-}
-
-function renderDetail(lead){
-  const wrap=document.getElementById('ld-wrap');
-  if(!lead||!lead.data||!Object.keys(lead.data).length){wrap.style.display='none';return;}
-  wrap.style.display='';
-  document.getElementById('ld-title').textContent='▸ Lead Info: '+lead.name;
-  document.getElementById('ld-body').innerHTML=
-    Object.entries(lead.data).map(([k,v])=>
-      `<div class="ld-row"><span class="ld-key">${k}</span><span class="ld-val">${v}</span></div>`
-    ).join('');
-}
-function toggleDetail(){
-  const b=document.getElementById('ld-body'),a=document.getElementById('ld-arrow');
-  const open=b.classList.toggle('open');
-  a.textContent=open?'▲':'▼';
-}
-
-// ═══════════════════════════════════════════════
-// CALLING
-// ═══════════════════════════════════════════════
-async function manualCall(){
-  if(!device){toast('Connect mic first','err');return;}
-  if(currentIdx<0){toast('Select a lead first','err');return;}
-  await dial(currentIdx);
-}
-
-async function dial(idx){
-  if(!device||conn)return;
-  selectLead(idx);
-  const lead=leads[idx];
-  currentAttempt++;
-  lead._attempt=currentAttempt;
-  setStatus('Calling…','');
-  document.getElementById('call-card').className='call-card ringing';
-  document.getElementById('call-btn').style.display='none';
-  document.getElementById('hang-btn').style.display='';
-  document.getElementById('vm-badge').className='vm-badge';
-  enableOutcomes(false);
-
-  const useAMD=document.getElementById('amd-toggle').checked;
-
-  try{
-    conn=await device.connect({
-      params:{
-        To:lead.phone,
-        callerId:fromNum,
-        leadName:lead.name,
-        // Pass AMD flag to worker so it can set MachineDetection param
-        amd:useAMD?'true':'false',
-      }
-    });
-    callSid=conn.parameters?.CallSid||null;
-    bindEvents(conn);
-  }catch(e){
-    setStatus('Error: '+e.message,'');
-    resetCardUI();
-    conn=null;
-    if(dialerRunning)scheduleNext();
-  }
-}
-
-function bindEvents(c){
-  c.on('ringing',()=>{
-    setStatus('Ringing… ('+currentAttempt+'/'+MAX_ATT+')','');
-    document.getElementById('call-card').className='call-card ringing';
-    // No-answer timeout — 28s, then hang up
-    clearNATimer();
-    naTimer=setTimeout(()=>{
-      if(conn&&!callStart){
-        setStatus('No answer — moving on','');
-        conn.disconnect();
-      }
-    },28000);
-  });
-
-  c.on('accept',()=>{
-    clearNATimer();
-    callStart=Date.now();
-    startTimer();
-    setStatus('Connected ✓','');
-    document.getElementById('call-card').className='call-card connected';
-    enableOutcomes(true);
-    renderQueue();
-  });
-
-  // AMD result comes back as a custom message from the worker via call status
-  // We also listen for very short connect+drop as VM heuristic
-  c.on('disconnect',()=>{
-    clearNATimer();
-    const duration=callStart?Math.round((Date.now()-callStart)/1000):0;
-    callStart=null;
-    stopTimer();
-    document.getElementById('call-card').className='call-card';
-    document.getElementById('vm-badge').className='vm-badge';
-    conn=null;
-    callSid=null;
-
-    if(dialerRunning){
-      if(duration>=8){
-        // Real conversation — wait for outcome
-        resetCardUI();
-        enableOutcomes(true);
-        setStatus('Call ended — log outcome below','');
-      }else if(duration>0&&duration<5){
-        // Connected briefly = VM auto-pickup
-        setStatus('Voicemail detected (auto-pickup)','');
-        document.getElementById('call-card').className='call-card voicemail';
-        document.getElementById('vm-badge').className='vm-badge show';
-        autoAdvance('VM');
-      }else{
-        // No answer
-        autoAdvance('Not home');
-      }
-    }else{
-      resetCardUI();
-      if(duration>=1)enableOutcomes(true);
-      setStatus(duration>=1?'Call ended — log outcome':'No answer','');
-    }
-    renderQueue();
-  });
-
-  c.on('cancel',()=>{clearNATimer();conn=null;resetCardUI();if(dialerRunning)scheduleNext();});
-  c.on('reject',()=>{clearNATimer();conn=null;resetCardUI();if(dialerRunning)scheduleNext();});
-  c.on('error', e=>{clearNATimer();conn=null;resetCardUI();setStatus('Error: '+e.message,'');if(dialerRunning)scheduleNext();});
-}
-
-function hangUp(){
-  if(conn){conn.disconnect();conn=null;}
-  clearNATimer();
+function stopDialer() {
+  running = false;
+  clearNAT();
+  if (conn) { try{conn.disconnect();}catch(e){} conn=null; }
   stopTimer();
-  resetCardUI();
-  enableOutcomes(true);
-  setStatus('Hung up — log outcome','');
+  showIdleUI();
+  setStatus('Stopped');
 }
 
-function forceHang(){
-  clearNATimer();
-  if(conn){try{conn.disconnect();}catch(e){}try{conn.reject();}catch(e){}conn=null;}
-  stopTimer();callStart=null;
-  resetCardUI();
-  setStatus('Force disconnected','');
-  toast('Force disconnected');
-  if(dialerRunning)scheduleNext();
-}
+async function dial() {
+  if (!running) return;
+  // find next undone lead
+  while (idx < leads.length && leads[idx].done) idx++;
+  if (idx >= leads.length) {
+    // second pass?
+    const retry = leads.findIndex(l=>!l.done);
+    if (retry < 0) { toast('All leads dialed ✓'); stopDialer(); return; }
+    idx = retry; attempt = 0;
+  }
 
-function clearNATimer(){if(naTimer){clearTimeout(naTimer);naTimer=null;}}
+  const lead = leads[idx];
+  attempt++;
+  lead.attempt = attempt;
 
-// ═══════════════════════════════════════════════
-// POWER DIALER
-// ═══════════════════════════════════════════════
-function startDialer(){
-  if(!device){toast('Connect mic first','err');return;}
-  if(!leads.length){toast('Load leads first','err');return;}
-  dialerRunning=true;
-  currentAttempt=0;
-  document.getElementById('pd-start').style.display='none';
-  document.getElementById('pd-stop').style.display='';
-  toast('Power dialer started');
-  fireNext();
-}
-function stopDialer(){
-  dialerRunning=false;
-  clearNATimer();
-  document.getElementById('pd-start').style.display='';
-  document.getElementById('pd-stop').style.display='none';
-  document.getElementById('pd-prog').textContent='';
-  toast('Dialer stopped');
-}
+  const from = closest(lead.phone);
+  document.getElementById('l-name').textContent    = lead.name;
+  document.getElementById('l-phone').textContent   = fmt(lead.phone);
+  document.getElementById('l-loc').textContent     = lead.loc||'';
+  document.getElementById('l-from').textContent    = '▲ from '+from.lbl;
+  document.getElementById('l-attempt').textContent = attempt > 1 ? 'Attempt '+attempt+' of '+MAX_ATT : '';
+  document.getElementById('l-timer').textContent   = '…';
+  document.getElementById('l-timer').className     = 'timer idle';
+  setStatus('Dialing…');
 
-function fireNext(){
-  if(!dialerRunning)return;
-  const idx=leads.findIndex((l,i)=>!l._done&&(i>currentIdx||currentIdx<0));
-  if(idx<0){
-    // wrap for second pass
-    const idx2=leads.findIndex(l=>!l._done);
-    if(idx2<0){toast('All leads dialed ✓');stopDialer();return;}
-    currentAttempt=0;
-    dial(idx2);
-  }else{
-    if(idx!==currentIdx)currentAttempt=0;
-    dial(idx);
+  try {
+    conn = await device.connect({ params:{ To:lead.phone, callerId:from.n, leadName:lead.name } });
+    bindEvents(conn, lead, from.n);
+  } catch(e) {
+    conn=null; setStatus('Error — skipping');
+    setTimeout(nextLead, 2000);
   }
 }
 
-function autoAdvance(outcome){
-  if(currentIdx<0)return;
-  const lead=leads[currentIdx];
-  if(currentAttempt>=MAX_ATT){
-    lead._done=true;
-    lead._outcome=outcome;
-    logEntry(lead,outcome,0);
-    currentAttempt=0;
+function bindEvents(c, lead) {
+  c.on('ringing', ()=>{
+    setStatus('Ringing…');
+    // hang up after 25s if no answer
+    clearNAT();
+    naTimer = setTimeout(()=>{
+      setStatus('No answer — moving on');
+      if(conn){try{conn.disconnect();}catch(e){}conn=null;}
+      handleNoAnswer(lead);
+    }, 25000);
+  });
+
+  c.on('accept', ()=>{
+    clearNAT();
+    callStart = Date.now();
+    startTimer();
+    setStatus('Connected ✓ — speak now');
+    // show hang up + outcomes
+    document.getElementById('main-btns').innerHTML =
+      `<button class="big-btn btn-hang" onclick="manualHang()">⬛ Hang Up</button>`;
+    document.getElementById('outcomes').classList.remove('show');
+  });
+
+  c.on('disconnect', ()=>{
+    clearNAT();
+    const dur = callStart ? Math.round((Date.now()-callStart)/1000) : 0;
+    callStart = null;
+    stopTimer();
+    conn = null;
+
+    if (dur >= 8) {
+      // Real conversation — show outcome buttons
+      setStatus('Call ended — how did it go?');
+      document.getElementById('main-btns').innerHTML = '';
+      document.getElementById('outcomes').classList.add('show');
+    } else if (dur > 0 && dur < 5) {
+      // Brief connect = VM auto-pickup
+      setStatus('Voicemail detected — skipping');
+      vmCount++;
+      handleNoAnswer(lead);
+    } else {
+      // No answer / ringing timeout
+      handleNoAnswer(lead);
+    }
+  });
+
+  c.on('cancel', ()=>{ clearNAT(); conn=null; handleNoAnswer(lead); });
+  c.on('reject', ()=>{ clearNAT(); conn=null; handleNoAnswer(lead); });
+  c.on('error',  ()=>{ clearNAT(); conn=null; nextLead(); });
+}
+
+function handleNoAnswer(lead) {
+  if (attempt >= MAX_ATT) {
+    lead.done = true;
+    doneCount++;
+    updateQueueBar();
+    idx++;
+    attempt = 0;
     scheduleNext();
-  }else{
-    setStatus('Retry '+currentAttempt+'/'+MAX_ATT+' in a moment…','');
+  } else {
+    // retry same lead
+    setStatus('Retrying in a moment…');
     scheduleNext(true);
   }
 }
 
-function scheduleNext(sameLead=false){
-  if(!dialerRunning)return;
-  const delay=parseInt(document.getElementById('delay-sel').value)*1000;
-  setTimeout(()=>{
-    if(!dialerRunning)return;
-    if(sameLead){if(currentIdx>=0)dial(currentIdx);}
-    else fireNext();
-    renderQueue();
-  },delay);
+function scheduleNext(same=false) {
+  if (!running) return;
+  const delay = parseInt(document.getElementById('delay-sel').value)*1000;
+  updateQueueBar();
+  setTimeout(()=>{ if(!same)idx=leads.findIndex((l,i)=>!l.done&&i>=idx)||idx; dial(); }, delay);
 }
 
-function skipLead(){
-  clearNATimer();
+function nextLead() { idx++; attempt=0; scheduleNext(); }
+
+function manualHang() {
   if(conn){try{conn.disconnect();}catch(e){}conn=null;}
-  if(currentIdx>=0){leads[currentIdx]._done=true;leads[currentIdx]._attempt=currentAttempt||1;}
-  currentAttempt=0;
-  resetCardUI();
-  renderQueue();
-  if(dialerRunning)scheduleNext();
-  else{
-    const next=leads.findIndex((l,i)=>!l._done&&i>currentIdx);
-    if(next>=0)selectLead(next);
+  stopTimer(); clearNAT();
+  setStatus('Hung up — how did it go?');
+  document.getElementById('main-btns').innerHTML = '';
+  document.getElementById('outcomes').classList.add('show');
+}
+
+// ── OUTCOMES ─────────────────────────────────────
+function logOutcome(outcome) {
+  document.getElementById('outcomes').classList.remove('show');
+  const lead = leads[idx];
+  if (lead) { lead.done=true; lead.outcome=outcome; }
+  doneCount++;
+  updateQueueBar();
+  if (cfg.appsUrl && lead) pushSheets(lead, outcome);
+  idx++; attempt=0;
+  if (running) {
+    document.getElementById('main-btns').innerHTML =
+      `<button class="big-btn btn-stop" onclick="stopDialer()">⬛ Stop</button>`;
+    scheduleNext();
+  } else {
+    showIdleUI();
   }
 }
 
-// ═══════════════════════════════════════════════
-// OUTCOMES
-// ═══════════════════════════════════════════════
-function enableOutcomes(on){
-  ['ob-appt','ob-cb','ob-na','ob-bad'].forEach(id=>document.getElementById(id).disabled=!on);
+async function pushSheets(lead, outcome) {
+  try {
+    await fetch(cfg.appsUrl,{method:'POST',body:JSON.stringify({
+      name:lead.name,phone:lead.phone,outcome,time:new Date().toISOString()
+    })});
+  } catch(e) {}
 }
-function logOutcome(outcome){
-  if(currentIdx<0)return;
-  const lead=leads[currentIdx];
-  lead._done=true;lead._outcome=outcome;lead._attempt=currentAttempt||1;
-  logEntry(lead,outcome,timerSecs);
-  currentAttempt=0;
-  stopTimer();
-  resetCardUI();
-  enableOutcomes(false);
-  renderQueue();
-  if(dialerRunning)scheduleNext();
-  else{
-    const next=leads.findIndex((l,i)=>!l._done&&i>currentIdx);
-    if(next>=0)selectLead(next);
+
+// ── UI HELPERS ────────────────────────────────────
+function showIdleUI() {
+  document.getElementById('main-btns').innerHTML =
+    `<button class="big-btn btn-start" onclick="startDialer()">▶ Start Dialing</button>`;
+  document.getElementById('outcomes').classList.remove('show');
+}
+
+function updateDisplay() {
+  if (!leads.length) {
+    document.getElementById('l-name').textContent  = 'Load leads to begin';
+    document.getElementById('l-phone').textContent = '';
+    document.getElementById('l-loc').textContent   = '';
+    document.getElementById('l-from').textContent  = '';
   }
-}
-function logEntry(lead,outcome,duration){
-  stats[outcome]=(stats[outcome]||0)+1;
-  updateStats();
-  const entry={time:new Date(),name:lead.name,phone:lead.phone,outcome,duration,sid:callSid};
-  callLog.unshift(entry);
-  renderLog();
-  if(cfg.appsUrl)pushSheets(entry);
-}
-async function pushSheets(e){
-  try{await fetch(cfg.appsUrl,{method:'POST',body:JSON.stringify({
-    name:e.name,phone:e.phone,outcome:e.outcome,
-    duration:fmtDur(e.duration),time:e.time.toISOString(),sid:e.sid||''
-  })});}catch(err){console.warn('Sheets failed',err);}
+  updateQueueBar();
 }
 
-// ═══════════════════════════════════════════════
-// UI HELPERS
-// ═══════════════════════════════════════════════
-function resetCardUI(){
-  document.getElementById('call-btn').style.display='';
-  document.getElementById('hang-btn').style.display='none';
-  document.getElementById('call-card').className='call-card';
-  document.getElementById('vm-badge').className='vm-badge';
-}
-function setStatus(msg,_){document.getElementById('c-status').textContent=msg;}
-
-// ═══════════════════════════════════════════════
-// TIMER
-// ═══════════════════════════════════════════════
-function startTimer(){
-  timerSecs=0;
-  const el=document.getElementById('c-timer');
-  el.classList.remove('idle');
-  timerInterval=setInterval(()=>{timerSecs++;el.textContent=fmtDur(timerSecs);},1000);
-}
-function stopTimer(){
-  clearInterval(timerInterval);timerInterval=null;
-  document.getElementById('c-timer').classList.add('idle');
-}
-function fmtDur(s){const m=Math.floor(s/60);return m+':'+(s%60+'').padStart(2,'0');}
-
-// ═══════════════════════════════════════════════
-// STATS + LOG
-// ═══════════════════════════════════════════════
-function updateStats(){
-  document.getElementById('s-appt').textContent=stats['Appointment set']||0;
-  document.getElementById('s-cb').textContent=stats['Callback']||0;
-  document.getElementById('s-na').textContent=stats['Not home']||0;
-  document.getElementById('s-vm').textContent=stats['VM']||0;
-  document.getElementById('s-bad').textContent=stats['Bad number']||0;
-}
-function renderLog(){
-  const el=document.getElementById('call-log');
-  if(!callLog.length){el.innerHTML='<div style="padding:20px;text-align:center;color:var(--t3);font-size:12px;">No calls yet</div>';return;}
-  const clr={'Appointment set':'var(--green)','Callback':'var(--amber)','Not home':'var(--purple)','VM':'#c084fc','Bad number':'var(--red)'};
-  el.innerHTML=callLog.map(e=>`<div class="log-item">
-    <div class="log-time">${e.time.toLocaleTimeString()} · ${fmtDur(e.duration)}</div>
-    <div class="log-name">${e.name}</div>
-    <div style="font-size:10px;color:${clr[e.outcome]||'var(--t2)'};">${e.outcome}</div>
-  </div>`).join('');
-}
-function exportLog(){
-  if(!callLog.length){toast('No log');return;}
-  const rows=['Name,Phone,Outcome,Duration,Time',...callLog.map(e=>`${e.name},${e.phone},${e.outcome},${fmtDur(e.duration)},${e.time.toISOString()}`)].join('\n');
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([rows],{type:'text/csv'}));
-  a.download='fex-calls-'+new Date().toISOString().slice(0,10)+'.csv';
-  a.click();
+function updateQueueBar() {
+  const left = leads.filter(l=>!l.done).length;
+  document.getElementById('q-done').textContent = doneCount+' done';
+  document.getElementById('q-left').textContent = left+' left';
+  document.getElementById('q-vm').textContent   = vmCount+' VM';
 }
 
-// ═══════════════════════════════════════════════
-// NUMPAD
-// ═══════════════════════════════════════════════
-let nVal='';
-function npadPress(k){if(k==='0'&&!nVal)nVal='+';else if(nVal.length<15)nVal+=k;renderNpad();}
-function npadBack(){nVal=nVal.slice(0,-1);renderNpad();}
-function renderNpad(){
-  const el=document.getElementById('npad-disp');
-  el.textContent=nVal||'Enter number…';
-  el.style.color=nVal?'var(--blue)':'var(--t3)';
-}
-function npadCall(){
-  if(!nVal){toast('Enter a number','err');return;}
-  let d=nVal.replace(/\D/g,'');
-  if(d.length===10)d='1'+d;
-  const e164='+'+d;
-  const tmp={id:Date.now(),name:fmt(e164),phone:e164,city:'',state:'',data:{},_done:false,_attempt:0,_outcome:null,_manual:true};
-  leads.unshift(tmp);
-  // shift currentIdx if needed
-  if(currentIdx>=0)currentIdx++;
-  renderQueue();
-  selectLead(0);
-  manualCall();
-  nVal='';renderNpad();
-}
-document.addEventListener('keydown',e=>{
-  if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName))return;
-  if(/^[0-9*#]$/.test(e.key))npadPress(e.key);
-  else if(e.key==='Backspace')npadBack();
-  else if(e.key==='Enter')npadCall();
-});
+function setStatus(msg) { document.getElementById('l-status').textContent = msg; }
 
-// ═══════════════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════════════
-function openCfg(){
+function fmt(p) {
+  const d=p.replace(/\D/g,'');
+  if(d.length===11) return`(${d.slice(1,4)}) ${d.slice(4,7)}-${d.slice(7)}`;
+  if(d.length===10) return`(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`;
+  return p;
+}
+
+// ── TIMER ─────────────────────────────────────────
+function startTimer() {
+  secs=0;
+  document.getElementById('l-timer').className='timer';
+  timerInt=setInterval(()=>{
+    secs++;
+    const m=Math.floor(secs/60), s=secs%60;
+    document.getElementById('l-timer').textContent=m+':'+(s+'').padStart(2,'0');
+  },1000);
+}
+function stopTimer() {
+  clearInterval(timerInt); timerInt=null;
+  document.getElementById('l-timer').className='timer idle';
+  document.getElementById('l-timer').textContent='—';
+}
+function clearNAT() { if(naTimer){clearTimeout(naTimer);naTimer=null;} }
+
+// ── CONFIG ────────────────────────────────────────
+function openCfg() {
   document.getElementById('cfg-worker').value=cfg.workerUrl;
   document.getElementById('cfg-sheet').value=cfg.sheetId;
   document.getElementById('cfg-apps').value=cfg.appsUrl;
   document.getElementById('cfg-modal').classList.add('open');
 }
-function closeCfg(){document.getElementById('cfg-modal').classList.remove('open');}
-function saveCfg(){
-  cfg.workerUrl=document.getElementById('cfg-worker').value.trim();
-  cfg.sheetId=document.getElementById('cfg-sheet').value.trim();
-  cfg.appsUrl=document.getElementById('cfg-apps').value.trim();
+function closeCfg() { document.getElementById('cfg-modal').classList.remove('open'); }
+function saveCfg() {
+  cfg.workerUrl = document.getElementById('cfg-worker').value.trim();
+  cfg.sheetId   = document.getElementById('cfg-sheet').value.trim();
+  cfg.appsUrl   = document.getElementById('cfg-apps').value.trim();
   localStorage.setItem('workerUrl',cfg.workerUrl);
   localStorage.setItem('sheetId',cfg.sheetId);
   localStorage.setItem('appsUrl',cfg.appsUrl);
-  updateSync();closeCfg();toast('Settings saved');
+  document.getElementById('sync-lbl').textContent = cfg.workerUrl ? '● Worker set' : '';
+  document.getElementById('sync-lbl').style.color = 'var(--green)';
+  closeCfg(); toast('Saved');
 }
-function updateSync(){
-  const el=document.getElementById('sync-ind');
-  el.textContent=cfg.workerUrl?'● WORKER SET':'● UNCONFIGURED';
-  el.className='sync'+(cfg.workerUrl?' ok':' err');
-}
-updateSync();
 
-// ═══════════════════════════════════════════════
-// DRAG + DROP
-// ═══════════════════════════════════════════════
+// ── INIT ──────────────────────────────────────────
+document.getElementById('max-att').value = localStorage.getItem('maxAtt')||'2';
+MAX_ATT = parseInt(document.getElementById('max-att').value);
+if (cfg.workerUrl) {
+  document.getElementById('sync-lbl').textContent='● Worker set';
+  document.getElementById('sync-lbl').style.color='var(--green)';
+}
+if (!cfg.workerUrl) setTimeout(openCfg, 400);
+
+// drag+drop
 document.addEventListener('dragover',e=>e.preventDefault());
 document.addEventListener('drop',e=>{
   e.preventDefault();
   const f=e.dataTransfer.files[0];
-  if(f&&f.name.endsWith('.csv'))importCSV({files:[f]});
+  if(f&&f.name.endsWith('.csv'))importCSV({files:[f],value:''});
 });
 
-// ═══════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════
-(function init(){
-  const sel=document.getElementById('from-sel');
-  NUMBERS.forEach(n=>{
-    const o=document.createElement('option');
-    o.value=n.n;o.textContent=n.lbl+'  '+n.n;sel.appendChild(o);
-  });
-  fromNum=NUMBERS[0].n;
-  document.getElementById('max-att').value=localStorage.getItem('maxAtt')||'2';
-  MAX_ATT=parseInt(document.getElementById('max-att').value);
-  if(!cfg.workerUrl)setTimeout(openCfg,500);
-})();
-
-// ═══════════════════════════════════════════════
-// TOAST
-// ═══════════════════════════════════════════════
+// ── TOAST ─────────────────────────────────────────
 function toast(msg,type='ok'){
   const t=document.createElement('div');
-  t.style.cssText=`position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  t.style.cssText=`position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
     background:${type==='err'?'#3a1020':'#0a2a0a'};
     border:1px solid ${type==='err'?'var(--red)':'var(--gdim)'};
     color:${type==='err'?'var(--red)':'var(--green)'};
-    padding:7px 16px;border-radius:5px;font-size:12px;font-family:var(--mono);
+    padding:8px 18px;border-radius:6px;font-size:12px;font-family:var(--mono);
     z-index:999;white-space:nowrap;pointer-events:none;`;
-  t.textContent=msg;
-  document.body.appendChild(t);
+  t.textContent=msg;document.body.appendChild(t);
   setTimeout(()=>t.remove(),2800);
 }
 </script>
