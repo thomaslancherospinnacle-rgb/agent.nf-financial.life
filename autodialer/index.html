@@ -9,130 +9,166 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
 :root {
   --bg:#0d0f12; --sf:#141720; --s2:#1c2030; --s3:#232840;
-  --b:#2a3050; --b2:#3a4570; --t3:#4a5580;
+  --b:#2a3050;  --b2:#3a4570; --t3:#4a5580;
   --tx:#e8eaf0; --t2:#8892b0;
   --green:#00e676; --gdim:#00a651;
-  --red:#ff4d6d; --amber:#ffab00; --blue:#4fc3f7; --purple:#b39ddb;
-  --fn:'IBM Plex Sans',sans-serif; --mono:'IBM Plex Mono',monospace;
+  --red:#ff4d6d;   --amber:#ffab00;
+  --blue:#4fc3f7;  --purple:#b39ddb;
+  --fn:'IBM Plex Sans',sans-serif;
+  --mono:'IBM Plex Mono',monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:var(--tx);font-family:var(--fn);font-size:14px;min-height:100vh;display:grid;grid-template-columns:1fr 360px;grid-template-rows:auto 1fr;}
+body{background:var(--bg);color:var(--tx);font-family:var(--fn);font-size:14px;height:100vh;display:grid;grid-template-rows:auto 1fr;grid-template-columns:1fr 340px;overflow:hidden;}
 
-/* TOP BAR */
-.topbar{grid-column:1/-1;background:var(--sf);border-bottom:1px solid var(--b);padding:10px 20px;display:flex;align-items:center;gap:12px;}
-.logo{font-family:var(--mono);font-size:13px;color:var(--green);letter-spacing:.1em;}
-.sep{color:var(--b2);}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--t3);display:inline-block;flex-shrink:0;}
-.dot.live{background:var(--green);box-shadow:0 0 6px var(--green);animation:blink 2s infinite;}
-.dot.ring{background:var(--amber);box-shadow:0 0 6px var(--amber);animation:blink .6s infinite;}
+/* ── TOPBAR ───────────────────────────────── */
+.topbar{grid-column:1/-1;background:var(--sf);border-bottom:1px solid var(--b);padding:9px 18px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.logo{font-family:var(--mono);font-size:12px;color:var(--green);letter-spacing:.1em;font-weight:500;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--t3);display:inline-block;flex-shrink:0;transition:background .3s;}
+.dot.live{background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite;}
+.dot.ring{background:var(--amber);box-shadow:0 0 6px var(--amber);animation:pulse .6s infinite;}
 .dot.err{background:var(--red);}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 .tlbl{font-size:11px;color:var(--t2);font-family:var(--mono);}
 .tbr{margin-left:auto;display:flex;gap:8px;align-items:center;}
-.btn{padding:6px 13px;border-radius:5px;font-size:11px;cursor:pointer;font-family:var(--fn);font-weight:500;border:none;transition:all .15s;}
-.btn:disabled{opacity:.3;cursor:not-allowed;}
-.btn-g{background:var(--gdim);color:#000;}
-.btn-g:hover:not(:disabled){background:#00c853;}
-.btn-r{background:none;border:1px solid var(--red);color:var(--red);}
-.btn-r:hover:not(:disabled){background:rgba(255,77,109,.1);}
-.btn-o{background:none;border:1px solid var(--b);color:var(--t2);}
-.btn-o:hover:not(:disabled){border-color:var(--b2);color:var(--tx);}
+.tbtn{padding:5px 11px;border-radius:4px;font-size:11px;cursor:pointer;font-family:var(--fn);font-weight:500;border:1px solid var(--b);background:none;color:var(--t2);transition:all .15s;}
+.tbtn:hover{border-color:var(--b2);color:var(--tx);}
+.tbtn.primary{background:var(--gdim);color:#000;border-color:var(--gdim);}
+.tbtn.primary:hover{background:#00c853;}
+.tbtn.danger{border-color:var(--red);color:var(--red);}
+.tbtn.danger:hover{background:rgba(255,77,109,.1);}
+.tbtn:disabled{opacity:.3;cursor:not-allowed;}
 
-/* LEFT PANEL */
+/* ── LEFT PANEL ───────────────────────────── */
 .left{background:var(--bg);display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--b);}
 
-/* DIALER CARD */
-.dialer-card{padding:24px;border-bottom:1px solid var(--b);flex-shrink:0;}
-.dc-meta{font-size:10px;font-family:var(--mono);color:var(--t3);margin-bottom:8px;letter-spacing:.08em;min-height:14px;}
-.dc-name{font-size:26px;font-weight:300;color:var(--tx);margin-bottom:4px;min-height:34px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.dc-phone{font-family:var(--mono);font-size:15px;color:var(--blue);margin-bottom:3px;min-height:20px;}
-.dc-loc{font-size:12px;color:var(--t2);margin-bottom:14px;min-height:16px;}
-.dc-from{font-size:10px;font-family:var(--mono);color:var(--gdim);margin-bottom:14px;min-height:14px;}
+/* state pill */
+.state-pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:12px;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.05em;}
+.sp-idle{background:var(--s3);color:var(--t2);}
+.sp-dialing{background:#2a2010;color:var(--amber);}
+.sp-ringing{background:#2a2010;color:var(--amber);}
+.sp-connected{background:#0a2a1a;color:var(--green);}
+.sp-paused{background:#1a1a30;color:var(--purple);}
+.sp-vm{background:#1a0828;color:#c084fc;}
+.sp-stopped{background:var(--s3);color:var(--t3);}
 
-/* STATUS BAR */
-.status-bar{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
-.status-icon{font-size:20px;min-width:28px;}
-.status-text{font-family:var(--mono);font-size:12px;color:var(--t2);flex:1;}
-.timer{font-family:var(--mono);font-size:28px;font-weight:500;color:var(--green);}
-.timer.idle{color:var(--t3);font-size:20px;}
+/* ── CONTROLS ─────────────────────────────── */
+.controls{padding:10px 16px;border-bottom:1px solid var(--b);display:flex;align-items:center;gap:10px;flex-shrink:0;background:var(--sf);}
+.c-lbl{font-size:10px;color:var(--t3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;}
+.c-sel{background:var(--s3);border:1px solid var(--b);color:var(--tx);padding:4px 8px;border-radius:4px;font-size:11px;cursor:pointer;}
+.c-sel:focus{outline:none;border-color:var(--b2);}
 
-/* BIG ACTION */
-.action-area{margin-top:4px;}
-.big-btn{width:100%;padding:16px;border-radius:8px;font-size:16px;font-weight:500;cursor:pointer;border:none;font-family:var(--fn);transition:all .2s;letter-spacing:.02em;}
-.big-btn:disabled{opacity:.3;cursor:not-allowed;}
-.b-start{background:var(--gdim);color:#000;}
-.b-start:hover:not(:disabled){background:#00c853;transform:translateY(-1px);}
-.b-connected{background:var(--blue);color:#000;}
-.b-connected:hover:not(:disabled){background:#81d4fa;}
-.b-stop{background:none;border:2px solid var(--red);color:var(--red);font-size:13px;padding:10px;}
-.b-stop:hover:not(:disabled){background:rgba(255,77,109,.08);}
+/* ── CALL CARD ────────────────────────────── */
+.call-card{padding:20px;border-bottom:1px solid var(--b);flex-shrink:0;}
+.cc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.cc-name{font-size:24px;font-weight:300;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:300px;}
+.cc-phone{font-family:var(--mono);font-size:14px;color:var(--blue);margin-bottom:2px;}
+.cc-loc{font-size:12px;color:var(--t2);margin-bottom:2px;}
+.cc-from{font-size:10px;font-family:var(--mono);color:var(--gdim);margin-bottom:12px;}
+.cc-attempt{font-size:10px;font-family:var(--mono);color:var(--t3);letter-spacing:.08em;}
 
-/* OUTCOME */
-.outcome-area{display:none;margin-top:12px;}
-.outcome-area.show{display:block;}
-.out-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-bottom:8px;}
-.out-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
-.out-btn{padding:11px 10px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid transparent;font-family:var(--fn);transition:all .15s;text-align:left;display:flex;align-items:center;gap:6px;}
-.out-btn:hover{filter:brightness(1.2);}
+/* timer */
+.timer-row{display:flex;align-items:baseline;gap:10px;margin:8px 0;}
+.big-timer{font-family:var(--mono);font-size:36px;font-weight:500;color:var(--green);min-width:80px;}
+.big-timer.idle{color:var(--t3);font-size:24px;}
+.status-text{font-size:12px;font-family:var(--mono);color:var(--t2);flex:1;}
+
+/* action buttons */
+.action-row{display:flex;gap:8px;margin-top:12px;}
+.abtn{flex:1;padding:12px;border-radius:7px;font-size:14px;font-weight:500;cursor:pointer;border:none;font-family:var(--fn);transition:all .2s;}
+.abtn:disabled{opacity:.3;cursor:not-allowed;}
+.a-start{background:var(--gdim);color:#000;}
+.a-start:hover:not(:disabled){background:#00c853;}
+.a-stop{background:none;border:2px solid var(--red);color:var(--red);}
+.a-stop:hover:not(:disabled){background:rgba(255,77,109,.08);}
+.a-connected{background:var(--blue);color:#000;}
+.a-connected:hover:not(:disabled){background:#81d4fa;}
+.a-hangup{background:var(--red);color:#fff;}
+.a-hangup:hover:not(:disabled){background:#c62828;}
+
+/* ── OUTCOMES ─────────────────────────────── */
+.outcomes{padding:14px 20px;border-bottom:1px solid var(--b);display:none;flex-shrink:0;}
+.outcomes.show{display:block;}
+.out-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-bottom:10px;}
+.out-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.obtn{padding:12px 10px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid transparent;font-family:var(--fn);transition:all .15s;display:flex;align-items:center;gap:7px;}
+.obtn:hover{filter:brightness(1.15);}
+.o-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
 .o-appt{background:#0a2a1a;border-color:var(--gdim);color:var(--green);}
 .o-cb  {background:#2a2010;border-color:#664400;color:var(--amber);}
 .o-ni  {background:#151530;border-color:#3a3a70;color:var(--purple);}
 .o-bad {background:#200a10;border-color:#601020;color:var(--red);}
-.o-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
 
-/* LEAD INFO */
-.lead-info{border-top:1px solid var(--b);padding:14px 24px;display:none;flex-shrink:0;}
+/* ── LEAD INFO ────────────────────────────── */
+.lead-info{display:none;border-bottom:1px solid var(--b);flex-shrink:0;}
 .lead-info.show{display:block;}
-.li-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;}
+.li-toggle{width:100%;padding:8px 20px;background:none;border:none;color:var(--t2);font-size:11px;font-family:var(--mono);cursor:pointer;text-align:left;display:flex;justify-content:space-between;border-bottom:1px solid transparent;}
+.li-toggle:hover{background:var(--s2);}
+.li-body{display:none;padding:10px 20px 14px;background:var(--s2);}
+.li-body.open{display:block;}
+.li-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px 14px;}
 .li-item{display:flex;flex-direction:column;gap:2px;}
 .li-item.full{grid-column:1/-1;}
 .li-k{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);font-family:var(--mono);}
 .li-v{font-size:12px;color:var(--tx);}
 .li-v a{color:var(--blue);text-decoration:none;}
+.li-v a:hover{text-decoration:underline;}
 
-/* CONTROLS BAR */
-.controls{padding:12px 16px;border-bottom:1px solid var(--b);display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex-shrink:0;background:var(--sf);}
-.ctrl-lbl{font-size:10px;color:var(--t3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;}
-.ctrl-sel{background:var(--s3);border:1px solid var(--b);color:var(--tx);padding:4px 8px;border-radius:4px;font-size:11px;cursor:pointer;}
-.stats-row{display:flex;gap:6px;margin-left:auto;}
-.stat-pill{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:4px;}
-.sp-done{background:#0a2a1a;color:var(--green);}
-.sp-vm  {background:#1a0828;color:#c084fc;}
-.sp-na  {background:#1a1a2a;color:var(--purple);}
-.sp-left{background:var(--s3);color:var(--t2);}
+/* ── DEBUG PANEL ──────────────────────────── */
+.debug{border-top:1px solid var(--b);flex-shrink:0;}
+.debug-toggle{width:100%;padding:7px 20px;background:none;border:none;color:var(--t3);font-size:10px;font-family:var(--mono);cursor:pointer;text-align:left;display:flex;justify-content:space-between;text-transform:uppercase;letter-spacing:.08em;}
+.debug-toggle:hover{background:var(--s2);}
+.debug-body{display:none;background:#080c10;padding:10px;font-family:var(--mono);font-size:10px;max-height:160px;overflow-y:auto;}
+.debug-body.open{display:block;}
+.debug-body::-webkit-scrollbar{width:3px;}.debug-body::-webkit-scrollbar-thumb{background:var(--b);}
+.dlog{margin-bottom:3px;line-height:1.4;}
+.dlog.info{color:#4fc3f7;}
+.dlog.warn{color:var(--amber);}
+.dlog.err{color:var(--red);}
+.dlog.ok{color:var(--green);}
+.dlog.dim{color:var(--t3);}
+.debug-actions{padding:8px 10px;display:flex;gap:6px;border-top:1px solid var(--b2);}
+.dbtn{padding:4px 10px;border-radius:3px;font-size:10px;cursor:pointer;font-family:var(--mono);border:1px solid var(--b2);background:none;color:var(--t2);}
+.dbtn:hover{background:var(--s2);}
+.dbtn.red{border-color:var(--red);color:var(--red);}
 
-/* CALL LOG */
+/* ── RIGHT PANEL ──────────────────────────── */
 .right{background:var(--sf);display:flex;flex-direction:column;overflow:hidden;}
-.rh{padding:10px 16px;border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.rh{padding:10px 14px;border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 .rh-title{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);}
+.stats-bar{padding:10px 14px;border-bottom:1px solid var(--b);display:grid;grid-template-columns:repeat(5,1fr);gap:4px;flex-shrink:0;}
+.stat-box{text-align:center;}
+.stat-n{font-family:var(--mono);font-size:16px;font-weight:500;}
+.stat-l{font-size:8px;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-top:1px;}
 .log-scroll{flex:1;overflow-y:auto;}
-.log-scroll::-webkit-scrollbar{width:3px;}
-.log-scroll::-webkit-scrollbar-thumb{background:var(--b);}
-.log-item{padding:10px 16px;border-bottom:1px solid var(--b);display:flex;align-items:flex-start;gap:10px;transition:background .1s;}
-.log-item.current{background:var(--s2);border-left:2px solid var(--amber);}
-.log-item.done{opacity:.55;}
-.li-num{font-family:var(--mono);font-size:9px;color:var(--t3);width:22px;flex-shrink:0;padding-top:2px;}
-.li-body{flex:1;min-width:0;}
-.li-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.li-ph{font-family:var(--mono);font-size:10px;color:var(--t2);}
-.li-tag{font-size:9px;padding:2px 6px;border-radius:3px;font-family:var(--mono);flex-shrink:0;margin-top:1px;}
-.tag-ring{background:#2a2010;color:var(--amber);animation:blink 1s infinite;}
-.tag-done{background:#0a2a1a;color:var(--green);}
-.tag-vm  {background:#1a0828;color:#c084fc;}
-.tag-na  {background:#1a1a2a;color:var(--purple);}
-.tag-cb  {background:#2a2010;color:var(--amber);}
-.tag-bad {background:#2a1018;color:var(--red);}
-.tag-ni  {background:#151530;color:var(--purple);}
-.tag-skip{background:var(--s3);color:var(--t3);}
-.tag-appt{background:#0a3a1a;color:var(--green);font-weight:500;}
+.log-scroll::-webkit-scrollbar{width:3px;}.log-scroll::-webkit-scrollbar-thumb{background:var(--b);}
+.log-item{padding:9px 14px;border-bottom:1px solid var(--b);display:flex;align-items:center;gap:8px;cursor:pointer;transition:background .1s;}
+.log-item:hover{background:var(--s2);}
+.log-item.active{background:var(--s2);border-left:2px solid var(--amber);}
+.log-item.spoke{border-left:2px solid var(--green);}
+.log-item.done-na{opacity:.45;}
+.li-num{font-family:var(--mono);font-size:9px;color:var(--t3);width:22px;flex-shrink:0;}
+.li-body2{flex:1;min-width:0;}
+.li-name2{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.li-ph2{font-family:var(--mono);font-size:10px;color:var(--t2);}
+.li-dots{display:flex;gap:2px;margin-top:2px;}
+.att-dot{width:5px;height:5px;border-radius:50%;}
+.ltag{font-size:9px;padding:2px 6px;border-radius:3px;font-family:var(--mono);flex-shrink:0;}
+.tg-next{background:#2a2010;color:var(--amber);}
+.tg-ring{background:#2a2010;color:var(--amber);animation:pulse .8s infinite;}
+.tg-appt{background:#0a3a1a;color:var(--green);font-weight:600;}
+.tg-cb  {background:#2a2010;color:var(--amber);}
+.tg-ni  {background:#151530;color:var(--purple);}
+.tg-bad {background:#2a1018;color:var(--red);}
+.tg-vm  {background:#1a0828;color:#c084fc;}
+.tg-na  {background:#1a1a2a;color:var(--purple);}
+.tg-q   {color:var(--t3);}
 
-/* IMPORT BAR */
-.import-bar{padding:10px 16px;border-top:1px solid var(--b);display:flex;gap:8px;align-items:center;flex-shrink:0;background:var(--sf);}
+.import-bar{padding:10px 14px;border-top:1px solid var(--b);display:flex;gap:7px;flex-shrink:0;}
 
-/* MODAL */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:50;align-items:center;justify-content:center;}
+/* ── MODAL ────────────────────────────────── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;align-items:center;justify-content:center;}
 .overlay.open{display:flex;}
-.modal{background:var(--sf);border:1px solid var(--b2);border-radius:10px;width:440px;max-width:95vw;}
+.modal{background:var(--sf);border:1px solid var(--b2);border-radius:10px;width:460px;max-width:95vw;}
 .mh{padding:14px 18px;border-bottom:1px solid var(--b);display:flex;justify-content:space-between;align-items:center;}
 .mh h3{font-size:13px;font-weight:500;}
 .mc{padding:18px;}
@@ -142,133 +178,186 @@ body{background:var(--bg);color:var(--tx);font-family:var(--fn);font-size:14px;m
 .field input{width:100%;background:var(--s2);border:1px solid var(--b);color:var(--tx);padding:7px 10px;border-radius:5px;font-size:12px;font-family:var(--fn);outline:none;}
 .field input:focus{border-color:var(--b2);}
 .hint{font-size:10px;color:var(--t3);margin-top:3px;}
+.health-row{background:var(--s2);border:1px solid var(--b);border-radius:5px;padding:8px 12px;margin-top:10px;font-family:var(--mono);font-size:10px;}
 </style>
 </head>
 <body>
 
-<!-- TOP BAR -->
+<!-- ── TOPBAR ──────────────────────────────────── -->
 <div class="topbar">
-  <span class="logo">FEX DIALER</span>
-  <span class="sep">|</span>
+  <span class="logo">FEX AUTO DIALER</span>
+  <span style="color:var(--b2)">|</span>
   <span class="dot" id="dev-dot"></span>
   <span class="tlbl" id="dev-lbl">Mic not connected</span>
+  <span id="state-badge" class="state-pill sp-idle" style="margin-left:8px;">IDLE</span>
   <div class="tbr">
-    <button class="btn btn-o" id="mic-btn" onclick="initDevice()" style="font-size:10px;">Connect Mic</button>
-    <button class="btn btn-o" onclick="openCfg()" style="font-size:10px;">⚙ Settings</button>
+    <button class="tbtn" onclick="checkHealth()" style="font-size:10px;">🔍 Health</button>
+    <button class="tbtn" id="mic-btn" onclick="initDevice()" style="font-size:10px;">Connect Mic</button>
+    <button class="tbtn" onclick="openCfg()" style="font-size:10px;">⚙ Settings</button>
   </div>
 </div>
 
-<!-- LEFT -->
+<!-- ── LEFT ────────────────────────────────────── -->
 <div class="left">
 
   <!-- CONTROLS -->
   <div class="controls">
-    <span class="ctrl-lbl">Dials/lead</span>
-    <select class="ctrl-sel" id="max-att" onchange="MAX_ATT=+this.value;save('maxAtt',this.value)">
+    <span class="c-lbl">Dials/lead</span>
+    <select class="c-sel" id="max-att" onchange="MAX_ATT=+this.value;ls('maxAtt',this.value)">
       <option value="1">1×</option><option value="2" selected>2×</option>
       <option value="3">3×</option><option value="4">4×</option>
     </select>
-    <span class="ctrl-lbl">Delay</span>
-    <select class="ctrl-sel" id="delay-sel">
+    <span class="c-lbl">Delay</span>
+    <select class="c-sel" id="delay-sel">
       <option value="1">1s</option><option value="2">2s</option>
       <option value="3" selected>3s</option><option value="5">5s</option>
+      <option value="10">10s</option>
     </select>
-    <div class="stats-row">
-      <span class="stat-pill sp-done" id="sp-done">0 done</span>
-      <span class="stat-pill sp-vm"   id="sp-vm"  >0 VM</span>
-      <span class="stat-pill sp-na"   id="sp-na"  >0 NA</span>
-      <span class="stat-pill sp-left" id="sp-left" >0 left</span>
+    <span class="c-lbl">NA timeout</span>
+    <select class="c-sel" id="na-sel">
+      <option value="20">20s</option><option value="25" selected>25s</option>
+      <option value="30">30s</option><option value="40">40s</option>
+    </select>
+    <button class="tbtn danger" onclick="skipLead()" style="margin-left:auto;font-size:11px;">Skip →</button>
+  </div>
+
+  <!-- CALL CARD -->
+  <div class="call-card">
+    <div class="cc-header">
+      <div>
+        <div class="cc-name"  id="cc-name">—</div>
+        <div class="cc-phone" id="cc-phone"></div>
+        <div class="cc-loc"   id="cc-loc"></div>
+        <div class="cc-from"  id="cc-from"></div>
+        <div class="cc-attempt" id="cc-attempt"></div>
+      </div>
+    </div>
+
+    <div class="timer-row">
+      <div class="big-timer idle" id="big-timer">—</div>
+      <div class="status-text"   id="status-text">Idle</div>
+    </div>
+
+    <div class="action-row" id="action-row">
+      <button class="abtn a-start" onclick="startDialer()">▶ Start Auto Dialer</button>
     </div>
   </div>
 
-  <!-- DIALER CARD -->
-  <div class="dialer-card">
-    <div class="dc-meta"   id="dc-meta"></div>
-    <div class="dc-name"   id="dc-name">Load leads to begin</div>
-    <div class="dc-phone"  id="dc-phone"></div>
-    <div class="dc-loc"    id="dc-loc"></div>
-    <div class="dc-from"   id="dc-from"></div>
-
-    <div class="status-bar">
-      <div class="status-icon" id="st-icon">💤</div>
-      <div class="status-text" id="st-text">Idle</div>
-      <div class="timer idle"  id="st-timer">—</div>
-    </div>
-
-    <div class="action-area" id="action-area">
-      <button class="big-btn b-start" onclick="startDialer()">▶ Start Auto Dialer</button>
-    </div>
-
-    <div class="outcome-area" id="outcome-area">
-      <div class="out-lbl">How did the call go?</div>
-      <div class="out-grid">
-        <button class="out-btn o-appt" onclick="logOutcome('Appointment set')"><span class="o-dot" style="background:var(--green)"></span>Appointment Set</button>
-        <button class="out-btn o-cb"   onclick="logOutcome('Callback')"><span class="o-dot" style="background:var(--amber)"></span>Call Back Later</button>
-        <button class="out-btn o-ni"   onclick="logOutcome('Not interested')"><span class="o-dot" style="background:var(--purple)"></span>Not Interested</button>
-        <button class="out-btn o-bad"  onclick="logOutcome('Bad number')"><span class="o-dot" style="background:var(--red)"></span>Bad Number</button>
-      </div>
+  <!-- OUTCOMES -->
+  <div class="outcomes" id="outcomes">
+    <div class="out-lbl">How did the call go?</div>
+    <div class="out-grid">
+      <button class="obtn o-appt" onclick="logOutcome('Appointment set')">
+        <span class="o-dot" style="background:var(--green)"></span>Appointment Set
+      </button>
+      <button class="obtn o-cb" onclick="logOutcome('Callback')">
+        <span class="o-dot" style="background:var(--amber)"></span>Call Back Later
+      </button>
+      <button class="obtn o-ni" onclick="logOutcome('Not interested')">
+        <span class="o-dot" style="background:var(--purple)"></span>Not Interested
+      </button>
+      <button class="obtn o-bad" onclick="logOutcome('Bad number')">
+        <span class="o-dot" style="background:var(--red)"></span>Bad Number
+      </button>
     </div>
   </div>
 
   <!-- LEAD INFO -->
   <div class="lead-info" id="lead-info">
-    <div class="li-grid" id="li-grid"></div>
-  </div>
-
-</div>
-
-<!-- RIGHT: CALL LOG -->
-<div class="right">
-  <div class="rh">
-    <span class="rh-title">Call History</span>
-    <div style="display:flex;gap:6px;">
-      <button class="btn btn-o" onclick="exportLog()" style="font-size:10px;padding:4px 8px;">↓ CSV</button>
-      <button class="btn btn-o" onclick="clearLog()"  style="font-size:10px;padding:4px 8px;">Clear</button>
+    <button class="li-toggle" onclick="toggleLI()">
+      <span id="li-title">Lead Info</span><span id="li-arrow">▼</span>
+    </button>
+    <div class="li-body" id="li-body">
+      <div class="li-grid" id="li-grid"></div>
     </div>
   </div>
-  <div class="log-scroll" id="call-log">
-    <div style="padding:30px 16px;text-align:center;color:var(--t3);font-size:12px;">Calls will appear here</div>
+
+  <!-- DEBUG -->
+  <div class="debug" style="margin-top:auto;">
+    <button class="debug-toggle" onclick="toggleDebug()">
+      <span>🐛 Debug Console</span><span id="dbg-arrow">▼</span>
+    </button>
+    <div class="debug-body" id="debug-body">
+      <div class="dlog dim">Debug output will appear here…</div>
+    </div>
+    <div class="debug-actions" id="debug-actions" style="display:none;">
+      <button class="dbtn" onclick="forceNext()">Force Next</button>
+      <button class="dbtn" onclick="resetState()">Reset State</button>
+      <button class="dbtn red" onclick="forceHangup()">Force Hangup</button>
+      <button class="dbtn" onclick="clearDebug()">Clear Log</button>
+      <button class="dbtn" onclick="exportDebug()">Export Log</button>
+    </div>
   </div>
+
+</div><!-- /left -->
+
+<!-- ── RIGHT ───────────────────────────────────── -->
+<div class="right">
+  <div class="rh">
+    <span class="rh-title">Call Log — <span id="rh-count" style="color:var(--t2)">0 leads</span></span>
+    <div style="display:flex;gap:6px;">
+      <button class="tbtn" onclick="exportCSV()" style="font-size:10px;padding:3px 8px;">↓ Export</button>
+      <button class="tbtn danger" onclick="clearLeads()" style="font-size:10px;padding:3px 8px;">Clear</button>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-box"><div class="stat-n" id="s-done"  style="color:var(--green)">0</div><div class="stat-l">Done</div></div>
+    <div class="stat-box"><div class="stat-n" id="s-appt"  style="color:#00e676">0</div><div class="stat-l">Appts</div></div>
+    <div class="stat-box"><div class="stat-n" id="s-vm"    style="color:#c084fc">0</div><div class="stat-l">VM</div></div>
+    <div class="stat-box"><div class="stat-n" id="s-na"    style="color:var(--purple)">0</div><div class="stat-l">NA</div></div>
+    <div class="stat-box"><div class="stat-n" id="s-left"  style="color:var(--t2)">0</div><div class="stat-l">Left</div></div>
+  </div>
+
+  <div class="log-scroll" id="log-scroll">
+    <div style="padding:30px;text-align:center;color:var(--t3);font-size:12px;">Import leads to begin</div>
+  </div>
+
   <div class="import-bar">
-    <label class="btn btn-g" style="cursor:pointer;font-size:11px;">
-      ↑ Import CSV
-      <input type="file" id="csv-in" accept=".csv" style="display:none" onchange="importCSV(this)">
+    <label class="tbtn primary" style="cursor:pointer;font-size:11px;">
+      ↑ CSV <input type="file" id="csv-in" accept=".csv" style="display:none" onchange="importCSV(this)">
     </label>
-    <button class="btn btn-o" onclick="loadSheets()" style="font-size:11px;">⊞ Sheets</button>
-    <button class="btn btn-r" onclick="clearLeads()" style="font-size:11px;margin-left:auto;">Clear Leads</button>
+    <button class="tbtn" onclick="loadSheets()" style="font-size:11px;">⊞ Sheets</button>
+    <button class="tbtn" onclick="rewindQueue()" style="font-size:11px;margin-left:auto;" title="Reset all leads to undone">↺ Rewind</button>
   </div>
 </div>
 
-<!-- CONFIG MODAL -->
+<!-- ── SETTINGS MODAL ───────────────────────────── -->
 <div class="overlay" id="cfg-modal">
   <div class="modal">
-    <div class="mh"><h3>Settings</h3><button onclick="closeCfg()" style="background:none;border:none;color:var(--t2);cursor:pointer;font-size:18px;">✕</button></div>
+    <div class="mh"><h3>Settings</h3>
+      <button onclick="closeCfg()" style="background:none;border:none;color:var(--t2);cursor:pointer;font-size:18px;">✕</button>
+    </div>
     <div class="mc">
       <div class="field">
         <label>Cloudflare Worker URL</label>
         <input id="cfg-worker" placeholder="https://raspy-math-9a25.thomaslancheros06.workers.dev">
+        <div class="hint">No trailing slash</div>
       </div>
       <div class="field">
         <label>Google Sheets ID (optional)</label>
         <input id="cfg-sheet" placeholder="Sheet ID from URL">
-        <div class="hint">Share publicly: File → Share → Anyone with link can view</div>
+        <div class="hint">File → Share → Anyone with link can view</div>
       </div>
       <div class="field">
         <label>Apps Script URL (outcome log, optional)</label>
         <input id="cfg-apps" placeholder="https://script.google.com/macros/s/.../exec">
       </div>
+      <div class="health-row" id="health-row" style="display:none;"></div>
     </div>
     <div class="mf">
-      <button class="btn btn-o" onclick="closeCfg()">Cancel</button>
-      <button class="btn btn-g" onclick="saveCfg()">Save</button>
+      <button class="tbtn" onclick="checkHealth()">🔍 Test Connection</button>
+      <button class="tbtn" onclick="closeCfg()">Cancel</button>
+      <button class="tbtn primary" onclick="saveCfg()">Save</button>
     </div>
   </div>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════
+'use strict';
+// ═══════════════════════════════════════════════════
 // NUMBERS + CLOSEST
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 const NUMBERS = [
   {n:'+15862215707',lbl:'(586) Mount Clemens',lat:42.5973,lng:-82.8779},
   {n:'+18108193812',lbl:'(810) Brighton',      lat:42.5295,lng:-83.7799},
@@ -277,158 +366,562 @@ const NUMBERS = [
   {n:'+17349844400',lbl:'(734) Flat Rock',      lat:42.1000,lng:-83.2747},
   {n:'+15176189305',lbl:'(517) Howell',         lat:42.6075,lng:-83.9297},
 ];
-const AC = {
+const AC_COORDS = {
   '231':{lat:44.76,lng:-85.62},'248':{lat:42.58,lng:-83.25},'269':{lat:42.29,lng:-85.59},
   '313':{lat:42.33,lng:-83.05},'517':{lat:42.73,lng:-84.56},'586':{lat:42.58,lng:-82.91},
   '616':{lat:42.96,lng:-85.67},'734':{lat:42.28,lng:-83.74},'810':{lat:43.01,lng:-83.69},
   '906':{lat:46.48,lng:-84.99},'419':{lat:41.66,lng:-83.56},'440':{lat:41.50,lng:-81.69},
   '219':{lat:41.68,lng:-86.25},'260':{lat:41.08,lng:-85.14},'default':{lat:43.33,lng:-84.54},
 };
-function closest(phone) {
+function closestNum(phone) {
   const ac = phone.replace(/\D/g,'').slice(-10).slice(0,3);
-  const c  = AC[ac] || AC.default;
+  const c  = AC_COORDS[ac] || AC_COORDS.default;
   let best = NUMBERS[0], bestD = Infinity;
   for (const n of NUMBERS) {
     const dLat=(n.lat-c.lat)*Math.PI/180, dLng=(n.lng-c.lng)*Math.PI/180;
-    const a=Math.sin(dLat/2)**2+Math.cos(c.lat*Math.PI/180)*Math.cos(n.lat*Math.PI/180)*Math.sin(dLng/2)**2;
-    const d=3958.8*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-    if(d<bestD){bestD=d;best=n;}
+    const a = Math.sin(dLat/2)**2 + Math.cos(c.lat*Math.PI/180)*Math.cos(n.lat*Math.PI/180)*Math.sin(dLng/2)**2;
+    const d = 3958.8*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+    if (d<bestD){bestD=d;best=n;}
   }
   return best;
 }
 
-// ═══════════════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════════════
-let leads = [];         // all leads
-let logEntries = [];    // call history shown on right
-let dialIdx = 0;        // current position in leads array
-let attempt = 0;        // attempt number for current lead
-let running = false;    // is the dialer running?
-let paused  = false;    // paused waiting for outcome?
-let conn    = null;     // active Twilio connection
-let naTimer = null;     // no-answer timeout
-let retryTimer = null;  // between-call delay timer
-let timerInt = null;    // call duration interval
-let secs    = 0;
-let callStart = null;
-let device  = null;
-let MAX_ATT = parseInt(localStorage.getItem('maxAtt')||'2');
+// ═══════════════════════════════════════════════════
+// CONFIG + STORAGE
+// ═══════════════════════════════════════════════════
+const ls  = (k,v) => localStorage.setItem(k,v);
+const lsg = (k,d='') => localStorage.getItem(k)||d;
 
-// stats
-let stats = { done:0, vm:0, na:0 };
-
-const cfg = {
-  workerUrl: localStorage.getItem('workerUrl')||'https://raspy-math-9a25.thomaslancheros06.workers.dev',
-  sheetId:   localStorage.getItem('sheetId')||'',
-  appsUrl:   localStorage.getItem('appsUrl')||'',
+const CFG = {
+  workerUrl: lsg('workerUrl','https://raspy-math-9a25.thomaslancheros06.workers.dev'),
+  sheetId:   lsg('sheetId'),
+  appsUrl:   lsg('appsUrl'),
 };
 
-// ═══════════════════════════════════════════════════════
-// TWILIO DEVICE
-// ═══════════════════════════════════════════════════════
-async function initDevice() {
-  if (!cfg.workerUrl) { openCfg(); return; }
-  setDev('Connecting…','ring');
-  document.getElementById('mic-btn').disabled = true;
-  try {
-    const r = await fetch(cfg.workerUrl+'/token');
-    const d = await r.json();
-    if (!d.token) throw new Error('No token');
-    device = new Twilio.Device(d.token, {
-      codecPreferences:['opus','pcmu'],
-      enableRingingState:true,
-      debug:false,
-    });
-    device.on('registered', () => {
-      setDev('Mic ready ✓','live');
-      document.getElementById('mic-btn').textContent='Reconnect';
-      document.getElementById('mic-btn').disabled=false;
-    });
-    device.on('unregistered', () => setDev('Disconnected',''));
-    device.on('error', e => { setDev('Error','err'); toast(e.message,'err'); });
+// ═══════════════════════════════════════════════════
+// STATE MACHINE
+// ═══════════════════════════════════════════════════
+// States: IDLE | DIALING | RINGING | CONNECTED | OUTCOME | STOPPED
+let STATE    = 'IDLE';
+let leads    = [];
+let dialIdx  = 0;
+let attempt  = 0;
+let MAX_ATT  = parseInt(lsg('maxAtt','2'));
+let device   = null;
+let conn     = null;       // active Twilio connection
+let naTimer  = null;       // no-answer watchdog
+let nextTimer = null;      // between-call delay
+let guardTimer = null;     // state machine watchdog (catches stuck states)
+let callStart  = null;
+let timerInt   = null;
+let timerSecs  = 0;
+let stats = { done:0, appt:0, vm:0, na:0 };
 
-    // This fires when Twilio bridges a REST-initiated call to the browser
-    // i.e. when a real human answers the outbound call
-    device.on('incoming', incomingConn => {
-      const curLead = leads[dialIdx];
-      onIncomingBridge(incomingConn, curLead);
+function setState(s, reason) {
+  const prev = STATE;
+  STATE = s;
+  dbg(`State: ${prev} → ${s}${reason?' ('+reason+')':''}`, s==='CONNECTED'?'ok':s==='OUTCOME'?'info':s==='RINGING'?'warn':'dim');
+  updateStateBadge(s);
+  resetGuard(s);
+}
+
+function updateStateBadge(s) {
+  const el  = document.getElementById('state-badge');
+  const map = {IDLE:'sp-idle',DIALING:'sp-dialing',RINGING:'sp-ringing',CONNECTED:'sp-connected',OUTCOME:'sp-paused',STOPPED:'sp-stopped'};
+  el.className = 'state-pill ' + (map[s]||'sp-idle');
+  el.textContent = s;
+}
+
+// Watchdog — if stuck in DIALING/RINGING for too long, recover
+function resetGuard(s) {
+  clearTimeout(guardTimer);
+  if (s === 'DIALING') {
+    guardTimer = setTimeout(() => {
+      dbg('WATCHDOG: stuck in DIALING — recovering', 'warn');
+      handleNoAnswer(leads[dialIdx]);
+    }, 15000);
+  }
+  if (s === 'RINGING') {
+    const naTimeout = parseInt(document.getElementById('na-sel').value) * 1000;
+    guardTimer = setTimeout(() => {
+      dbg('WATCHDOG: stuck in RINGING — hanging up', 'warn');
+      if (conn) { try{conn.disconnect();}catch(e){} conn=null; }
+      else { handleNoAnswer(leads[dialIdx]); }
+    }, naTimeout + 5000);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// TWILIO DEVICE INIT
+// ═══════════════════════════════════════════════════
+async function initDevice() {
+  if (!CFG.workerUrl) { openCfg(); return; }
+  setDevUI('Connecting…','ring');
+  document.getElementById('mic-btn').disabled = true;
+  dbg('Fetching token from '+CFG.workerUrl+'/token','info');
+  try {
+    const r = await fetch(CFG.workerUrl+'/token');
+    if (!r.ok) throw new Error('HTTP '+r.status);
+    const d = await r.json();
+    if (!d.token) throw new Error(d.error||'No token in response');
+    dbg('Token received, registering device…','info');
+
+    device = new Twilio.Device(d.token, {
+      codecPreferences: ['opus','pcmu'],
+      enableRingingState: true,
+      debug: false,
+      closeProtection: false,
     });
+
+    device.on('registered',   ()  => { setDevUI('Mic ready ✓','live'); dbg('Device registered','ok'); document.getElementById('mic-btn').textContent='Reconnect'; document.getElementById('mic-btn').disabled=false; });
+    device.on('unregistered', ()  => { setDevUI('Disconnected',''); dbg('Device unregistered','warn'); });
+    device.on('error',        (e) => { setDevUI('Device error','err'); dbg('Device error: '+e.message+' code:'+e.code,'err'); });
+    device.on('tokenWillExpire', () => { dbg('Token expiring — refreshing…','warn'); refreshToken(); });
 
     await device.register();
   } catch(e) {
-    setDev('Failed — check Worker URL','err');
+    setDevUI('Failed','err');
+    dbg('initDevice failed: '+e.message,'err');
     document.getElementById('mic-btn').disabled = false;
     toast('Mic failed: '+e.message,'err');
   }
 }
-function setDev(msg, state) {
+
+async function refreshToken() {
+  try {
+    const r = await fetch(CFG.workerUrl+'/token');
+    const d = await r.json();
+    if (d.token && device) { device.updateToken(d.token); dbg('Token refreshed','ok'); }
+  } catch(e) { dbg('Token refresh failed: '+e.message,'err'); }
+}
+
+function setDevUI(msg, state) {
   document.getElementById('dev-lbl').textContent = msg;
   const d = document.getElementById('dev-dot');
   d.className = 'dot'+(state==='live'?' live':state==='ring'?' ring':state==='err'?' err':'');
 }
 
-// ═══════════════════════════════════════════════════════
-// IMPORT
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+// DIALER ENGINE
+// ═══════════════════════════════════════════════════
+function startDialer() {
+  if (!device) { toast('Connect mic first','err'); return; }
+  if (!leads.length) { toast('Import leads first','err'); return; }
+  if (STATE !== 'IDLE' && STATE !== 'STOPPED') { dbg('Cannot start from state '+STATE,'warn'); return; }
+
+  dialIdx = leads.findIndex(l=>!l.done);
+  if (dialIdx < 0) { toast('All leads done — rewind first'); return; }
+  attempt = 0;
+  setState('DIALING','startDialer');
+  setActionRow('running');
+  dbg('Dialer started — '+leads.filter(l=>!l.done).length+' leads queued','ok');
+  dial();
+}
+
+function stopDialer() {
+  dbg('Dialer stopped by user','warn');
+  clearTimers();
+  if (conn) { try{conn.disconnect();}catch(e){} conn=null; }
+  setState('STOPPED','user stop');
+  setActionRow('idle');
+  setOutcomes(false);
+  stopTimer();
+}
+
+async function dial() {
+  if (STATE === 'STOPPED' || STATE === 'OUTCOME') return;
+
+  // Find next undone lead
+  while (dialIdx < leads.length && leads[dialIdx].done) dialIdx++;
+
+  // All done?
+  if (dialIdx >= leads.length) {
+    const retry = leads.findIndex(l=>!l.done);
+    if (retry < 0) {
+      dbg('All leads exhausted','ok');
+      toast('🎉 All leads dialed!');
+      stopDialer();
+      return;
+    }
+    dialIdx = retry; attempt = 0;
+    dbg('Wrapped to retry pass','info');
+  }
+
+  const lead = leads[dialIdx];
+  attempt++;
+  const from = closestNum(lead.phone);
+
+  dbg(`Dialing #${dialIdx+1} ${lead.name} ${lead.phone} via ${from.lbl} (attempt ${attempt}/${MAX_ATT})`,'info');
+  setState('DIALING','dial()');
+  updateCard(lead, from, attempt);
+  renderLog();
+
+  try {
+    conn = await device.connect({
+      params: { To: lead.phone, callerId: from.n, leadName: lead.name }
+    });
+    dbg('device.connect() resolved, binding events…','dim');
+    bindEvents(conn, lead);
+  } catch(e) {
+    dbg('device.connect() threw: '+e.message,'err');
+    conn = null;
+    recordAtt(lead,'error');
+    handleNoAnswer(lead);
+  }
+}
+
+function bindEvents(c, lead) {
+  c.on('ringing', () => {
+    dbg('Event: ringing','dim');
+    setState('RINGING','ringing event');
+    setStatusText('🔔 Ringing…');
+    clearNAT();
+    const timeout = parseInt(document.getElementById('na-sel').value)*1000;
+    naTimer = setTimeout(() => {
+      dbg('NA timeout hit — hanging up','warn');
+      setStatusText('⏱ No answer');
+      if (conn) { try{conn.disconnect();}catch(e){conn=null;} }
+      else { recordAtt(lead,'na'); handleNoAnswer(lead); }
+    }, timeout);
+  });
+
+  c.on('accept', () => {
+    dbg('Event: accept — CONNECTED','ok');
+    clearNAT();
+    clearTimeout(guardTimer);
+    callStart = Date.now();
+    startTimer();
+    setState('CONNECTED','accept event');
+    setStatusText('✅ Connected — click if talking to a person');
+    recordAtt(lead,'connected');
+    renderLog();
+    setActionRow('connected');
+  });
+
+  c.on('disconnect', () => {
+    const dur = callStart ? Math.round((Date.now()-callStart)/1000) : 0;
+    dbg(`Event: disconnect (duration ${dur}s, state was ${STATE})`,'dim');
+    clearNAT(); clearTimeout(guardTimer);
+    callStart=null; conn=null;
+    stopTimer();
+
+    if (STATE === 'OUTCOME') {
+      // User already clicked Connected — they'll log outcome
+      setStatusText('📋 Call ended — log outcome');
+      return;
+    }
+
+    if (STATE === 'CONNECTED' && dur >= 8) {
+      // Real conversation
+      setState('OUTCOME','long call');
+      recordAtt(lead,'spoke');
+      setStatusText('📋 Call ended — how did it go?');
+      setActionRow('outcome');
+      setOutcomes(true);
+      renderLog();
+    } else if (dur > 0 && dur < 5) {
+      // Brief = VM
+      dbg('Short connect ('+dur+'s) = VM','warn');
+      setState('DIALING','vm detected');
+      recordAtt(lead,'vm');
+      stats.vm++;
+      setStatusText('📬 Voicemail — skipping');
+      updateStats(); renderLog();
+      handleNoAnswer(lead);
+    } else {
+      // No answer
+      dbg('disconnect without accept = no answer','dim');
+      setState('DIALING','no answer');
+      recordAtt(lead,'na');
+      handleNoAnswer(lead);
+    }
+  });
+
+  c.on('cancel', () => {
+    dbg('Event: cancel','warn');
+    clearNAT(); conn=null;
+    if (STATE!=='STOPPED'&&STATE!=='OUTCOME') { recordAtt(lead,'cancel'); handleNoAnswer(lead); }
+  });
+  c.on('reject', () => {
+    dbg('Event: reject','warn');
+    clearNAT(); conn=null;
+    if (STATE!=='STOPPED'&&STATE!=='OUTCOME') { recordAtt(lead,'reject'); handleNoAnswer(lead); }
+  });
+  c.on('error', e => {
+    dbg('Event: error '+e.message+' code:'+e.code,'err');
+    clearNAT(); conn=null;
+    stopTimer();
+    if (STATE!=='STOPPED'&&STATE!=='OUTCOME') {
+      recordAtt(lead,'error');
+      handleNoAnswer(lead);
+    }
+  });
+}
+
+function handleNoAnswer(lead) {
+  if (STATE === 'STOPPED' || STATE === 'OUTCOME') return;
+  stats.na++;
+  if (attempt >= MAX_ATT) {
+    dbg(`Max attempts (${MAX_ATT}) reached for ${lead.name} — marking done`,'warn');
+    lead.done = true;
+    stats.done++;
+    dialIdx++;
+    attempt = 0;
+    updateStats(); renderLog();
+    scheduleNext();
+  } else {
+    dbg(`Retrying ${lead.name} (attempt ${attempt}/${MAX_ATT})…`,'info');
+    scheduleNext(true);
+  }
+}
+
+function scheduleNext(same=false) {
+  if (STATE === 'STOPPED') return;
+  const delay = parseInt(document.getElementById('delay-sel').value)*1000;
+  dbg(`Next call in ${delay/1000}s`+(same?' (same lead)':' (next lead)'),'dim');
+  clearTimeout(nextTimer);
+  nextTimer = setTimeout(() => {
+    if (STATE === 'STOPPED' || STATE === 'OUTCOME') return;
+    if (!same) {
+      while (dialIdx<leads.length && leads[dialIdx].done) dialIdx++;
+    }
+    dial();
+  }, delay);
+}
+
+// User confirms human answered
+function userConnected() {
+  dbg('User confirmed: real person on line','ok');
+  setState('OUTCOME','user confirmed');
+  setActionRow('hangup');
+  setStatusText('🤝 On call — hang up when done');
+}
+
+function manualHangup() {
+  dbg('Manual hangup','info');
+  if (conn) { try{conn.disconnect();}catch(e){} conn=null; }
+  clearNAT(); stopTimer();
+  setState('OUTCOME','manual hangup');
+  setStatusText('📋 Log the outcome below');
+  setActionRow('outcome');
+  setOutcomes(true);
+}
+
+function logOutcome(outcome) {
+  const lead = leads[dialIdx];
+  dbg('Outcome logged: '+outcome+' for '+lead?.name,'ok');
+  if (lead) {
+    lead.done = true;
+    lead.outcome = outcome;
+    recordAtt(lead, outcome);
+    stats.done++;
+    if (outcome==='Appointment set') stats.appt++;
+    if (CFG.appsUrl) pushSheets(lead, outcome);
+  }
+  attempt=0; dialIdx++;
+  setState('DIALING','after outcome');
+  setOutcomes(false);
+  updateStats(); renderLog();
+  setActionRow('running');
+  scheduleNext();
+}
+
+function skipLead() {
+  dbg('Skip lead #'+(dialIdx+1),'warn');
+  clearTimers();
+  if (conn) { try{conn.disconnect();}catch(e){} conn=null; }
+  stopTimer();
+  if (leads[dialIdx]) { leads[dialIdx].done=true; recordAtt(leads[dialIdx],'skip'); stats.done++; }
+  dialIdx++; attempt=0;
+  setState('DIALING','skip');
+  updateStats(); renderLog();
+  if (STATE!=='STOPPED') scheduleNext();
+}
+
+// ═══════════════════════════════════════════════════
+// UI STATE RENDERING
+// ═══════════════════════════════════════════════════
+function setActionRow(mode) {
+  const el = document.getElementById('action-row');
+  const map = {
+    idle:    `<button class="abtn a-start" onclick="startDialer()">▶ Start Auto Dialer</button>`,
+    running: `<div style="display:flex;gap:8px;">
+                <button class="abtn a-connected" onclick="userConnected()" style="flex:2;">✅ Connected — talking</button>
+                <button class="abtn a-stop" onclick="stopDialer()" style="flex:1;font-size:12px;">⬛ Stop</button>
+              </div>`,
+    connected:`<button class="abtn a-hangup" onclick="manualHangup()">⬛ Hang Up</button>`,
+    hangup:   `<button class="abtn a-hangup" onclick="manualHangup()">⬛ Hang Up</button>`,
+    outcome:  `<div style="text-align:center;font-family:var(--mono);font-size:11px;color:var(--t3);padding:8px 0;">Select outcome above ↑</div>`,
+  };
+  el.innerHTML = map[mode] || map.idle;
+}
+
+function setOutcomes(show) {
+  document.getElementById('outcomes').classList.toggle('show', show);
+}
+
+function setStatusText(msg) {
+  document.getElementById('status-text').textContent = msg;
+}
+
+function updateCard(lead, from, att) {
+  document.getElementById('cc-name').textContent    = lead.name;
+  document.getElementById('cc-phone').textContent   = fmt(lead.phone);
+  document.getElementById('cc-loc').textContent     = lead.loc||'';
+  document.getElementById('cc-from').textContent    = '▲ from '+from.lbl;
+  document.getElementById('cc-attempt').textContent = att>1?`Attempt ${att} of ${MAX_ATT}`:'';
+  document.getElementById('big-timer').textContent  = '…';
+  document.getElementById('big-timer').className    = 'big-timer idle';
+  renderLeadInfo(lead);
+}
+
+// ═══════════════════════════════════════════════════
+// LEAD INFO
+// ═══════════════════════════════════════════════════
+function renderLeadInfo(lead) {
+  const panel = document.getElementById('lead-info');
+  if (!lead?.data || !Object.keys(lead.data).length) { panel.classList.remove('show'); return; }
+  panel.classList.add('show');
+  document.getElementById('li-title').textContent = '▸ '+lead.name;
+  const priority = ['Full Name','Address','City','State','Zip','Email'];
+  const shown = new Set();
+  let html = '';
+  for (const key of priority) {
+    const val = lead.data[key];
+    if (!val||val===lead.phone) continue;
+    const full = key==='Address'||key==='Email';
+    const v = key==='Email'?`<a href="mailto:${val}">${val}</a>`:val;
+    html += `<div class="li-item${full?' full':''}"><span class="li-k">${key}</span><span class="li-v">${v}</span></div>`;
+    shown.add(key);
+  }
+  for (const [k,v] of Object.entries(lead.data)) {
+    if (shown.has(k)||!v||v===lead.phone||v===lead.name) continue;
+    html += `<div class="li-item"><span class="li-k">${k}</span><span class="li-v">${v}</span></div>`;
+  }
+  document.getElementById('li-grid').innerHTML = html;
+}
+function toggleLI() {
+  const b=document.getElementById('li-body'),a=document.getElementById('li-arrow');
+  const open=b.classList.toggle('open'); a.textContent=open?'▲':'▼';
+}
+
+// ═══════════════════════════════════════════════════
+// LOG
+// ═══════════════════════════════════════════════════
+const DOT_COLOR = {vm:'#c084fc',na:'var(--purple)',cancel:'var(--purple)',connected:'var(--green)',spoke:'var(--green)',error:'var(--red)',skip:'var(--t3)'};
+const OUTCOME_TAG = {'Appointment set':'tg-appt',Callback:'tg-cb','Not interested':'tg-ni','Bad number':'tg-bad'};
+
+function renderLog() {
+  const el = document.getElementById('log-scroll');
+  document.getElementById('rh-count').textContent = leads.length+' leads';
+  if (!leads.length) { el.innerHTML='<div style="padding:30px;text-align:center;color:var(--t3);font-size:12px;">Import leads to begin</div>'; return; }
+
+  el.innerHTML = leads.map((l,i) => {
+    const isCur = i===dialIdx && STATE!=='IDLE'&&STATE!=='STOPPED';
+    const dots  = l.attempts.map(a=>`<span class="att-dot" style="background:${DOT_COLOR[a.result]||'var(--t3)'}"></span>`).join('');
+    let tag='';
+    if (l.outcome)        tag=`<span class="ltag ${OUTCOME_TAG[l.outcome]||'tg-q'}">${l.outcome}</span>`;
+    else if (isCur)       tag=`<span class="ltag tg-ring">dialing</span>`;
+    else if (l.done) {
+      const last=l.attempts[l.attempts.length-1]?.result;
+      tag=`<span class="ltag ${last==='vm'?'tg-vm':'tg-na'}">${last==='vm'?'VM':'NA'}</span>`;
+    } else if (i===dialIdx+1) tag=`<span class="ltag tg-next">next</span>`;
+    else tag=`<span class="ltag tg-q">#${i+1}</span>`;
+
+    const rowClass = isCur?'log-item active':l.outcome?'log-item spoke':l.done?'log-item done-na':'log-item';
+    return `<div class="${rowClass}" onclick="previewLead(${i})">
+      <div class="li-num">${i+1}</div>
+      <div class="li-body2">
+        <div class="li-name2">${l.name}</div>
+        <div class="li-ph2">${fmt(l.phone)}<span style="margin-left:6px;display:inline-flex;align-items:center;gap:2px;">${dots}</span></div>
+      </div>${tag}
+    </div>`;
+  }).join('');
+
+  const cur = el.querySelector('.active');
+  if (cur) cur.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+function previewLead(i) { renderLeadInfo(leads[i]); }
+
+// ═══════════════════════════════════════════════════
+// TIMER
+// ═══════════════════════════════════════════════════
+function startTimer() {
+  timerSecs=0;
+  const el=document.getElementById('big-timer');
+  el.className='big-timer';
+  timerInt=setInterval(()=>{
+    timerSecs++;
+    el.textContent=Math.floor(timerSecs/60)+':'+(timerSecs%60+'').padStart(2,'0');
+  },1000);
+}
+function stopTimer() {
+  clearInterval(timerInt); timerInt=null;
+  const el=document.getElementById('big-timer');
+  el.className='big-timer idle'; el.textContent='—';
+}
+
+// ═══════════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════════
+function updateStats() {
+  document.getElementById('s-done').textContent = stats.done;
+  document.getElementById('s-appt').textContent = stats.appt;
+  document.getElementById('s-vm').textContent   = stats.vm;
+  document.getElementById('s-na').textContent   = stats.na;
+  document.getElementById('s-left').textContent = leads.filter(l=>!l.done).length;
+}
+
+// ═══════════════════════════════════════════════════
+// IMPORT / EXPORT
+// ═══════════════════════════════════════════════════
 function importCSV(input) {
-  const file = input.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const raw   = e.target.result.replace(/\r/g,'');
-    const lines = raw.split('\n').filter(l=>l.trim());
-    const rawH  = lines[0].split(',').map(h=>h.replace(/"/g,'').trim());
-    const h     = rawH.map(s=>s.toLowerCase());
-    const pi    = h.findIndex(s=>/phone|cell|mobile|number/.test(s));
-    const ni    = h.findIndex(s=>/name/.test(s));
-    const ai    = h.findIndex(s=>/^addr/.test(s));
-    const ci    = h.findIndex(s=>/^city/.test(s));
-    const si    = h.findIndex(s=>/^(state|st)$/.test(s));
-    const zi    = h.findIndex(s=>/^zip/.test(s));
-    const ei    = h.findIndex(s=>/^email/.test(s));
-    if (pi<0) { toast('No phone column found','err'); return; }
-    const imported = [];
-    for (let i=1;i<lines.length;i++) {
-      const c = splitCSV(lines[i]);
-      const phone = cleanPhone(c[pi]||'');
-      if (!phone) continue;
-      const data = {};
-      rawH.forEach((key,j)=>{ if(key&&c[j]&&c[j].trim()) data[key]=c[j].replace(/^"|"$/g,'').trim(); });
-      const parts = [ai>=0?c[ai]:'',ci>=0?c[ci]:'',si>=0?c[si]:'',zi>=0?c[zi]:''];
+  const file=input.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const raw=e.target.result.replace(/\r/g,'');
+    const lines=raw.split('\n').filter(l=>l.trim());
+    if(!lines.length){toast('Empty file','err');return;}
+    const rawH=lines[0].split(',').map(h=>h.replace(/"/g,'').trim());
+    const h=rawH.map(s=>s.toLowerCase());
+    const pi=h.findIndex(s=>/phone|cell|mobile|number/.test(s));
+    const ni=h.findIndex(s=>/name/.test(s));
+    const ai=h.findIndex(s=>/^addr/.test(s));
+    const ci=h.findIndex(s=>/^city/.test(s));
+    const si=h.findIndex(s=>/^(state|st)$/.test(s));
+    const zi=h.findIndex(s=>/^zip/.test(s));
+    if(pi<0){toast('No phone column','err');dbg('CSV missing phone column. Headers: '+rawH.join(', '),'err');return;}
+    const imported=[];
+    for(let i=1;i<lines.length;i++){
+      const c=splitCSV(lines[i]);
+      const phone=cleanPhone(c[pi]||'');
+      if(!phone) continue;
+      const data={};
+      rawH.forEach((key,j)=>{if(key&&c[j]?.trim())data[key]=c[j].replace(/^"|"$/g,'').trim();});
+      const loc=[ai>=0?c[ai]:'',ci>=0?c[ci]:'',si>=0?c[si]:'',zi>=0?c[zi]:''].map(s=>s.replace(/^"|"$/g,'').trim()).filter(Boolean).join(', ');
       imported.push({
-        name:  (ni>=0?c[ni]:'Lead '+i).replace(/^"|"$/g,'').trim()||'Lead '+i,
-        phone, email: ei>=0?(c[ei]||'').replace(/^"|"$/g,'').trim():'',
-        loc:   parts.map(s=>s.replace(/^"|"$/g,'').trim()).filter(Boolean).join(', '),
-        data,
-        attempts:[], // array of {time, result}
-        outcome:null, done:false,
+        name:(ni>=0?c[ni]:'Lead '+i).replace(/^"|"$/g,'').trim()||'Lead '+i,
+        phone,loc,data,attempts:[],outcome:null,done:false
       });
     }
-    const before = leads.length;
-    leads = [...leads, ...imported];
-    if (!running) dialIdx = leads.findIndex(l=>!l.done);
-    updateStats(); renderLog(); updateCard();
-    toast('Imported '+imported.length+' leads');
+    leads=[...leads,...imported];
+    dialIdx=leads.findIndex(l=>!l.done);
+    updateStats(); renderLog();
+    toast(`Imported ${imported.length} leads`);
+    dbg(`Imported ${imported.length} leads from ${file.name}`,'ok');
     input.value='';
   };
   reader.readAsText(file);
 }
-function splitCSV(row) {
-  const r=[]; let c='',q=false;
-  for (const ch of row){if(ch==='"'){q=!q;}else if(ch===','&&!q){r.push(c);c='';}else{c+=ch;}}
-  r.push(c); return r;
-}
-function cleanPhone(p) {
-  const d=p.replace(/\D/g,'');
-  if(d.length===10) return'+1'+d;
-  if(d.length===11&&d[0]==='1') return'+'+d;
-  return d.length>=10?'+1'+d.slice(-10):'';
-}
+function splitCSV(row){const r=[];let c='',q=false;for(const ch of row){if(ch==='"'){q=!q;}else if(ch===','&&!q){r.push(c);c='';}else{c+=ch;}}r.push(c);return r;}
+function cleanPhone(p){const d=p.replace(/\D/g,'');if(d.length===10)return'+1'+d;if(d.length===11&&d[0]==='1')return'+'+d;return d.length>=10?'+1'+d.slice(-10):'';}
+function fmt(p){const d=p.replace(/\D/g,'');if(d.length===11)return`(${d.slice(1,4)}) ${d.slice(4,7)}-${d.slice(7)}`;if(d.length===10)return`(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`;return p;}
+
 async function loadSheets() {
-  if (!cfg.sheetId) { openCfg(); return; }
-  setStatus('💤','Loading from Sheets…');
-  try {
-    const r=await fetch('https://docs.google.com/spreadsheets/d/'+cfg.sheetId+'/gviz/tq?tqx=out:json');
+  if(!CFG.sheetId){openCfg();return;}
+  dbg('Loading from Sheets ID: '+CFG.sheetId,'info');
+  try{
+    const r=await fetch(`https://docs.google.com/spreadsheets/d/${CFG.sheetId}/gviz/tq?tqx=out:json`);
     const t=await r.text();
     const j=JSON.parse(t.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/)[1]);
     const cols=j.table.cols.map(c=>c.label);
@@ -441,500 +934,199 @@ async function loadSheets() {
       const phone=cleanPhone(v[pi]||'');
       if(!phone)return null;
       const data={};cols.forEach((k,j)=>{if(v[j])data[k]=v[j];});
-      return{name:ni>=0?(v[ni]||'Lead '+i):'Lead '+i,phone,email:'',loc:'',data,attempts:[],outcome:null,done:false};
+      return{name:ni>=0?(v[ni]||'Lead '+i):'Lead '+i,phone,loc:'',data,attempts:[],outcome:null,done:false};
     }).filter(Boolean);
     leads=[...leads,...imported];
-    if(!running)dialIdx=leads.findIndex(l=>!l.done);
-    updateStats();renderLog();updateCard();
+    dialIdx=leads.findIndex(l=>!l.done);
+    updateStats();renderLog();
     toast('Loaded '+imported.length+' leads');
-  } catch(e){toast('Sheets error','err');}
+    dbg('Loaded '+imported.length+' leads from Sheets','ok');
+  }catch(e){toast('Sheets error','err');dbg('Sheets error: '+e.message,'err');}
 }
+
 function clearLeads() {
-  if (running){toast('Stop dialer first','err');return;}
-  if (!confirm('Clear all leads?')) return;
-  leads=[];dialIdx=0;attempt=0;stats={done:0,vm:0,na:0};
-  updateStats();renderLog();updateCard();
+  if(STATE!=='IDLE'&&STATE!=='STOPPED'){toast('Stop dialer first','err');return;}
+  if(!confirm('Clear all leads?'))return;
+  leads=[];dialIdx=0;attempt=0;stats={done:0,appt:0,vm:0,na:0};
+  updateStats();renderLog();
   document.getElementById('lead-info').classList.remove('show');
-  setStatus('💤','Idle');
+  document.getElementById('cc-name').textContent='—';
+  ['cc-phone','cc-loc','cc-from','cc-attempt'].forEach(id=>document.getElementById(id).textContent='');
+  dbg('Leads cleared','warn');
 }
 
-// ═══════════════════════════════════════════════════════
-// DIALER ENGINE
-// ═══════════════════════════════════════════════════════
-function startDialer() {
-  if (!device) { toast('Connect mic first','err'); return; }
-  if (!leads.length) { toast('Import leads first','err'); return; }
-  running = true; paused = false; attempt = 0;
-  dialIdx = leads.findIndex(l=>!l.done);
-  if (dialIdx<0) { toast('All leads done ✓'); return; }
-  showRunningUI();
-  dial();
+function rewindQueue() {
+  leads.forEach(l=>{l.done=false;l.attempts=[];l.outcome=null;});
+  dialIdx=0;attempt=0;stats={done:0,appt:0,vm:0,na:0};
+  updateStats();renderLog();
+  toast('Queue rewound');
+  dbg('Queue rewound — all leads reset','info');
 }
 
-function stopDialer() {
-  running = false; paused = false;
-  clearNAT(); clearRetry(); clearPoll();
-  if (conn) { try{conn.disconnect();}catch(e){} conn=null; }
-  if (activeSid) { hangupSid(activeSid); activeSid=null; }
-  stopTimer();
-  setStatus('💤','Stopped');
-  showIdleUI();
-}
-
-// ── REST-BASED PREDICTIVE DIALER ─────────────────────────────────
-// Calls go out via Twilio REST API (worker), AMD happens server-side.
-// Browser SDK just listens — when a human answers, Twilio bridges
-// the call to the browser client automatically.
-
-let activeSid = null;   // current outbound call SID
-let pollTimer = null;   // polls Twilio for call status
-
-async function dial() {
-  if (!running || paused) return;
-
-  // Find next undone lead
-  while (dialIdx < leads.length && leads[dialIdx].done) dialIdx++;
-  if (dialIdx >= leads.length) {
-    const retry = leads.findIndex(l=>!l.done);
-    if (retry < 0) { toast('🎉 All leads dialed!'); stopDialer(); return; }
-    dialIdx = retry; attempt = 0;
-  }
-
-  const lead = leads[dialIdx];
-  attempt++;
-  const fromNum = closest(lead.phone);
-
-  // Update display
-  document.getElementById('dc-name').textContent  = lead.name;
-  document.getElementById('dc-phone').textContent = fmt(lead.phone);
-  document.getElementById('dc-loc').textContent   = lead.loc||'';
-  document.getElementById('dc-from').textContent  = '▲ from '+fromNum.lbl;
-  document.getElementById('dc-meta').textContent  = attempt>1?'ATTEMPT '+attempt+' OF '+MAX_ATT:'';
-  document.getElementById('st-timer').textContent = '…';
-  document.getElementById('st-timer').className   = 'timer idle';
-  setStatus('📞','Dialing '+lead.name+'…');
-  renderLeadInfo(lead); renderLog();
-
-  try {
-    // Fire outbound call via REST — AMD runs server-side
-    const r = await fetch(cfg.workerUrl+'/dial', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ to:lead.phone, from:fromNum.n, leadName:lead.name, identity:'fex-agent' })
-    });
-    const d = await r.json();
-    if (!d.sid) throw new Error(d.error||'No SID returned');
-    activeSid = d.sid;
-
-    // Start polling for call status
-    startPoll(lead);
-
-  } catch(e) {
-    recordAttempt(lead,'error');
-    setStatus('⚠️','Error: '+e.message+' — skipping');
-    scheduleNext();
-  }
-}
-
-// Poll Twilio call status every second
-// When status = 'in-progress' and AMD says human → browser SDK picks up the bridge
-function startPoll(lead) {
-  clearPoll();
-  let elapsed = 0;
-  const MAX_RING = 28; // seconds before giving up
-
-  pollTimer = setInterval(async () => {
-    elapsed++;
-    if (!running || paused) { clearPoll(); return; }
-
-    // Check if browser SDK has received an inbound connection (the bridge)
-    if (conn && callStart) {
-      // Already connected via browser — stop polling
-      clearPoll(); return;
-    }
-
-    if (elapsed >= MAX_RING) {
-      clearPoll();
-      // Hang up via REST
-      hangupSid(activeSid);
-      activeSid = null;
-      recordAttempt(lead,'na');
-      stats.na++;
-      setStatus('⏱','No answer — next lead');
-      updateStats(); renderLog();
-      handleNoAnswer(lead);
-    }
-  }, 1000);
-}
-
-function clearPoll() {
-  if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
-}
-
-async function hangupSid(sid) {
-  if (!sid) return;
-  try {
-    await fetch(cfg.workerUrl+'/hangup-call', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({callSid:sid})
-    });
-  } catch(e) {}
-}
-
-// Browser SDK receives inbound bridge when human answers
-// Set this up in initDevice
-function onIncomingBridge(c, lead) {
-  c.accept();
-  conn = c;
-  clearPoll();
-  clearNAT();
-  callStart = Date.now();
-  startTimer();
-
-  const curLead = leads[dialIdx];
-  setStatus('✅','Connected — '+curLead.name);
-  renderLog();
-  showConnectedUI();
-
-  c.on('disconnect', () => {
-    const dur = callStart?Math.round((Date.now()-callStart)/1000):0;
-    callStart=null; conn=null; activeSid=null;
-    stopTimer();
-    if (paused || dur>=8) {
-      paused=true;
-      recordAttempt(curLead,'spoke');
-      setStatus('📋','Call ended — log outcome');
-      showOutcomeUI(); renderLog();
-    } else if (dur>0 && dur<5) {
-      // AMD missed a VM — short connect
-      recordAttempt(curLead,'vm'); stats.vm++;
-      setStatus('📬','VM detected — skipping');
-      updateStats(); renderLog();
-      handleNoAnswer(curLead);
-    } else {
-      recordAttempt(curLead,'na');
-      handleNoAnswer(curLead);
-    }
-  });
-
-  c.on('error', () => {
-    conn=null; stopTimer();
-    if (paused) { showOutcomeUI(); return; }
-    handleNoAnswer(curLead);
-  });
-}
-
-// User confirms they're talking to a real person
-function userClickedConnected() {
-  paused = true;
-  setStatus('🤝','On call — click Hang Up when done');
-  showHangupUI();
-}
-
-// Manual hang up
-function manualHangup() {
-  if (conn) { try{conn.disconnect();}catch(e){} conn=null; }
-  if (activeSid) { hangupSid(activeSid); activeSid=null; }
-  stopTimer(); clearPoll(); clearNAT();
-  paused = true;
-  setStatus('📋','Call ended — log outcome');
-  showOutcomeUI();
-}
-
-function handleNoAnswer(lead) {
-  if (attempt >= MAX_ATT) {
-    lead.done = true;
-    stats.done++; stats.na++;
-    dialIdx++; attempt = 0;
-    updateStats(); renderLog();
-    scheduleNext();
-  } else {
-    setStatus('🔄','Retrying '+lead.name+' in a moment…');
-    scheduleNext(true);
-  }
-}
-
-function recordAttempt(lead, result) {
-  lead.attempts.push({ time: new Date(), result });
-}
-
-function scheduleNext(same=false) {
-  if (!running) return;
-  const delay = parseInt(document.getElementById('delay-sel').value)*1000;
-  clearRetry();
-  retryTimer = setTimeout(() => {
-    if (!running || paused) return;
-    if (!same) {
-      // advance to next undone
-      if (!leads[dialIdx]?.done) { /* stay */ } else { dialIdx++; }
-    }
-    dial();
-  }, delay);
-}
-
-// ═══════════════════════════════════════════════════════
-// OUTCOME LOGGING
-// ═══════════════════════════════════════════════════════
-function logOutcome(outcome) {
-  const lead = leads[dialIdx];
-  if (lead) {
-    lead.done = true;
-    lead.outcome = outcome;
-    recordAttempt(lead, outcome);
-    stats.done++;
-    if (cfg.appsUrl) pushSheets(lead, outcome);
-  }
-  paused = false;
-  dialIdx++;
-  attempt = 0;
-  updateStats(); renderLog();
-  showRunningUI();
-  setStatus('➡️','Logged: '+outcome+' — dialing next…');
-  scheduleNext();
-}
-
-async function pushSheets(lead, outcome) {
-  try {
-    await fetch(cfg.appsUrl,{method:'POST',body:JSON.stringify({
-      name:lead.name,phone:lead.phone,outcome,time:new Date().toISOString()
-    })});
-  } catch(e) {}
-}
-
-// ═══════════════════════════════════════════════════════
-// UI STATE MACHINES
-// ═══════════════════════════════════════════════════════
-function showIdleUI() {
-  document.getElementById('action-area').innerHTML =
-    `<button class="big-btn b-start" onclick="startDialer()">▶ Start Auto Dialer</button>`;
-  document.getElementById('outcome-area').classList.remove('show');
-}
-
-function showRunningUI() {
-  document.getElementById('action-area').innerHTML =
-    `<div style="display:flex;gap:8px;">
-      <button class="big-btn b-connected" onclick="userClickedConnected()" style="flex:2;font-size:14px;">✅ Connected — talking</button>
-      <button class="big-btn b-stop" onclick="stopDialer()" style="flex:1;">⬛ Stop</button>
-    </div>`;
-  document.getElementById('outcome-area').classList.remove('show');
-}
-
-function showConnectedUI() {
-  document.getElementById('action-area').innerHTML =
-    `<button class="big-btn b-stop" onclick="manualHangup()" style="font-size:14px;padding:14px;border:2px solid var(--red);color:var(--red);">⬛ Hang Up</button>`;
-  document.getElementById('outcome-area').classList.remove('show');
-}
-
-function showHangupUI() {
-  document.getElementById('action-area').innerHTML =
-    `<button class="big-btn b-stop" onclick="manualHangup()" style="font-size:14px;padding:14px;border:2px solid var(--red);color:var(--red);">⬛ Hang Up</button>`;
-}
-
-function showOutcomeUI() {
-  document.getElementById('action-area').innerHTML = '';
-  document.getElementById('outcome-area').classList.add('show');
-}
-
-function setStatus(icon, text) {
-  document.getElementById('st-icon').textContent = icon;
-  document.getElementById('st-text').textContent = text;
-}
-
-// ═══════════════════════════════════════════════════════
-// CALL LOG (RIGHT PANEL)
-// ═══════════════════════════════════════════════════════
-function renderLog() {
-  const el = document.getElementById('call-log');
-  if (!leads.length) {
-    el.innerHTML = '<div style="padding:30px 16px;text-align:center;color:var(--t3);font-size:12px;">Import leads to begin</div>';
-    return;
-  }
-
-  const outcomeTag = {
-    'Appointment set': 'tag-appt',
-    'Callback':        'tag-cb',
-    'Not interested':  'tag-ni',
-    'Bad number':      'tag-bad',
-  };
-
-  el.innerHTML = leads.map((l,i) => {
-    const isCurrent = (i === dialIdx && running);
-    const lastAtt   = l.attempts[l.attempts.length-1];
-    let tagHtml='';
-
-    if (l.outcome) {
-      tagHtml = `<span class="li-tag ${outcomeTag[l.outcome]||'tag-done'}">${l.outcome}</span>`;
-    } else if (isCurrent) {
-      tagHtml = `<span class="li-tag tag-ring">dialing</span>`;
-    } else if (lastAtt) {
-      const r=lastAtt.result;
-      if(r==='vm')      tagHtml=`<span class="li-tag tag-vm">VM</span>`;
-      else if(r==='na'||r==='cancel') tagHtml=`<span class="li-tag tag-na">no ans</span>`;
-      else if(r==='spoke') tagHtml=`<span class="li-tag tag-done">spoke</span>`;
-    } else {
-      tagHtml = `<span class="li-tag tag-skip">#${i+1}</span>`;
-    }
-
-    // attempt dots
-    const dots = l.attempts.map(a => {
-      const col = a.result==='vm'?'#c084fc':a.result==='na'||a.result==='cancel'?'var(--purple)':a.result==='spoke'||a.outcome?'var(--green)':'var(--t3)';
-      return `<span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:${col};margin-right:2px;"></span>`;
-    }).join('');
-
-    return `<div class="log-item${isCurrent?' current':l.done?' done':''}" onclick="previewLead(${i})">
-      <div class="li-num">${i+1}</div>
-      <div class="li-body">
-        <div class="li-name">${l.name}</div>
-        <div class="li-ph">${fmt(l.phone)}${dots?'<span style="margin-left:6px;">'+dots+'</span>':''}</div>
-      </div>
-      ${tagHtml}
-    </div>`;
-  }).join('');
-
-  // scroll current into view
-  const cur = el.querySelector('.current');
-  if (cur) cur.scrollIntoView({block:'nearest', behavior:'smooth'});
-}
-
-function updateLogCurrent(state) { renderLog(); }
-
-function previewLead(i) {
-  renderLeadInfo(leads[i]);
-}
-
-// ═══════════════════════════════════════════════════════
-// LEAD INFO PANEL
-// ═══════════════════════════════════════════════════════
-function renderLeadInfo(lead) {
-  const panel = document.getElementById('lead-info');
-  const grid  = document.getElementById('li-grid');
-  if (!lead?.data) { panel.classList.remove('show'); return; }
-
-  const priority = ['Full Name','Address','City','State','Zip','Email'];
-  const shown = new Set();
-  let html = '';
-
-  for (const key of priority) {
-    const val = lead.data[key];
-    if (!val || val === lead.phone) continue;
-    const isEmail = key==='Email';
-    const isFull  = key==='Address'||key==='Email';
-    const display = isEmail ? `<a href="mailto:${val}">${val}</a>` : val;
-    html += `<div class="li-item${isFull?' full':''}"><span class="li-k">${key}</span><span class="li-v">${display}</span></div>`;
-    shown.add(key);
-  }
-
-  // remaining columns
-  for (const [key,val] of Object.entries(lead.data)) {
-    if (shown.has(key)||!val||val===lead.phone||val===lead.name) continue;
-    html += `<div class="li-item"><span class="li-k">${key}</span><span class="li-v">${val}</span></div>`;
-  }
-
-  if (html) { grid.innerHTML=html; panel.classList.add('show'); }
-  else panel.classList.remove('show');
-}
-
-function updateCard() {
-  if (!leads.length) {
-    document.getElementById('dc-name').textContent = 'Load leads to begin';
-    ['dc-phone','dc-loc','dc-from','dc-meta'].forEach(id=>document.getElementById(id).textContent='');
-  }
-}
-
-// ═══════════════════════════════════════════════════════
-// TIMER
-// ═══════════════════════════════════════════════════════
-function startTimer() {
-  secs=0;
-  const el=document.getElementById('st-timer');
-  el.className='timer';
-  timerInt=setInterval(()=>{
-    secs++;
-    const m=Math.floor(secs/60),s=secs%60;
-    el.textContent=m+':'+(s+'').padStart(2,'0');
-  },1000);
-}
-function stopTimer() {
-  clearInterval(timerInt);timerInt=null;
-  const el=document.getElementById('st-timer');
-  el.className='timer idle'; el.textContent='—';
-}
-
-// ═══════════════════════════════════════════════════════
-// STATS
-// ═══════════════════════════════════════════════════════
-function updateStats() {
-  const left=leads.filter(l=>!l.done).length;
-  document.getElementById('sp-done').textContent=stats.done+' done';
-  document.getElementById('sp-vm').textContent  =stats.vm  +' VM';
-  document.getElementById('sp-na').textContent  =stats.na  +' NA';
-  document.getElementById('sp-left').textContent=left+' left';
-}
-
-// ═══════════════════════════════════════════════════════
-// EXPORT + CLEAR LOG
-// ═══════════════════════════════════════════════════════
-function exportLog() {
-  const rows = leads.filter(l=>l.attempts.length||l.outcome).map(l=>
-    `${l.name},${l.phone},${l.outcome||''},${l.attempts.length},${l.attempts.map(a=>a.result).join('|')}`
-  );
-  if(!rows.length){toast('No calls yet');return;}
+function exportCSV() {
+  if(!leads.length){toast('No leads');return;}
+  const rows=['Name,Phone,Outcome,Attempts,AttemptResults,Location'];
+  leads.forEach(l=>rows.push(`"${l.name}","${l.phone}","${l.outcome||''}",${l.attempts.length},"${l.attempts.map(a=>a.result).join('|')}","${l.loc||''}"`));
   const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob(['Name,Phone,Outcome,Attempts,Results\n'+rows.join('\n')],{type:'text/csv'}));
-  a.download='fex-calls-'+new Date().toISOString().slice(0,10)+'.csv';
+  a.href=URL.createObjectURL(new Blob([rows.join('\n')],{type:'text/csv'}));
+  a.download='fex-dialer-'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+  dbg('Exported '+leads.length+' rows','ok');
+}
+
+async function pushSheets(lead,outcome) {
+  try{
+    await fetch(CFG.appsUrl,{method:'POST',body:JSON.stringify({name:lead.name,phone:lead.phone,outcome,time:new Date().toISOString()})});
+    dbg('Pushed outcome to Sheets: '+outcome,'ok');
+  }catch(e){dbg('Sheets push failed: '+e.message,'err');}
+}
+
+function recordAtt(lead,result) {
+  if(!lead)return;
+  lead.attempts.push({time:new Date(),result});
+  dbg(`  → recorded attempt: ${result} on ${lead.name}`,'dim');
+}
+
+// ═══════════════════════════════════════════════════
+// DEBUG PANEL
+// ═══════════════════════════════════════════════════
+let debugLog=[];
+function dbg(msg,level='dim'){
+  const ts=new Date().toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  debugLog.push({ts,msg,level});
+  if(debugLog.length>300) debugLog.shift();
+  const body=document.getElementById('debug-body');
+  if(!body.classList.contains('open'))return;
+  const d=document.createElement('div');
+  d.className='dlog '+level;
+  d.textContent=`${ts} ${msg}`;
+  body.appendChild(d);
+  body.scrollTop=body.scrollHeight;
+}
+function toggleDebug(){
+  const b=document.getElementById('debug-body'),a=document.getElementById('dbg-arrow');
+  const actions=document.getElementById('debug-actions');
+  const open=b.classList.toggle('open');
+  a.textContent=open?'▲':'▼';
+  actions.style.display=open?'flex':'none';
+  if(open){
+    b.innerHTML='';
+    debugLog.forEach(({ts,msg,level})=>{
+      const d=document.createElement('div');
+      d.className='dlog '+level;d.textContent=`${ts} ${msg}`;b.appendChild(d);
+    });
+    b.scrollTop=b.scrollHeight;
+  }
+}
+function clearDebug(){debugLog=[];document.getElementById('debug-body').innerHTML='<div class="dlog dim">Cleared.</div>';}
+function exportDebug(){
+  const txt=debugLog.map(l=>`[${l.ts}] ${l.msg}`).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));
+  a.download='fex-debug-'+new Date().toISOString().slice(0,10)+'.txt';
   a.click();
 }
-function clearLog() {
-  if (!confirm('Clear call history?')) return;
-  leads.forEach(l=>{l.attempts=[];l.outcome=null;l.done=false;});
-  stats={done:0,vm:0,na:0};
-  updateStats(); renderLog();
+
+// Debug action buttons
+function forceNext(){
+  dbg('DEBUG: force next lead','warn');
+  clearTimers();
+  if(conn){try{conn.disconnect();}catch(e){}conn=null;}
+  stopTimer();
+  if(leads[dialIdx]){leads[dialIdx].done=true;recordAtt(leads[dialIdx],'skip');stats.done++;}
+  dialIdx++;attempt=0;
+  setState('DIALING','force next');
+  setOutcomes(false);
+  setActionRow('running');
+  updateStats();renderLog();
+  scheduleNext();
+}
+function resetState(){
+  dbg('DEBUG: hard reset state machine','warn');
+  clearTimers();
+  if(conn){try{conn.disconnect();}catch(e){}conn=null;}
+  stopTimer();
+  callStart=null;attempt=0;
+  setState('IDLE','reset');
+  setActionRow('idle');
+  setOutcomes(false);
+  setStatusText('State reset — press Start to begin');
+}
+function forceHangup(){
+  dbg('DEBUG: force hangup','warn');
+  if(conn){try{conn.disconnect();}catch(e){}conn=null;}
+  clearNAT();stopTimer();callStart=null;
+  setStatusText('Force disconnected');
+  if(STATE==='CONNECTED'||STATE==='OUTCOME'){setState('OUTCOME','force hangup');setOutcomes(true);setActionRow('outcome');}
+  else{setState('DIALING','force hangup');scheduleNext();}
 }
 
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+// HEALTH CHECK
+// ═══════════════════════════════════════════════════
+async function checkHealth() {
+  if(!CFG.workerUrl){openCfg();toast('Set Worker URL first','err');return;}
+  dbg('Health check: '+CFG.workerUrl+'/health','info');
+  const row=document.getElementById('health-row');
+  row.style.display='block';row.textContent='Checking…';row.style.color='var(--t2)';
+  try{
+    const r=await fetch(CFG.workerUrl+'/health');
+    const d=await r.json();
+    if(d.ok){
+      row.textContent='✓ Worker OK — '+d.account+' — TwiML App: '+d.twimlApp;
+      row.style.color='var(--green)';
+      dbg('Health: OK '+JSON.stringify(d),'ok');
+    }else{
+      row.textContent='⚠ Missing: '+d.missing.join(', ');
+      row.style.color='var(--amber)';
+      dbg('Health: missing vars: '+d.missing.join(', '),'warn');
+    }
+  }catch(e){
+    row.textContent='✗ Cannot reach worker: '+e.message;
+    row.style.color='var(--red)';
+    dbg('Health failed: '+e.message,'err');
+  }
+}
+
+// ═══════════════════════════════════════════════════
 // CONFIG
-// ═══════════════════════════════════════════════════════
-function openCfg() {
-  document.getElementById('cfg-worker').value=cfg.workerUrl;
-  document.getElementById('cfg-sheet').value=cfg.sheetId;
-  document.getElementById('cfg-apps').value=cfg.appsUrl;
+// ═══════════════════════════════════════════════════
+function openCfg(){
+  document.getElementById('cfg-worker').value=CFG.workerUrl;
+  document.getElementById('cfg-sheet').value=CFG.sheetId;
+  document.getElementById('cfg-apps').value=CFG.appsUrl;
+  document.getElementById('health-row').style.display='none';
   document.getElementById('cfg-modal').classList.add('open');
 }
-function closeCfg() { document.getElementById('cfg-modal').classList.remove('open'); }
-function saveCfg() {
-  cfg.workerUrl=document.getElementById('cfg-worker').value.trim();
-  cfg.sheetId  =document.getElementById('cfg-sheet').value.trim();
-  cfg.appsUrl  =document.getElementById('cfg-apps').value.trim();
-  save('workerUrl',cfg.workerUrl);save('sheetId',cfg.sheetId);save('appsUrl',cfg.appsUrl);
-  closeCfg(); toast('Settings saved');
+function closeCfg(){document.getElementById('cfg-modal').classList.remove('open');}
+function saveCfg(){
+  CFG.workerUrl=document.getElementById('cfg-worker').value.trim();
+  CFG.sheetId  =document.getElementById('cfg-sheet').value.trim();
+  CFG.appsUrl  =document.getElementById('cfg-apps').value.trim();
+  ls('workerUrl',CFG.workerUrl);ls('sheetId',CFG.sheetId);ls('appsUrl',CFG.appsUrl);
+  closeCfg();toast('Settings saved');
+  dbg('Settings saved — worker: '+CFG.workerUrl,'ok');
 }
-function save(k,v){localStorage.setItem(k,v);}
 
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // HELPERS
-// ═══════════════════════════════════════════════════════
-function fmt(p){
-  const d=p.replace(/\D/g,'');
-  if(d.length===11)return`(${d.slice(1,4)}) ${d.slice(4,7)}-${d.slice(7)}`;
-  if(d.length===10)return`(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`;
-  return p;
-}
-function clearNAT(){if(naTimer){clearTimeout(naTimer);naTimer=null;}}
-function clearRetry(){if(retryTimer){clearTimeout(retryTimer);retryTimer=null;}}
+// ═══════════════════════════════════════════════════
+function clearNAT(){clearTimeout(naTimer);naTimer=null;}
+function clearTimers(){clearNAT();clearTimeout(nextTimer);nextTimer=null;clearTimeout(guardTimer);guardTimer=null;}
 
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // DRAG + DROP
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 document.addEventListener('dragover',e=>e.preventDefault());
 document.addEventListener('drop',e=>{
   e.preventDefault();
   const f=e.dataTransfer.files[0];
-  if(f&&f.name.endsWith('.csv'))importCSV({files:[f],value:''});
+  if(f?.name.endsWith('.csv'))importCSV({files:[f],value:''});
 });
 
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // TOAST
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 function toast(msg,type='ok'){
   const t=document.createElement('div');
   t.style.cssText=`position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
@@ -942,17 +1134,18 @@ function toast(msg,type='ok'){
     border:1px solid ${type==='err'?'var(--red)':'var(--gdim)'};
     color:${type==='err'?'var(--red)':'var(--green)'};
     padding:8px 18px;border-radius:6px;font-size:12px;font-family:var(--mono);
-    z-index:999;white-space:nowrap;pointer-events:none;`;
-  t.textContent=msg;document.body.appendChild(t);
-  setTimeout(()=>t.remove(),3000);
+    z-index:9999;white-space:nowrap;pointer-events:none;`;
+  t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),3000);
 }
 
-// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // INIT
-// ═══════════════════════════════════════════════════════
-document.getElementById('max-att').value=localStorage.getItem('maxAtt')||'2';
+// ═══════════════════════════════════════════════════
+document.getElementById('max-att').value=lsg('maxAtt','2');
 MAX_ATT=parseInt(document.getElementById('max-att').value);
-if(!cfg.workerUrl) setTimeout(openCfg,400);
+dbg('FEX Dialer initialized','ok');
+dbg('Worker URL: '+(CFG.workerUrl||'NOT SET'), CFG.workerUrl?'dim':'err');
+if(!CFG.workerUrl) setTimeout(openCfg,500);
 </script>
 </body>
 </html>
