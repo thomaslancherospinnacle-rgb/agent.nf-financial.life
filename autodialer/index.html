@@ -340,9 +340,21 @@ async function initDevice() {
       enableRingingState:true,
       debug:false,
     });
-    device.on('registered',   () => { setDev('Mic ready ✓','live'); document.getElementById('mic-btn').textContent='Reconnect'; document.getElementById('mic-btn').disabled=false; });
+    device.on('registered', () => {
+      setDev('Mic ready ✓','live');
+      document.getElementById('mic-btn').textContent='Reconnect';
+      document.getElementById('mic-btn').disabled=false;
+    });
     device.on('unregistered', () => setDev('Disconnected',''));
-    device.on('error',        e  => { setDev('Error','err'); toast(e.message,'err'); });
+    device.on('error', e => { setDev('Error','err'); toast(e.message,'err'); });
+
+    // This fires when Twilio bridges a REST-initiated call to the browser
+    // i.e. when a real human answers the outbound call
+    device.on('incoming', incomingConn => {
+      const curLead = leads[dialIdx];
+      onIncomingBridge(incomingConn, curLead);
+    });
+
     await device.register();
   } catch(e) {
     setDev('Failed — check Worker URL','err');
@@ -461,27 +473,30 @@ function startDialer() {
 
 function stopDialer() {
   running = false; paused = false;
-  clearNAT(); clearRetry();
+  clearNAT(); clearRetry(); clearPoll();
   if (conn) { try{conn.disconnect();}catch(e){} conn=null; }
+  if (activeSid) { hangupSid(activeSid); activeSid=null; }
   stopTimer();
   setStatus('💤','Stopped');
   showIdleUI();
 }
 
-// Core dial function — called automatically after every outcome/skip/timeout
+// ── REST-BASED PREDICTIVE DIALER ─────────────────────────────────
+// Calls go out via Twilio REST API (worker), AMD happens server-side.
+// Browser SDK just listens — when a human answers, Twilio bridges
+// the call to the browser client automatically.
+
+let activeSid = null;   // current outbound call SID
+let pollTimer = null;   // polls Twilio for call status
+
 async function dial() {
   if (!running || paused) return;
 
   // Find next undone lead
   while (dialIdx < leads.length && leads[dialIdx].done) dialIdx++;
-
-  // Wrapped around — all done
   if (dialIdx >= leads.length) {
     const retry = leads.findIndex(l=>!l.done);
-    if (retry < 0) {
-      toast('🎉 All leads dialed!');
-      stopDialer(); return;
-    }
+    if (retry < 0) { toast('🎉 All leads dialed!'); stopDialer(); return; }
     dialIdx = retry; attempt = 0;
   }
 
@@ -489,111 +504,139 @@ async function dial() {
   attempt++;
   const fromNum = closest(lead.phone);
 
-  // Update card
+  // Update display
   document.getElementById('dc-name').textContent  = lead.name;
   document.getElementById('dc-phone').textContent = fmt(lead.phone);
   document.getElementById('dc-loc').textContent   = lead.loc||'';
-  document.getElementById('dc-from').textContent  = '▲ calling from '+fromNum.lbl;
-  document.getElementById('dc-meta').textContent  = attempt>1 ? 'ATTEMPT '+attempt+' OF '+MAX_ATT : '';
+  document.getElementById('dc-from').textContent  = '▲ from '+fromNum.lbl;
+  document.getElementById('dc-meta').textContent  = attempt>1?'ATTEMPT '+attempt+' OF '+MAX_ATT:'';
   document.getElementById('st-timer').textContent = '…';
   document.getElementById('st-timer').className   = 'timer idle';
   setStatus('📞','Dialing '+lead.name+'…');
-  renderLeadInfo(lead);
-  renderLog(); // highlight current in log
+  renderLeadInfo(lead); renderLog();
 
   try {
-    conn = await device.connect({
-      params:{ To:lead.phone, callerId:fromNum.n, leadName:lead.name }
+    // Fire outbound call via REST — AMD runs server-side
+    const r = await fetch(cfg.workerUrl+'/dial', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ to:lead.phone, from:fromNum.n, leadName:lead.name, identity:'fex-agent' })
     });
-    bindEvents(conn, lead);
+    const d = await r.json();
+    if (!d.sid) throw new Error(d.error||'No SID returned');
+    activeSid = d.sid;
+
+    // Start polling for call status
+    startPoll(lead);
+
   } catch(e) {
-    conn = null;
-    recordAttempt(lead, 'error');
-    setStatus('⚠️','Connection error — skipping');
+    recordAttempt(lead,'error');
+    setStatus('⚠️','Error: '+e.message+' — skipping');
     scheduleNext();
   }
 }
 
-function bindEvents(c, lead) {
-  // Ringing
-  c.on('ringing', () => {
-    setStatus('🔔','Ringing…');
-    updateLogCurrent('ring');
-    // Hang up after 27s if no answer
-    clearNAT();
-    naTimer = setTimeout(() => {
-      setStatus('⏱','No answer — moving on');
-      if (conn) { try{conn.disconnect();}catch(e){} conn=null; }
-      recordAttempt(lead,'na');
-      handleNoAnswer(lead);
-    }, 27000);
-  });
+// Poll Twilio call status every second
+// When status = 'in-progress' and AMD says human → browser SDK picks up the bridge
+function startPoll(lead) {
+  clearPoll();
+  let elapsed = 0;
+  const MAX_RING = 28; // seconds before giving up
 
-  // Connected
-  c.on('accept', () => {
-    clearNAT();
-    callStart = Date.now();
-    startTimer();
-    setStatus('✅','Connected — speaking with '+lead.name);
-    updateLogCurrent('connected');
-    // Show the "Connected" button — user clicks when they've established it's a real person
-    showConnectedUI();
-  });
+  pollTimer = setInterval(async () => {
+    elapsed++;
+    if (!running || paused) { clearPoll(); return; }
 
-  // Disconnected
-  c.on('disconnect', () => {
-    clearNAT();
-    const dur = callStart ? Math.round((Date.now()-callStart)/1000) : 0;
-    callStart = null;
-    stopTimer();
-    conn = null;
-
-    if (paused) {
-      // User already clicked Connected — show outcome buttons
-      setStatus('📋','Call ended — log outcome');
-      showOutcomeUI();
-      return;
+    // Check if browser SDK has received an inbound connection (the bridge)
+    if (conn && callStart) {
+      // Already connected via browser — stop polling
+      clearPoll(); return;
     }
 
-    if (dur >= 10) {
-      // Talked long enough — pause and ask for outcome
-      paused = true;
-      recordAttempt(lead, 'spoke');
-      setStatus('📋','Call ended — log outcome');
-      showOutcomeUI();
-    } else if (dur > 0 && dur < 6) {
-      // Brief connect = VM
-      recordAttempt(lead,'vm');
-      stats.vm++;
-      setStatus('📬','Voicemail — skipping');
-      updateLogCurrent('vm');
-      handleNoAnswer(lead);
-    } else {
-      // No answer
+    if (elapsed >= MAX_RING) {
+      clearPoll();
+      // Hang up via REST
+      hangupSid(activeSid);
+      activeSid = null;
       recordAttempt(lead,'na');
+      stats.na++;
+      setStatus('⏱','No answer — next lead');
+      updateStats(); renderLog();
       handleNoAnswer(lead);
     }
-    updateStats(); renderLog();
-  });
-
-  c.on('cancel', () => { clearNAT(); conn=null; recordAttempt(lead,'cancel'); handleNoAnswer(lead); });
-  c.on('reject', () => { clearNAT(); conn=null; recordAttempt(lead,'reject'); handleNoAnswer(lead); });
-  c.on('error',  e => { clearNAT(); conn=null; recordAttempt(lead,'error');  setStatus('⚠️','Error — skipping'); scheduleNext(); });
+  }, 1000);
 }
 
-// User clicked "Connected" — pause auto-dial, wait for outcome
+function clearPoll() {
+  if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+}
+
+async function hangupSid(sid) {
+  if (!sid) return;
+  try {
+    await fetch(cfg.workerUrl+'/hangup-call', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({callSid:sid})
+    });
+  } catch(e) {}
+}
+
+// Browser SDK receives inbound bridge when human answers
+// Set this up in initDevice
+function onIncomingBridge(c, lead) {
+  c.accept();
+  conn = c;
+  clearPoll();
+  clearNAT();
+  callStart = Date.now();
+  startTimer();
+
+  const curLead = leads[dialIdx];
+  setStatus('✅','Connected — '+curLead.name);
+  renderLog();
+  showConnectedUI();
+
+  c.on('disconnect', () => {
+    const dur = callStart?Math.round((Date.now()-callStart)/1000):0;
+    callStart=null; conn=null; activeSid=null;
+    stopTimer();
+    if (paused || dur>=8) {
+      paused=true;
+      recordAttempt(curLead,'spoke');
+      setStatus('📋','Call ended — log outcome');
+      showOutcomeUI(); renderLog();
+    } else if (dur>0 && dur<5) {
+      // AMD missed a VM — short connect
+      recordAttempt(curLead,'vm'); stats.vm++;
+      setStatus('📬','VM detected — skipping');
+      updateStats(); renderLog();
+      handleNoAnswer(curLead);
+    } else {
+      recordAttempt(curLead,'na');
+      handleNoAnswer(curLead);
+    }
+  });
+
+  c.on('error', () => {
+    conn=null; stopTimer();
+    if (paused) { showOutcomeUI(); return; }
+    handleNoAnswer(curLead);
+  });
+}
+
+// User confirms they're talking to a real person
 function userClickedConnected() {
   paused = true;
-  setStatus('🤝','On call — hang up when done');
+  setStatus('🤝','On call — click Hang Up when done');
   showHangupUI();
 }
 
-// User manually hangs up
+// Manual hang up
 function manualHangup() {
   if (conn) { try{conn.disconnect();}catch(e){} conn=null; }
-  stopTimer();
-  clearNAT();
-  if (!paused) paused = true;
+  if (activeSid) { hangupSid(activeSid); activeSid=null; }
+  stopTimer(); clearPoll(); clearNAT();
+  paused = true;
   setStatus('📋','Call ended — log outcome');
   showOutcomeUI();
 }
