@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Virtual Phone</title>
+<script src="https://cdn.jsdelivr.net/npm/@twilio/voice-sdk@2.10.0/dist/twilio.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg: #0a0a0f;
+  --glass: rgba(255,255,255,.04);
+  --glass2: rgba(255,255,255,.07);
+  --border: rgba(255,255,255,.09);
+  --border2: rgba(255,255,255,.16);
+  --tx: #f0f0f5;
+  --t2: rgba(240,240,245,.55);
+  --t3: rgba(240,240,245,.25);
+  --green: #22d3a0;
+  --green-glow: rgba(34,211,160,.2);
+  --red: #f04060;
+  --red-glow: rgba(240,64,96,.2);
+  --blue: #60a5fa;
+  --amber: #fbbf24;
+  --fn: 'DM Sans', sans-serif;
+  --mono: 'DM Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: var(--bg);
+  color: var(--tx);
+  font-family: var(--fn);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow-x: hidden;
+}
+
+/* subtle grid background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.phone {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 360px;
+  background: rgba(16,16,24,.95);
+  border: 1px solid var(--border);
+  border-radius: 32px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.04),
+    0 40px 80px rgba(0,0,0,.6),
+    0 0 100px rgba(34,211,160,.04);
+}
+
+/* ── TOP STATUS BAR ─────────────────────────── */
+.status-bar {
+  padding: 14px 22px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+.sb-left { display: flex; align-items: center; gap: 8px; }
+.mic-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--t3); transition: all .3s; }
+.mic-dot.live  { background: var(--green); box-shadow: 0 0 8px var(--green); animation: breathe 2s infinite; }
+.mic-dot.ring  { background: var(--amber); box-shadow: 0 0 8px var(--amber); animation: breathe .6s infinite; }
+.mic-dot.talk  { background: var(--green); box-shadow: 0 0 12px var(--green); }
+.mic-dot.err   { background: var(--red); }
+@keyframes breathe { 0%,100%{opacity:1}50%{opacity:.3} }
+.mic-label { font-size: 11px; color: var(--t2); font-family: var(--mono); }
+.sb-right { display: flex; align-items: center; gap: 8px; }
+.connect-btn {
+  font-size: 10px; padding: 4px 10px; border-radius: 20px;
+  background: var(--glass2); border: 1px solid var(--border2);
+  color: var(--t2); cursor: pointer; font-family: var(--mono);
+  transition: all .2s;
+}
+.connect-btn:hover { background: var(--glass); color: var(--tx); }
+.connect-btn.connected { border-color: rgba(34,211,160,.4); color: var(--green); }
+
+/* ── NUMBER DISPLAY ─────────────────────────── */
+.display-area {
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid var(--border);
+  min-height: 130px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.caller-name {
+  font-size: 13px;
+  color: var(--t2);
+  font-weight: 300;
+  margin-bottom: 4px;
+  min-height: 18px;
+  transition: opacity .3s;
+}
+.number-display {
+  font-family: var(--mono);
+  font-size: 32px;
+  font-weight: 300;
+  color: var(--tx);
+  letter-spacing: .04em;
+  min-height: 42px;
+  line-height: 1.2;
+  word-break: break-all;
+  transition: all .2s;
+}
+.number-display.empty { color: var(--t3); font-size: 18px; padding-top: 8px; }
+.number-display.typing { color: var(--blue); }
+
+/* from-number row */
+.from-row {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.from-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--green);
+  cursor: pointer;
+  transition: all .2s;
+  flex: 1;
+}
+.from-chip:hover { background: var(--glass2); border-color: rgba(34,211,160,.3); }
+.from-chip-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+.auto-btn {
+  font-size: 10px; padding: 4px 10px; border-radius: 20px;
+  background: var(--glass); border: 1px solid var(--border);
+  color: var(--t2); cursor: pointer; font-family: var(--mono);
+  transition: all .2s; white-space: nowrap;
+}
+.auto-btn:hover { border-color: rgba(34,211,160,.4); color: var(--green); }
+.auto-btn.active { background: rgba(34,211,160,.08); border-color: rgba(34,211,160,.4); color: var(--green); }
+
+/* ── PASTE INPUT ────────────────────────────── */
+.paste-area {
+  padding: 0 22px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.paste-input {
+  width: 100%;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--t2);
+  outline: none;
+  transition: all .2s;
+  resize: none;
+}
+.paste-input::placeholder { color: var(--t3); }
+.paste-input:focus { border-color: var(--border2); color: var(--tx); }
+
+/* ── CALL STATUS ────────────────────────────── */
+.call-status {
+  display: none;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+.call-status.show { display: block; }
+.cs-timer {
+  font-family: var(--mono);
+  font-size: 36px;
+  font-weight: 300;
+  color: var(--green);
+  margin-bottom: 4px;
+}
+.cs-label {
+  font-size: 12px;
+  color: var(--t2);
+  font-family: var(--mono);
+}
+
+/* ── DIALPAD ────────────────────────────────── */
+.dialpad {
+  padding: 16px 22px;
+}
+.dial-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.dk {
+  aspect-ratio: 1;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  cursor: pointer;
+  transition: all .15s;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.dk:hover { background: var(--glass2); border-color: var(--border2); }
+.dk:active { transform: scale(.92); background: rgba(255,255,255,.1); }
+.dk-num { font-family: var(--mono); font-size: 22px; font-weight: 400; color: var(--tx); line-height: 1; }
+.dk-sub { font-size: 8px; letter-spacing: .15em; color: var(--t3); min-height: 10px; }
+
+/* action row */
+.action-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  align-items: center;
+}
+.act-btn {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  transition: all .2s;
+  font-size: 22px;
+}
+.act-btn:active { transform: scale(.9); }
+.act-call {
+  background: var(--green);
+  box-shadow: 0 4px 24px var(--green-glow);
+}
+.act-call:hover { background: #28edb4; box-shadow: 0 4px 32px rgba(34,211,160,.35); }
+.act-call:disabled { background: rgba(34,211,160,.25); box-shadow: none; cursor: not-allowed; opacity: .5; }
+.act-hang {
+  background: var(--red);
+  box-shadow: 0 4px 24px var(--red-glow);
+  display: none;
+}
+.act-hang:hover { background: #f55070; }
+.act-back {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  color: var(--t2);
+}
+.act-back:hover { background: var(--glass2); }
+.act-placeholder { /* empty slot */ }
+
+/* ── NUMBER SELECTOR SHEET ──────────────────── */
+.sheet-overlay {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.7);
+  z-index: 10;
+  border-radius: 32px;
+  align-items: flex-end;
+}
+.sheet-overlay.open { display: flex; }
+.sheet {
+  width: 100%;
+  background: #13131e;
+  border-radius: 24px 24px 0 0;
+  border-top: 1px solid var(--border2);
+  padding: 6px 0 20px;
+  max-height: 80%;
+  overflow-y: auto;
+}
+.sheet-handle {
+  width: 36px; height: 4px;
+  background: var(--border2);
+  border-radius: 2px;
+  margin: 10px auto 16px;
+}
+.sheet-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--t3);
+  font-family: var(--mono);
+  padding: 0 20px 10px;
+}
+.sheet-item {
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: background .15s;
+}
+.sheet-item:hover { background: var(--glass); }
+.sheet-item.selected { background: rgba(34,211,160,.06); }
+.si-dot {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(34,211,160,.1);
+  border: 1px solid rgba(34,211,160,.3);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 10px; color: var(--green);
+  flex-shrink: 0;
+}
+.si-info { flex: 1; }
+.si-name { font-size: 13px; font-weight: 500; }
+.si-num  { font-family: var(--mono); font-size: 11px; color: var(--t2); margin-top: 1px; }
+.si-check { color: var(--green); font-size: 16px; }
+
+/* ── SETTINGS ───────────────────────────────── */
+.settings-sheet {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.7);
+  z-index: 10;
+  border-radius: 32px;
+  align-items: flex-end;
+}
+.settings-sheet.open { display: flex; }
+.settings-body {
+  width: 100%;
+  background: #13131e;
+  border-radius: 24px 24px 0 0;
+  border-top: 1px solid var(--border2);
+  padding: 6px 0 30px;
+}
+.s-field { padding: 10px 20px; }
+.s-label { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--t3); font-family: var(--mono); margin-bottom: 6px; }
+.s-input {
+  width: 100%; background: var(--glass);
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 9px 12px; font-size: 12px; font-family: var(--mono);
+  color: var(--tx); outline: none;
+}
+.s-input:focus { border-color: var(--border2); }
+.s-save {
+  margin: 8px 20px 0;
+  width: calc(100% - 40px);
+  padding: 12px; border-radius: 12px; border: none;
+  background: var(--green); color: #000;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  font-family: var(--fn); transition: all .2s;
+}
+.s-save:hover { background: #28edb4; }
+.s-health { margin: 8px 20px 0; font-family: var(--mono); font-size: 11px; color: var(--t3); min-height: 16px; }
+
+/* ── RECENT CALLS ───────────────────────────── */
+.recent {
+  border-top: 1px solid var(--border);
+  max-height: 160px;
+  overflow-y: auto;
+}
+.recent::-webkit-scrollbar { width: 0; }
+.recent-header {
+  padding: 10px 22px 6px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--t3);
+  font-family: var(--mono);
+  display: flex;
+  justify-content: space-between;
+}
+.recent-clear { cursor: pointer; color: var(--t3); transition: color .2s; }
+.recent-clear:hover { color: var(--red); }
+.recent-item {
+  padding: 9px 22px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background .15s;
+  border-bottom: 1px solid rgba(255,255,255,.03);
+}
+.recent-item:hover { background: var(--glass); }
+.ri-icon { font-size: 14px; width: 20px; text-align: center; }
+.ri-info { flex: 1; min-width: 0; }
+.ri-num  { font-family: var(--mono); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ri-meta { font-size: 10px; color: var(--t2); margin-top: 1px; }
+.ri-redial { font-size: 16px; color: var(--t3); cursor: pointer; transition: color .2s; padding: 4px; }
+.ri-redial:hover { color: var(--green); }
+
+/* ── TOAST ──────────────────────────────────── */
+.toast-wrap { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); z-index: 20; pointer-events: none; }
+.toast {
+  background: rgba(20,20,30,.95);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 7px 16px;
+  font-size: 12px;
+  font-family: var(--mono);
+  white-space: nowrap;
+  animation: toastIn .2s ease;
+  margin-bottom: 6px;
+}
+@keyframes toastIn { from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)} }
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <!-- TOAST AREA -->
+  <div class="toast-wrap" id="toast-wrap"></div>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <div class="sb-left">
+      <div class="mic-dot" id="mic-dot"></div>
+      <span class="mic-label" id="mic-label">Not connected</span>
+    </div>
+    <div class="sb-right">
+      <button class="connect-btn" id="conn-btn" onclick="initDevice()">Connect Mic</button>
+      <button class="connect-btn" onclick="openSettings()" style="padding:4px 8px;">⚙</button>
+    </div>
+  </div>
+
+  <!-- DISPLAY -->
+  <div class="display-area">
+    <div class="caller-name" id="caller-name"></div>
+    <div class="number-display empty" id="num-display">Dial a number</div>
+    <div class="from-row">
+      <div class="from-chip" id="from-chip" onclick="openNumberPicker()">
+        <div class="from-chip-dot"></div>
+        <span id="from-chip-label">Select number</span>
+      </div>
+      <button class="auto-btn active" id="auto-btn" onclick="toggleAuto()">⚡ Auto</button>
+    </div>
+  </div>
+
+  <!-- PASTE INPUT -->
+  <div class="paste-area">
+    <textarea
+      class="paste-input"
+      id="paste-input"
+      rows="2"
+      placeholder="Paste anything — number, text, email… digits extracted automatically"
+      oninput="onPasteInput(this.value)"
+      onpaste="setTimeout(()=>onPasteInput(this.value),10)"
+    ></textarea>
+  </div>
+
+  <!-- CALL STATUS (shown during call) -->
+  <div class="call-status" id="call-status">
+    <div class="cs-timer" id="cs-timer">0:00</div>
+    <div class="cs-label" id="cs-label">Calling…</div>
+  </div>
+
+  <!-- DIALPAD -->
+  <div class="dialpad">
+    <div class="dial-grid">
+      <div class="dk" onclick="press('1')"><span class="dk-num">1</span><span class="dk-sub">&nbsp;</span></div>
+      <div class="dk" onclick="press('2')"><span class="dk-num">2</span><span class="dk-sub">ABC</span></div>
+      <div class="dk" onclick="press('3')"><span class="dk-num">3</span><span class="dk-sub">DEF</span></div>
+      <div class="dk" onclick="press('4')"><span class="dk-num">4</span><span class="dk-sub">GHI</span></div>
+      <div class="dk" onclick="press('5')"><span class="dk-num">5</span><span class="dk-sub">JKL</span></div>
+      <div class="dk" onclick="press('6')"><span class="dk-num">6</span><span class="dk-sub">MNO</span></div>
+      <div class="dk" onclick="press('7')"><span class="dk-num">7</span><span class="dk-sub">PQRS</span></div>
+      <div class="dk" onclick="press('8')"><span class="dk-num">8</span><span class="dk-sub">TUV</span></div>
+      <div class="dk" onclick="press('9')"><span class="dk-num">9</span><span class="dk-sub">WXYZ</span></div>
+      <div class="dk" onclick="press('*')"><span class="dk-num">*</span><span class="dk-sub">&nbsp;</span></div>
+      <div class="dk" onclick="press('0')"><span class="dk-num">0</span><span class="dk-sub">+</span></div>
+      <div class="dk" onclick="press('#')"><span class="dk-num">#</span><span class="dk-sub">&nbsp;</span></div>
+    </div>
+    <div class="action-row">
+      <button class="act-btn act-back" onclick="backspace()">⌫</button>
+      <button class="act-btn act-call" id="call-btn" onclick="makeCall()" disabled>📞</button>
+      <button class="act-btn act-hang" id="hang-btn" onclick="hangUp()">📵</button>
+    </div>
+  </div>
+
+  <!-- RECENT CALLS -->
+  <div class="recent" id="recent-section" style="display:none;">
+    <div class="recent-header">
+      <span>Recent</span>
+      <span class="recent-clear" onclick="clearRecent()">clear</span>
+    </div>
+    <div id="recent-list"></div>
+  </div>
+
+  <!-- NUMBER PICKER SHEET -->
+  <div class="sheet-overlay" id="picker-overlay" onclick="closePicker(event)">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">Call from…</div>
+      <div id="picker-list"></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS SHEET -->
+  <div class="settings-sheet" id="settings-sheet" onclick="closeSettings(event)">
+    <div class="settings-body">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">Settings</div>
+      <div class="s-field">
+        <div class="s-label">Worker URL</div>
+        <input class="s-input" id="s-worker" placeholder="https://raspy-math-9a25.thomaslancheros06.workers.dev">
+      </div>
+      <div class="s-health" id="s-health"></div>
+      <div style="display:flex;gap:8px;padding:0 20px;margin-top:8px;">
+        <button class="s-save" onclick="checkHealth()" style="background:var(--glass);border:1px solid var(--border);color:var(--t2);flex:1;">🔍 Test</button>
+        <button class="s-save" onclick="saveSettings()" style="flex:2;">Save</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /phone -->
+
+<script>
+'use strict';
+// ── NUMBERS ──────────────────────────────────────────────────
+const NUMBERS = [
+  {n:'+15862215707',lbl:'Mount Clemens',area:'586',lat:42.5973,lng:-82.8779},
+  {n:'+18108193812',lbl:'Brighton',     area:'810',lat:42.5295,lng:-83.7799},
+  {n:'+12314442706',lbl:'Cadillac',     area:'231',lat:44.2519,lng:-85.4013},
+  {n:'+13136266971',lbl:'Detroit',      area:'313',lat:42.3314,lng:-83.0458},
+  {n:'+17349844400',lbl:'Flat Rock',    area:'734',lat:42.1000,lng:-83.2747},
+  {n:'+15176189305',lbl:'Howell',       area:'517',lat:42.6075,lng:-83.9297},
+];
+const AC = {
+  '231':{lat:44.76,lng:-85.62},'248':{lat:42.58,lng:-83.25},'269':{lat:42.29,lng:-85.59},
+  '313':{lat:42.33,lng:-83.05},'517':{lat:42.73,lng:-84.56},'586':{lat:42.58,lng:-82.91},
+  '616':{lat:42.96,lng:-85.67},'734':{lat:42.28,lng:-83.74},'810':{lat:43.01,lng:-83.69},
+  '906':{lat:46.48,lng:-84.99},'419':{lat:41.66,lng:-83.56},'440':{lat:41.50,lng:-81.69},
+  '219':{lat:41.68,lng:-86.25},'260':{lat:41.08,lng:-85.14},'default':{lat:43.33,lng:-84.54},
+};
+function closest(phone) {
+  const ac = phone.replace(/\D/g,'').slice(-10).slice(0,3);
+  const c  = AC[ac] || AC.default;
+  let best = NUMBERS[0], bestD = Infinity;
+  for (const n of NUMBERS) {
+    const dLat=(n.lat-c.lat)*Math.PI/180, dLng=(n.lng-c.lng)*Math.PI/180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(c.lat*Math.PI/180)*Math.cos(n.lat*Math.PI/180)*Math.sin(dLng/2)**2;
+    const d = 3958.8*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+    if(d<bestD){bestD=d;best=n;}
+  }
+  return best;
+}
+
+// ── STATE ─────────────────────────────────────────────────────
+let digits = '';          // current number being dialed
+let selectedNum = null;   // selected from-number
+let autoMode   = true;    // auto-match area code
+let device     = null;
+let conn       = null;
+let timerInt   = null;
+let secs       = 0;
+let recentCalls = JSON.parse(localStorage.getItem('vp_recent')||'[]');
+
+const workerUrl = () => localStorage.getItem('vp_worker') || 'https://raspy-math-9a25.thomaslancheros06.workers.dev';
+
+// ── DEVICE ────────────────────────────────────────────────────
+async function initDevice() {
+  const url = workerUrl();
+  if (!url) { openSettings(); return; }
+  setMic('ring','Connecting…');
+  document.getElementById('conn-btn').textContent = '…';
+  try {
+    const r = await fetch(url+'/token');
+    if (!r.ok) throw new Error('HTTP '+r.status);
+    const d = await r.json();
+    if (!d.token) throw new Error(d.error||'No token');
+    device = new Twilio.Device(d.token, {
+      codecPreferences:['opus','pcmu'], enableRingingState:true, debug:false,
+    });
+    device.on('registered',   () => { setMic('live','Ready'); document.getElementById('conn-btn').textContent='Connected'; document.getElementById('conn-btn').className='connect-btn connected'; });
+    device.on('unregistered', () => { setMic('','Disconnected'); });
+    device.on('error',        e  => { setMic('err','Error'); toast(e.message,'err'); });
+    device.on('tokenWillExpire', () => refreshToken());
+    await device.register();
+  } catch(e) {
+    setMic('err','Failed');
+    document.getElementById('conn-btn').textContent='Retry';
+    toast('Failed: '+e.message,'err');
+  }
+}
+
+async function refreshToken() {
+  try {
+    const r=await fetch(workerUrl()+'/token');
+    const d=await r.json();
+    if(d.token&&device) device.updateToken(d.token);
+  }catch(e){}
+}
+
+function setMic(state, label) {
+  const dot = document.getElementById('mic-dot');
+  document.getElementById('mic-label').textContent = label;
+  dot.className = 'mic-dot'+(state==='live'?' live':state==='ring'?' ring':state==='talk'?' talk':state==='err'?' err':'');
+}
+
+// ── DIGIT INPUT ───────────────────────────────────────────────
+function press(k) {
+  if (conn) { sendDTMF(k); return; }
+  if (k==='0' && digits==='') digits='+';
+  else if (digits.length < 16) digits+=k;
+  updateDisplay();
+  if (autoMode && digits.length >= 4) matchAuto();
+}
+
+function backspace() {
+  if (conn) return;
+  digits = digits.slice(0,-1);
+  updateDisplay();
+  if (autoMode && digits.length >= 4) matchAuto();
+}
+
+function onPasteInput(raw) {
+  // Strip everything except digits and leading +
+  const nums = raw.replace(/[^\d+]/g,'');
+  // If starts with +, keep it; otherwise just digits
+  let clean = nums.replace(/\+/g,'');
+  if (nums.startsWith('+')) clean = '+' + clean;
+  // Take last 11 digits max
+  if (clean.replace(/\D/g,'').length > 11) {
+    const d = clean.replace(/\D/g,'');
+    clean = (nums.startsWith('+')?'+':'') + d.slice(-11);
+  }
+  digits = clean || '';
+  updateDisplay();
+  if (autoMode && digits.length >= 4) matchAuto();
+  // Clear paste box after processing
+  if (digits) setTimeout(()=>{ document.getElementById('paste-input').value=''; },800);
+}
+
+function matchAuto() {
+  const num = closest(digits);
+  setFromNumber(num);
+}
+
+function toggleAuto() {
+  autoMode = !autoMode;
+  const btn = document.getElementById('auto-btn');
+  btn.className = 'auto-btn'+(autoMode?' active':'');
+  btn.textContent = autoMode ? '⚡ Auto' : '🔒 Manual';
+  if (autoMode && digits.length>=4) matchAuto();
+}
+
+function updateDisplay() {
+  const el  = document.getElementById('num-display');
+  const btn = document.getElementById('call-btn');
+  if (!digits) {
+    el.textContent = 'Dial a number';
+    el.className   = 'number-display empty';
+    btn.disabled   = true;
+    document.getElementById('caller-name').textContent = '';
+  } else {
+    el.textContent = formatNum(digits);
+    el.className   = 'number-display typing';
+    const d = digits.replace(/\D/g,'');
+    btn.disabled   = d.length < 10 || !device;
+  }
+}
+
+function formatNum(v) {
+  const raw = v.replace(/\D/g,'');
+  if (v.startsWith('+') && raw.length >= 11)
+    return `+${raw[0]} (${raw.slice(1,4)}) ${raw.slice(4,7)}-${raw.slice(7,11)}`;
+  if (raw.length === 10)
+    return `(${raw.slice(0,3)}) ${raw.slice(3,6)}-${raw.slice(6)}`;
+  if (raw.length > 10)
+    return `+${raw.slice(0,1)} (${raw.slice(1,4)}) ${raw.slice(4,7)}-${raw.slice(7)}`;
+  if (raw.length > 6)
+    return `(${raw.slice(0,3)}) ${raw.slice(3,6)}-${raw.slice(6)}`;
+  if (raw.length > 3)
+    return `(${raw.slice(0,3)}) ${raw.slice(3)}`;
+  return v;
+}
+
+function toE164(v) {
+  let d = v.replace(/\D/g,'');
+  if (d.length===10) d='1'+d;
+  return '+'+d;
+}
+
+// ── CALLING ───────────────────────────────────────────────────
+async function makeCall() {
+  if (!device) { toast('Connect mic first','err'); return; }
+  const e164 = toE164(digits);
+  const d = e164.replace(/\D/g,'');
+  if (d.length < 10) { toast('Enter a valid number','err'); return; }
+  const from = selectedNum || closest(e164);
+
+  setCallUI(true);
+  setMic('ring','Calling…');
+  document.getElementById('cs-label').textContent = 'Calling '+formatNum(digits)+'…';
+
+  try {
+    conn = await device.connect({ params:{ To:e164, callerId:from.n } });
+    conn.on('ringing',    () => { document.getElementById('cs-label').textContent='Ringing…'; });
+    conn.on('accept',     () => {
+      setMic('talk','On call');
+      startTimer();
+      document.getElementById('cs-label').textContent='Connected';
+      addRecent(e164, formatNum(digits), 'out');
+    });
+    conn.on('disconnect', () => {
+      setMic('live','Ready');
+      setCallUI(false);
+      stopTimer();
+      conn=null;
+      toast('Call ended');
+    });
+    conn.on('cancel', () => { setMic('live','Ready'); setCallUI(false); stopTimer(); conn=null; });
+    conn.on('reject', () => { setMic('live','Ready'); setCallUI(false); stopTimer(); conn=null; toast('Rejected'); });
+    conn.on('error',  e => { setMic('live','Ready'); setCallUI(false); stopTimer(); conn=null; toast(e.message,'err'); });
+  } catch(e) {
+    setCallUI(false);
+    setMic('live','Ready');
+    toast('Call failed: '+e.message,'err');
+  }
+}
+
+function hangUp() {
+  if (conn) { try{conn.disconnect();}catch(e){} conn=null; }
+  setCallUI(false);
+  setMic('live','Ready');
+  stopTimer();
+}
+
+function sendDTMF(k) {
+  if (conn) { try{ conn.sendDigits(k); }catch(e){} }
+}
+
+function setCallUI(active) {
+  document.getElementById('call-status').classList.toggle('show', active);
+  document.getElementById('call-btn').style.display = active ? 'none' : '';
+  document.getElementById('hang-btn').style.display = active ? '' : 'none';
+}
+
+// ── TIMER ─────────────────────────────────────────────────────
+function startTimer() {
+  secs=0;
+  const el=document.getElementById('cs-timer');
+  timerInt=setInterval(()=>{
+    secs++;
+    el.textContent=Math.floor(secs/60)+':'+(secs%60+'').padStart(2,'0');
+  },1000);
+}
+function stopTimer() { clearInterval(timerInt); timerInt=null; secs=0; document.getElementById('cs-timer').textContent='0:00'; }
+
+// ── NUMBER PICKER ─────────────────────────────────────────────
+function setFromNumber(num) {
+  selectedNum = num;
+  document.getElementById('from-chip-label').textContent = `(${num.area}) ${num.lbl}  ${num.n}`;
+}
+
+function openNumberPicker() {
+  const list = document.getElementById('picker-list');
+  list.innerHTML = NUMBERS.map((n,i) => {
+    const sel = selectedNum?.n === n.n;
+    return `<div class="sheet-item${sel?' selected':''}" onclick="pickNumber(${i})">
+      <div class="si-dot">(${n.area})</div>
+      <div class="si-info">
+        <div class="si-name">${n.lbl}</div>
+        <div class="si-num">${n.n}</div>
+      </div>
+      ${sel?'<span class="si-check">✓</span>':''}
+    </div>`;
+  }).join('');
+  document.getElementById('picker-overlay').classList.add('open');
+}
+function closePicker(e) {
+  if (e.target===document.getElementById('picker-overlay'))
+    document.getElementById('picker-overlay').classList.remove('open');
+}
+function pickNumber(i) {
+  autoMode = false;
+  document.getElementById('auto-btn').className='auto-btn';
+  document.getElementById('auto-btn').textContent='🔒 Manual';
+  setFromNumber(NUMBERS[i]);
+  document.getElementById('picker-overlay').classList.remove('open');
+  toast('From: '+NUMBERS[i].lbl);
+}
+
+// ── RECENT CALLS ──────────────────────────────────────────────
+function addRecent(e164, formatted, dir) {
+  recentCalls.unshift({ e164, formatted, dir, ts: Date.now() });
+  if (recentCalls.length > 20) recentCalls.pop();
+  localStorage.setItem('vp_recent', JSON.stringify(recentCalls));
+  renderRecent();
+}
+function renderRecent() {
+  const section = document.getElementById('recent-section');
+  const list    = document.getElementById('recent-list');
+  if (!recentCalls.length) { section.style.display='none'; return; }
+  section.style.display='block';
+  list.innerHTML = recentCalls.map((c,i) => {
+    const ago = timeAgo(c.ts);
+    return `<div class="recent-item">
+      <span class="ri-icon">${c.dir==='out'?'↗':'↙'}</span>
+      <div class="ri-info">
+        <div class="ri-num">${c.formatted}</div>
+        <div class="ri-meta">${ago}</div>
+      </div>
+      <span class="ri-redial" onclick="redial(${i})" title="Redial">↩</span>
+    </div>`;
+  }).join('');
+}
+function redial(i) {
+  digits = recentCalls[i].e164;
+  updateDisplay();
+  if (autoMode) matchAuto();
+}
+function clearRecent() {
+  recentCalls=[];
+  localStorage.removeItem('vp_recent');
+  renderRecent();
+}
+function timeAgo(ts) {
+  const s = Math.round((Date.now()-ts)/1000);
+  if(s<60) return 'just now';
+  if(s<3600) return Math.floor(s/60)+'m ago';
+  if(s<86400) return Math.floor(s/3600)+'h ago';
+  return Math.floor(s/86400)+'d ago';
+}
+
+// ── SETTINGS ─────────────────────────────────────────────────
+function openSettings() {
+  document.getElementById('s-worker').value = workerUrl();
+  document.getElementById('s-health').textContent='';
+  document.getElementById('settings-sheet').classList.add('open');
+}
+function closeSettings(e) {
+  if(e.target===document.getElementById('settings-sheet'))
+    document.getElementById('settings-sheet').classList.remove('open');
+}
+function saveSettings() {
+  const url = document.getElementById('s-worker').value.trim();
+  localStorage.setItem('vp_worker',url);
+  document.getElementById('settings-sheet').classList.remove('open');
+  toast('Saved — connect mic to use new URL');
+}
+async function checkHealth() {
+  const url=document.getElementById('s-worker').value.trim()||workerUrl();
+  const el=document.getElementById('s-health');
+  el.textContent='Checking…'; el.style.color='var(--t2)';
+  try{
+    const r=await fetch(url+'/health');
+    const d=await r.json();
+    if(d.ok){el.textContent='✓ Worker OK';el.style.color='var(--green)';}
+    else{el.textContent='⚠ Missing: '+d.missing?.join(', ');el.style.color='var(--amber)';}
+  }catch(e){el.textContent='✗ '+e.message;el.style.color='var(--red)';}
+}
+
+// ── TOAST ─────────────────────────────────────────────────────
+function toast(msg, type='ok') {
+  const el = document.createElement('div');
+  el.className='toast';
+  el.style.color = type==='err'?'var(--red)':type==='warn'?'var(--amber)':'var(--green)';
+  el.textContent = msg;
+  document.getElementById('toast-wrap').appendChild(el);
+  setTimeout(()=>el.remove(), 2800);
+}
+
+// ── KEYBOARD ─────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+  if (/^[0-9*#]$/.test(e.key)) press(e.key);
+  else if (e.key==='Backspace') backspace();
+  else if (e.key==='Enter' && !document.getElementById('call-btn').disabled) makeCall();
+  else if (e.key==='Escape' && conn) hangUp();
+});
+
+// ── INIT ─────────────────────────────────────────────────────
+setFromNumber(NUMBERS[0]);
+renderRecent();
+updateDisplay();
+if (!workerUrl()) openSettings();
+</script>
+</body>
+</html>
