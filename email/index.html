@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Email - American Income Life</title>
   
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
   <script src="../config.js"></script>
   <script src="../auth.js"></script>
   <script>
@@ -1217,6 +1218,104 @@
         width: 100%;
       }
     }
+    /* Send Benefits Modal */
+    .benefits-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .benefits-modal.active { display: flex; }
+    .benefits-modal-content {
+      background: white;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 620px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.35);
+    }
+    .benefits-modal-header {
+      background: linear-gradient(135deg, #065f46 0%, #10b981 100%);
+      color: white;
+      padding: 20px 24px;
+      border-radius: 12px 12px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .benefits-modal-header h3 { font-size: 18px; }
+    .benefits-modal-body { padding: 24px; }
+    .benefits-section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+    .file-picker-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .file-picker-item {
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      user-select: none;
+    }
+    .file-picker-item:hover { border-color: #10b981; background: #f0fdf4; }
+    .file-picker-item.selected { border-color: #10b981; background: #d1fae5; }
+    .file-picker-item input[type=checkbox] { width: 18px; height: 18px; accent-color: #10b981; flex-shrink: 0; }
+    .file-picker-item-label { font-size: 13px; font-weight: 600; color: #1f2937; }
+    .file-picker-item-sub { font-size: 11px; color: #6b7280; }
+    .gc-form { border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; background: #fafafa; margin-bottom: 20px; }
+    .gc-form-title {
+      font-size: 13px; font-weight: 700; color: #065f46;
+      margin-bottom: 14px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .gc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .gc-grid.full { grid-template-columns: 1fr; }
+    .gc-field { display: flex; flex-direction: column; gap: 4px; }
+    .gc-field label { font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; }
+    .gc-field input {
+      padding: 8px 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 13px;
+      transition: border 0.2s;
+    }
+    .gc-field input:focus { outline: none; border-color: #10b981; }
+    .benefits-modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .btn-cancel-benefits {
+      padding: 10px 20px; background: white; border: 1px solid #d1d5db;
+      border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500;
+    }
+    .btn-apply-benefits {
+      padding: 10px 24px; background: #10b981; color: white;
+      border: none; border-radius: 6px; cursor: pointer;
+      font-size: 13px; font-weight: 600; transition: background 0.2s;
+    }
+    .btn-apply-benefits:hover { background: #059669; }
+    .btn-apply-benefits:disabled { background: #9ca3af; cursor: not-allowed; }
   </style>
 </head>
 <body>
@@ -1433,6 +1532,10 @@
         <!-- Preset Menu -->
         <div class="preset-menu" id="presetMenu">
           <div class="preset-item-header">📋 During Presentation</div>
+          <div class="preset-item" onclick="openSendBenefits()">
+            <strong>🎁 Send Benefits</strong>
+            <span>Here are your benefits we went over — select files & fill out Gift Certificate</span>
+          </div>
           <div class="preset-item" onclick="insertChildSafeKit()">
             <strong>🛡️ Child Safe Kit</strong>
             <span>Send app during CSK portion of preso</span>
@@ -2613,6 +2716,200 @@
       }
     }
 
+    // ── Send Benefits ─────────────────────────────────────────────────────────
+    
+    function openSendBenefits() {
+      document.getElementById('presetMenu').classList.remove('active');
+      // Pre-fill today's date in delivery field
+      const today = new Date();
+      const mm = String(today.getMonth()+1).padStart(2,'0');
+      const dd = String(today.getDate()).padStart(2,'0');
+      const yyyy = today.getFullYear();
+      document.getElementById('gc-date').value = `${mm}/${dd}/${yyyy}`;
+      // Pre-fill agent name from currentUser if available
+      if (currentUser) {
+        const agentName = currentUser.fullName || currentUser.firstName || currentUser.username || '';
+        document.getElementById('gc-agent').value = agentName;
+      }
+      document.getElementById('sendBenefitsModal').classList.add('active');
+    }
+
+    function closeSendBenefits() {
+      document.getElementById('sendBenefitsModal').classList.remove('active');
+    }
+
+    function toggleFilePicker(key) {
+      const checked = document.getElementById('chk-' + key).checked;
+      const item = document.getElementById('fpk-' + key);
+      if (checked) item.classList.add('selected');
+      else item.classList.remove('selected');
+      // Show/hide GC form based on ADB checkbox
+      if (key === 'adb') {
+        document.getElementById('gcForm').style.display = checked ? '' : 'none';
+      }
+    }
+
+    async function applySendBenefits() {
+      const btn = document.getElementById('applyBenefitsBtn');
+      btn.disabled = true;
+      btn.textContent = '⏳ Processing...';
+
+      try {
+        // 1. Compose body
+        const firstName = (document.getElementById('gc-name').value || '[Name]').split(' ')[0];
+        const editor = document.getElementById('bodyEditor');
+        editor.innerHTML = `
+<p>Hi ${escapeHtml(firstName)},</p>
+
+<p>It was great connecting with you today! As promised, I've attached everything we went over so you have it all in one place for your records.</p>
+
+<p><strong>Here's what's included:</strong></p>
+<ul>
+  ${document.getElementById('chk-willkit').checked ? '<li><strong>Will Kit</strong> — Your personalized estate planning document to get your wishes on paper</li>' : ''}
+  ${document.getElementById('chk-adb').checked ? '<li><strong>ADB Gift Certificate</strong> — Your complimentary $2,000 Accidental Death &amp; Dismemberment policy from American Income Life</li>' : ''}
+  ${document.getElementById('chk-family').checked ? '<li><strong>Family Info Guide</strong> — A handy reference to keep your family\'s important information organized</li>' : ''}
+</ul>
+
+<p>Please keep these documents somewhere safe — they\'re important for you and your family. If you have any questions about what we covered or need anything clarified, don\'t hesitate to reach out.</p>
+
+<p>Looking forward to being a resource for you!</p>
+
+<p>Talk soon,</p>
+        `;
+
+        // Set subject
+        document.getElementById('subject').value = `Your Benefits from Today's Meeting — ${firstName}`;
+
+        // 2. Build attachments list
+        const filesToAttach = [];
+        if (document.getElementById('chk-willkit').checked)
+          filesToAttach.push({ path: 'willkit.pdf', name: 'Will Kit.pdf', type: 'application/pdf' });
+        if (document.getElementById('chk-family').checked)
+          filesToAttach.push({ path: 'family_info_guide.pdf', name: 'Family Info Guide.pdf', type: 'application/pdf' });
+        if (document.getElementById('chk-qrcode').checked)
+          filesToAttach.push({ path: 'qrcode.png', name: 'QR Code.png', type: 'image/png' });
+
+        // 3. Attach regular files
+        for (const file of filesToAttach) {
+          if (attachments.some(a => a.name === file.name)) continue;
+          try {
+            const resp = await fetch(file.path);
+            if (!resp.ok) continue;
+            const blob = await resp.blob();
+            const data = await blobToBase64(blob);
+            attachments.push({ name: file.name, size: blob.size, type: file.type, data, autoAttached: true });
+          } catch(e) { console.warn('Could not attach', file.path, e); }
+        }
+
+        // 4. Fill & attach Gift Certificate PDF if selected
+        if (document.getElementById('chk-adb').checked) {
+          btn.textContent = '⏳ Filling Certificate...';
+          try {
+            await attachFilledGiftCertificate();
+          } catch(e) {
+            console.error('PDF fill error:', e);
+            // Fall back to blank PDF
+            try {
+              const resp = await fetch('ADB-Gift-Certificate.pdf');
+              if (resp.ok) {
+                const blob = await resp.blob();
+                const data = await blobToBase64(blob);
+                attachments.push({ name: 'ADB Gift Certificate.pdf', size: blob.size, type: 'application/pdf', data, autoAttached: true });
+              }
+            } catch(e2) {}
+          }
+        }
+
+        displayAttachments();
+        closeSendBenefits();
+
+        // Open compose modal
+        document.getElementById('composeModal').classList.add('active');
+        document.getElementById('bodyEditor').focus();
+
+      } catch(e) {
+        console.error('applySendBenefits error:', e);
+        alert('Something went wrong: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '✅ Apply & Fill Compose';
+      }
+    }
+
+    function blobToBase64(blob) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    async function attachFilledGiftCertificate() {
+      // Load pdf-lib
+      if (typeof PDFLib === 'undefined') throw new Error('pdf-lib not loaded');
+      const { PDFDocument } = PDFLib;
+
+      const resp = await fetch('ADB-Gift-Certificate.pdf');
+      if (!resp.ok) throw new Error('Could not fetch ADB-Gift-Certificate.pdf');
+      const arrayBuffer = await resp.arrayBuffer();
+
+      const pdfDoc = await PDFDocument.load(arrayBuffer);
+      const form = pdfDoc.getForm();
+
+      // Helper to safely set a field
+      function setField(fieldName, value) {
+        if (!value) return;
+        try {
+          const field = form.getTextField(fieldName);
+          field.setText(value);
+        } catch(e) { /* field not found or wrong type */ }
+      }
+
+      const gcName     = document.getElementById('gc-name').value.trim();
+      const gcDob      = document.getElementById('gc-dob').value.trim();
+      const gcPhone    = document.getElementById('gc-phone').value.trim();
+      const gcDate     = document.getElementById('gc-date').value.trim();
+      const gcAddress  = document.getElementById('gc-address').value.trim();
+      const gcCity     = document.getElementById('gc-city').value.trim();
+      const gcState    = document.getElementById('gc-state').value.trim();
+      const gcZip      = document.getElementById('gc-zip').value.trim();
+      const gcBenef    = document.getElementById('gc-beneficiary').value.trim();
+      const gcAgent    = document.getElementById('gc-agent').value.trim();
+
+      setField('Insureds Name', gcName);
+      setField('Insureds Date of Birth', gcDob);
+      setField('Phone Number', gcPhone);
+      setField('Date Certificate Delivered', gcDate);
+      setField('Street Address', gcAddress);
+      setField('City', gcCity);
+      setField('State', gcState);
+      setField('ZIP', gcZip);
+      setField('Beneficiary', gcBenef || 'Estate');
+      setField('Agent Name', gcAgent);
+      setField('Relationship to Insured', 'N/A');
+
+      // Flatten form so fields are baked in and not editable (looks cleaner when opened)
+      form.flatten();
+
+      const pdfBytes = await pdfDoc.save();
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const data = await blobToBase64(blob);
+
+      // Remove any existing GC attachment
+      const idx = attachments.findIndex(a => a.name === 'ADB Gift Certificate.pdf');
+      if (idx > -1) attachments.splice(idx, 1);
+
+      attachments.push({
+        name: 'ADB Gift Certificate.pdf',
+        size: blob.size,
+        type: 'application/pdf',
+        data,
+        autoAttached: true
+      });
+    }
+    // ── End Send Benefits ──────────────────────────────────────────────────────
+
     // Utility functions
     function formatDate(dateString) {
       const date = new Date(dateString);
@@ -2704,6 +3001,107 @@
   </script>
 
 
+
+  <!-- Send Benefits Modal -->
+  <div class="benefits-modal" id="sendBenefitsModal">
+    <div class="benefits-modal-content">
+      <div class="benefits-modal-header">
+        <h3>🎁 Send Benefits</h3>
+        <button class="close-modal" onclick="closeSendBenefits()" style="color:white;background:none;border:none;font-size:26px;cursor:pointer;line-height:1;">×</button>
+      </div>
+      <div class="benefits-modal-body">
+
+        <!-- File Picker -->
+        <div class="benefits-section-title">📎 Select Files to Attach</div>
+        <div class="file-picker-grid">
+          <label class="file-picker-item selected" id="fpk-willkit">
+            <input type="checkbox" id="chk-willkit" checked onchange="toggleFilePicker('willkit')">
+            <div>
+              <div class="file-picker-item-label">📄 Will Kit</div>
+              <div class="file-picker-item-sub">willkit.pdf</div>
+            </div>
+          </label>
+          <label class="file-picker-item selected" id="fpk-adb">
+            <input type="checkbox" id="chk-adb" checked onchange="toggleFilePicker('adb')">
+            <div>
+              <div class="file-picker-item-label">🛡️ ADB Gift Certificate</div>
+              <div class="file-picker-item-sub">$2,000 AD&D Policy (fillable)</div>
+            </div>
+          </label>
+          <label class="file-picker-item selected" id="fpk-family">
+            <input type="checkbox" id="chk-family" checked onchange="toggleFilePicker('family')">
+            <div>
+              <div class="file-picker-item-label">👨‍👩‍👧 Family Info Guide</div>
+              <div class="file-picker-item-sub">family_info_guide.pdf</div>
+            </div>
+          </label>
+          <label class="file-picker-item selected" id="fpk-qrcode">
+            <input type="checkbox" id="chk-qrcode" checked onchange="toggleFilePicker('qrcode')">
+            <div>
+              <div class="file-picker-item-label">📱 QR Code</div>
+              <div class="file-picker-item-sub">qrcode.png</div>
+            </div>
+          </label>
+        </div>
+
+        <!-- Gift Certificate Fill Form (shown when ADB selected) -->
+        <div class="gc-form" id="gcForm">
+          <div class="gc-form-title">📝 Fill Out Gift Certificate — <em style="font-weight:400;color:#374151;">Will be pre-filled when sent to client</em></div>
+          <div class="gc-grid">
+            <div class="gc-field">
+              <label>Insured's Name *</label>
+              <input type="text" id="gc-name" placeholder="Full Name">
+            </div>
+            <div class="gc-field">
+              <label>Date of Birth *</label>
+              <input type="text" id="gc-dob" placeholder="MM/DD/YYYY">
+            </div>
+            <div class="gc-field">
+              <label>Phone Number</label>
+              <input type="text" id="gc-phone" placeholder="(555) 000-0000">
+            </div>
+            <div class="gc-field">
+              <label>Date Delivered</label>
+              <input type="text" id="gc-date" placeholder="MM/DD/YYYY">
+            </div>
+          </div>
+          <div class="gc-grid" style="margin-top:10px;">
+            <div class="gc-field">
+              <label>Street Address</label>
+              <input type="text" id="gc-address" placeholder="123 Main St">
+            </div>
+            <div class="gc-field">
+              <label>City</label>
+              <input type="text" id="gc-city" placeholder="City">
+            </div>
+            <div class="gc-field">
+              <label>State</label>
+              <input type="text" id="gc-state" placeholder="FL" maxlength="2">
+            </div>
+            <div class="gc-field">
+              <label>ZIP Code</label>
+              <input type="text" id="gc-zip" placeholder="33301">
+            </div>
+          </div>
+          <div class="gc-grid" style="margin-top:10px;">
+            <div class="gc-field">
+              <label>Beneficiary</label>
+              <input type="text" id="gc-beneficiary" placeholder="e.g. Estate">
+            </div>
+            <div class="gc-field">
+              <label>Agent's Name</label>
+              <input type="text" id="gc-agent" placeholder="Your name">
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="benefits-modal-footer">
+        <button class="btn-cancel-benefits" onclick="closeSendBenefits()">Cancel</button>
+        <button class="btn-apply-benefits" id="applyBenefitsBtn" onclick="applySendBenefits()">✅ Apply & Fill Compose</button>
+      </div>
+    </div>
+  </div>
 
 <script>
 (function() {
