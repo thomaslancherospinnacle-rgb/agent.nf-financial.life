@@ -1653,34 +1653,31 @@
     };
 
     // Update signature with user info
-    // NOTE: In this auth system, currentUser.username IS the agent's full name
-    // (e.g. "Thomas Lancheros"). fullName/firstName do not exist on the user object.
-    // currentUser.phone may come back from the /me endpoint if the agent saved it.
+    // NOTE: In this auth system currentUser.username IS the agent's full name
+    // (e.g. "Thomas Lancheros"). fullName/firstName do NOT exist on the user object.
+    // currentUser.phone comes from the /me endpoint if the agent saved their number.
     function updateSignature() {
       if (!currentUser) {
         console.error('updateSignature called but currentUser is null');
         return;
       }
 
-      // username = full name stored by auth.js (e.g. "Thomas Lancheros")
       const name  = currentUser.username || 'Your Name';
       const email = currentUser.email    || 'agent@americanincome.life';
-      // phone comes from /me endpoint if the agent has saved it
       const phone = currentUser.phone    || currentUser.phoneNumber || '';
 
-      // Build branded Globe Life / AIL email signature with inline styles
-      // (inline styles are required so the signature renders in all email clients)
       const phoneRow = phone
         ? `<tr><td style="padding:2px 0;font-size:13px;color:#374151;">&#128222; ${escapeHtml(phone)}</td></tr>`
         : '';
 
-      const sigHtml = `
-<table cellpadding="0" cellspacing="0" border="0"
-       style="margin-top:20px;padding-top:14px;border-top:2px solid #e5e7eb;
-              font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
+      // Branded Globe Life / AIL email signature with 100% inline styles
+      // (required so signature renders correctly in Gmail, Outlook, Apple Mail, etc.)
+      const sigHtml = `<table cellpadding="0" cellspacing="0" border="0"
+        style="margin-top:20px;padding-top:14px;border-top:2px solid #e5e7eb;
+               font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
   <tr>
     <td style="padding-right:18px;vertical-align:middle;">
-      <img src="https://agent.nf-financial.life/globe-life-logo.png"
+      <img src="https://agent.nf-financial.life/email/globe.svg"
            alt="Globe Life" width="110"
            style="width:110px;height:auto;display:block;"
            onerror="this.style.display='none'">
@@ -1691,12 +1688,10 @@
         <tr><td style="font-size:12px;color:#6b7280;padding-bottom:6px;">American Income Life &bull; Globe Life</td></tr>
         ${phoneRow}
         <tr><td style="font-size:13px;padding-top:2px;">
-          <a href="mailto:${escapeHtml(email)}"
-             style="color:#1e3a8a;text-decoration:none;">${escapeHtml(email)}</a>
+          <a href="mailto:${escapeHtml(email)}" style="color:#1e3a8a;text-decoration:none;">${escapeHtml(email)}</a>
         </td></tr>
         <tr><td style="font-size:12px;padding-top:3px;">
-          <a href="https://www.americanincome.com" target="_blank"
-             style="color:#6b7280;text-decoration:none;">americanincome.com</a>
+          <a href="https://www.americanincome.com" target="_blank" style="color:#6b7280;text-decoration:none;">americanincome.com</a>
         </td></tr>
       </table>
     </td>
@@ -2366,35 +2361,26 @@
       editor.focus();
     }
 
+    // Use { filename, path } instead of base64 for static files.
+    // Resend fetches the file directly from the public URL — this avoids
+    // hitting the CF Worker 1 MB request body limit (willkit.pdf alone is 2.1 MB).
     async function attachWillKitFiles() {
+      const BASE = window.location.origin + '/email/';
       const filesToAttach = [
-        { path: 'willkit.pdf', name: 'Will Kit.pdf', type: 'application/pdf' },
-        { path: 'qrcode.png', name: 'QR Code.png', type: 'image/png' }
+        { url: BASE + 'willkit.pdf',  name: 'Will Kit.pdf', type: 'application/pdf' },
+        { url: BASE + 'qrcode.png',   name: 'QR Code.png',  type: 'image/png' }
       ];
 
       for (const file of filesToAttach) {
-        // Check if already attached
         if (attachments.some(a => a.name === file.name)) continue;
-
-        try {
-          const response = await fetch(file.path);
-          if (!response.ok) continue;
-          const blob = await response.blob();
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            attachments.push({
-              name: file.name,
-              size: blob.size,
-              type: file.type,
-              data: e.target.result.split(',')[1],
-              autoAttached: true
-            });
-            displayAttachments();
-          };
-          reader.readAsDataURL(blob);
-        } catch (err) {
-          console.warn('Could not auto-attach ' + file.path + ':', err);
-        }
+        attachments.push({
+          name:          file.name,
+          type:          file.type,
+          size:          0,            // unknown without fetching — display only
+          path:          file.url,     // Resend will fetch this URL directly
+          autoAttached:  true
+        });
+        displayAttachments();
       }
     }
 
@@ -2528,10 +2514,10 @@
       
       list.innerHTML = attachments.map((file, index) => `
         <div class="attached-file ${file.autoAttached ? 'auto-attached' : ''}">
-          <div class="attached-file-icon">${file.type === 'application/pdf' ? '📄' : file.type.startsWith('image/') ? '🖼️' : '📎'}</div>
+          <div class="attached-file-icon">${file.type === 'application/pdf' ? '📄' : file.type && file.type.startsWith('image/') ? '🖼️' : '📎'}</div>
           <div class="attached-file-info">
             <div class="attached-file-name">${escapeHtml(file.name)} ${file.autoAttached ? '<span class="auto-badge">AUTO</span>' : ''}</div>
-            <div class="attached-file-size">${formatFileSize(file.size)}</div>
+            <div class="attached-file-size">${file.path ? '🔗 linked' : formatFileSize(file.size)}</div>
           </div>
           <div class="remove-attachment" onclick="removeAttachment(${index})">×</div>
         </div>
@@ -2694,14 +2680,25 @@
         let successCount = 0;
         
         for (const recipient of toEmails) {
-          // Remap attachments to the format expected by the CF Worker / Resend API:
-          //   { filename, content (base64), type }
-          // The local attachments[] array stores them as { name, data, type, size, autoAttached }
-          const remappedAttachments = attachments.map(a => ({
-            filename: a.filename || a.name,
-            content:  a.content  || a.data,
-            type:     a.type     || 'application/octet-stream'
-          }));
+          // Remap attachments → Resend API format.
+          // Static files use { filename, path } so Resend fetches them directly
+          // (avoids CF Worker 1 MB body limit — willkit.pdf alone is 2.1 MB).
+          // Dynamically-filled files (ADB cert) use { filename, content (base64) }.
+          const remappedAttachments = attachments.map(a => {
+            if (a.path) {
+              // Path-based: Resend fetches the URL at send time — no base64 needed
+              return {
+                filename: a.name,
+                path:     a.path
+              };
+            }
+            // Base64-based (generated in-browser, e.g. filled ADB certificate)
+            return {
+              filename: a.filename || a.name,
+              content:  a.content  || a.data,
+              type:     a.type     || 'application/octet-stream'
+            };
+          });
 
           const response = await fetch(CFWORKER + '/email/send', {
             method: 'POST',
@@ -2828,22 +2825,24 @@
         // 2. Build attachments list
         const filesToAttach = [];
         if (document.getElementById('chk-willkit').checked)
-          filesToAttach.push({ path: 'willkit.pdf', name: 'Will Kit.pdf', type: 'application/pdf' });
+          filesToAttach.push({ path: 'willkit.pdf',         name: 'Will Kit.pdf',         type: 'application/pdf' });
         if (document.getElementById('chk-family').checked)
           filesToAttach.push({ path: 'family_info_guide.pdf', name: 'Family Info Guide.pdf', type: 'application/pdf' });
         if (document.getElementById('chk-qrcode').checked)
-          filesToAttach.push({ path: 'qrcode.png', name: 'QR Code.png', type: 'image/png' });
+          filesToAttach.push({ path: 'qrcode.png',           name: 'QR Code.png',           type: 'image/png' });
 
-        // 3. Attach regular files
+        // 3. Attach regular files using { path } (public URL) — avoids base64 size limits.
+        //    Resend fetches these directly from agent.nf-financial.life at send time.
+        const BASE = window.location.origin + '/email/';
         for (const file of filesToAttach) {
           if (attachments.some(a => a.name === file.name)) continue;
-          try {
-            const resp = await fetch(file.path);
-            if (!resp.ok) continue;
-            const blob = await resp.blob();
-            const data = await blobToBase64(blob);
-            attachments.push({ name: file.name, size: blob.size, type: file.type, data, autoAttached: true });
-          } catch(e) { console.warn('Could not attach', file.path, e); }
+          attachments.push({
+            name:         file.name,
+            type:         file.type,
+            size:         0,
+            path:         BASE + file.path,   // e.g. https://agent.nf-financial.life/email/willkit.pdf
+            autoAttached: true
+          });
         }
 
         // 4. Fill & attach Gift Certificate PDF if selected
