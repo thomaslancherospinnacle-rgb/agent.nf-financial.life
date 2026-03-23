@@ -1566,11 +1566,8 @@
         <div class="signature-section">
           <div class="signature-label">SIGNATURE:</div>
           <div id="signaturePreview">
-            <p>Best regards,<br>
-            <strong id="signatureName">Your Name</strong><br>
-            American Income Life<br>
-            📞 <span id="signaturePhone">(555) 123-4567</span><br>
-            📧 <span id="signatureEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="21584e54530f444c40484d614459404c514d440f424e4c">[email&#160;protected]</a></span></p>
+            <!-- Populated dynamically by buildSignatureHtml() once user is authenticated -->
+            <p style="color:#9ca3af;font-size:13px;">Loading signature…</p>
           </div>
         </div>
         
@@ -1656,19 +1653,58 @@
     };
 
     // Update signature with user info
+    // NOTE: In this auth system, currentUser.username IS the agent's full name
+    // (e.g. "Thomas Lancheros"). fullName/firstName do not exist on the user object.
+    // currentUser.phone may come back from the /me endpoint if the agent saved it.
     function updateSignature() {
       if (!currentUser) {
         console.error('updateSignature called but currentUser is null');
         return;
       }
-      
-      const name = currentUser.fullName || currentUser.firstName || currentUser.username || 'Agent';
-      const email = currentUser.email || 'agent@americanincome.life';
-      const phone = currentUser.phone || currentUser.phoneNumber || '(555) 123-4567';
-      
-      document.getElementById('signatureName').textContent = name;
-      document.getElementById('signatureEmail').textContent = email;
-      document.getElementById('signaturePhone').textContent = phone;
+
+      // username = full name stored by auth.js (e.g. "Thomas Lancheros")
+      const name  = currentUser.username || 'Your Name';
+      const email = currentUser.email    || 'agent@americanincome.life';
+      // phone comes from /me endpoint if the agent has saved it
+      const phone = currentUser.phone    || currentUser.phoneNumber || '';
+
+      // Build branded Globe Life / AIL email signature with inline styles
+      // (inline styles are required so the signature renders in all email clients)
+      const phoneRow = phone
+        ? `<tr><td style="padding:2px 0;font-size:13px;color:#374151;">&#128222; ${escapeHtml(phone)}</td></tr>`
+        : '';
+
+      const sigHtml = `
+<table cellpadding="0" cellspacing="0" border="0"
+       style="margin-top:20px;padding-top:14px;border-top:2px solid #e5e7eb;
+              font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
+  <tr>
+    <td style="padding-right:18px;vertical-align:middle;">
+      <img src="https://agent.nf-financial.life/globe-life-logo.png"
+           alt="Globe Life" width="110"
+           style="width:110px;height:auto;display:block;"
+           onerror="this.style.display='none'">
+    </td>
+    <td style="vertical-align:top;border-left:3px solid #1e3a8a;padding-left:14px;">
+      <table cellpadding="0" cellspacing="0" border="0">
+        <tr><td style="font-weight:700;font-size:14px;color:#1f2937;padding-bottom:1px;">${escapeHtml(name)}</td></tr>
+        <tr><td style="font-size:12px;color:#6b7280;padding-bottom:6px;">American Income Life &bull; Globe Life</td></tr>
+        ${phoneRow}
+        <tr><td style="font-size:13px;padding-top:2px;">
+          <a href="mailto:${escapeHtml(email)}"
+             style="color:#1e3a8a;text-decoration:none;">${escapeHtml(email)}</a>
+        </td></tr>
+        <tr><td style="font-size:12px;padding-top:3px;">
+          <a href="https://www.americanincome.com" target="_blank"
+             style="color:#6b7280;text-decoration:none;">americanincome.com</a>
+        </td></tr>
+      </table>
+    </td>
+  </tr>
+</table>`;
+
+      const preview = document.getElementById('signaturePreview');
+      if (preview) preview.innerHTML = sigHtml;
     }
 
     // Toggle sidebar on mobile
@@ -2658,17 +2694,26 @@
         let successCount = 0;
         
         for (const recipient of toEmails) {
+          // Remap attachments to the format expected by the CF Worker / Resend API:
+          //   { filename, content (base64), type }
+          // The local attachments[] array stores them as { name, data, type, size, autoAttached }
+          const remappedAttachments = attachments.map(a => ({
+            filename: a.filename || a.name,
+            content:  a.content  || a.data,
+            type:     a.type     || 'application/octet-stream'
+          }));
+
           const response = await fetch(CFWORKER + '/email/send', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               username: username,
               to: recipient,
-              cc: ccEmails.join(', '),
-              bcc: bccEmails.join(', '),
+              cc:  ccEmails.length  ? ccEmails.join(', ')  : undefined,
+              bcc: bccEmails.length ? bccEmails.join(', ') : undefined,
               subject: subject,
               html: fullHtml,
-              attachments: attachments,
+              attachments: remappedAttachments,
               headers: {
                 'List-Unsubscribe': '<mailto:unsubscribe@americanincome.life>',
                 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click'
