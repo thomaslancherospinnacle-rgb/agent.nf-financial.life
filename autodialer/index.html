@@ -682,9 +682,17 @@ function bindEvents(c, lead) {
     stopTimer();
 
     if (STATE === 'OUTCOME') {
-      // Manual hangup path — user already clicked "Connected"
-      if (FULL_AUTO) {
-        // Full auto: log as spoke and immediately advance
+      // User clicked "Hang Up" manually during a real call
+      if (REDIAL_MODE) {
+        dbg('REDIAL: manual hangup on real call — redialing immediately','warn');
+        recordAtt(lead,'spoke');
+        renderLog();
+        setState('DIALING','redial after manual hangup');
+        setStatusText('🔄 Redialing — they hung up…');
+        setOutcomes(false);
+        setActionRow('running');
+        scheduleNext(true, 0);
+      } else if (FULL_AUTO) {
         dbg('Full-auto: outcome-state disconnect → auto-advancing','info');
         recordAtt(lead,'spoke');
         stats.done++; lead.done=true; lead.outcome='Auto-advanced';
@@ -700,23 +708,21 @@ function bindEvents(c, lead) {
     }
 
     if (STATE === 'CONNECTED' && dur >= 8) {
-      // Real conversation — lead was on long enough
+      // ── Real human picked up and then hung up ──
       if (REDIAL_MODE) {
-        // ── REDIAL MODE: lead hung up → instant redial regardless of attempt count ──
-        dbg(`REDIAL: lead disconnected after ${dur}s — redialing immediately`,'warn');
+        // Instant redial — ignore MAX_ATT, don't advance, 0ms delay
+        dbg(`REDIAL: real pickup ${dur}s — redialing immediately`,'warn');
         recordAtt(lead,'spoke');
         renderLog();
-        // Don't mark done, don't advance, don't wait — just call again NOW
-        setState('DIALING','redial mode');
-        setStatusText('🔄 Redialing…');
+        setState('DIALING','redial after pickup');
+        setStatusText('🔄 Redialing — they hung up…');
         setActionRow('running');
-        scheduleNext(true, 0); // same lead, 0-delay
+        scheduleNext(true, 0); // same lead, zero wait
         return;
       }
       if (FULL_AUTO) {
-        // Full auto but not redial: auto-log and move on
+        // Auto-advance without outcome prompt
         dbg('Full-auto: long call ended → auto-advancing','info');
-        setState('OUTCOME','long call auto');
         recordAtt(lead,'spoke');
         lead.done=true; lead.outcome='Auto-advanced';
         stats.done++;
@@ -734,18 +740,19 @@ function bindEvents(c, lead) {
         setOutcomes(true);
         renderLog();
       }
-    } else if (dur > 0 && dur < 5) {
-      // Brief = VM
-      dbg('Short connect ('+dur+'s) = VM','warn');
+    } else if (STATE === 'CONNECTED' && dur > 0 && dur < 8) {
+      // Short connect = forwarded to VM (carrier picked up briefly)
+      // → goes through handleNoAnswer → respects MAX_ATT
+      dbg(`Short connect (${dur}s) = VM/forwarded — counting attempt`,'warn');
       setState('DIALING','vm detected');
       recordAtt(lead,'vm');
       stats.vm++;
-      setStatusText('📬 Voicemail — skipping');
+      setStatusText('📬 Voicemail — will retry up to max attempts');
       updateStats(); renderLog();
       handleNoAnswer(lead);
     } else {
-      // No answer
-      dbg('disconnect without accept = no answer','dim');
+      // No answer, ringing timeout, or other
+      dbg('disconnect without real pickup = no answer','dim');
       setState('DIALING','no answer');
       recordAtt(lead,'na');
       handleNoAnswer(lead);
@@ -775,7 +782,9 @@ function bindEvents(c, lead) {
 
 function handleNoAnswer(lead) {
   if (STATE === 'STOPPED' || STATE === 'OUTCOME') return;
-  stats.na++;
+  // Only count as NA if it wasn't a VM (VM already counted separately)
+  const lastResult = lead.attempts[lead.attempts.length-1]?.result;
+  if (lastResult !== 'vm') stats.na++;
   if (attempt >= MAX_ATT) {
     dbg(`Max attempts (${MAX_ATT}) reached for ${lead.name} — marking done`,'warn');
     lead.done = true;
@@ -785,7 +794,7 @@ function handleNoAnswer(lead) {
     updateStats(); renderLog();
     scheduleNext();
   } else {
-    dbg(`Retrying ${lead.name} (attempt ${attempt}/${MAX_ATT})…`,'info');
+    dbg(`Retrying ${lead.name} (attempt ${attempt}/${MAX_ATT}) after delay…`,'info');
     scheduleNext(true);
   }
 }
