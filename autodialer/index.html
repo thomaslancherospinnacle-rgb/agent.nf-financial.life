@@ -181,6 +181,14 @@ body{background:var(--bg);color:var(--tx);font-family:var(--fn);font-size:14px;h
 .health-row{background:var(--s2);border:1px solid var(--b);border-radius:5px;padding:8px 12px;margin-top:10px;font-family:var(--mono);font-size:10px;}
 
 /* ── NUMPAD ───────────────────────────────── */
+/* ── TOGGLE SWITCH ──────────────────────────── */
+.toggle-sw{position:relative;display:inline-flex;align-items:center;cursor:pointer;flex-shrink:0;}
+.toggle-sw input{opacity:0;width:0;height:0;position:absolute;}
+.toggle-tk{display:inline-block;width:30px;height:16px;background:var(--b2);border-radius:8px;position:relative;transition:background .2s;}
+.toggle-tk::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:transform .2s;}
+.toggle-sw input:checked + .toggle-tk{background:var(--gdim);}
+.toggle-sw input:checked + .toggle-tk::after{transform:translateX(14px);}
+
 .numpad-wrap{border-top:1px solid var(--b);flex-shrink:0;}
 .numpad-toggle{width:100%;padding:8px 20px;background:none;border:none;color:var(--t2);font-size:11px;font-family:var(--mono);cursor:pointer;text-align:left;display:flex;justify-content:space-between;text-transform:uppercase;letter-spacing:.08em;}
 .numpad-toggle:hover{background:var(--s2);}
@@ -238,6 +246,16 @@ body{background:var(--bg);color:var(--tx);font-family:var(--fn);font-size:14px;h
       <option value="20">20s</option><option value="25" selected>25s</option>
       <option value="30">30s</option><option value="40">40s</option>
     </select>
+    <span class="c-lbl" style="margin-left:8px;">Full Auto</span>
+    <label class="toggle-sw" title="Skip outcome prompts — auto-advance on every disconnect">
+      <input type="checkbox" id="full-auto-chk" onchange="FULL_AUTO=this.checked;ls('fullAuto',this.checked?'1':'0')">
+      <span class="toggle-tk"></span>
+    </label>
+    <span class="c-lbl" style="margin-left:8px;">Redial</span>
+    <label class="toggle-sw" title="Instantly redial when lead hangs up, ignoring max-attempt limit">
+      <input type="checkbox" id="redial-chk" onchange="REDIAL_MODE=this.checked;ls('redialMode',this.checked?'1':'0')">
+      <span class="toggle-tk"></span>
+    </label>
     <button class="tbtn danger" onclick="skipLead()" style="margin-left:auto;font-size:11px;">Skip →</button>
   </div>
 
@@ -464,6 +482,8 @@ let callStart  = null;
 let timerInt   = null;
 let timerSecs  = 0;
 let stats = { done:0, appt:0, vm:0, na:0 };
+let FULL_AUTO   = lsg('fullAuto','1') === '1';   // auto-advance without human confirmation
+let REDIAL_MODE = lsg('redialMode','1') === '1'; // instant redial when lead hangs up, ignoring MAX_ATT
 
 function setState(s, reason) {
   const prev = STATE;
@@ -640,10 +660,18 @@ function bindEvents(c, lead) {
     callStart = Date.now();
     startTimer();
     setState('CONNECTED','accept event');
-    setStatusText('✅ Connected — click if talking to a person');
     recordAtt(lead,'connected');
     renderLog();
-    setActionRow('connected');
+    if (REDIAL_MODE) {
+      setStatusText('🔄 Redial mode — will auto-redial on hangup');
+      setActionRow('redial-connected');
+    } else if (FULL_AUTO) {
+      setStatusText('✅ Connected — will auto-advance on hangup');
+      setActionRow('redial-connected');
+    } else {
+      setStatusText('✅ Connected — click if talking to a person');
+      setActionRow('connected');
+    }
   });
 
   c.on('disconnect', () => {
@@ -654,19 +682,58 @@ function bindEvents(c, lead) {
     stopTimer();
 
     if (STATE === 'OUTCOME') {
-      // User already clicked Connected — they'll log outcome
-      setStatusText('📋 Call ended — log outcome');
+      // Manual hangup path — user already clicked "Connected"
+      if (FULL_AUTO) {
+        // Full auto: log as spoke and immediately advance
+        dbg('Full-auto: outcome-state disconnect → auto-advancing','info');
+        recordAtt(lead,'spoke');
+        stats.done++; lead.done=true; lead.outcome='Auto-advanced';
+        attempt=0; dialIdx++;
+        setState('DIALING','full-auto after outcome');
+        setOutcomes(false); updateStats(); renderLog();
+        setActionRow('running');
+        scheduleNext();
+      } else {
+        setStatusText('📋 Call ended — log outcome');
+      }
       return;
     }
 
     if (STATE === 'CONNECTED' && dur >= 8) {
-      // Real conversation
-      setState('OUTCOME','long call');
-      recordAtt(lead,'spoke');
-      setStatusText('📋 Call ended — how did it go?');
-      setActionRow('outcome');
-      setOutcomes(true);
-      renderLog();
+      // Real conversation — lead was on long enough
+      if (REDIAL_MODE) {
+        // ── REDIAL MODE: lead hung up → instant redial regardless of attempt count ──
+        dbg(`REDIAL: lead disconnected after ${dur}s — redialing immediately`,'warn');
+        recordAtt(lead,'spoke');
+        renderLog();
+        // Don't mark done, don't advance, don't wait — just call again NOW
+        setState('DIALING','redial mode');
+        setStatusText('🔄 Redialing…');
+        setActionRow('running');
+        scheduleNext(true, 0); // same lead, 0-delay
+        return;
+      }
+      if (FULL_AUTO) {
+        // Full auto but not redial: auto-log and move on
+        dbg('Full-auto: long call ended → auto-advancing','info');
+        setState('OUTCOME','long call auto');
+        recordAtt(lead,'spoke');
+        lead.done=true; lead.outcome='Auto-advanced';
+        stats.done++;
+        attempt=0; dialIdx++;
+        setState('DIALING','full-auto advance');
+        setOutcomes(false); updateStats(); renderLog();
+        setActionRow('running');
+        scheduleNext();
+      } else {
+        // Manual outcome selection
+        setState('OUTCOME','long call');
+        recordAtt(lead,'spoke');
+        setStatusText('📋 Call ended — how did it go?');
+        setActionRow('outcome');
+        setOutcomes(true);
+        renderLog();
+      }
     } else if (dur > 0 && dur < 5) {
       // Brief = VM
       dbg('Short connect ('+dur+'s) = VM','warn');
@@ -723,9 +790,9 @@ function handleNoAnswer(lead) {
   }
 }
 
-function scheduleNext(same=false) {
+function scheduleNext(same=false, delayOverride=null) {
   if (STATE === 'STOPPED') return;
-  const delay = parseInt(document.getElementById('delay-sel').value)*1000;
+  const delay = delayOverride !== null ? delayOverride : parseInt(document.getElementById('delay-sel').value)*1000;
   dbg(`Next call in ${delay/1000}s`+(same?' (same lead)':' (next lead)'),'dim');
   clearTimeout(nextTimer);
   nextTimer = setTimeout(() => {
@@ -795,6 +862,10 @@ function setActionRow(mode) {
     idle:    `<button class="abtn a-start" onclick="startDialer()">▶ Start Auto Dialer</button>`,
     running: `<div style="display:flex;gap:8px;">
                 <button class="abtn a-connected" onclick="userConnected()" style="flex:2;">✅ Connected — talking</button>
+                <button class="abtn a-stop" onclick="stopDialer()" style="flex:1;font-size:12px;">⬛ Stop</button>
+              </div>`,
+    'redial-connected': `<div style="display:flex;gap:8px;">
+                <button class="abtn a-hangup" onclick="manualHangup()" style="flex:2;">⬛ Hang Up</button>
                 <button class="abtn a-stop" onclick="stopDialer()" style="flex:1;font-size:12px;">⬛ Stop</button>
               </div>`,
     connected:`<button class="abtn a-hangup" onclick="manualHangup()">⬛ Hang Up</button>`,
@@ -1325,6 +1396,8 @@ async function npadCall() {
 // ═══════════════════════════════════════════════════
 document.getElementById('max-att').value=lsg('maxAtt','2');
 MAX_ATT=parseInt(document.getElementById('max-att').value);
+document.getElementById('full-auto-chk').checked = FULL_AUTO;
+document.getElementById('redial-chk').checked     = REDIAL_MODE;
 dbg('FEX Dialer initialized','ok');
 dbg('Worker URL: '+(CFG.workerUrl||'NOT SET'), CFG.workerUrl?'dim':'err');
 if(!CFG.workerUrl) setTimeout(openCfg,500);
