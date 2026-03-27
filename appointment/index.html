@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Schedule Appointment — AIL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F5F0;
+    --surface: #FFFFFF;
+    --border: #E2DDD6;
+    --text: #1A1814;
+    --muted: #7A7570;
+    --accent: #1A3A2A;
+    --accent-light: #E8F0EB;
+    --accent-hover: #142E21;
+    --danger: #C0392B;
+    --success: #1A7A4A;
+    --success-bg: #E8F5EE;
+    --pill-bg: #EEF5F0;
+    --pill-text: #1A5A35;
+    --shadow: 0 2px 16px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+    line-height: 1.6;
+  }
+
+  .page-wrap {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .header .logo-mark {
+    width: 48px;
+    height: 48px;
+    background: var(--accent);
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+  }
+
+  .header .logo-mark svg { width: 24px; height: 24px; }
+
+  .header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    font-weight: 400;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+    letter-spacing: -0.02em;
+  }
+
+  .header p {
+    font-size: 0.95rem;
+    color: var(--muted);
+  }
+
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .card-section {
+    padding: 1.75rem 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .card-section:last-child { border-bottom: none; }
+
+  .section-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.25rem;
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .field { display: flex; flex-direction: column; gap: 0.4rem; }
+
+  .field.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  select {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--text);
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.65rem 0.9rem;
+    width: 100%;
+    transition: border-color 0.15s, background 0.15s;
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--accent);
+    background: #fff;
+  }
+
+  input.error, select.error { border-color: var(--danger); }
+
+  .select-wrap { position: relative; }
+  .select-wrap::after {
+    content: '';
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0; height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid var(--muted);
+    pointer-events: none;
+  }
+
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 0.6rem;
+  }
+
+  .product-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.85rem;
+    border-radius: 999px;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: var(--muted);
+    transition: all 0.15s;
+    user-select: none;
+    white-space: nowrap;
+  }
+
+  .product-pill input[type="radio"] { display: none; }
+
+  .product-pill:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-light);
+  }
+
+  .product-pill.selected {
+    border-color: var(--accent);
+    background: var(--accent-light);
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .product-pill .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+
+  .product-pill.selected .dot { background: var(--accent); }
+
+  .time-picker-label {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+  }
+
+  .date-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .date-tab {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    color: var(--muted);
+  }
+
+  .date-tab .date-day { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; }
+  .date-tab .date-num { font-size: 1.3rem; font-weight: 600; color: var(--text); margin: 0.1rem 0; }
+  .date-tab .date-month { font-size: 0.8rem; color: var(--muted); }
+
+  .date-tab:hover { border-color: var(--accent); background: var(--accent-light); }
+  .date-tab.active { border-color: var(--accent); background: var(--accent); }
+  .date-tab.active .date-day,
+  .date-tab.active .date-num,
+  .date-tab.active .date-month { color: #fff; }
+
+  .time-slots {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 0.5rem;
+    max-height: 260px;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+
+  .time-slots::-webkit-scrollbar { width: 4px; }
+  .time-slots::-webkit-scrollbar-track { background: transparent; }
+  .time-slots::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .time-slot {
+    padding: 0.55rem 0.5rem;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    cursor: pointer;
+    text-align: center;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    color: var(--text);
+    transition: all 0.12s;
+    white-space: nowrap;
+  }
+
+  .time-slot:hover { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+  .time-slot.selected { border-color: var(--accent); background: var(--accent); color: #fff; font-weight: 500; }
+  .time-slot.past { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+
+  .no-slots {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 2rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .summary-box {
+    background: var(--accent-light);
+    border: 1px solid #C5DFC9;
+    border-radius: var(--radius-sm);
+    padding: 1rem 1.25rem;
+    display: none;
+    gap: 0.4rem;
+    flex-direction: column;
+  }
+
+  .summary-box.visible { display: flex; }
+  .summary-box .sum-label { font-size: 0.75rem; color: var(--accent); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+  .summary-box .sum-val { font-size: 0.95rem; color: var(--accent); font-weight: 500; }
+
+  .submit-btn {
+    width: 100%;
+    padding: 0.9rem 1.5rem;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    letter-spacing: 0.01em;
+  }
+
+  .submit-btn:hover { background: var(--accent-hover); }
+  .submit-btn:active { transform: scale(0.99); }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .err-msg {
+    font-size: 0.78rem;
+    color: var(--danger);
+    margin-top: 0.2rem;
+    display: none;
+  }
+
+  .err-msg.visible { display: block; }
+
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--text);
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 1000;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .toast.success { background: var(--success); }
+  .toast.error-t { background: var(--danger); }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .success-screen {
+    display: none;
+    text-align: center;
+    padding: 3rem 2rem;
+  }
+
+  .success-screen.visible { display: block; }
+
+  .success-icon {
+    width: 64px; height: 64px;
+    background: var(--success-bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+  }
+
+  .success-icon svg { width: 28px; height: 28px; }
+
+  .success-screen h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.6rem;
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+  }
+
+  .success-screen p { color: var(--muted); font-size: 0.95rem; }
+  .success-screen .reminder-note {
+    margin-top: 1.5rem;
+    background: var(--accent-light);
+    border-radius: var(--radius-sm);
+    padding: 1rem 1.25rem;
+    font-size: 0.88rem;
+    color: var(--accent);
+    text-align: left;
+  }
+
+  .reset-btn {
+    margin-top: 1.5rem;
+    padding: 0.65rem 1.5rem;
+    background: transparent;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    color: var(--text);
+    transition: all 0.15s;
+  }
+
+  .reset-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  @media (max-width: 520px) {
+    .card-section { padding: 1.25rem 1.25rem; }
+    .field-row { grid-template-columns: 1fr; }
+    .product-grid { grid-template-columns: 1fr 1fr; }
+    .header h1 { font-size: 1.6rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+
+  <div class="header">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M9 16l2 2 4-4"/>
+      </svg>
+    </div>
+    <h1>Schedule Appointment</h1>
+    <p>Book a meeting — we'll send you text reminders automatically</p>
+  </div>
+
+  <div class="card" id="mainCard">
+
+    <!-- Contact Info -->
+    <div class="card-section">
+      <div class="section-label">Contact Information</div>
+      <div class="field-row">
+        <div class="field">
+          <label for="firstName">First name</label>
+          <input type="text" id="firstName" placeholder="Maria" autocomplete="given-name">
+          <span class="err-msg" id="err-firstName">Required</span>
+        </div>
+        <div class="field">
+          <label for="lastName">Last name</label>
+          <input type="text" id="lastName" placeholder="Gonzalez" autocomplete="family-name">
+          <span class="err-msg" id="err-lastName">Required</span>
+        </div>
+        <div class="field">
+          <label for="email">Email address</label>
+          <input type="email" id="email" placeholder="maria@email.com" autocomplete="email">
+          <span class="err-msg" id="err-email">Valid email required</span>
+        </div>
+        <div class="field">
+          <label for="phone">Mobile number</label>
+          <input type="tel" id="phone" placeholder="(305) 555-0100" autocomplete="tel">
+          <span class="err-msg" id="err-phone">Valid US number required</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product -->
+    <div class="card-section">
+      <div class="section-label">Appointment Type</div>
+      <div class="product-grid" id="productGrid">
+        <label class="product-pill" data-product="Hard Card">
+          <input type="radio" name="product" value="Hard Card">
+          <span class="dot"></span>Hard Card
+        </label>
+        <label class="product-pill" data-product="Discount Card">
+          <input type="radio" name="product" value="Discount Card">
+          <span class="dot"></span>Discount Card
+        </label>
+        <label class="product-pill" data-product="POS">
+          <input type="radio" name="product" value="POS">
+          <span class="dot"></span>POS
+        </label>
+        <label class="product-pill" data-product="Child Safe">
+          <input type="radio" name="product" value="Child Safe">
+          <span class="dot"></span>Child Safe
+        </label>
+        <label class="product-pill" data-product="Will Kit">
+          <input type="radio" name="product" value="Will Kit">
+          <span class="dot"></span>Will Kit
+        </label>
+        <label class="product-pill" data-product="Beneficiary">
+          <input type="radio" name="product" value="Beneficiary">
+          <span class="dot"></span>Beneficiary
+        </label>
+        <label class="product-pill" data-product="Sponsorship Program">
+          <input type="radio" name="product" value="Sponsorship Program">
+          <span class="dot"></span>Sponsorship Program
+        </label>
+      </div>
+      <span class="err-msg" id="err-product" style="margin-top:0.5rem">Please select an appointment type</span>
+    </div>
+
+    <!-- Time Picker -->
+    <div class="card-section">
+      <div class="section-label">Date &amp; Time</div>
+
+      <div class="date-tabs" id="dateTabs"></div>
+
+      <div class="time-slots" id="timeSlots"></div>
+      <span class="err-msg" id="err-time" style="margin-top:0.75rem">Please select a time slot</span>
+    </div>
+
+    <!-- Summary -->
+    <div class="card-section">
+      <div class="section-label">Appointment Summary</div>
+      <div class="summary-box" id="summaryBox">
+        <span class="sum-label">Booking Details</span>
+        <span class="sum-val" id="sumName"></span>
+        <span class="sum-val" id="sumProduct"></span>
+        <span class="sum-val" id="sumTime"></span>
+      </div>
+      <p style="font-size:0.8rem; color:var(--muted); margin-top:0.75rem;">
+        Text reminders will be sent to your mobile at 24h, 12h, 6h, 1h, and 5 minutes before your appointment.
+      </p>
+    </div>
+
+    <!-- Submit -->
+    <div class="card-section">
+      <button class="submit-btn" id="submitBtn" onclick="submitBooking()">Confirm Appointment</button>
+    </div>
+
+  </div>
+
+  <!-- Success State -->
+  <div class="card">
+    <div class="success-screen" id="successScreen">
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#1A7A4A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+      </div>
+      <h2>You're booked!</h2>
+      <p id="successText">Your appointment has been confirmed.</p>
+      <div class="reminder-note" id="reminderNote"></div>
+      <button class="reset-btn" onclick="resetForm()">Schedule another appointment</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── CONFIG ────────────────────────────────────────────────────────────────
+// Replace with your deployed Google Apps Script Web App URL
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxK0z31a-cz9Q47U-eatzCLG3-sNmaPZZ1ti0_WYSGubtWxfHBdGEmPYUAB68dAwCeT_Q/exec';
+
+// ─── DATE/TIME SETUP ───────────────────────────────────────────────────────
+const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+let selectedDate = null;
+let selectedTime = null;
+let selectedProduct = null;
+
+function buildDates() {
+  const tabs = document.getElementById('dateTabs');
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+
+  [today, tomorrow].forEach((d, i) => {
+    const tab = document.createElement('div');
+    tab.className = 'date-tab' + (i === 0 ? ' active' : '');
+    tab.innerHTML = `
+      <div class="date-day">${DAYS[d.getDay()].slice(0,3)}</div>
+      <div class="date-num">${d.getDate()}</div>
+      <div class="date-month">${MONTHS[d.getMonth()]}</div>
+    `;
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.date-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      selectedDate = d;
+      selectedTime = null;
+      buildTimeSlots(d);
+      updateSummary();
+    });
+    tabs.appendChild(tab);
+    if (i === 0) { selectedDate = d; }
+  });
+
+  buildTimeSlots(today);
+}
+
+function buildTimeSlots(date) {
+  const container = document.getElementById('timeSlots');
+  container.innerHTML = '';
+
+  const now = new Date();
+  const isToday = date.toDateString() === now.toDateString();
+
+  const slots = [];
+  for (let h = 8; h <= 23; h++) {
+    for (let m = 0; m < 60; m += 30) {
+      if (h === 23 && m > 30) continue;
+      slots.push({ h, m });
+    }
+  }
+
+  // Last slot is 23:30 (11:30 PM), within "11:59 PM" cap
+  let anyAvail = false;
+  slots.forEach(({ h, m }) => {
+    const slotTime = new Date(date);
+    slotTime.setHours(h, m, 0, 0);
+
+    const isPast = isToday && slotTime <= now;
+    const label = formatTime12(h, m);
+
+    const el = document.createElement('div');
+    el.className = 'time-slot' + (isPast ? ' past' : '');
+    el.textContent = label;
+    if (!isPast) {
+      anyAvail = true;
+      el.addEventListener('click', () => {
+        document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedTime = slotTime;
+        updateSummary();
+      });
+    }
+    container.appendChild(el);
+  });
+
+  if (!anyAvail) {
+    container.innerHTML = '<div class="no-slots">No available slots for this day.</div>';
+  }
+}
+
+function formatTime12(h, m) {
+  const period = h >= 12 ? 'PM' : 'AM';
+  const hour = h % 12 || 12;
+  return `${hour}:${m.toString().padStart(2,'0')} ${period}`;
+}
+
+function formatDateFull(d) {
+  return `${DAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}`;
+}
+
+// ─── PRODUCT PILLS ─────────────────────────────────────────────────────────
+document.querySelectorAll('.product-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('.product-pill').forEach(p => p.classList.remove('selected'));
+    pill.classList.add('selected');
+    selectedProduct = pill.dataset.product;
+    updateSummary();
+  });
+});
+
+// ─── SUMMARY ───────────────────────────────────────────────────────────────
+function updateSummary() {
+  const firstName = document.getElementById('firstName').value.trim();
+  const lastName = document.getElementById('lastName').value.trim();
+  const box = document.getElementById('summaryBox');
+
+  if (selectedProduct && selectedTime) {
+    box.classList.add('visible');
+    document.getElementById('sumName').textContent = (firstName || lastName) ? `${firstName} ${lastName}`.trim() : 'Your appointment';
+    document.getElementById('sumProduct').textContent = `Type: ${selectedProduct}`;
+    document.getElementById('sumTime').textContent = `${formatDateFull(selectedTime)} at ${formatTime12(selectedTime.getHours(), selectedTime.getMinutes())}`;
+  } else {
+    box.classList.remove('visible');
+  }
+}
+
+// Live name updates in summary
+['firstName','lastName'].forEach(id => {
+  document.getElementById(id).addEventListener('input', updateSummary);
+});
+
+// ─── VALIDATION ────────────────────────────────────────────────────────────
+function showErr(id, msg) {
+  const el = document.getElementById('err-' + id);
+  const input = document.getElementById(id);
+  if (el) { el.textContent = msg || el.textContent; el.classList.add('visible'); }
+  if (input) input.classList.add('error');
+}
+
+function clearErr(id) {
+  const el = document.getElementById('err-' + id);
+  const input = document.getElementById(id);
+  if (el) el.classList.remove('visible');
+  if (input) input.classList.remove('error');
+}
+
+['firstName','lastName','email','phone'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => clearErr(id));
+});
+
+function validatePhone(raw) {
+  const digits = raw.replace(/\D/g, '');
+  return digits.length === 10 || (digits.length === 11 && digits[0] === '1');
+}
+
+function cleanPhone(raw) {
+  const digits = raw.replace(/\D/g, '');
+  return digits.length === 11 ? '+' + digits : '+1' + digits;
+}
+
+function validate() {
+  let ok = true;
+  const firstName = document.getElementById('firstName').value.trim();
+  const lastName = document.getElementById('lastName').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+
+  if (!firstName) { showErr('firstName', 'Required'); ok = false; }
+  if (!lastName) { showErr('lastName', 'Required'); ok = false; }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showErr('email', 'Valid email required'); ok = false; }
+  if (!phone || !validatePhone(phone)) { showErr('phone', 'Valid US number required'); ok = false; }
+  if (!selectedProduct) { document.getElementById('err-product').classList.add('visible'); ok = false; } else { document.getElementById('err-product').classList.remove('visible'); }
+  if (!selectedTime) { document.getElementById('err-time').classList.add('visible'); ok = false; } else { document.getElementById('err-time').classList.remove('visible'); }
+
+  return ok;
+}
+
+// ─── SUBMIT ────────────────────────────────────────────────────────────────
+async function submitBooking() {
+  if (!validate()) return;
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Confirming…';
+
+  const firstName = document.getElementById('firstName').value.trim();
+  const lastName = document.getElementById('lastName').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const phone = cleanPhone(document.getElementById('phone').value.trim());
+
+  const payload = {
+    firstName,
+    lastName,
+    email,
+    phone,
+    product: selectedProduct,
+    appointmentTime: selectedTime.toISOString(),
+    appointmentLabel: `${formatDateFull(selectedTime)} at ${formatTime12(selectedTime.getHours(), selectedTime.getMinutes())}`
+  };
+
+  try {
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      mode: 'no-cors'
+    });
+
+    // no-cors = opaque response, assume success if no throw
+    showSuccess(payload);
+  } catch (e) {
+    showToast('Something went wrong. Please try again.', 'error-t');
+    btn.disabled = false;
+    btn.textContent = 'Confirm Appointment';
+  }
+}
+
+function showSuccess(data) {
+  document.getElementById('mainCard').style.display = 'none';
+  const screen = document.getElementById('successScreen');
+  screen.classList.add('visible');
+
+  document.getElementById('successText').textContent =
+    `${data.firstName} ${data.lastName} — ${data.product} — ${data.appointmentLabel}`;
+
+  document.getElementById('reminderNote').innerHTML =
+    `<strong>Text reminders will be sent to ${data.phone}</strong><br>
+    Reminders scheduled for: 24 hours, 12 hours, 6 hours, 1 hour, and 5 minutes before your appointment.`;
+}
+
+function resetForm() {
+  document.getElementById('mainCard').style.display = 'block';
+  document.getElementById('successScreen').classList.remove('visible');
+  document.getElementById('mainCard').querySelectorAll('input[type="text"], input[type="email"], input[type="tel"]').forEach(i => i.value = '');
+  document.querySelectorAll('.product-pill').forEach(p => p.classList.remove('selected'));
+  selectedDate = null; selectedTime = null; selectedProduct = null;
+  document.getElementById('summaryBox').classList.remove('visible');
+  document.getElementById('submitBtn').disabled = false;
+  document.getElementById('submitBtn').textContent = 'Confirm Appointment';
+  buildDates();
+}
+
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type;
+  setTimeout(() => t.classList.add('show'), 10);
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ─── INIT ──────────────────────────────────────────────────────────────────
+buildDates();
+</script>
+</body>
+</html>
