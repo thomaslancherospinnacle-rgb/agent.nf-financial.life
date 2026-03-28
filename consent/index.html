@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SMS Consent for Appointment Reminders</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --card:#121a2b;
+      --muted:#9fb0d0;
+      --text:#eef4ff;
+      --accent:#4f8cff;
+      --border:#22304d;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:linear-gradient(180deg,#0b1220,#0f172a);
+      color:var(--text);
+      line-height:1.6;
+    }
+    .wrap{
+      max-width:900px;
+      margin:0 auto;
+      padding:48px 20px 64px;
+    }
+    .card{
+      background:rgba(18,26,43,.92);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:32px;
+      box-shadow:0 18px 50px rgba(0,0,0,.28);
+    }
+    h1,h2{margin-top:0}
+    h1{font-size:clamp(2rem,4vw,3rem);line-height:1.1}
+    h2{margin-top:28px;font-size:1.2rem}
+    p,li{color:var(--muted)}
+    .badge{
+      display:inline-block;
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(79,140,255,.14);
+      color:#cfe0ff;
+      border:1px solid rgba(79,140,255,.35);
+      font-size:.95rem;
+      margin-bottom:16px;
+    }
+    a{color:#9bc0ff}
+    .footer{
+      margin-top:24px;
+      font-size:.95rem;
+      color:var(--muted);
+    }
+    .highlight{
+      color:var(--text);
+      font-weight:600;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="badge">SMS Consent Disclosure</div>
+      <h1>Consent to Receive Appointment Reminder Text Messages</h1>
+      <p>
+        By providing your mobile number during scheduling, booking, or a live phone conversation, you agree to receive
+        <span class="highlight">transactional text messages</span> related to your appointment or scheduling activity.
+      </p>
+
+      <h2>What messages you may receive</h2>
+      <ul>
+        <li>Appointment confirmations</li>
+        <li>Appointment reminders</li>
+        <li>Reschedule or cancellation notices</li>
+        <li>Scheduling follow-ups</li>
+      </ul>
+
+      <h2>How consent is collected</h2>
+      <p>
+        Users provide consent verbally during a call or while booking an appointment. During that process, users provide
+        their phone number and are informed that they may receive appointment reminders and scheduling-related text messages.
+      </p>
+
+      <h2>Message frequency</h2>
+      <p>
+        Message frequency varies depending on appointment activity. Most users receive only the messages needed to manage
+        their scheduled appointment.
+      </p>
+
+      <h2>Opt out</h2>
+      <p>
+        You can opt out at any time by replying <span class="highlight">STOP</span>. After opting out, no further text
+        reminders will be sent unless you opt in again.
+      </p>
+
+      <h2>Help</h2>
+      <p>
+        For help, reply <span class="highlight">HELP</span> or contact us at
+        <a href="mailto:support@example.com">support@example.com</a>.
+      </p>
+
+      <h2>Not marketing</h2>
+      <p>
+        These text messages are used for informational and scheduling purposes only. No promotional or marketing messages
+        are sent through this reminder flow.
+      </p>
+
+      <div class="footer">
+        Last updated: March 27, 2026
+      </div>
+    </div>
+  </div>
+</body>
+</html>
