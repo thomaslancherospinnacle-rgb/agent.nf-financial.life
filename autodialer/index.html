@@ -159,6 +159,40 @@ const SS = (k,v) => localStorage.setItem(k,v);
 
 let device=null, conn=null, leads=[], idx=0, attempt=0, running=false, dialing=false, callTimer=null, callStart=0, gapTimer=null, headers=[], stats={conn:0,vm:0,fail:0};
 
+// Twilio caller IDs — frontend picks the geographically closest one per lead
+const NUMBERS = [
+  {n:'+15862215707',lbl:'(586) Mount Clemens',lat:42.5973,lng:-82.8779},
+  {n:'+12693869670',lbl:'(269) Colon',        lat:41.9559,lng:-85.3253},
+  {n:'+18108193812',lbl:'(810) Brighton',     lat:42.5295,lng:-83.7799},
+  {n:'+19893490235',lbl:'(989) Birch Run',    lat:43.2503,lng:-83.7894},
+  {n:'+16163194434',lbl:'(616) Lowell',       lat:42.9337,lng:-85.3420},
+  {n:'+12314442706',lbl:'(231) Cadillac',     lat:44.2519,lng:-85.4013},
+  {n:'+12484532765',lbl:'(248) Rochester',    lat:42.6806,lng:-83.1340},
+  {n:'+13136266971',lbl:'(313) Detroit',      lat:42.3314,lng:-83.0458},
+  {n:'+17349844400',lbl:'(734) Flat Rock',    lat:42.1000,lng:-83.2747},
+  {n:'+15176189305',lbl:'(517) Howell',       lat:42.6075,lng:-83.9297},
+];
+const AC_COORDS = {
+  '231':{lat:44.76,lng:-85.62},'248':{lat:42.58,lng:-83.25},'269':{lat:42.29,lng:-85.59},
+  '313':{lat:42.33,lng:-83.05},'517':{lat:42.73,lng:-84.56},'586':{lat:42.58,lng:-82.91},
+  '616':{lat:42.96,lng:-85.67},'734':{lat:42.28,lng:-83.74},'810':{lat:43.01,lng:-83.69},
+  '906':{lat:46.48,lng:-84.99},'947':{lat:42.58,lng:-83.25},'989':{lat:43.42,lng:-83.95},
+  '419':{lat:41.66,lng:-83.56},'440':{lat:41.50,lng:-81.69},
+  'default':{lat:43.33,lng:-84.54},
+};
+function closestNum(phone){
+  const ac = phone.replace(/\D/g,'').slice(-10).slice(0,3);
+  const c = AC_COORDS[ac] || AC_COORDS.default;
+  let best = NUMBERS[0], bestD = Infinity;
+  for(const n of NUMBERS){
+    const dLat=(n.lat-c.lat)*Math.PI/180, dLng=(n.lng-c.lng)*Math.PI/180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(c.lat*Math.PI/180)*Math.cos(n.lat*Math.PI/180)*Math.sin(dLng/2)**2;
+    const d = 3958.8*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+    if(d<bestD){bestD=d;best=n;}
+  }
+  return best;
+}
+
 $('worker').value = LS('dialer_worker','');
 $('worker').addEventListener('change', e => SS('dialer_worker', e.target.value));
 
@@ -236,9 +270,10 @@ function normalizePhone(p){
 function showLead(i){
   if(i>=leads.length){$('name').textContent='—';$('phone').textContent='—';$('info').innerHTML='<div style="color:var(--t3);text-align:center;padding:20px">Done</div>';return}
   const l = leads[i];
+  const from = closestNum(l.phone);
   $('name').textContent = l.name;
   $('phone').textContent = l.phone;
-  $('att').textContent = 'Lead '+(i+1)+'/'+leads.length+' • Attempt '+(attempt+1)+'/'+ $('maxAtt').value;
+  $('att').textContent = 'Lead '+(i+1)+'/'+leads.length+' • Attempt '+(attempt+1)+'/'+ $('maxAtt').value+' • from '+from.lbl;
   $('info').innerHTML = l.extra.length
     ? l.extra.map(x=>`<div class="info-row"><div class="info-k">${esc(x.k)}</div><div class="info-v">${esc(x.v)}</div></div>`).join('')
     : '<div style="color:var(--t3);text-align:center;padding:20px">No extra info</div>';
@@ -268,10 +303,11 @@ async function dialNext(){
   }
   dialing = true;
   showLead(idx);
+  const from = closestNum(lead.phone);
   setState('DIALING','ring');
-  log('Dialing '+lead.name+' '+lead.phone+' (attempt '+(attempt+1)+')');
+  log('Dialing '+lead.name+' '+lead.phone+' from '+from.lbl+' (attempt '+(attempt+1)+')');
   try{
-    const params = { To: lead.phone };
+    const params = { To: lead.phone, callerId: from.n, leadName: lead.name };
     if($('amd').checked) params.MachineDetection = 'Enable';
     conn = await device.connect({ params });
     bindCall(lead);
@@ -394,7 +430,8 @@ $('kp-call').onclick = async ()=>{
   if(!kpBuf){alert('Enter a number');return}
   if(running){alert('Stop the auto-dialer first');return}
   const num = normalizePhone(kpBuf);
-  log('Manual dial: '+num);
+  const from = closestNum(num);
+  log('Manual dial: '+num+' from '+from.lbl);
   setState('DIALING','ring');
   manualCall = true;
   $('kp-call').style.display='none';
@@ -406,7 +443,7 @@ $('kp-call').onclick = async ()=>{
     $('timer').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
   },250);
   try{
-    conn = await device.connect({params:{To:num}});
+    conn = await device.connect({params:{To:num, callerId:from.n, leadName:'Manual'}});
     conn.on('ringing',()=>{setState('RINGING','ring');log('Ringing…')});
     conn.on('accept',()=>{setState('CONNECTED','live');log('Connected — keypad now sends DTMF','ok')});
     conn.on('disconnect',()=>{endManual('Disconnected')});
