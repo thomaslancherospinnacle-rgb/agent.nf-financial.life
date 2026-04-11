@@ -436,7 +436,13 @@ $('kp-call').onclick = async ()=>{
   if(!kpBuf){alert('Enter a number');return}
   if(running){alert('Stop the auto-dialer first');return}
   const num = normalizePhone(kpBuf);
-  const from = closestNum(num);
+  const fromSel = $('kp-from').value;
+  let from;
+  if(fromSel==='auto'){
+    from = closestNum(num);
+  }else{
+    from = NUMBERS.find(n=>n.n===fromSel) || closestNum(num);
+  }
   log('Manual dial: '+num+' from '+from.lbl);
   setState('DIALING','ring');
   manualCall = true;
@@ -468,6 +474,38 @@ function endManual(reason){
   $('kp-call').style.display='block';
   $('kp-end').style.display='none';
 }
+
+// ── BULLETPROOF DROPDOWN INIT ──
+// Run after everything else, in a try/catch, so no upstream error can block it.
+function initFromDropdown(){
+  try{
+    const sel = document.getElementById('kp-from');
+    if(!sel){console.error('kp-from dropdown not found');return}
+    // Remove any previously added options (keep only "Auto")
+    while(sel.options.length>1) sel.remove(1);
+    // Add all numbers
+    NUMBERS.forEach(n=>{
+      const o = document.createElement('option');
+      o.value = n.n;
+      o.textContent = n.lbl;
+      sel.appendChild(o);
+    });
+    // Restore saved selection
+    try{ sel.value = localStorage.getItem('kp_from') || 'auto'; }catch{}
+    sel.addEventListener('change', e=>{
+      try{ localStorage.setItem('kp_from', e.target.value); }catch{}
+    });
+    console.log('✓ Dropdown populated with', sel.options.length, 'options');
+  }catch(e){
+    console.error('Dropdown init failed:', e);
+  }
+}
+// Run immediately AND on DOMContentLoaded as a belt-and-suspenders safety
+initFromDropdown();
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', initFromDropdown);
+}
+setTimeout(initFromDropdown, 100);
 
 log('Ready. Enter Worker URL → Connect Mic → Load CSV → Start.');
 </script>
