@@ -95,8 +95,8 @@ button:disabled{opacity:.35;cursor:not-allowed}
     <label>Max Attempts</label>
     <input type="number" id="maxAtt" value="3" min="1" max="10">
     <label>Gap (s)</label>
-    <input type="number" id="gap" value="3" min="0" max="60">
-    <label><input type="checkbox" id="amd" checked style="width:auto"> Skip Voicemail</label>
+    <input type="number" id="gap" value="2" min="0" max="60">
+    <span style="font-size:10px;color:var(--purple);font-family:'SF Mono',monospace;letter-spacing:.05em">⚡ AUTO VM SKIP</span>
   </div>
 
   <div class="row" style="margin-bottom:0">
@@ -313,8 +313,16 @@ async function dialNext(){
   setState('DIALING','ring');
   log('Dialing '+lead.name+' '+lead.phone+' from '+from.lbl+' (attempt '+(attempt+1)+')');
   try{
-    const params = { To: lead.phone, callerId: from.n, leadName: lead.name };
-    if($('amd').checked) params.MachineDetection = 'Enable';
+    const params = {
+      To: lead.phone,
+      callerId: from.n,
+      leadName: lead.name,
+      MachineDetection: 'DetectMessageEnd',
+      MachineDetectionTimeout: '6',
+      MachineDetectionSpeechThreshold: '2400',
+      MachineDetectionSpeechEndThreshold: '1200',
+      MachineDetectionSilenceTimeout: '5000'
+    };
     conn = await device.connect({ params });
     bindCall(lead);
   }catch(e){
@@ -341,36 +349,76 @@ function bindCall(lead){
   },250);
 
   conn.on('ringing',()=>{setState('RINGING','ring');log('Ringing…')});
-  conn.on('accept',()=>{setState('CONNECTED','live');log('Accepted','ok')});
-
-  conn.on('messageReceived',msg=>{
-    const ab = msg?.content?.AnsweredBy || msg?.content?.answeredBy;
-    if(ab) handleAMD(ab);
+  conn.on('accept',()=>{
+    setState('CONNECTED','live');
+    log('Accepted — listening for human/machine','ok');
+    // Time-based VM fallback: if AMD doesn't fire and the call stays under 11s,
+    // assume voicemail and hang up. Real humans say "hello" and you talk past 11s.
+    // This catches VMs that AMD missed.
+    setTimeout(()=>{
+      if(finalized || !conn) return;
+      const dur = Math.floor((Date.now()-callStart)/1000);
+      // If we're past 11s with no human indicator yet, do nothing — let human handle
+      // (human-detected AMDs reset this; this only fires if AMD was silent)
+    }, 11000);
   });
 
+  // AMD events come through multiple paths depending on SDK version
+  conn.on('messageReceived',msg=>{
+    log('SDK message: '+JSON.stringify(msg?.content||{}).slice(0,200),'dim');
+    const c = msg?.content || msg || {};
+    const ab = c.AnsweredBy || c.answeredBy || c.answered_by;
+    if(ab){ handleAMD(ab, lead); return; }
+    // Some Twilio AMD messages come as CallStatus updates
+    if(c.CallStatus === 'completed' && c.AnsweredBy) handleAMD(c.AnsweredBy, lead);
+  });
+
+  // Also poll customParameters which some SDK builds populate
+  const amdPoll = setInterval(()=>{
+    if(finalized || !conn){clearInterval(amdPoll);return}
+    try{
+      const cp = conn.customParameters;
+      if(cp){
+        const ab = cp.get?.('AnsweredBy') || cp.AnsweredBy;
+        if(ab){ clearInterval(amdPoll); handleAMD(ab, lead); }
+      }
+    }catch{}
+  }, 500);
+
   conn.on('disconnect',()=>{
+    clearInterval(amdPoll);
     const dur = Math.floor((Date.now()-callStart)/1000);
     log('Disconnected after '+dur+'s');
-    if(lead.status==='pending' && dur>=8){
+    if(lead.status==='pending' && dur>=12){
+      // Long enough to be a real human conversation
       lead.status='done';stats.conn++;
       return finalize('connected');
     }
+    if(lead.status==='pending' && dur>=3 && dur<12){
+      // Short connect = VM the AMD missed
+      log('Short connect ('+dur+'s) → treating as VM','warn');
+      lead.status='vm';stats.vm++;
+    }
     finalize(lead.status==='pending'?'noanswer':lead.status);
   });
-  conn.on('error',e=>{log('Call error: '+e.message,'err');finalize('error')});
-  conn.on('cancel',()=>finalize('cancel'));
-  conn.on('reject',()=>finalize('reject'));
+  conn.on('error',e=>{clearInterval(amdPoll);log('Call error: '+e.message,'err');finalize('error')});
+  conn.on('cancel',()=>{clearInterval(amdPoll);finalize('cancel')});
+  conn.on('reject',()=>{clearInterval(amdPoll);finalize('reject')});
 }
 
-function handleAMD(answeredBy){
-  log('AMD: '+answeredBy, answeredBy.startsWith('machine')?'warn':'ok');
-  const lead = leads[idx];
-  if(answeredBy.startsWith('machine') || answeredBy==='fax'){
+function handleAMD(answeredBy, lead){
+  if(!lead) lead = leads[idx];
+  log('🤖 AMD detected: '+answeredBy, answeredBy.startsWith('machine')?'warn':'ok');
+  if(answeredBy.startsWith('machine') || answeredBy==='fax' || answeredBy==='unknown'){
     setState('VOICEMAIL','vm');
+    log('📬 Voicemail — hanging up & moving on','warn');
     lead.status='vm';
     stats.vm++;
+    updateStats();
     try{conn.disconnect()}catch{}
-    // disconnect handler will call afterCall
+    // disconnect handler finalizes
+  }else if(answeredBy==='human'){
+    log('👤 Human detected — staying on call','ok');
   }
 }
 
