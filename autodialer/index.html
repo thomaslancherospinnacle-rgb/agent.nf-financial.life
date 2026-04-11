@@ -125,6 +125,12 @@ button:disabled{opacity:.35;cursor:not-allowed}
 
 <div class="panel">
   <h1>◆ KEYPAD</h1>
+  <div style="margin-bottom:10px">
+    <label style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;font-family:'SF Mono',monospace;display:block;margin-bottom:4px">Dial From</label>
+    <select id="kp-from" style="width:100%;background:var(--s3);border:1px solid var(--b);color:var(--tx);padding:7px 10px;border-radius:5px;font-size:11px;font-family:'SF Mono',monospace;cursor:pointer">
+      <option value="auto">Auto (closest match)</option>
+    </select>
+  </div>
   <div class="kp-display empty" id="kp-disp">Type or click to dial</div>
   <div class="kp-grid">
     <button class="kp-key" data-k="1">1<small>&nbsp;</small></button>
