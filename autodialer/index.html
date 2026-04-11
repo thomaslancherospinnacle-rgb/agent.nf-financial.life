@@ -157,7 +157,7 @@ const $ = id => document.getElementById(id);
 const LS = (k,d) => localStorage.getItem(k) ?? d;
 const SS = (k,v) => localStorage.setItem(k,v);
 
-let device=null, conn=null, leads=[], idx=0, attempt=0, running=false, callTimer=null, callStart=0, gapTimer=null, headers=[], stats={conn:0,vm:0,fail:0};
+let device=null, conn=null, leads=[], idx=0, attempt=0, running=false, dialing=false, callTimer=null, callStart=0, gapTimer=null, headers=[], stats={conn:0,vm:0,fail:0};
 
 $('worker').value = LS('dialer_worker','');
 $('worker').addEventListener('change', e => SS('dialer_worker', e.target.value));
@@ -251,11 +251,12 @@ function renderQueue(){
 
 // ── DIALING ──
 $('start').onclick = ()=>{ if(!device){alert('Connect mic first');return} running=true;$('start').disabled=true;$('stop').disabled=false;$('skip').disabled=false;log('Auto-dial started','ok');dialNext()};
-$('stop').onclick = ()=>{ running=false;$('stop').disabled=true;$('start').disabled=false;$('skip').disabled=true;clearTimeout(gapTimer);if(conn)try{conn.disconnect()}catch{}setState('STOPPED');log('Stopped','warn')};
+$('stop').onclick = ()=>{ running=false;dialing=false;$('stop').disabled=true;$('start').disabled=false;$('skip').disabled=true;clearTimeout(gapTimer);if(conn)try{conn.disconnect()}catch{}setState('STOPPED');log('Stopped','warn')};
 $('skip').onclick = ()=>{ log('Skip pressed','warn');if(conn)try{conn.disconnect()}catch{};attempt = +$('maxAtt').value; afterCall('skipped')};
 
 async function dialNext(){
   if(!running) return;
+  if(dialing){log('dialNext blocked — already dialing','warn');return}
   if(idx>=leads.length){log('All leads complete','ok');$('stop').click();return}
   const lead = leads[idx];
   if(attempt >= +$('maxAtt').value){
@@ -265,6 +266,7 @@ async function dialNext(){
     showLead(idx);
     return setTimeout(dialNext, 300);
   }
+  dialing = true;
   showLead(idx);
   setState('DIALING','ring');
   log('Dialing '+lead.name+' '+lead.phone+' (attempt '+(attempt+1)+')');
@@ -275,6 +277,7 @@ async function dialNext(){
     bindCall(lead);
   }catch(e){
     log('connect() failed: '+e.message,'err');
+    dialing = false;
     attempt++;
     setTimeout(dialNext, 1500);
   }
@@ -282,6 +285,13 @@ async function dialNext(){
 
 function bindCall(lead){
   callStart = Date.now();
+  let finalized = false;
+  const finalize = (reason)=>{
+    if(finalized) return;
+    finalized = true;
+    clearInterval(callTimer);
+    afterCall(reason);
+  };
   callTimer = setInterval(()=>{
     const s = Math.floor((Date.now()-callStart)/1000);
     $('timer').className='timer';
@@ -291,27 +301,23 @@ function bindCall(lead){
   conn.on('ringing',()=>{setState('RINGING','ring');log('Ringing…')});
   conn.on('accept',()=>{setState('CONNECTED','live');log('Accepted','ok')});
 
-  // Twilio AMD: AnsweredBy comes via call params update
   conn.on('messageReceived',msg=>{
     const ab = msg?.content?.AnsweredBy || msg?.content?.answeredBy;
     if(ab) handleAMD(ab);
   });
-  // Some SDK versions expose customParameters / call updates
-  conn.on('sample',()=>{}); // noop, keep alive
 
   conn.on('disconnect',()=>{
-    clearInterval(callTimer);
     const dur = Math.floor((Date.now()-callStart)/1000);
     log('Disconnected after '+dur+'s');
-    if(lead.status==='pending'){
-      // short call = no answer; long = connected
-      if(dur>=8){lead.status='done';stats.conn++;afterCall('connected');return}
+    if(lead.status==='pending' && dur>=8){
+      lead.status='done';stats.conn++;
+      return finalize('connected');
     }
-    afterCall(lead.status==='pending'?'noanswer':lead.status);
+    finalize(lead.status==='pending'?'noanswer':lead.status);
   });
-  conn.on('error',e=>{clearInterval(callTimer);log('Call error: '+e.message,'err');afterCall('error')});
-  conn.on('cancel',()=>{clearInterval(callTimer);afterCall('cancel')});
-  conn.on('reject',()=>{clearInterval(callTimer);afterCall('reject')});
+  conn.on('error',e=>{log('Call error: '+e.message,'err');finalize('error')});
+  conn.on('cancel',()=>finalize('cancel'));
+  conn.on('reject',()=>finalize('reject'));
 }
 
 function handleAMD(answeredBy){
@@ -328,6 +334,7 @@ function handleAMD(answeredBy){
 
 function afterCall(reason){
   conn = null;
+  dialing = false;
   $('timer').textContent='00:00';$('timer').className='timer idle';
   renderQueue();updateStats();
   if(!running) return;
