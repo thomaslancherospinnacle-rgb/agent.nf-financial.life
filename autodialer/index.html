@@ -22,6 +22,10 @@ button:disabled{opacity:.35;cursor:not-allowed}
 .btn-stop{background:none;border-color:var(--red);color:var(--red)}
 .btn-skip{background:none;border-color:var(--amber);color:var(--amber)}
 .btn-vm{background:none;border-color:var(--pink);color:var(--pink)}
+.btn-mute{background:none;border-color:var(--t2);color:var(--t2);min-width:70px}
+.btn-mute:hover:not(:disabled){border-color:var(--tx);color:var(--tx)}
+.btn-mute.muted{background:var(--red);color:#fff;border-color:var(--red)}
+.btn-mute.muted:hover{background:#ff7a92}
 .btn-redial{background:var(--blue);color:#000;border-color:var(--blue);font-weight:600}
 .btn-redial:hover:not(:disabled){background:#81d4fa}
 .btn-redial:disabled{opacity:.3}
@@ -71,8 +75,10 @@ button:disabled{opacity:.35;cursor:not-allowed}
 .actions{display:flex;gap:6px;margin-top:10px}
 .actions button{flex:1;padding:12px}
 .q{margin-top:12px;max-height:360px;overflow:auto}
-.q-item{display:flex;align-items:center;gap:8px;padding:7px 9px;border-bottom:1px solid var(--b);font-size:11px}
+.q-item{display:flex;align-items:center;gap:8px;padding:7px 9px;border-bottom:1px solid var(--b);font-size:11px;cursor:pointer;transition:background .1s}
+.q-item:hover{background:var(--s2)}
 .q-item.cur{background:#0a2a1a}
+.q-item.cur:hover{background:#0e3a24}
 .q-item.done{opacity:.5}
 .q-num{font-family:'SF Mono',monospace;color:var(--t3);font-size:9px;width:22px}
 .q-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -137,6 +143,7 @@ summary:hover{color:var(--tx)}
     <button id="stop" class="btn-stop" disabled>■ STOP</button>
     <button id="vm" class="btn-vm" disabled>📬 SENT TO VM</button>
     <button id="beep" class="btn-beep" disabled title="Press & HOLD to spam #01 tones through the line">🔔 BEEP!</button>
+    <button id="mute" class="btn-mute" disabled title="Mute your mic — they can't hear you, you can still hear them">🎤 MUTE</button>
     <button id="redial" class="btn-redial" disabled title="Hang up and instantly redial this same number from the same caller ID">⚡ REDIAL</button>
     <button id="block-redial" class="btn-block" disabled title="Hang up and instantly redial from the NEXT closest caller ID (for when they've blocked the current number)">🚫 BLOCKED REDIAL</button>
     <button id="skip" class="btn-skip" disabled>⏭ SKIP</button>
@@ -364,7 +371,18 @@ $('load-leads').onclick=async()=>{
     }).filter(Boolean);
     idx=0;attempt=0;stats={book:0,conn:0,vm:0,fail:0};updateStats();
     log('Loaded '+leads.length+' leads from '+tab,'ok');
-    renderQueue();if(leads.length)showLead(0);
+    // Check for saved position on this tab
+    const saved=loadPosition(tab);
+    if(saved&&saved.idx>0&&saved.idx<leads.length){
+      const when=new Date(saved.ts).toLocaleString();
+      if(confirm('📍 You left off at lead #'+(saved.idx+1)+' ('+leads[saved.idx].name+') on '+when+'.\n\nResume from there?')){
+        idx=saved.idx;
+        log('↷ Resumed from lead #'+(idx+1),'ok');
+      }else{
+        log('Starting from top','warn');
+      }
+    }
+    renderQueue();if(leads.length)showLead(idx);
     checkCanStart();
   }catch(e){log('Load failed: '+e.message,'err');alert('Load failed: '+e.message)}
   finally{$('load-leads').disabled=false}
@@ -395,8 +413,8 @@ async function flushSync(){
 setInterval(flushSync,15000);
 
 // ══ DIALING ══
-$('start').onclick=()=>{if(!device){alert('Connect mic');return}running=true;$('start').disabled=true;$('stop').disabled=false;$('vm').disabled=false;$('skip').disabled=false;$('beep').disabled=false;$('redial').disabled=false;$('block-redial').disabled=false;log('Started','ok');dialNext()};
-$('stop').onclick=()=>{running=false;dialing=false;$('stop').disabled=true;$('start').disabled=!leads.length;$('vm').disabled=true;$('skip').disabled=true;$('beep').disabled=true;$('redial').disabled=true;$('block-redial').disabled=true;clearTimeout(gapTimer);if(conn)try{conn.disconnect()}catch{};setState('STOPPED');log('Stopped','warn')};
+$('start').onclick=()=>{if(!device){alert('Connect mic');return}running=true;$('start').disabled=true;$('stop').disabled=false;$('vm').disabled=false;$('skip').disabled=false;$('beep').disabled=false;$('mute').disabled=false;$('redial').disabled=false;$('block-redial').disabled=false;log('Started','ok');dialNext()};
+$('stop').onclick=()=>{running=false;dialing=false;$('stop').disabled=true;$('start').disabled=!leads.length;$('vm').disabled=true;$('skip').disabled=true;$('beep').disabled=true;$('mute').disabled=true;$('redial').disabled=true;$('block-redial').disabled=true;clearTimeout(gapTimer);if(conn)try{conn.disconnect()}catch{};setState('STOPPED');log('Stopped','warn')};
 // BEEP spam — press & hold fires #01 on repeat, release stops
 let beepInterval=null, beepSeq=['#','0','1'], beepIdx=0;
 function beepStart(e){
@@ -430,6 +448,22 @@ $('beep').addEventListener('touchend',beepStop);
 $('beep').addEventListener('touchcancel',beepStop);
 // Prevent context menu on long-press (mobile)
 $('beep').addEventListener('contextmenu',e=>e.preventDefault());
+
+// MUTE toggle — mutes your mic so they can't hear you, you can still hear them
+$('mute').onclick=()=>{
+  if(!conn){log('MUTE: no active call','warn');return}
+  try{
+    const newState=!conn.isMuted();
+    conn.mute(newState);
+    $('mute').classList.toggle('muted',newState);
+    $('mute').textContent=newState?'🔇 MUTED':'🎤 MUTE';
+    log(newState?'🔇 Mic muted (they can\'t hear you)':'🎤 Mic unmuted','warn');
+  }catch(e){log('Mute failed: '+e.message,'err')}
+};
+function resetMuteUI(){
+  $('mute').classList.remove('muted');
+  $('mute').textContent='🎤 MUTE';
+}
 
 // Ranked list of caller IDs by distance to a given destination
 function rankedNumbers(phone){
@@ -487,10 +521,11 @@ $('block-redial').onclick=()=>{
 $('skip').onclick=()=>{if(conn)try{conn.disconnect()}catch{};attempt=+$('maxAtt').value;afterCall('skipped')};
 $('vm').onclick=()=>{
   const l=leads[idx];if(!l)return;
-  log('📬 Manual VM: '+l.name+' (attempt '+(attempt+1)+'/'+$('maxAtt').value+')','warn');
+  log('📵 Sent to VM: '+l.name+' (attempt '+(attempt+1)+'/'+$('maxAtt').value+')','warn');
   stats.vm++;
-  l.history.push('Voicemail');
-  syncOutcome(l,'Voicemail');
+  l.history.push('No Pickup');
+  l._manualVm=true; // flag so disconnect handler doesn't double-log or prompt outcome
+  syncOutcome(l,'No Pickup');
   updateStats();
   setState('VM','vm');
   // Stay on lead — afterCall() will increment attempt and retry if under maxAtt
@@ -527,18 +562,23 @@ function bindCall(lead){
   conn.on('disconnect',()=>{
     const dur=Math.floor((Date.now()-callStart)/1000);
     log('Disconnected after '+dur+'s');
+    // If user hit the manual VM button, skip all automatic analysis — they already logged it
+    if(lead._manualVm){
+      lead._manualVm=false;
+      return finalize('vm-manual');
+    }
     if(lead.status==='pending'&&dur>=12){
       lead.status='human';stats.conn++;
       promptOutcome(lead);
       return finalize('human');
     }
     if(lead.status==='pending'&&dur>=3&&dur<12){
-      log('Short connect → VM','warn');
+      log('Short connect → No Pickup','warn');
       stats.vm++;
-      lead.history.push('Voicemail');
-      syncOutcome(lead,'Voicemail');
+      lead.history.push('No Pickup');
+      syncOutcome(lead,'No Pickup');
       updateStats();
-      // don't set status='vm' — let afterCall retry if attempts remain
+      // don't set status — let afterCall retry if attempts remain
     }
     finalize(lead.status==='pending'?'noanswer':lead.status);
   });
@@ -550,8 +590,9 @@ function handleAMD(ab,lead){
   if(ab.startsWith('machine')||ab==='fax'||ab==='unknown'){
     setState('VM','vm');
     stats.vm++;
-    lead.history.push('Voicemail');
-    syncOutcome(lead,'Voicemail');
+    lead.history.push('No Pickup');
+    lead._manualVm=true; // prevent disconnect handler from double-logging or prompting
+    syncOutcome(lead,'No Pickup');
     updateStats();
     // Stay on lead — afterCall will retry if attempts remain
     try{conn.disconnect()}catch{}
@@ -579,6 +620,7 @@ document.querySelectorAll('.obtn').forEach(b=>b.onclick=()=>{
 function afterCall(reason){
   conn=null;dialing=false;
   beepStop(); // kill any beep spam in progress
+  resetMuteUI();
   $('timer').textContent='00:00';$('timer').className='timer idle';
   renderQueue();updateStats();
   if(awaitingOutcome)return; // wait for user to log outcome
@@ -595,10 +637,10 @@ function afterCall(reason){
   if(attempt>=+$('maxAtt').value){
     if(lead.status==='pending'){
       // Decide final status from history
-      const hadVm=lead.history.includes('Voicemail');
+      const hadVm=lead.history.includes('No Pickup');
       lead.status=hadVm?'vm':'fail';
       if(!hadVm)stats.fail++;
-      syncOutcome(lead,hadVm?'Max VM reached':'No Answer (max attempts)');
+      syncOutcome(lead,hadVm?'Max No Pickup reached':'No Answer (max attempts)');
     }
     idx++;attempt=0;
   }
@@ -608,6 +650,7 @@ function afterCall(reason){
 // ══ UI RENDER ══
 function showLead(i){
   if(i>=leads.length){$('name').textContent='—';$('phone').textContent='—';$('info').innerHTML='<div style="color:var(--t3);text-align:center;padding:18px">Done</div>';renderScript(null);return}
+  savePosition();
   const l=leads[i];const from=closestNum(l.phone);
   $('name').textContent=l.name;$('phone').textContent=l.phone;
   $('att').textContent='Lead '+(i+1)+'/'+leads.length+' • Try '+(attempt+1)+'/'+$('maxAtt').value+' • '+from.lbl+(l.history.length?' • '+l.history.length+' prior':'');
@@ -632,7 +675,46 @@ function renderScript(lead){
 $('script-sel').onchange=()=>{SS('dialer_script',$('script-sel').value);renderScript(leads[idx])};
 $('script-sel').value=LS('dialer_script','0');
 
-function renderQueue(){$('queue').innerHTML=leads.map((l,i)=>`<div class="q-item ${i===idx?'cur':''} ${l.status!=='pending'?'done':''}"><div class="q-num">${i+1}</div><div class="q-name">${esc(l.name)}</div><div class="q-st ${l.status}">${l.status.toUpperCase()}</div></div>`).join('')}
+// Persistent "left off at" — stored per-tab
+function savePosition(){
+  if(!tabName||!leads.length)return;
+  const key='dialer_pos_'+tabName;
+  try{localStorage.setItem(key,JSON.stringify({idx,ts:Date.now()}))}catch{}
+}
+function loadPosition(tab){
+  try{
+    const raw=localStorage.getItem('dialer_pos_'+tab);
+    if(!raw)return null;
+    return JSON.parse(raw);
+  }catch{return null}
+}
+
+function jumpToLead(i){
+  if(i<0||i>=leads.length)return;
+  const wasRunning=running&&dialing;
+  if(dialing){
+    if(!confirm('A call is in progress. Stop it and jump to lead #'+(i+1)+'?'))return;
+    if(conn)try{conn.disconnect()}catch{}
+    dialing=false;
+  }
+  idx=i;attempt=0;
+  savePosition();
+  showLead(idx);
+  renderQueue();
+  log('↷ Jumped to lead #'+(i+1)+': '+leads[i].name,'warn');
+  // Continue auto-dialing from new position if we were running
+  if(wasRunning&&running){
+    setTimeout(dialNext,500);
+  }
+}
+
+function renderQueue(){
+  $('queue').innerHTML=leads.map((l,i)=>`<div class="q-item ${i===idx?'cur':''} ${l.status!=='pending'?'done':''}" data-idx="${i}" title="Click to jump to this lead"><div class="q-num">${i+1}</div><div class="q-name">${esc(l.name)}</div><div class="q-st ${l.status}">${l.status.toUpperCase()}</div></div>`).join('');
+  // Wire click handlers for jump-to-lead
+  document.querySelectorAll('#queue .q-item').forEach(el=>{
+    el.onclick=()=>jumpToLead(+el.dataset.idx);
+  });
+}
 function updateStats(){$('s-total').textContent=leads.length;$('s-book').textContent=stats.book;$('s-conn').textContent=stats.conn;$('s-vm').textContent=stats.vm;$('s-fail').textContent=stats.fail}
 
 // ══ KEYPAD ══
@@ -657,7 +739,7 @@ $('kp-call').onclick=async()=>{
   }catch(e){log('Manual dial failed: '+e.message,'err');endManual('Failed')}
 };
 $('kp-end').onclick=()=>{if(conn)try{conn.disconnect()}catch{}};
-function endManual(r){log(r);clearInterval(callTimer);beepStop();conn=null;manualCall=false;$('timer').textContent='00:00';$('timer').className='timer idle';setState('IDLE');$('kp-call').style.display='block';$('kp-end').style.display='none'}
+function endManual(r){log(r);clearInterval(callTimer);beepStop();resetMuteUI();conn=null;manualCall=false;$('timer').textContent='00:00';$('timer').className='timer idle';setState('IDLE');$('kp-call').style.display='block';$('kp-end').style.display='none'}
 
 renderPendingSyncs();log('Ready. Setup → Connect Mic → Refresh Tabs → Load Leads → Start.');
 </script></body></html>
