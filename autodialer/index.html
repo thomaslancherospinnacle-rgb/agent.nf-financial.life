@@ -412,7 +412,7 @@ function beepStart(e){
     try{conn.sendDigits(beepSeq[beepIdx]);beepIdx=(beepIdx+1)%beepSeq.length}catch(e){log('BEEP err: '+e.message,'err');beepStop()}
   };
   fire();
-  beepInterval=setInterval(fire, 180); // ~5.5 tones/sec
+  beepInterval=setInterval(fire, 90); // ~11 tones/sec — near Twilio's DTMF ceiling
 }
 function beepStop(){
   if(beepInterval){clearInterval(beepInterval);beepInterval=null;log('🔔 BEEP spam stopped','ok')}
