@@ -136,7 +136,7 @@ summary:hover{color:var(--tx)}
     <button id="start" class="btn-go" disabled>▶ START</button>
     <button id="stop" class="btn-stop" disabled>■ STOP</button>
     <button id="vm" class="btn-vm" disabled>📬 SENT TO VM</button>
-    <button id="beep" class="btn-beep" disabled title="Sends # tone to the other end of the call">🔔 BEEP!</button>
+    <button id="beep" class="btn-beep" disabled title="Press & HOLD to spam #01 tones through the line">🔔 BEEP!</button>
     <button id="redial" class="btn-redial" disabled title="Hang up and instantly redial this same number from the same caller ID">⚡ REDIAL</button>
     <button id="block-redial" class="btn-block" disabled title="Hang up and instantly redial from the NEXT closest caller ID (for when they've blocked the current number)">🚫 BLOCKED REDIAL</button>
     <button id="skip" class="btn-skip" disabled>⏭ SKIP</button>
@@ -397,11 +397,39 @@ setInterval(flushSync,15000);
 // ══ DIALING ══
 $('start').onclick=()=>{if(!device){alert('Connect mic');return}running=true;$('start').disabled=true;$('stop').disabled=false;$('vm').disabled=false;$('skip').disabled=false;$('beep').disabled=false;$('redial').disabled=false;$('block-redial').disabled=false;log('Started','ok');dialNext()};
 $('stop').onclick=()=>{running=false;dialing=false;$('stop').disabled=true;$('start').disabled=!leads.length;$('vm').disabled=true;$('skip').disabled=true;$('beep').disabled=true;$('redial').disabled=true;$('block-redial').disabled=true;clearTimeout(gapTimer);if(conn)try{conn.disconnect()}catch{};setState('STOPPED');log('Stopped','warn')};
-$('beep').onclick=()=>{
+// BEEP spam — press & hold fires #01 on repeat, release stops
+let beepInterval=null, beepSeq=['#','0','1'], beepIdx=0;
+function beepStart(e){
+  if(e)e.preventDefault();
   if(!conn){log('BEEP: no active call','warn');return}
-  try{conn.sendDigits('#');log('🔔 BEEP! (sent # tone)','ok')}
-  catch(e){log('BEEP failed: '+e.message,'err')}
-};
+  if(beepInterval)return; // already spamming
+  log('🔔 BEEP spam started','warn');
+  $('beep').style.background='#ffc340';
+  $('beep').style.transform='scale(.95)';
+  // Fire immediately, then on interval
+  const fire=()=>{
+    if(!conn){beepStop();return}
+    try{conn.sendDigits(beepSeq[beepIdx]);beepIdx=(beepIdx+1)%beepSeq.length}catch(e){log('BEEP err: '+e.message,'err');beepStop()}
+  };
+  fire();
+  beepInterval=setInterval(fire, 180); // ~5.5 tones/sec
+}
+function beepStop(){
+  if(beepInterval){clearInterval(beepInterval);beepInterval=null;log('🔔 BEEP spam stopped','ok')}
+  beepIdx=0;
+  $('beep').style.background='';
+  $('beep').style.transform='';
+}
+// Mouse
+$('beep').addEventListener('mousedown',beepStart);
+$('beep').addEventListener('mouseup',beepStop);
+$('beep').addEventListener('mouseleave',beepStop);
+// Touch (mobile / tablet)
+$('beep').addEventListener('touchstart',beepStart,{passive:false});
+$('beep').addEventListener('touchend',beepStop);
+$('beep').addEventListener('touchcancel',beepStop);
+// Prevent context menu on long-press (mobile)
+$('beep').addEventListener('contextmenu',e=>e.preventDefault());
 
 // Ranked list of caller IDs by distance to a given destination
 function rankedNumbers(phone){
@@ -550,6 +578,7 @@ document.querySelectorAll('.obtn').forEach(b=>b.onclick=()=>{
 
 function afterCall(reason){
   conn=null;dialing=false;
+  beepStop(); // kill any beep spam in progress
   $('timer').textContent='00:00';$('timer').className='timer idle';
   renderQueue();updateStats();
   if(awaitingOutcome)return; // wait for user to log outcome
@@ -628,7 +657,7 @@ $('kp-call').onclick=async()=>{
   }catch(e){log('Manual dial failed: '+e.message,'err');endManual('Failed')}
 };
 $('kp-end').onclick=()=>{if(conn)try{conn.disconnect()}catch{}};
-function endManual(r){log(r);clearInterval(callTimer);conn=null;manualCall=false;$('timer').textContent='00:00';$('timer').className='timer idle';setState('IDLE');$('kp-call').style.display='block';$('kp-end').style.display='none'}
+function endManual(r){log(r);clearInterval(callTimer);beepStop();conn=null;manualCall=false;$('timer').textContent='00:00';$('timer').className='timer idle';setState('IDLE');$('kp-call').style.display='block';$('kp-end').style.display='none'}
 
 renderPendingSyncs();log('Ready. Setup → Connect Mic → Refresh Tabs → Load Leads → Start.');
 </script></body></html>
