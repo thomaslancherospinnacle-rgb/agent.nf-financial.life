@@ -22,6 +22,16 @@ button:disabled{opacity:.35;cursor:not-allowed}
 .btn-stop{background:none;border-color:var(--red);color:var(--red)}
 .btn-skip{background:none;border-color:var(--amber);color:var(--amber)}
 .btn-vm{background:none;border-color:var(--pink);color:var(--pink)}
+.btn-redial{background:var(--blue);color:#000;border-color:var(--blue);font-weight:600}
+.btn-redial:hover:not(:disabled){background:#81d4fa}
+.btn-redial:disabled{opacity:.3}
+.btn-block{background:var(--red);color:#fff;border-color:var(--red);font-weight:600}
+.btn-block:hover:not(:disabled){background:#ff7a92}
+.btn-block:disabled{opacity:.3}
+.btn-beep{background:var(--amber);color:#000;border-color:var(--amber);font-weight:700;letter-spacing:.05em;box-shadow:0 0 0 0 rgba(255,171,0,.7);transition:all .2s}
+.btn-beep:hover:not(:disabled){background:#ffc340;transform:scale(1.03)}
+.btn-beep:active:not(:disabled){transform:scale(.95);box-shadow:0 0 0 8px rgba(255,171,0,0)}
+.btn-beep:disabled{opacity:.3}
 .pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:12px;font-family:'SF Mono',monospace;font-size:9px;letter-spacing:.06em;background:var(--s3);color:var(--t2)}
 .pill.live{background:#0a2a1a;color:var(--green)}
 .pill.ring{background:#2a2010;color:var(--amber)}
@@ -105,7 +115,7 @@ summary:hover{color:var(--tx)}
       <span class="pill" id="devpill"><span class="dot"></span>OFFLINE</span>
     </div>
     <div class="row">
-      <label>PASSWORD</label><input id="gas-depid" style="flex:1;min-width:240px" placeholder="AKfycbw...TgfyZ5">
+      <label>Deployment ID</label><input id="gas-depid" style="flex:1;min-width:240px" placeholder="AKfycbw...TgfyZ5">
       <button id="load-tabs">↻ Refresh Tabs</button>
     </div>
     <div class="tabs-row">
@@ -126,6 +136,9 @@ summary:hover{color:var(--tx)}
     <button id="start" class="btn-go" disabled>▶ START</button>
     <button id="stop" class="btn-stop" disabled>■ STOP</button>
     <button id="vm" class="btn-vm" disabled>📬 SENT TO VM</button>
+    <button id="beep" class="btn-beep" disabled title="Sends # tone to the other end of the call">🔔 BEEP!</button>
+    <button id="redial" class="btn-redial" disabled title="Hang up and instantly redial this same number from the same caller ID">⚡ REDIAL</button>
+    <button id="block-redial" class="btn-block" disabled title="Hang up and instantly redial from the NEXT closest caller ID (for when they've blocked the current number)">🚫 BLOCKED REDIAL</button>
     <button id="skip" class="btn-skip" disabled>⏭ SKIP</button>
     <span class="pill" id="state" style="margin-left:auto"><span class="dot"></span>IDLE</span>
     <span id="pending-syncs"></span>
@@ -154,9 +167,9 @@ summary:hover{color:var(--tx)}
     <div class="script-hdr">
       <span style="font-size:10px;font-family:'SF Mono',monospace;color:var(--green);letter-spacing:.08em">◆ SCRIPT</span>
       <select id="script-sel">
-        <option value="0">Discount Card</option>
-        <option value="1">Response Card</option>
-        <option value="2">Aged Mortgage</option>
+        <option value="0">AGED MTG</option>
+        <option value="1">HARD CARD</option>
+        <option value="2">DISCOUNT CARD</option>
       </select>
     </div>
     <div class="script-body empty" id="script-body">Load a lead to see script</div>
@@ -199,37 +212,54 @@ summary:hover{color:var(--tx)}
 
 <script>
 'use strict';
-// ══ HARDCODED SCRIPTS — PASTE YOUR REAL ONES HERE ══
+// ══ HARDCODED SCRIPTS — tokens in {curly braces} auto-fill from CSV/sheet columns ══
 const SCRIPTS = [
-  { name:'Discount Card', text:`Hello hello {name}?
-Hey name this is name with Globe Life American Income division insurance company how are you doing today?
+  {
+    name: 'AGED MTG',
+    text: `Hello hello {name}, its _____. Giving you a quick call here, I manage the brokerage, that handles the mortgage protection for {lender}. Reason for my call, Your file that's associated with your property on {address} came, across our system, as flagged for review or incomplete… Not a problem, {name}, the only reason for that is, sometime around when, you closed or refinanced the home…. We sent you like, several things in the mail, about the mortgage, protection Right, where, it pays off the home if you, get sick or, pass away, Does, that ring a bell at all {name}?
 
-If yes continue
-If no, you have the $2000 policy with us, it came accross…
+You did the right thing. I mean, you filled out the card, you mailed it back to us… But for some reason, on our end, we haven't gotten that completed…. I'm the senior underwriter in the area here. So, I just wanted to make sure we took care of you.
 
-great I'm calling about that smaller policy you got with us, the $2,000 policy it just came across my desk and it was showing me that we don't have a beneficiary for you we also just got to make sure that we have you updated on the company wide updates for 2026 make sure you get the claims forms all that good stuff now we do this over the phone virtually to save you time we don't have to come out to the house anymore like we used to so what usually works better mornings or evenings?
-.` },
-  { name:'Response Card', text:`Hey {name}? Hey {name} this is (agent) with American Income Life, we handle some of your permanent benefits through the {group}. I’m calling because we just got back your 
-beneficiary card and I just need to verify to make sure everything is up to date.
-
-It looks like you have your (relation), {name} down as the beneficiary. Is that still correct? Okay perfect, and you still want the benefit package to come down to {address}? Okay cool, and then just to verify your birthday I have (birthday)? 
-Okay perfect, now the {group} set you up with a permanent benefits package, and it looks like in our files here you are still one of the members who have not received it yet. So my job is to get you caught up with all the other members in your local (#). 
-Now {name}, do you have a spouse or is it just yourself? 
-(only ask if they do not have spouse as beneficiary) 
-
-
-(ALWAYS GIVE IT A SHOT - “IF YOU GUYS HAVE 15 MINUTES TOGETHER WE CAN GET THIS KNOCKED OUT RIGHT NOW”) 
-Okay perfect, now I’m sure you/you guys are really busy people, but what usually works better for you, mornings or evenings? 
-I gotcha, let me check my schedule so I can get you/you guys in. It’ll be nice and quick 
-because we are all virtual now. . . (pause) So as far as availability I have ___ or ___ today, what works the best? .` },
-  { name:'Aged Mortgage', text:`Hello hello {name}, its _____. Giving you a quick call here, I manage the brokerage, that handles the mortgage protection for %lender%. Reason for my call, Your file that’s associated with your property on {address} came, across our system, as flagged for review or incomplete… Not a problem, %name%, the only reason for that is, sometime around when, you closed or refinanced the home…. We sent you like, several things in the mail, about the mortgage, protection Right, where, it pays off the home if you, get sick or, pass away, Does, that ring a bell at all {name}?
-You did the right thing. I mean, you filled out the card, you mailed it back to us… But for some reason, on our end, we haven’t gotten that completed…. I’m the senior underwriter in the area here. So, I just wanted to make sure we took care of you.
 Now, is it just you in the home or is there a significant other or family there with you?
-Gotcha, and im assuming that god forbid, you where to pass, your (Beneficiary) would be the one, taking over the mortgage, right?
-Ok so correct me if im wrong, you just wanted to make sure that (beneficiary) is taken care of right, so they dont have to take care of that financial burden.
+
+Gotcha, and im assuming that god forbid, you where to pass, your {beneficiary} would be the one, taking over the mortgage, right?
+
+Ok so correct me if im wrong, you just wanted to make sure that {beneficiary} is taken care of right, so they dont have to take care of that financial burden.
+
 Gotcha so usually you get the mortgage protection taken care of at closing, its showing youve got the homeowners insurance, which takes care of damages, and the PMI, that makes sure the bank gets their money if you default on the mortgage, and the mortgage protection is the 3rd and most important insurance takes care of the home god forbid you where to pass, does that make sense?
-Ok is there a reason why you never got this taken care of, or you don’t know?
-BOOK APPOINTMENT!` },
+
+Ok is there a reason why you never got this taken care of, or you don't know?`
+  },
+  {
+    name: 'HARD CARD',
+    text: `Hey {name}? Hey {name} this is _____ with American Income Life, we handle some of your permanent benefits through the {union}. I'm calling because we just got back your beneficiary card and I just need to verify to make sure everything is up to date.
+
+It looks like you have your {relation}, {beneficiary} down as the beneficiary. Is that still correct? Okay perfect, and you still want the benefit package to come down to {address}? Okay cool, and then just to verify your birthday I have {birthday}?
+
+Okay perfect, now the {union} set you up with a permanent benefits package, and it looks like in our files here you are still one of the members who have not received it yet. So my job is to get you caught up with all the other members in your local {local}.
+
+Now {name}, do you have a spouse or is it just yourself?
+
+(only ask if they do not have spouse as beneficiary)
+(ALWAYS GIVE IT A SHOT — "IF YOU GUYS HAVE 15 MINUTES TOGETHER WE CAN GET THIS KNOCKED OUT RIGHT NOW")
+
+Okay perfect, now I'm sure you/you guys are really busy people, but what usually works better for you, mornings or evenings?
+
+I gotcha, let me check my schedule so I can get you/you guys in. It'll be nice and quick because we are all virtual now… (pause) So as far as availability I have ___ or ___ today, what works the best?`
+  },
+  {
+    name: 'DISCOUNT CARD',
+    text: `Hello hello {name}?
+
+Hey {name} this is _____ with Globe Life American Income division insurance company how are you doing today?
+
+[if yes continue]
+[if no → "you have the $2000 policy with us, it came across…"]
+
+Great, I'm calling about that smaller policy you got with us, the $2,000 policy. It just came across my desk and it was showing me that we don't have a beneficiary for you. We also just got to make sure that we have you updated on the company wide updates for 2026, make sure you get the claims forms, all that good stuff.
+
+Now we do this over the phone virtually to save you time, we don't have to come out to the house anymore like we used to. So what usually works better, mornings or evenings?`
+  },
 ];
 
 // ══ TWILIO NUMBERS (frontend picks closest) ══
@@ -365,10 +395,80 @@ async function flushSync(){
 setInterval(flushSync,15000);
 
 // ══ DIALING ══
-$('start').onclick=()=>{if(!device){alert('Connect mic');return}running=true;$('start').disabled=true;$('stop').disabled=false;$('vm').disabled=false;$('skip').disabled=false;log('Started','ok');dialNext()};
-$('stop').onclick=()=>{running=false;dialing=false;$('stop').disabled=true;$('start').disabled=!leads.length;$('vm').disabled=true;$('skip').disabled=true;clearTimeout(gapTimer);if(conn)try{conn.disconnect()}catch{};setState('STOPPED');log('Stopped','warn')};
+$('start').onclick=()=>{if(!device){alert('Connect mic');return}running=true;$('start').disabled=true;$('stop').disabled=false;$('vm').disabled=false;$('skip').disabled=false;$('beep').disabled=false;$('redial').disabled=false;$('block-redial').disabled=false;log('Started','ok');dialNext()};
+$('stop').onclick=()=>{running=false;dialing=false;$('stop').disabled=true;$('start').disabled=!leads.length;$('vm').disabled=true;$('skip').disabled=true;$('beep').disabled=true;$('redial').disabled=true;$('block-redial').disabled=true;clearTimeout(gapTimer);if(conn)try{conn.disconnect()}catch{};setState('STOPPED');log('Stopped','warn')};
+$('beep').onclick=()=>{
+  if(!conn){log('BEEP: no active call','warn');return}
+  try{conn.sendDigits('#');log('🔔 BEEP! (sent # tone)','ok')}
+  catch(e){log('BEEP failed: '+e.message,'err')}
+};
+
+// Ranked list of caller IDs by distance to a given destination
+function rankedNumbers(phone){
+  const ac=phone.replace(/\D/g,'').slice(-10).slice(0,3);
+  const c=AC_COORDS[ac]||AC_COORDS.default;
+  return NUMBERS.map(n=>{
+    const dLat=(n.lat-c.lat)*Math.PI/180,dLng=(n.lng-c.lng)*Math.PI/180;
+    const a=Math.sin(dLat/2)**2+Math.cos(c.lat*Math.PI/180)*Math.cos(n.lat*Math.PI/180)*Math.sin(dLng/2)**2;
+    const d=3958.8*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+    return {n,d};
+  }).sort((a,b)=>a.d-b.d).map(x=>x.n);
+}
+
+// Fast redial — same caller ID, zero delay, doesn't count as new attempt
+async function fastRedial(from,reason){
+  const lead=leads[idx];if(!lead){log('No active lead','warn');return}
+  // Hang up current call if any
+  if(conn){try{conn.disconnect()}catch{}}
+  // Wait a tick for disconnect to settle, then fire
+  setTimeout(async()=>{
+    dialing=true;
+    setState('DIALING','ring');
+    log('⚡ '+reason+': '+lead.name+' from '+from.lbl);
+    try{
+      conn=await device.connect({params:{To:lead.phone,callerId:from.n,leadName:lead.name,MachineDetection:'DetectMessageEnd',MachineDetectionTimeout:'6'}});
+      lead._lastCallerId=from.n;
+      bindCall(lead);
+    }catch(e){log('Redial failed: '+e.message,'err');dialing=false}
+  },150);
+}
+
+$('redial').onclick=()=>{
+  const lead=leads[idx];if(!lead){log('No active lead','warn');return}
+  const from=lead._lastCallerId?NUMBERS.find(n=>n.n===lead._lastCallerId)||closestNum(lead.phone):closestNum(lead.phone);
+  fastRedial(from,'INSTANT REDIAL');
+};
+
+$('block-redial').onclick=()=>{
+  const lead=leads[idx];if(!lead){log('No active lead','warn');return}
+  const ranked=rankedNumbers(lead.phone);
+  // Track which numbers we've already tried on this lead
+  if(!lead._triedIds)lead._triedIds=new Set();
+  if(lead._lastCallerId)lead._triedIds.add(lead._lastCallerId);
+  // Find the next closest one we haven't used yet
+  let next=ranked.find(n=>!lead._triedIds.has(n.n));
+  if(!next){
+    // Cycled through all — reset and use second-closest
+    log('All numbers tried — resetting rotation','warn');
+    lead._triedIds=new Set();
+    next=ranked[1]||ranked[0];
+  }
+  log('🚫 Blocked — rotating to '+next.lbl,'warn');
+  fastRedial(next,'BLOCKED REDIAL');
+};
 $('skip').onclick=()=>{if(conn)try{conn.disconnect()}catch{};attempt=+$('maxAtt').value;afterCall('skipped')};
-$('vm').onclick=()=>{const l=leads[idx];if(!l)return;log('📬 Manual VM: '+l.name,'warn');l.status='vm';stats.vm++;updateStats();renderQueue();setState('VM','vm');syncOutcome(l,'Voicemail');if(conn)try{conn.disconnect()}catch{}else afterCall('vm-manual')};
+$('vm').onclick=()=>{
+  const l=leads[idx];if(!l)return;
+  log('📬 Manual VM: '+l.name+' (attempt '+(attempt+1)+'/'+$('maxAtt').value+')','warn');
+  stats.vm++;
+  l.history.push('Voicemail');
+  syncOutcome(l,'Voicemail');
+  updateStats();
+  setState('VM','vm');
+  // Stay on lead — afterCall() will increment attempt and retry if under maxAtt
+  if(conn)try{conn.disconnect()}catch{}
+  else afterCall('vm-manual');
+};
 
 async function dialNext(){
   if(!running||dialing)return;
@@ -384,6 +484,7 @@ async function dialNext(){
   setState('DIALING','ring');log('Dialing '+lead.name+' from '+from.lbl+' ('+(attempt+1)+'/'+$('maxAtt').value+')');
   try{
     conn=await device.connect({params:{To:lead.phone,callerId:from.n,leadName:lead.name,MachineDetection:'DetectMessageEnd',MachineDetectionTimeout:'6',MachineDetectionSpeechThreshold:'2400'}});
+    lead._lastCallerId=from.n;
     bindCall(lead);
   }catch(e){log('connect() failed: '+e.message,'err');dialing=false;attempt++;setTimeout(dialNext,1500)}
 }
@@ -395,11 +496,39 @@ function bindCall(lead){
   conn.on('ringing',()=>{setState('RINGING','ring');log('Ringing…')});
   conn.on('accept',()=>{setState('CONNECTED','live');log('Accepted','ok')});
   conn.on('messageReceived',msg=>{const c=msg?.content||{};const ab=c.AnsweredBy||c.answeredBy;if(ab)handleAMD(ab,lead)});
-  conn.on('disconnect',()=>{const dur=Math.floor((Date.now()-callStart)/1000);log('Disconnected after '+dur+'s');if(lead.status==='pending'&&dur>=12){lead.status='human';stats.conn++;promptOutcome(lead);return finalize('human')}if(lead.status==='pending'&&dur>=3&&dur<12){log('Short connect → VM','warn');lead.status='vm';stats.vm++;syncOutcome(lead,'Voicemail')}finalize(lead.status==='pending'?'noanswer':lead.status)});
+  conn.on('disconnect',()=>{
+    const dur=Math.floor((Date.now()-callStart)/1000);
+    log('Disconnected after '+dur+'s');
+    if(lead.status==='pending'&&dur>=12){
+      lead.status='human';stats.conn++;
+      promptOutcome(lead);
+      return finalize('human');
+    }
+    if(lead.status==='pending'&&dur>=3&&dur<12){
+      log('Short connect → VM','warn');
+      stats.vm++;
+      lead.history.push('Voicemail');
+      syncOutcome(lead,'Voicemail');
+      updateStats();
+      // don't set status='vm' — let afterCall retry if attempts remain
+    }
+    finalize(lead.status==='pending'?'noanswer':lead.status);
+  });
   conn.on('error',e=>{log('Call error: '+e.message,'err');finalize('error')});
   conn.on('cancel',()=>finalize('cancel'));conn.on('reject',()=>finalize('reject'));
 }
-function handleAMD(ab,lead){log('AMD: '+ab,ab.startsWith('machine')?'warn':'ok');if(ab.startsWith('machine')||ab==='fax'||ab==='unknown'){setState('VM','vm');lead.status='vm';stats.vm++;updateStats();syncOutcome(lead,'Voicemail');try{conn.disconnect()}catch{}}}
+function handleAMD(ab,lead){
+  log('AMD: '+ab,ab.startsWith('machine')?'warn':'ok');
+  if(ab.startsWith('machine')||ab==='fax'||ab==='unknown'){
+    setState('VM','vm');
+    stats.vm++;
+    lead.history.push('Voicemail');
+    syncOutcome(lead,'Voicemail');
+    updateStats();
+    // Stay on lead — afterCall will retry if attempts remain
+    try{conn.disconnect()}catch{}
+  }
+}
 
 function promptOutcome(lead){
   awaitingOutcome=true;
@@ -423,17 +552,28 @@ function afterCall(reason){
   conn=null;dialing=false;
   $('timer').textContent='00:00';$('timer').className='timer idle';
   renderQueue();updateStats();
-  if(awaitingOutcome)return; // wait for user
+  if(awaitingOutcome)return; // wait for user to log outcome
   if(!running)return;
   const lead=leads[idx];
-  if(['human','booked','done','vm','dnc','fail'].includes(lead.status)){
-    if(lead.status==='vm')syncOutcome(lead,'Voicemail'); // ensure VM logged
-    idx++;attempt=0;setTimeout(dialNext,+$('gap').value*1000);
-  }else{
-    attempt++;
-    if(attempt>=+$('maxAtt').value){if(lead.status==='pending'){lead.status='fail';stats.fail++;syncOutcome(lead,'No Answer')};idx++;attempt=0}
+  // Lead is truly finished (booked / DNC / done outcome / max-failed) → advance
+  if(['booked','dnc','done','fail'].includes(lead.status)){
+    idx++;attempt=0;
     setTimeout(dialNext,+$('gap').value*1000);
+    return;
   }
+  // Otherwise: count this attempt (including VM) and retry or give up
+  attempt++;
+  if(attempt>=+$('maxAtt').value){
+    if(lead.status==='pending'){
+      // Decide final status from history
+      const hadVm=lead.history.includes('Voicemail');
+      lead.status=hadVm?'vm':'fail';
+      if(!hadVm)stats.fail++;
+      syncOutcome(lead,hadVm?'Max VM reached':'No Answer (max attempts)');
+    }
+    idx++;attempt=0;
+  }
+  setTimeout(dialNext,+$('gap').value*1000);
 }
 
 // ══ UI RENDER ══
