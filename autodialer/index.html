@@ -1,183 +1,193 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CSV Auto Dialer</title>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Auto Dialer v2</title>
 <script src="https://cdn.jsdelivr.net/npm/@twilio/voice-sdk@2.10.0/dist/twilio.min.js"></script>
 <style>
-:root{--bg:#0d0f12;--sf:#141720;--s2:#1c2030;--s3:#232840;--b:#2a3050;--b2:#3a4570;--tx:#e8eaf0;--t2:#8892b0;--t3:#4a5580;--green:#00e676;--gdim:#00a651;--red:#ff4d6d;--amber:#ffab00;--blue:#4fc3f7;--purple:#b39ddb;}
+:root{--bg:#0d0f12;--sf:#141720;--s2:#1c2030;--s3:#232840;--b:#2a3050;--b2:#3a4570;--tx:#e8eaf0;--t2:#8892b0;--t3:#4a5580;--green:#00e676;--gdim:#00a651;--red:#ff4d6d;--amber:#ffab00;--blue:#4fc3f7;--purple:#b39ddb;--pink:#c084fc}
 *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,'Inter',sans-serif}
-body{background:var(--bg);color:var(--tx);font-size:14px;min-height:100vh;padding:18px;display:grid;grid-template-columns:1fr 260px 340px;gap:16px}
-h1{font-size:13px;letter-spacing:.12em;color:var(--green);font-weight:500;margin-bottom:14px;font-family:'SF Mono',monospace}
-.panel{background:var(--sf);border:1px solid var(--b);border-radius:10px;padding:18px}
-.row{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+body{background:var(--bg);color:var(--tx);font-size:13px;min-height:100vh;padding:14px;display:grid;grid-template-columns:1fr 260px 340px;gap:14px}
+@media(max-width:1180px){body{grid-template-columns:1fr 300px}}
+@media(max-width:880px){body{grid-template-columns:1fr}}
+h1{font-size:12px;letter-spacing:.1em;color:var(--green);font-weight:500;margin-bottom:12px;font-family:'SF Mono',monospace}
+.panel{background:var(--sf);border:1px solid var(--b);border-radius:10px;padding:16px}
+.row{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
 label{font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:.08em;font-family:'SF Mono',monospace}
-input,select{background:var(--s3);border:1px solid var(--b);color:var(--tx);padding:7px 10px;border-radius:5px;font-size:12px;font-family:inherit}
-input:focus,select:focus{outline:none;border-color:var(--b2)}
-input[type=number]{width:70px}
-button{padding:8px 14px;border-radius:6px;border:1px solid var(--b);background:var(--s3);color:var(--tx);cursor:pointer;font-size:12px;font-weight:500;transition:all .15s}
+input,select,textarea{background:var(--s3);border:1px solid var(--b);color:var(--tx);padding:6px 9px;border-radius:5px;font-size:11px;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--b2)}
+input[type=number]{width:60px}
+button{padding:7px 12px;border-radius:6px;border:1px solid var(--b);background:var(--s3);color:var(--tx);cursor:pointer;font-size:11px;font-weight:500;transition:all .12s}
 button:hover:not(:disabled){border-color:var(--b2)}
 button:disabled{opacity:.35;cursor:not-allowed}
 .btn-go{background:var(--gdim);color:#000;border-color:var(--gdim)}
-.btn-go:hover:not(:disabled){background:#00c853}
 .btn-stop{background:none;border-color:var(--red);color:var(--red)}
-.btn-stop:hover:not(:disabled){background:rgba(255,77,109,.1)}
 .btn-skip{background:none;border-color:var(--amber);color:var(--amber)}
-.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:14px;font-family:'SF Mono',monospace;font-size:10px;letter-spacing:.06em;background:var(--s3);color:var(--t2)}
+.btn-vm{background:none;border-color:var(--pink);color:var(--pink)}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:12px;font-family:'SF Mono',monospace;font-size:9px;letter-spacing:.06em;background:var(--s3);color:var(--t2)}
 .pill.live{background:#0a2a1a;color:var(--green)}
 .pill.ring{background:#2a2010;color:var(--amber)}
-.pill.vm{background:#1a0828;color:#c084fc}
+.pill.vm{background:#1a0828;color:var(--pink)}
 .pill.err{background:#200a10;color:var(--red)}
-.dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor}
 .live .dot,.ring .dot{box-shadow:0 0 6px currentColor;animation:p 1.4s infinite}
 @keyframes p{0%,100%{opacity:1}50%{opacity:.3}}
-.bigname{font-size:32px;font-weight:300;margin:18px 0 4px;min-height:40px}
-.bigphone{font-family:'SF Mono',monospace;font-size:18px;color:var(--blue);margin-bottom:14px}
-.timer{font-family:'SF Mono',monospace;font-size:42px;color:var(--green);margin:10px 0}
+.bigname{font-size:28px;font-weight:300;margin:16px 0 3px;min-height:36px}
+.bigphone{font-family:'SF Mono',monospace;font-size:16px;color:var(--blue);margin-bottom:10px}
+.timer{font-family:'SF Mono',monospace;font-size:36px;color:var(--green);margin:8px 0}
 .timer.idle{color:var(--t3)}
-.info{background:var(--s2);border:1px solid var(--b);border-radius:8px;padding:14px;margin:14px 0;max-height:240px;overflow:auto}
-.info-row{display:flex;padding:5px 0;border-bottom:1px solid var(--b);font-size:12px}
-.info-row:last-child{border-bottom:none}
-.info-k{color:var(--t2);min-width:130px;font-family:'SF Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.info{background:var(--s2);border:1px solid var(--b);border-radius:7px;padding:12px;margin:12px 0;max-height:200px;overflow:auto}
+.info-row{display:flex;padding:4px 0;border-bottom:1px solid var(--b);font-size:11px}
+.info-row:last-child{border:none}
+.info-k{color:var(--t2);min-width:120px;font-family:'SF Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.04em}
 .info-v{color:var(--tx);flex:1;word-break:break-word}
-.actions{display:flex;gap:8px;margin-top:14px}
-.actions button{flex:1;padding:13px}
-.q{margin-top:14px;max-height:280px;overflow:auto}
-.q-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-bottom:1px solid var(--b);font-size:12px}
+.script-wrap{background:var(--s2);border:1px solid var(--b);border-radius:7px;margin:12px 0;overflow:hidden}
+.script-hdr{padding:8px 12px;background:var(--s3);display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--b)}
+.script-hdr select{flex:1}
+.script-body{padding:14px;max-height:320px;overflow:auto;font-size:13px;line-height:1.65;white-space:pre-wrap;color:var(--tx)}
+.script-body.empty{color:var(--t3);text-align:center;padding:30px;font-style:italic}
+.tok{background:rgba(0,230,118,.15);color:var(--green);padding:1px 5px;border-radius:3px;font-weight:500}
+.tok-missing{background:rgba(255,77,109,.15);color:var(--red);padding:1px 5px;border-radius:3px;font-weight:500}
+.outcome-panel{background:rgba(255,171,0,.08);border:1px solid var(--amber);border-radius:8px;padding:12px;margin:12px 0;display:none}
+.outcome-panel.show{display:block}
+.outcome-panel h3{font-size:10px;color:var(--amber);letter-spacing:.08em;font-family:'SF Mono',monospace;margin-bottom:8px}
+.out-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.obtn{padding:10px 6px;border-radius:6px;border:1px solid transparent;font-size:11px;cursor:pointer;font-weight:500;transition:all .12s}
+.obtn:hover{filter:brightness(1.15)}
+.o-book{background:#0a2a1a;border-color:var(--gdim);color:var(--green)}
+.o-cb{background:#2a2010;border-color:#664400;color:var(--amber)}
+.o-ni{background:#151530;border-color:#3a3a70;color:var(--purple)}
+.o-wn{background:#200a10;border-color:#601020;color:var(--red)}
+.o-dnc{background:#200a10;border-color:var(--red);color:var(--red);font-weight:700}
+.o-np{background:var(--s3);border-color:var(--b);color:var(--t2)}
+.actions{display:flex;gap:6px;margin-top:10px}
+.actions button{flex:1;padding:12px}
+.q{margin-top:12px;max-height:360px;overflow:auto}
+.q-item{display:flex;align-items:center;gap:8px;padding:7px 9px;border-bottom:1px solid var(--b);font-size:11px}
 .q-item.cur{background:#0a2a1a}
-.q-item.done{opacity:.4}
-.q-num{font-family:'SF Mono',monospace;color:var(--t3);font-size:10px;width:24px}
+.q-item.done{opacity:.5}
+.q-num{font-family:'SF Mono',monospace;color:var(--t3);font-size:9px;width:22px}
 .q-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.q-st{font-family:'SF Mono',monospace;font-size:10px;padding:2px 7px;border-radius:8px;background:var(--s3);color:var(--t2)}
+.q-st{font-family:'SF Mono',monospace;font-size:9px;padding:2px 6px;border-radius:7px;background:var(--s3);color:var(--t2)}
+.q-st.pending{background:var(--s3);color:var(--t2)}
 .q-st.done{background:#0a2a1a;color:var(--green)}
-.q-st.vm{background:#1a0828;color:#c084fc}
+.q-st.vm{background:#1a0828;color:var(--pink)}
 .q-st.fail{background:#200a10;color:var(--red)}
-.log{background:#000;border:1px solid var(--b);border-radius:6px;padding:10px;height:140px;overflow:auto;font-family:'SF Mono',monospace;font-size:10px;color:var(--t2);margin-top:12px}
-.log div{padding:1px 0}
-.log .ok{color:var(--green)}.log .warn{color:var(--amber)}.log .err{color:var(--red)}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
-.stat{background:var(--s2);border:1px solid var(--b);border-radius:6px;padding:10px;text-align:center}
-.stat-v{font-family:'SF Mono',monospace;font-size:20px;color:var(--tx)}
-.stat-l{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-top:3px}
-.kp-display{background:#000;border:1px solid var(--b);border-radius:8px;padding:14px;font-family:'SF Mono',monospace;font-size:22px;color:var(--blue);text-align:center;margin-bottom:10px;min-height:52px;letter-spacing:.04em;word-break:break-all}
-.kp-display.empty{color:var(--t3);font-size:13px}
-.kp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
-.kp-key{background:var(--s2);border:1px solid var(--b);border-radius:8px;padding:14px 0;font-family:'SF Mono',monospace;font-size:20px;color:var(--tx);cursor:pointer;transition:all .1s;user-select:none;font-weight:500}
+.q-st.dnc{background:var(--red);color:#fff;font-weight:700}
+.log{background:#000;border:1px solid var(--b);border-radius:6px;padding:9px;height:130px;overflow:auto;font-family:'SF Mono',monospace;font-size:10px;color:var(--t2);margin-top:10px}
+.log div{padding:1px 0}.log .ok{color:var(--green)}.log .warn{color:var(--amber)}.log .err{color:var(--red)}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px}
+.stat{background:var(--s2);border:1px solid var(--b);border-radius:6px;padding:8px;text-align:center}
+.stat-v{font-family:'SF Mono',monospace;font-size:17px;color:var(--tx)}
+.stat-l{font-size:8px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
+.kp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}
+.kp-key{background:var(--s2);border:1px solid var(--b);border-radius:7px;padding:13px 0;font-family:'SF Mono',monospace;font-size:18px;color:var(--tx);cursor:pointer;user-select:none}
 .kp-key:hover{background:var(--s3);border-color:var(--b2)}
 .kp-key:active{background:var(--gdim);color:#000;transform:scale(.96)}
-.kp-key small{display:block;font-size:8px;color:var(--t3);margin-top:2px;letter-spacing:.1em}
-.kp-actions{display:flex;gap:8px}
-.kp-actions button{flex:1;padding:12px}
+.kp-display{background:#000;border:1px solid var(--b);border-radius:8px;padding:12px;font-family:'SF Mono',monospace;font-size:20px;color:var(--blue);text-align:center;margin-bottom:8px;min-height:46px}
+.kp-display.empty{color:var(--t3);font-size:12px}
 .kp-call{background:var(--gdim);color:#000;border-color:var(--gdim);font-weight:600}
 .kp-call:hover:not(:disabled){background:#00c853}
 .kp-end{background:var(--red);color:#fff;border-color:var(--red)}
-.kp-bs{background:var(--s2)}
-.btn-vm{background:none;border-color:#c084fc;color:#c084fc}
-.btn-vm:hover:not(:disabled){background:rgba(192,132,252,.1)}
-.script-wrap{background:var(--s2);border:1px solid var(--b);border-radius:8px;margin:14px 0;overflow:hidden}
-.script-hdr{padding:10px 14px;background:var(--s3);display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--b)}
-.script-hdr h3{font-size:11px;font-family:'SF Mono',monospace;letter-spacing:.08em;color:var(--green);font-weight:500;margin:0}
-.script-hdr .spacer{flex:1}
-.script-hdr label{cursor:pointer;padding:4px 10px;border:1px solid var(--b);border-radius:4px;font-size:10px;color:var(--t2)}
-.script-hdr label:hover{border-color:var(--b2);color:var(--tx)}
-.script-hdr button{padding:4px 10px;border:1px solid var(--b);background:none;color:var(--t2);border-radius:4px;font-size:10px;cursor:pointer}
-.script-hdr button:hover{border-color:var(--b2);color:var(--tx)}
-.script-body{padding:14px;max-height:340px;overflow:auto;font-size:13px;line-height:1.6;white-space:pre-wrap;color:var(--tx);font-family:-apple-system,'Inter',sans-serif}
-.script-body.empty{color:var(--t3);text-align:center;padding:30px;font-style:italic}
-.script-body .tok{background:rgba(0,230,118,.15);color:var(--green);padding:1px 5px;border-radius:3px;font-weight:500}
-.script-body .tok-missing{background:rgba(255,77,109,.15);color:var(--red);padding:1px 5px;border-radius:3px;font-weight:500;text-decoration:line-through}
-.script-body h1,.script-body h2,.script-body h3{color:var(--blue);font-size:14px;margin:12px 0 6px;font-weight:600}
-@media(max-width:1180px){body{grid-template-columns:1fr 300px}}
-@media(max-width:880px){body{grid-template-columns:1fr}}
-</style>
-</head>
-<body>
+.tabs-row{display:flex;gap:6px;align-items:center;margin-top:6px}
+.tabs-row select{flex:1}
+details{margin-top:10px}
+summary{cursor:pointer;color:var(--t2);font-size:10px;font-family:'SF Mono',monospace;padding:6px 0;letter-spacing:.08em}
+summary:hover{color:var(--tx)}
+.pending-syncs{display:inline-block;background:var(--amber);color:#000;border-radius:10px;padding:1px 7px;font-size:9px;font-family:'SF Mono',monospace;margin-left:6px}
+</style></head><body>
 
 <div class="panel">
-  <h1>◆ CSV AUTO DIALER</h1>
+  <h1>◆ AUTO DIALER v2</h1>
 
-  <div class="row">
-    <label>Worker URL</label>
-    <input id="worker" style="flex:1;min-width:240px" placeholder="https://your-worker.workers.dev">
-    <button id="mic">Connect Mic</button>
-    <span class="pill" id="devpill"><span class="dot"></span>OFFLINE</span>
-  </div>
+  <details open><summary>⚙ SETUP</summary>
+    <div class="row" style="margin-top:8px">
+      <label>Worker</label><input id="worker" style="flex:1;min-width:200px" placeholder="https://your-worker.workers.dev">
+      <button id="mic">Connect Mic</button>
+      <span class="pill" id="devpill"><span class="dot"></span>OFFLINE</span>
+    </div>
+    <div class="row">
+      <label>GAS URL</label><input id="gas-url" style="flex:1;min-width:200px" placeholder="https://script.google.com/macros/s/.../exec">
+      <label>Token</label><input id="gas-token" style="width:120px" type="password" placeholder="secret">
+      <button id="load-tabs">↻ Refresh Tabs</button>
+    </div>
+    <div class="tabs-row">
+      <label>Tab</label>
+      <select id="tab-sel"><option value="">— pick a tab —</option></select>
+      <button id="load-leads" class="btn-go">📥 Load Leads</button>
+    </div>
+    <div id="file-name" style="font-size:10px;color:var(--t3);font-family:'SF Mono',monospace;margin-top:6px"></div>
+  </details>
 
-  <div class="row">
-    <label>CSV</label>
-    <input type="file" id="csv" accept=".csv">
-    <label>Max Attempts</label>
-    <input type="number" id="maxAtt" value="3" min="1" max="10">
-    <label>Gap (s)</label>
-    <input type="number" id="gap" value="2" min="0" max="60">
-    <span style="font-size:10px;color:var(--purple);font-family:'SF Mono',monospace;letter-spacing:.05em">⚡ AUTO VM SKIP</span>
+  <div class="row" style="margin-top:12px">
+    <label>Max Attempts</label><input type="number" id="maxAtt" value="3" min="1" max="10">
+    <label>Gap (s)</label><input type="number" id="gap" value="2" min="0" max="60">
+    <span style="font-size:10px;color:var(--pink);font-family:'SF Mono',monospace;letter-spacing:.05em">⚡ AUTO VM SKIP</span>
   </div>
 
   <div class="row" style="margin-bottom:0">
     <button id="start" class="btn-go" disabled>▶ START</button>
     <button id="stop" class="btn-stop" disabled>■ STOP</button>
-    <button id="vm" class="btn-vm" disabled title="Hang up & mark as voicemail — goes to next lead or retries">📬 SENT TO VM</button>
+    <button id="vm" class="btn-vm" disabled>📬 SENT TO VM</button>
     <button id="skip" class="btn-skip" disabled>⏭ SKIP</button>
     <span class="pill" id="state" style="margin-left:auto"><span class="dot"></span>IDLE</span>
+    <span id="pending-syncs"></span>
   </div>
 
   <div class="bigname" id="name">—</div>
   <div class="bigphone" id="phone">—</div>
   <div class="timer idle" id="timer">00:00</div>
-  <div style="font-family:'SF Mono',monospace;font-size:11px;color:var(--t3)" id="att"></div>
+  <div style="font-family:'SF Mono',monospace;font-size:10px;color:var(--t3)" id="att"></div>
 
-  <div class="info" id="info"><div style="color:var(--t3);text-align:center;padding:20px">Load a CSV to begin</div></div>
+  <div class="info" id="info"><div style="color:var(--t3);text-align:center;padding:18px">Load a tab to begin</div></div>
+
+  <div class="outcome-panel" id="outcome-panel">
+    <h3>▸ LOG CALL OUTCOME</h3>
+    <div class="out-grid">
+      <button class="obtn o-book"  data-out="Booked">✅ Booked</button>
+      <button class="obtn o-cb"    data-out="Callback">🔄 Callback</button>
+      <button class="obtn o-ni"    data-out="Not Interested">❌ Not Interested</button>
+      <button class="obtn o-wn"    data-out="Wrong Number">📵 Wrong Number</button>
+      <button class="obtn o-np"    data-out="No Pickup">📵 No Pickup</button>
+      <button class="obtn o-dnc"   data-out="DNC">🚫 DNC</button>
+    </div>
+  </div>
 
   <div class="script-wrap">
     <div class="script-hdr">
-      <h3>◆ SCRIPT</h3>
-      <span id="script-status" style="font-size:10px;color:var(--t3);font-family:'SF Mono',monospace"></span>
-      <span class="spacer"></span>
-      <label>
-        📄 Upload .txt
-        <input type="file" id="script-file" accept=".txt" style="display:none">
-      </label>
-      <button id="script-clear">✕ Clear</button>
+      <span style="font-size:10px;font-family:'SF Mono',monospace;color:var(--green);letter-spacing:.08em">◆ SCRIPT</span>
+      <select id="script-sel">
+        <option value="0">Script 1</option>
+        <option value="1">Script 2</option>
+        <option value="2">Script 3</option>
+      </select>
     </div>
-    <div class="script-body empty" id="script-body">Upload a script .txt file. Use %name%, %address%, %lender%, or any CSV column name as placeholders — they'll auto-fill from the current lead.</div>
+    <div class="script-body empty" id="script-body">Load a lead to see script</div>
   </div>
 
   <div class="stats">
     <div class="stat"><div class="stat-v" id="s-total">0</div><div class="stat-l">Total</div></div>
-    <div class="stat"><div class="stat-v" id="s-conn">0</div><div class="stat-l">Connected</div></div>
-    <div class="stat"><div class="stat-v" id="s-vm">0</div><div class="stat-l">Voicemail</div></div>
-    <div class="stat"><div class="stat-v" id="s-fail">0</div><div class="stat-l">No Answer</div></div>
+    <div class="stat"><div class="stat-v" id="s-book" style="color:var(--green)">0</div><div class="stat-l">Booked</div></div>
+    <div class="stat"><div class="stat-v" id="s-conn">0</div><div class="stat-l">Answered</div></div>
+    <div class="stat"><div class="stat-v" id="s-vm">0</div><div class="stat-l">VM</div></div>
+    <div class="stat"><div class="stat-v" id="s-fail">0</div><div class="stat-l">No Ans</div></div>
   </div>
-
   <div class="log" id="log"></div>
 </div>
 
 <div class="panel">
   <h1>◆ KEYPAD</h1>
   <div style="margin-bottom:10px">
-    <label style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;font-family:'SF Mono',monospace;display:block;margin-bottom:4px">Dial From</label>
-    <select id="kp-from" style="width:100%;background:var(--s3);border:1px solid var(--b);color:var(--tx);padding:7px 10px;border-radius:5px;font-size:11px;font-family:'SF Mono',monospace;cursor:pointer">
-      <option value="auto">Auto (closest match)</option>
-    </select>
+    <label style="display:block;margin-bottom:4px">Dial From</label>
+    <select id="kp-from" style="width:100%"><option value="auto">Auto (closest match)</option></select>
   </div>
-  <div class="kp-display empty" id="kp-disp">Type or click to dial</div>
+  <div class="kp-display empty" id="kp-disp">Type to dial</div>
   <div class="kp-grid">
-    <button class="kp-key" data-k="1">1<small>&nbsp;</small></button>
-    <button class="kp-key" data-k="2">2<small>ABC</small></button>
-    <button class="kp-key" data-k="3">3<small>DEF</small></button>
-    <button class="kp-key" data-k="4">4<small>GHI</small></button>
-    <button class="kp-key" data-k="5">5<small>JKL</small></button>
-    <button class="kp-key" data-k="6">6<small>MNO</small></button>
-    <button class="kp-key" data-k="7">7<small>PQRS</small></button>
-    <button class="kp-key" data-k="8">8<small>TUV</small></button>
-    <button class="kp-key" data-k="9">9<small>WXYZ</small></button>
-    <button class="kp-key" data-k="*">*<small>&nbsp;</small></button>
-    <button class="kp-key" data-k="0">0<small>+</small></button>
-    <button class="kp-key" data-k="#">#<small>&nbsp;</small></button>
+    <button class="kp-key" data-k="1">1</button><button class="kp-key" data-k="2">2</button><button class="kp-key" data-k="3">3</button>
+    <button class="kp-key" data-k="4">4</button><button class="kp-key" data-k="5">5</button><button class="kp-key" data-k="6">6</button>
+    <button class="kp-key" data-k="7">7</button><button class="kp-key" data-k="8">8</button><button class="kp-key" data-k="9">9</button>
+    <button class="kp-key" data-k="*">*</button><button class="kp-key" data-k="0">0</button><button class="kp-key" data-k="#">#</button>
   </div>
-  <div class="kp-actions">
-    <button class="kp-bs" id="kp-bs">⌫</button>
+  <div class="actions">
+    <button id="kp-bs">⌫</button>
     <button class="kp-call" id="kp-call">📞 CALL</button>
     <button class="kp-end" id="kp-end" style="display:none">END</button>
   </div>
@@ -189,13 +199,15 @@ button:disabled{opacity:.35;cursor:not-allowed}
 </div>
 
 <script>
-const $ = id => document.getElementById(id);
-const LS = (k,d) => localStorage.getItem(k) ?? d;
-const SS = (k,v) => localStorage.setItem(k,v);
+'use strict';
+// ══ HARDCODED SCRIPTS — PASTE YOUR REAL ONES HERE ══
+const SCRIPTS = [
+  { name:'Script 1', text:`Lorem ipsum dolor sit amet {name}, dolor sit amet {address} and {lender} sit amet consectetur. {name} adipiscing elit sed do eiusmod.` },
+  { name:'Script 2', text:`Lorem ipsum {name} — placeholder 2. Replace this whole string.` },
+  { name:'Script 3', text:`Lorem ipsum {name} — placeholder 3. Replace this whole string.` },
+];
 
-let device=null, conn=null, leads=[], idx=0, attempt=0, running=false, dialing=false, callTimer=null, callStart=0, gapTimer=null, headers=[], stats={conn:0,vm:0,fail:0};
-
-// Twilio caller IDs — frontend picks the geographically closest one per lead
+// ══ TWILIO NUMBERS (frontend picks closest) ══
 const NUMBERS = [
   {n:'+15862215707',lbl:'(586) Mount Clemens',lat:42.5973,lng:-82.8779},
   {n:'+12693869670',lbl:'(269) Colon',        lat:41.9559,lng:-85.3253},
@@ -208,477 +220,252 @@ const NUMBERS = [
   {n:'+17349844400',lbl:'(734) Flat Rock',    lat:42.1000,lng:-83.2747},
   {n:'+15176189305',lbl:'(517) Howell',       lat:42.6075,lng:-83.9297},
 ];
-const AC_COORDS = {
-  '231':{lat:44.76,lng:-85.62},'248':{lat:42.58,lng:-83.25},'269':{lat:42.29,lng:-85.59},
-  '313':{lat:42.33,lng:-83.05},'517':{lat:42.73,lng:-84.56},'586':{lat:42.58,lng:-82.91},
-  '616':{lat:42.96,lng:-85.67},'734':{lat:42.28,lng:-83.74},'810':{lat:43.01,lng:-83.69},
-  '906':{lat:46.48,lng:-84.99},'947':{lat:42.58,lng:-83.25},'989':{lat:43.42,lng:-83.95},
-  '419':{lat:41.66,lng:-83.56},'440':{lat:41.50,lng:-81.69},
-  'default':{lat:43.33,lng:-84.54},
-};
-function closestNum(phone){
-  const ac = phone.replace(/\D/g,'').slice(-10).slice(0,3);
-  const c = AC_COORDS[ac] || AC_COORDS.default;
-  let best = NUMBERS[0], bestD = Infinity;
-  for(const n of NUMBERS){
-    const dLat=(n.lat-c.lat)*Math.PI/180, dLng=(n.lng-c.lng)*Math.PI/180;
-    const a = Math.sin(dLat/2)**2 + Math.cos(c.lat*Math.PI/180)*Math.cos(n.lat*Math.PI/180)*Math.sin(dLng/2)**2;
-    const d = 3958.8*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-    if(d<bestD){bestD=d;best=n;}
-  }
-  return best;
-}
+const AC_COORDS={'231':{lat:44.76,lng:-85.62},'248':{lat:42.58,lng:-83.25},'269':{lat:42.29,lng:-85.59},'313':{lat:42.33,lng:-83.05},'517':{lat:42.73,lng:-84.56},'586':{lat:42.58,lng:-82.91},'616':{lat:42.96,lng:-85.67},'734':{lat:42.28,lng:-83.74},'810':{lat:43.01,lng:-83.69},'906':{lat:46.48,lng:-84.99},'947':{lat:42.58,lng:-83.25},'989':{lat:43.42,lng:-83.95},'default':{lat:43.33,lng:-84.54}};
+function closestNum(p){const ac=p.replace(/\D/g,'').slice(-10).slice(0,3);const c=AC_COORDS[ac]||AC_COORDS.default;let best=NUMBERS[0],bestD=Infinity;for(const n of NUMBERS){const dLat=(n.lat-c.lat)*Math.PI/180,dLng=(n.lng-c.lng)*Math.PI/180;const a=Math.sin(dLat/2)**2+Math.cos(c.lat*Math.PI/180)*Math.cos(n.lat*Math.PI/180)*Math.sin(dLng/2)**2;const d=3958.8*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));if(d<bestD){bestD=d;best=n;}}return best;}
 
-$('worker').value = LS('dialer_worker','');
-$('worker').addEventListener('change', e => SS('dialer_worker', e.target.value));
+// ══ STATE ══
+const $=id=>document.getElementById(id);
+const LS=(k,d='')=>{try{return localStorage.getItem(k)??d}catch{return d}};
+const SS=(k,v)=>{try{localStorage.setItem(k,v)}catch{}};
+let device=null,conn=null,leads=[],idx=0,attempt=0,running=false,dialing=false,callTimer=null,callStart=0,gapTimer=null,headers=[],stats={book:0,conn:0,vm:0,fail:0},awaitingOutcome=false,tabName='',pendingSync=[];
+try{pendingSync=JSON.parse(LS('dialer_pendingSync','[]'))}catch{pendingSync=[]}
 
 function log(m,t=''){const d=document.createElement('div');d.className=t;d.textContent='['+new Date().toLocaleTimeString()+'] '+m;$('log').appendChild(d);$('log').scrollTop=1e9}
+function setState(t,c=''){const p=$('state');p.className='pill '+c;p.innerHTML='<span class="dot"></span>'+t}
+function setDev(t,c=''){const p=$('devpill');p.className='pill '+c;p.innerHTML='<span class="dot"></span>'+t}
+function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+function renderPendingSyncs(){$('pending-syncs').innerHTML=pendingSync.length?`<span class="pending-syncs">${pendingSync.length} pending sync</span>`:''}
 
-function setState(txt,cls=''){const p=$('state');p.className='pill '+cls;p.innerHTML='<span class="dot"></span>'+txt}
-function setDev(txt,cls=''){const p=$('devpill');p.className='pill '+cls;p.innerHTML='<span class="dot"></span>'+txt}
+// ══ PERSISTED CONFIG ══
+$('worker').value=LS('dialer_worker','');
+$('gas-url').value=LS('dialer_gas','');
+$('gas-token').value=LS('dialer_token','');
+$('worker').addEventListener('change',e=>SS('dialer_worker',e.target.value));
+$('gas-url').addEventListener('change',e=>SS('dialer_gas',e.target.value));
+$('gas-token').addEventListener('change',e=>SS('dialer_token',e.target.value));
 
-// ── MIC / DEVICE ──
-$('mic').onclick = async () => {
-  const url = $('worker').value.trim();
-  if(!url){alert('Enter Worker URL first');return}
+// ══ MIC ══
+$('mic').onclick=async()=>{
+  const url=$('worker').value.trim();if(!url){alert('Enter Worker URL');return}
   $('mic').disabled=true;
   try{
-    const r = await fetch(url+'/token');
-    const d = await r.json();
-    if(!d.token) throw new Error(d.error||'No token');
-    device = new Twilio.Device(d.token,{codecPreferences:['opus','pcmu'],logLevel:1});
-    device.on('registered',()=>{setDev('READY','live');log('Device ready','ok');$('mic').textContent='Reconnect';$('mic').disabled=false;$('start').disabled = !leads.length});
+    const r=await fetch(url+'/token');const d=await r.json();
+    if(!d.token)throw new Error(d.error||'No token');
+    device=new Twilio.Device(d.token,{codecPreferences:['opus','pcmu'],logLevel:1});
+    device.on('registered',()=>{setDev('READY','live');log('Device ready','ok');$('mic').textContent='Reconnect';$('mic').disabled=false;checkCanStart()});
     device.on('error',e=>{setDev('ERROR','err');log('Device: '+e.message,'err')});
-    device.on('tokenWillExpire',async()=>{const r=await fetch(url+'/token');const d=await r.json();if(d.token)device.updateToken(d.token);log('Token refreshed')});
+    device.on('tokenWillExpire',async()=>{try{const r=await fetch(url+'/token');const d=await r.json();if(d.token)device.updateToken(d.token);log('Token refreshed')}catch{}});
     await device.register();
   }catch(e){log('Mic init failed: '+e.message,'err');setDev('ERROR','err');$('mic').disabled=false}
 };
 
-// ── CSV ──
-$('csv').onchange = e => {
-  const f = e.target.files[0]; if(!f) return;
-  const rd = new FileReader();
-  rd.onload = ev => parseCSV(ev.target.result);
-  rd.readAsText(f);
+// ══ GOOGLE SHEETS (via GAS — bound to one spreadsheet) ══
+async function gasCall(action,payload={}){
+  const url=$('gas-url').value.trim();
+  const token=$('gas-token').value.trim();
+  if(!url)throw new Error('GAS URL not set');
+  const body=JSON.stringify({action,token,...payload});
+  const r=await fetch(url,{method:'POST',body,headers:{'Content-Type':'text/plain'}});
+  if(!r.ok)throw new Error('GAS HTTP '+r.status);
+  const d=await r.json();
+  if(!d.ok)throw new Error(d.error||'GAS error');
+  return d;
+}
+
+$('load-tabs').onclick=async()=>{
+  if(!$('gas-url').value.trim()){alert('Enter GAS URL first');return}
+  $('load-tabs').disabled=true;log('Loading tabs…');
+  try{
+    const d=await gasCall('listTabs');
+    const sel=$('tab-sel');sel.innerHTML='<option value="">— pick a tab —</option>';
+    d.tabs.forEach(t=>{
+      const o=document.createElement('option');
+      o.value=t.name;
+      o.textContent=t.name+' ('+t.count+' leads)';
+      sel.appendChild(o);
+    });
+    $('file-name').textContent='📂 '+d.fileName+' — '+d.tabs.length+' tabs';
+    log('Found '+d.tabs.length+' tabs in "'+d.fileName+'"','ok');
+  }catch(e){log('Tab load failed: '+e.message,'err');alert('Load tabs failed: '+e.message)}
+  finally{$('load-tabs').disabled=false}
 };
 
-function parseCSV(text){
-  const rows = [];
-  let cur=[],field='',q=false;
-  for(let i=0;i<text.length;i++){
-    const c=text[i];
-    if(q){
-      if(c==='"' && text[i+1]==='"'){field+='"';i++}
-      else if(c==='"'){q=false}
-      else field+=c;
-    }else{
-      if(c==='"')q=true;
-      else if(c===','){cur.push(field);field=''}
-      else if(c==='\n'||c==='\r'){if(field||cur.length){cur.push(field);rows.push(cur);cur=[];field=''}if(c==='\r'&&text[i+1]==='\n')i++}
-      else field+=c;
-    }
-  }
-  if(field||cur.length){cur.push(field);rows.push(cur)}
-  if(!rows.length){alert('Empty CSV');return}
-  headers = rows[0].map(h=>h.trim());
-  leads = rows.slice(1).filter(r=>r[0]&&r[1]).map(r=>({
-    name:(r[0]||'').trim(),
-    phone:normalizePhone(r[1]||''),
-    extra:headers.slice(2).map((h,i)=>({k:h,v:(r[i+2]||'').trim()})).filter(x=>x.v),
-    status:'pending', attempts:0
-  }));
-  idx=0;attempt=0;stats={conn:0,vm:0,fail:0};updateStats();
-  log('Loaded '+leads.length+' leads','ok');
-  renderQueue();
-  if(leads.length) showLead(0);
-  $('start').disabled = !device || !leads.length;
-}
-
-function normalizePhone(p){
-  let d = p.replace(/[^\d+]/g,'');
-  if(!d) return '';
-  if(d.startsWith('+')) return d;
-  if(d.length===10) return '+1'+d;
-  if(d.length===11 && d[0]==='1') return '+'+d;
-  return '+'+d;
-}
-
-function showLead(i){
-  if(i>=leads.length){$('name').textContent='—';$('phone').textContent='—';$('info').innerHTML='<div style="color:var(--t3);text-align:center;padding:20px">Done</div>';return}
-  const l = leads[i];
-  const from = closestNum(l.phone);
-  $('name').textContent = l.name;
-  $('phone').textContent = l.phone;
-  $('att').textContent = 'Lead '+(i+1)+'/'+leads.length+' • Attempt '+(attempt+1)+'/'+ $('maxAtt').value+' • from '+from.lbl;
-  $('info').innerHTML = l.extra.length
-    ? l.extra.map(x=>`<div class="info-row"><div class="info-k">${esc(x.k)}</div><div class="info-v">${esc(x.v)}</div></div>`).join('')
-    : '<div style="color:var(--t3);text-align:center;padding:20px">No extra info</div>';
-  renderScript(l);
-}
-
-// ── SCRIPT RENDERING ──
-let scriptTemplate = '';
-function renderScript(lead){
-  const body = $('script-body');
-  if(!scriptTemplate){
-    body.className='script-body empty';
-    body.textContent='Upload a script .txt file. Use %name%, %address%, %lender%, or any CSV column name as placeholders — they\'ll auto-fill from the current lead.';
-    return;
-  }
-  if(!lead){
-    body.className='script-body empty';
-    body.textContent='Waiting for current lead…';
-    return;
-  }
-  // Build case-insensitive lookup from lead data
-  const lookup = {};
-  // All extra columns
-  lead.extra.forEach(x=>{ lookup[x.k.toLowerCase().trim()] = x.v; });
-  // Core fields
-  lookup['name'] = (lead.name||'').split(/\s+/)[0] || lead.name || '';
-  lookup['fullname'] = lead.name || '';
-  lookup['phone'] = lead.phone || '';
-  // Common aliases — check if any column roughly matches and alias it
-  const aliasMap = {
-    'address':['address','addr','street','property','property address','home address','mailing address'],
-    'lender':['lender','bank','mortgage company','mortgage lender','servicer'],
-    'beneficiary':['beneficiary','spouse','partner'],
-    'city':['city','town'],
-    'state':['state','st'],
-    'zip':['zip','zipcode','postal'],
-  };
-  for(const [k,aliases] of Object.entries(aliasMap)){
-    if(lookup[k]) continue;
-    for(const a of aliases){
-      if(lookup[a]){ lookup[k] = lookup[a]; break; }
-    }
-  }
-  // Render: escape HTML, then replace tokens with highlighted spans
-  let html = esc(scriptTemplate);
-  html = html.replace(/%([^%\n]+)%/g, (match, key)=>{
-    const k = key.toLowerCase().trim();
-    const v = lookup[k];
-    if(v) return `<span class="tok">${esc(v)}</span>`;
-    return `<span class="tok-missing">%${esc(key)}%</span>`;
-  });
-  body.className='script-body';
-  body.innerHTML = html;
-}
-
-// Upload handler
-$('script-file').onchange = e=>{
-  const f = e.target.files[0]; if(!f) return;
-  const rd = new FileReader();
-  rd.onload = ev=>{
-    scriptTemplate = ev.target.result;
-    try{ localStorage.setItem('dialer_script', scriptTemplate); }catch{}
-    $('script-status').textContent = '✓ '+f.name;
-    log('Script loaded: '+f.name+' ('+scriptTemplate.length+' chars)','ok');
-    renderScript(leads[idx]);
-  };
-  rd.readAsText(f);
+$('load-leads').onclick=async()=>{
+  const tab=$('tab-sel').value;if(!tab){alert('Pick a tab first');return}
+  $('load-leads').disabled=true;log('Loading leads from '+tab+'…');
+  try{
+    const d=await gasCall('loadTab',{tab});
+    headers=d.headers;
+    tabName=tab;
+    const ni=headers.findIndex(h=>/name/i.test(h));
+    const pi=headers.findIndex(h=>/phone|cell|mobile|number/i.test(h));
+    if(pi<0)throw new Error('No phone column found. Headers: '+headers.join(', '));
+    leads=d.rows.map((row,i)=>{
+      const cells={};headers.forEach((h,j)=>{cells[h]=(row[j]??'').toString().trim()});
+      const phone=normalizePhone(cells[headers[pi]]||'');
+      if(!phone)return null;
+      const name=ni>=0?(cells[headers[ni]]||'').trim()||'Row '+(i+2):'Row '+(i+2);
+      const existingOutcomes=row.slice(headers.length).map(c=>String(c||'').trim()).filter(Boolean);
+      const isDNC=existingOutcomes.some(o=>/DNC/i.test(o));
+      return{rowIdx:i+2,name,phone,cells,status:isDNC?'dnc':'pending',attempts:0,history:existingOutcomes};
+    }).filter(Boolean);
+    idx=0;attempt=0;stats={book:0,conn:0,vm:0,fail:0};updateStats();
+    log('Loaded '+leads.length+' leads from '+tab,'ok');
+    renderQueue();if(leads.length)showLead(0);
+    checkCanStart();
+  }catch(e){log('Load failed: '+e.message,'err');alert('Load failed: '+e.message)}
+  finally{$('load-leads').disabled=false}
 };
-$('script-clear').onclick = ()=>{
-  scriptTemplate='';
-  try{ localStorage.removeItem('dialer_script'); }catch{}
-  $('script-status').textContent='';
-  $('script-file').value='';
-  renderScript(null);
-  log('Script cleared');
-};
-// Restore script from previous session
-try{
-  const saved = localStorage.getItem('dialer_script');
-  if(saved){
-    scriptTemplate = saved;
-    $('script-status').textContent='✓ restored from last session';
-  }
-}catch{}
-function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
 
-function renderQueue(){
-  $('queue').innerHTML = leads.map((l,i)=>`<div class="q-item ${i===idx?'cur':''} ${l.status!=='pending'?'done':''}"><div class="q-num">${i+1}</div><div class="q-name">${esc(l.name)}</div><div class="q-st ${l.status}">${l.status.toUpperCase()}</div></div>`).join('');
+function findLastNonEmpty(arr){for(let i=arr.length-1;i>=0;i--)if(String(arr[i]||'').trim())return i;return-1}
+function normalizePhone(p){let d=p.replace(/[^\d+]/g,'');if(!d)return'';if(d.startsWith('+'))return d;if(d.length===10)return'+1'+d;if(d.length===11&&d[0]==='1')return'+'+d;return'+'+d}
+
+function checkCanStart(){$('start').disabled=!device||!leads.length}
+
+// ══ SYNC QUEUE (offline-safe) ══
+async function syncOutcome(lead,outcome){
+  const item={tab:tabName,rowIdx:lead.rowIdx,outcome,ts:new Date().toISOString()};
+  pendingSync.push(item);SS('dialer_pendingSync',JSON.stringify(pendingSync));renderPendingSyncs();
+  flushSync();
 }
+async function flushSync(){
+  if(!pendingSync.length)return;
+  if(!$('gas-url').value.trim()){log('GAS URL not set — '+pendingSync.length+' outcomes queued','warn');return}
+  const batch=pendingSync.slice(0,10);
+  try{
+    await gasCall('logOutcomes',{items:batch});
+    pendingSync=pendingSync.slice(batch.length);
+    SS('dialer_pendingSync',JSON.stringify(pendingSync));renderPendingSyncs();
+    if(pendingSync.length)setTimeout(flushSync,500);
+  }catch(e){log('Sync failed (will retry): '+e.message,'warn')}
+}
+setInterval(flushSync,15000);
 
-// ── DIALING ──
-$('start').onclick = ()=>{ if(!device){alert('Connect mic first');return} running=true;$('start').disabled=true;$('stop').disabled=false;$('skip').disabled=false;$('vm').disabled=false;log('Auto-dial started','ok');dialNext()};
-$('stop').onclick = ()=>{ running=false;dialing=false;$('stop').disabled=true;$('start').disabled=false;$('skip').disabled=true;$('vm').disabled=true;clearTimeout(gapTimer);if(conn)try{conn.disconnect()}catch{}setState('STOPPED');log('Stopped','warn')};
-$('skip').onclick = ()=>{ log('Skip pressed','warn');if(conn)try{conn.disconnect()}catch{};attempt = +$('maxAtt').value; afterCall('skipped')};
-$('vm').onclick = ()=>{
-  const lead = leads[idx];
-  if(!lead){log('No active lead','warn');return}
-  log('📬 Manually marked as VM — '+lead.name,'warn');
-  lead.status='vm';
-  stats.vm++;
-  updateStats();
-  renderQueue();
-  setState('VOICEMAIL','vm');
-  if(conn)try{conn.disconnect()}catch{}
-  // disconnect handler will call afterCall; if no conn, call it directly
-  if(!conn) afterCall('vm-manual');
-};
+// ══ DIALING ══
+$('start').onclick=()=>{if(!device){alert('Connect mic');return}running=true;$('start').disabled=true;$('stop').disabled=false;$('vm').disabled=false;$('skip').disabled=false;log('Started','ok');dialNext()};
+$('stop').onclick=()=>{running=false;dialing=false;$('stop').disabled=true;$('start').disabled=!leads.length;$('vm').disabled=true;$('skip').disabled=true;clearTimeout(gapTimer);if(conn)try{conn.disconnect()}catch{};setState('STOPPED');log('Stopped','warn')};
+$('skip').onclick=()=>{if(conn)try{conn.disconnect()}catch{};attempt=+$('maxAtt').value;afterCall('skipped')};
+$('vm').onclick=()=>{const l=leads[idx];if(!l)return;log('📬 Manual VM: '+l.name,'warn');l.status='vm';stats.vm++;updateStats();renderQueue();setState('VM','vm');syncOutcome(l,'Voicemail');if(conn)try{conn.disconnect()}catch{}else afterCall('vm-manual')};
 
 async function dialNext(){
-  if(!running) return;
-  if(dialing){log('dialNext blocked — already dialing','warn');return}
-  if(idx>=leads.length){log('All leads complete','ok');$('stop').click();return}
-  const lead = leads[idx];
-  if(attempt >= +$('maxAtt').value){
-    if(lead.status==='pending') lead.status='fail',stats.fail++;
-    updateStats();renderQueue();
-    idx++;attempt=0;
-    showLead(idx);
-    return setTimeout(dialNext, 300);
+  if(!running||dialing)return;
+  while(idx<leads.length&&leads[idx].status==='dnc')idx++;
+  if(idx>=leads.length){log('All leads done','ok');$('stop').click();return}
+  const lead=leads[idx];
+  if(attempt>=+$('maxAtt').value){
+    if(lead.status==='pending'){lead.status='fail';stats.fail++;syncOutcome(lead,'Max attempts reached')}
+    updateStats();renderQueue();idx++;attempt=0;showLead(idx);return setTimeout(dialNext,300);
   }
-  dialing = true;
-  showLead(idx);
-  const from = closestNum(lead.phone);
-  setState('DIALING','ring');
-  log('Dialing '+lead.name+' '+lead.phone+' from '+from.lbl+' (attempt '+(attempt+1)+')');
+  dialing=true;showLead(idx);
+  const from=closestNum(lead.phone);
+  setState('DIALING','ring');log('Dialing '+lead.name+' from '+from.lbl+' ('+(attempt+1)+'/'+$('maxAtt').value+')');
   try{
-    const params = {
-      To: lead.phone,
-      callerId: from.n,
-      leadName: lead.name,
-      MachineDetection: 'DetectMessageEnd',
-      MachineDetectionTimeout: '6',
-      MachineDetectionSpeechThreshold: '2400',
-      MachineDetectionSpeechEndThreshold: '1200',
-      MachineDetectionSilenceTimeout: '5000'
-    };
-    conn = await device.connect({ params });
+    conn=await device.connect({params:{To:lead.phone,callerId:from.n,leadName:lead.name,MachineDetection:'DetectMessageEnd',MachineDetectionTimeout:'6',MachineDetectionSpeechThreshold:'2400'}});
     bindCall(lead);
-  }catch(e){
-    log('connect() failed: '+e.message,'err');
-    dialing = false;
-    attempt++;
-    setTimeout(dialNext, 1500);
-  }
+  }catch(e){log('connect() failed: '+e.message,'err');dialing=false;attempt++;setTimeout(dialNext,1500)}
 }
 
 function bindCall(lead){
-  callStart = Date.now();
-  let finalized = false;
-  const finalize = (reason)=>{
-    if(finalized) return;
-    finalized = true;
-    clearInterval(callTimer);
-    afterCall(reason);
-  };
-  callTimer = setInterval(()=>{
-    const s = Math.floor((Date.now()-callStart)/1000);
-    $('timer').className='timer';
-    $('timer').textContent = String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
-  },250);
-
+  callStart=Date.now();let finalized=false;
+  const finalize=reason=>{if(finalized)return;finalized=true;clearInterval(callTimer);afterCall(reason)};
+  callTimer=setInterval(()=>{const s=Math.floor((Date.now()-callStart)/1000);$('timer').className='timer';$('timer').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')},250);
   conn.on('ringing',()=>{setState('RINGING','ring');log('Ringing…')});
-  conn.on('accept',()=>{
-    setState('CONNECTED','live');
-    log('Accepted — listening for human/machine','ok');
-    // Time-based VM fallback: if AMD doesn't fire and the call stays under 11s,
-    // assume voicemail and hang up. Real humans say "hello" and you talk past 11s.
-    // This catches VMs that AMD missed.
-    setTimeout(()=>{
-      if(finalized || !conn) return;
-      const dur = Math.floor((Date.now()-callStart)/1000);
-      // If we're past 11s with no human indicator yet, do nothing — let human handle
-      // (human-detected AMDs reset this; this only fires if AMD was silent)
-    }, 11000);
-  });
-
-  // AMD events come through multiple paths depending on SDK version
-  conn.on('messageReceived',msg=>{
-    log('SDK message: '+JSON.stringify(msg?.content||{}).slice(0,200),'dim');
-    const c = msg?.content || msg || {};
-    const ab = c.AnsweredBy || c.answeredBy || c.answered_by;
-    if(ab){ handleAMD(ab, lead); return; }
-    // Some Twilio AMD messages come as CallStatus updates
-    if(c.CallStatus === 'completed' && c.AnsweredBy) handleAMD(c.AnsweredBy, lead);
-  });
-
-  // Also poll customParameters which some SDK builds populate
-  const amdPoll = setInterval(()=>{
-    if(finalized || !conn){clearInterval(amdPoll);return}
-    try{
-      const cp = conn.customParameters;
-      if(cp){
-        const ab = cp.get?.('AnsweredBy') || cp.AnsweredBy;
-        if(ab){ clearInterval(amdPoll); handleAMD(ab, lead); }
-      }
-    }catch{}
-  }, 500);
-
-  conn.on('disconnect',()=>{
-    clearInterval(amdPoll);
-    const dur = Math.floor((Date.now()-callStart)/1000);
-    log('Disconnected after '+dur+'s');
-    if(lead.status==='pending' && dur>=12){
-      // Long enough to be a real human conversation
-      lead.status='done';stats.conn++;
-      return finalize('connected');
-    }
-    if(lead.status==='pending' && dur>=3 && dur<12){
-      // Short connect = VM the AMD missed
-      log('Short connect ('+dur+'s) → treating as VM','warn');
-      lead.status='vm';stats.vm++;
-    }
-    finalize(lead.status==='pending'?'noanswer':lead.status);
-  });
-  conn.on('error',e=>{clearInterval(amdPoll);log('Call error: '+e.message,'err');finalize('error')});
-  conn.on('cancel',()=>{clearInterval(amdPoll);finalize('cancel')});
-  conn.on('reject',()=>{clearInterval(amdPoll);finalize('reject')});
+  conn.on('accept',()=>{setState('CONNECTED','live');log('Accepted','ok')});
+  conn.on('messageReceived',msg=>{const c=msg?.content||{};const ab=c.AnsweredBy||c.answeredBy;if(ab)handleAMD(ab,lead)});
+  conn.on('disconnect',()=>{const dur=Math.floor((Date.now()-callStart)/1000);log('Disconnected after '+dur+'s');if(lead.status==='pending'&&dur>=12){lead.status='human';stats.conn++;promptOutcome(lead);return finalize('human')}if(lead.status==='pending'&&dur>=3&&dur<12){log('Short connect → VM','warn');lead.status='vm';stats.vm++;syncOutcome(lead,'Voicemail')}finalize(lead.status==='pending'?'noanswer':lead.status)});
+  conn.on('error',e=>{log('Call error: '+e.message,'err');finalize('error')});
+  conn.on('cancel',()=>finalize('cancel'));conn.on('reject',()=>finalize('reject'));
 }
+function handleAMD(ab,lead){log('AMD: '+ab,ab.startsWith('machine')?'warn':'ok');if(ab.startsWith('machine')||ab==='fax'||ab==='unknown'){setState('VM','vm');lead.status='vm';stats.vm++;updateStats();syncOutcome(lead,'Voicemail');try{conn.disconnect()}catch{}}}
 
-function handleAMD(answeredBy, lead){
-  if(!lead) lead = leads[idx];
-  log('🤖 AMD detected: '+answeredBy, answeredBy.startsWith('machine')?'warn':'ok');
-  if(answeredBy.startsWith('machine') || answeredBy==='fax' || answeredBy==='unknown'){
-    setState('VOICEMAIL','vm');
-    log('📬 Voicemail — hanging up & moving on','warn');
-    lead.status='vm';
-    stats.vm++;
-    updateStats();
-    try{conn.disconnect()}catch{}
-    // disconnect handler finalizes
-  }else if(answeredBy==='human'){
-    log('👤 Human detected — staying on call','ok');
-  }
+function promptOutcome(lead){
+  awaitingOutcome=true;
+  $('outcome-panel').classList.add('show');
+  running=false; // pause auto-dialer until outcome logged
 }
-
-function afterCall(reason){
-  conn = null;
-  dialing = false;
-  $('timer').textContent='00:00';$('timer').className='timer idle';
-  renderQueue();updateStats();
-  if(!running) return;
-  const lead = leads[idx];
-  if(lead.status==='done'){
-    idx++;attempt=0;
-    setTimeout(dialNext, +$('gap').value*1000);
-  }else{
-    // VM, no-answer, error → retry or move on
-    attempt++;
-    if(attempt >= +$('maxAtt').value){
-      if(lead.status==='pending') lead.status='fail',stats.fail++;
-      idx++;attempt=0;
-    }
-    setTimeout(dialNext, +$('gap').value*1000);
-  }
-}
-
-function updateStats(){
-  $('s-total').textContent = leads.length;
-  $('s-conn').textContent = stats.conn;
-  $('s-vm').textContent = stats.vm;
-  $('s-fail').textContent = stats.fail;
-}
-
-// ── KEYPAD ──
-let kpBuf = '';
-const kpDisp = $('kp-disp');
-function kpRender(){
-  if(!kpBuf){kpDisp.textContent='Type or click to dial';kpDisp.className='kp-display empty'}
-  else{kpDisp.textContent=kpBuf;kpDisp.className='kp-display'}
-}
-function kpPress(k){
-  // If a manual call is live, send DTMF instead of typing
-  if(conn && manualCall){
-    try{conn.sendDigits(k);log('DTMF: '+k)}catch(e){log('DTMF failed: '+e.message,'err')}
-    return;
-  }
-  if(kpBuf.length<20) kpBuf += k;
-  kpRender();
-}
-document.querySelectorAll('.kp-key').forEach(b=>b.onclick=()=>kpPress(b.dataset.k));
-$('kp-bs').onclick = ()=>{kpBuf=kpBuf.slice(0,-1);kpRender()};
-$('kp-bs').addEventListener('contextmenu',e=>{e.preventDefault();kpBuf='';kpRender()});
-
-// keyboard input
-document.addEventListener('keydown',e=>{
-  if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return;
-  if(/^[0-9*#+]$/.test(e.key)){kpPress(e.key);e.preventDefault()}
-  else if(e.key==='Backspace'&&!manualCall){kpBuf=kpBuf.slice(0,-1);kpRender();e.preventDefault()}
-  else if(e.key==='Enter'&&kpBuf&&!manualCall){$('kp-call').click();e.preventDefault()}
+document.querySelectorAll('.obtn').forEach(b=>b.onclick=()=>{
+  const out=b.dataset.out;const lead=leads[idx];if(!lead)return;
+  log('Outcome: '+out+' for '+lead.name,'ok');
+  syncOutcome(lead,out);
+  if(out==='Booked'){lead.status='booked';stats.book++}
+  else if(out==='DNC'){lead.status='dnc'}
+  else{lead.status='done'}
+  $('outcome-panel').classList.remove('show');awaitingOutcome=false;
+  updateStats();renderQueue();
+  idx++;attempt=0;running=true;
+  setTimeout(dialNext,+$('gap').value*1000);
 });
 
-let manualCall = false;
-$('kp-call').onclick = async ()=>{
-  if(!device){alert('Connect mic first');return}
-  if(!kpBuf){alert('Enter a number');return}
-  if(running){alert('Stop the auto-dialer first');return}
-  const num = normalizePhone(kpBuf);
-  const fromSel = $('kp-from').value;
-  let from;
-  if(fromSel==='auto'){
-    from = closestNum(num);
+function afterCall(reason){
+  conn=null;dialing=false;
+  $('timer').textContent='00:00';$('timer').className='timer idle';
+  renderQueue();updateStats();
+  if(awaitingOutcome)return; // wait for user
+  if(!running)return;
+  const lead=leads[idx];
+  if(['human','booked','done','vm','dnc','fail'].includes(lead.status)){
+    if(lead.status==='vm')syncOutcome(lead,'Voicemail'); // ensure VM logged
+    idx++;attempt=0;setTimeout(dialNext,+$('gap').value*1000);
   }else{
-    from = NUMBERS.find(n=>n.n===fromSel) || closestNum(num);
+    attempt++;
+    if(attempt>=+$('maxAtt').value){if(lead.status==='pending'){lead.status='fail';stats.fail++;syncOutcome(lead,'No Answer')};idx++;attempt=0}
+    setTimeout(dialNext,+$('gap').value*1000);
   }
-  log('Manual dial: '+num+' from '+from.lbl);
-  setState('DIALING','ring');
-  manualCall = true;
-  $('kp-call').style.display='none';
-  $('kp-end').style.display='block';
-  callStart = Date.now();
-  callTimer = setInterval(()=>{
-    const s=Math.floor((Date.now()-callStart)/1000);
-    $('timer').className='timer';
-    $('timer').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
-  },250);
+}
+
+// ══ UI RENDER ══
+function showLead(i){
+  if(i>=leads.length){$('name').textContent='—';$('phone').textContent='—';$('info').innerHTML='<div style="color:var(--t3);text-align:center;padding:18px">Done</div>';renderScript(null);return}
+  const l=leads[i];const from=closestNum(l.phone);
+  $('name').textContent=l.name;$('phone').textContent=l.phone;
+  $('att').textContent='Lead '+(i+1)+'/'+leads.length+' • Try '+(attempt+1)+'/'+$('maxAtt').value+' • '+from.lbl+(l.history.length?' • '+l.history.length+' prior':'');
+  const entries=Object.entries(l.cells).filter(([k,v])=>v&&!/name|phone|cell|mobile/i.test(k));
+  $('info').innerHTML=entries.length?entries.map(([k,v])=>`<div class="info-row"><div class="info-k">${esc(k)}</div><div class="info-v">${esc(v)}</div></div>`).join(''):'<div style="color:var(--t3);text-align:center;padding:18px">No extra info</div>';
+  renderScript(l);
+}
+
+function renderScript(lead){
+  const sIdx=+$('script-sel').value;const tpl=SCRIPTS[sIdx]?.text||'';
+  const body=$('script-body');
+  if(!tpl){body.className='script-body empty';body.textContent='Script empty';return}
+  if(!lead){body.className='script-body empty';body.textContent='Load a lead';return}
+  const lookup={};Object.entries(lead.cells).forEach(([k,v])=>{lookup[k.toLowerCase().trim()]=v});
+  lookup['name']=(lead.name||'').split(/\s+/)[0]||lead.name||'';
+  lookup['fullname']=lead.name||'';lookup['phone']=lead.phone||'';
+  const aliases={'address':['address','addr','street','property','property address'],'lender':['lender','bank','mortgage company','servicer'],'beneficiary':['beneficiary','spouse','partner']};
+  for(const[k,aa]of Object.entries(aliases)){if(lookup[k])continue;for(const a of aa){if(lookup[a]){lookup[k]=lookup[a];break}}}
+  let html=esc(tpl).replace(/\{([^}\n]+)\}/g,(m,k)=>{const v=lookup[k.toLowerCase().trim()];return v?`<span class="tok">${esc(v)}</span>`:`<span class="tok-missing">{${esc(k)}}</span>`});
+  body.className='script-body';body.innerHTML=html;
+}
+$('script-sel').onchange=()=>{SS('dialer_script',$('script-sel').value);renderScript(leads[idx])};
+$('script-sel').value=LS('dialer_script','0');
+
+function renderQueue(){$('queue').innerHTML=leads.map((l,i)=>`<div class="q-item ${i===idx?'cur':''} ${l.status!=='pending'?'done':''}"><div class="q-num">${i+1}</div><div class="q-name">${esc(l.name)}</div><div class="q-st ${l.status}">${l.status.toUpperCase()}</div></div>`).join('')}
+function updateStats(){$('s-total').textContent=leads.length;$('s-book').textContent=stats.book;$('s-conn').textContent=stats.conn;$('s-vm').textContent=stats.vm;$('s-fail').textContent=stats.fail}
+
+// ══ KEYPAD ══
+NUMBERS.forEach(n=>{const o=document.createElement('option');o.value=n.n;o.textContent=n.lbl;$('kp-from').appendChild(o)});
+$('kp-from').value=LS('kp_from','auto');$('kp-from').addEventListener('change',e=>SS('kp_from',e.target.value));
+let kpBuf='',manualCall=false;const kpDisp=$('kp-disp');
+function kpRender(){if(!kpBuf){kpDisp.textContent='Type to dial';kpDisp.className='kp-display empty'}else{kpDisp.textContent=kpBuf;kpDisp.className='kp-display'}}
+function kpPress(k){if(conn&&manualCall){try{conn.sendDigits(k);log('DTMF: '+k)}catch{};return}if(kpBuf.length<20)kpBuf+=k;kpRender()}
+document.querySelectorAll('.kp-key').forEach(b=>b.onclick=()=>kpPress(b.dataset.k));
+$('kp-bs').onclick=()=>{kpBuf=kpBuf.slice(0,-1);kpRender()};
+$('kp-call').onclick=async()=>{
+  if(!device){alert('Connect mic');return}if(!kpBuf){alert('Enter number');return}if(running){alert('Stop auto-dialer first');return}
+  const num=normalizePhone(kpBuf);const fromSel=$('kp-from').value;const from=fromSel==='auto'?closestNum(num):(NUMBERS.find(n=>n.n===fromSel)||closestNum(num));
+  log('Manual: '+num+' from '+from.lbl);setState('DIALING','ring');manualCall=true;
+  $('kp-call').style.display='none';$('kp-end').style.display='block';callStart=Date.now();
+  callTimer=setInterval(()=>{const s=Math.floor((Date.now()-callStart)/1000);$('timer').className='timer';$('timer').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')},250);
   try{
-    conn = await device.connect({params:{To:num, callerId:from.n, leadName:'Manual'}});
-    conn.on('ringing',()=>{setState('RINGING','ring');log('Ringing…')});
-    conn.on('accept',()=>{setState('CONNECTED','live');log('Connected — keypad now sends DTMF','ok')});
-    conn.on('disconnect',()=>{endManual('Disconnected')});
-    conn.on('error',e=>{log('Call error: '+e.message,'err');endManual('Error')});
-    conn.on('cancel',()=>endManual('Cancelled'));
-    conn.on('reject',()=>endManual('Rejected'));
+    conn=await device.connect({params:{To:num,callerId:from.n,leadName:'Manual'}});
+    conn.on('accept',()=>{setState('CONNECTED','live');log('Connected','ok')});
+    conn.on('disconnect',()=>endManual('Disconnected'));conn.on('error',e=>{log('Error: '+e.message,'err');endManual('Error')});
+    conn.on('cancel',()=>endManual('Cancel'));conn.on('reject',()=>endManual('Reject'));
   }catch(e){log('Manual dial failed: '+e.message,'err');endManual('Failed')}
 };
-$('kp-end').onclick = ()=>{if(conn)try{conn.disconnect()}catch{}};
-function endManual(reason){
-  log(reason);
-  clearInterval(callTimer);
-  conn=null;manualCall=false;
-  $('timer').textContent='00:00';$('timer').className='timer idle';
-  setState('IDLE');
-  $('kp-call').style.display='block';
-  $('kp-end').style.display='none';
-}
+$('kp-end').onclick=()=>{if(conn)try{conn.disconnect()}catch{}};
+function endManual(r){log(r);clearInterval(callTimer);conn=null;manualCall=false;$('timer').textContent='00:00';$('timer').className='timer idle';setState('IDLE');$('kp-call').style.display='block';$('kp-end').style.display='none'}
 
-// ── BULLETPROOF DROPDOWN INIT ──
-// Run after everything else, in a try/catch, so no upstream error can block it.
-function initFromDropdown(){
-  try{
-    const sel = document.getElementById('kp-from');
-    if(!sel){console.error('kp-from dropdown not found');return}
-    // Remove any previously added options (keep only "Auto")
-    while(sel.options.length>1) sel.remove(1);
-    // Add all numbers
-    NUMBERS.forEach(n=>{
-      const o = document.createElement('option');
-      o.value = n.n;
-      o.textContent = n.lbl;
-      sel.appendChild(o);
-    });
-    // Restore saved selection
-    try{ sel.value = localStorage.getItem('kp_from') || 'auto'; }catch{}
-    sel.addEventListener('change', e=>{
-      try{ localStorage.setItem('kp_from', e.target.value); }catch{}
-    });
-    console.log('✓ Dropdown populated with', sel.options.length, 'options');
-  }catch(e){
-    console.error('Dropdown init failed:', e);
-  }
-}
-// Run immediately AND on DOMContentLoaded as a belt-and-suspenders safety
-initFromDropdown();
-if(document.readyState === 'loading'){
-  document.addEventListener('DOMContentLoaded', initFromDropdown);
-}
-setTimeout(initFromDropdown, 100);
-
-log('Ready. Enter Worker URL → Connect Mic → Load CSV → Start.');
-</script>
-</body>
-</html>
+renderPendingSyncs();log('Ready. Setup → Connect Mic → Refresh Tabs → Load Leads → Start.');
+</script></body></html>
