@@ -73,6 +73,8 @@ button:disabled{opacity:.35;cursor:not-allowed}
 .kp-call:hover:not(:disabled){background:#00c853}
 .kp-end{background:var(--red);color:#fff;border-color:var(--red)}
 .kp-bs{background:var(--s2)}
+.btn-vm{background:none;border-color:#c084fc;color:#c084fc}
+.btn-vm:hover:not(:disabled){background:rgba(192,132,252,.1)}
 @media(max-width:1180px){body{grid-template-columns:1fr 300px}}
 @media(max-width:880px){body{grid-template-columns:1fr}}
 </style>
@@ -102,6 +104,7 @@ button:disabled{opacity:.35;cursor:not-allowed}
   <div class="row" style="margin-bottom:0">
     <button id="start" class="btn-go" disabled>▶ START</button>
     <button id="stop" class="btn-stop" disabled>■ STOP</button>
+    <button id="vm" class="btn-vm" disabled title="Hang up & mark as voicemail — goes to next lead or retries">📬 SENT TO VM</button>
     <button id="skip" class="btn-skip" disabled>⏭ SKIP</button>
     <span class="pill" id="state" style="margin-left:auto"><span class="dot"></span>IDLE</span>
   </div>
@@ -291,9 +294,22 @@ function renderQueue(){
 }
 
 // ── DIALING ──
-$('start').onclick = ()=>{ if(!device){alert('Connect mic first');return} running=true;$('start').disabled=true;$('stop').disabled=false;$('skip').disabled=false;log('Auto-dial started','ok');dialNext()};
-$('stop').onclick = ()=>{ running=false;dialing=false;$('stop').disabled=true;$('start').disabled=false;$('skip').disabled=true;clearTimeout(gapTimer);if(conn)try{conn.disconnect()}catch{}setState('STOPPED');log('Stopped','warn')};
+$('start').onclick = ()=>{ if(!device){alert('Connect mic first');return} running=true;$('start').disabled=true;$('stop').disabled=false;$('skip').disabled=false;$('vm').disabled=false;log('Auto-dial started','ok');dialNext()};
+$('stop').onclick = ()=>{ running=false;dialing=false;$('stop').disabled=true;$('start').disabled=false;$('skip').disabled=true;$('vm').disabled=true;clearTimeout(gapTimer);if(conn)try{conn.disconnect()}catch{}setState('STOPPED');log('Stopped','warn')};
 $('skip').onclick = ()=>{ log('Skip pressed','warn');if(conn)try{conn.disconnect()}catch{};attempt = +$('maxAtt').value; afterCall('skipped')};
+$('vm').onclick = ()=>{
+  const lead = leads[idx];
+  if(!lead){log('No active lead','warn');return}
+  log('📬 Manually marked as VM — '+lead.name,'warn');
+  lead.status='vm';
+  stats.vm++;
+  updateStats();
+  renderQueue();
+  setState('VOICEMAIL','vm');
+  if(conn)try{conn.disconnect()}catch{}
+  // disconnect handler will call afterCall; if no conn, call it directly
+  if(!conn) afterCall('vm-manual');
+};
 
 async function dialNext(){
   if(!running) return;
