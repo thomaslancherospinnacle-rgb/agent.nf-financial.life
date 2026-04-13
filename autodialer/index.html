@@ -105,8 +105,7 @@ summary:hover{color:var(--tx)}
       <span class="pill" id="devpill"><span class="dot"></span>OFFLINE</span>
     </div>
     <div class="row">
-      <label>GAS URL</label><input id="gas-url" style="flex:1;min-width:200px" placeholder="https://script.google.com/macros/s/.../exec">
-      <label>Token</label><input id="gas-token" style="width:120px" type="password" placeholder="secret">
+      <label>PASSWORD</label><input id="gas-depid" style="flex:1;min-width:240px" placeholder="AKfycbw...TgfyZ5">
       <button id="load-tabs">↻ Refresh Tabs</button>
     </div>
     <div class="tabs-row">
@@ -155,9 +154,9 @@ summary:hover{color:var(--tx)}
     <div class="script-hdr">
       <span style="font-size:10px;font-family:'SF Mono',monospace;color:var(--green);letter-spacing:.08em">◆ SCRIPT</span>
       <select id="script-sel">
-        <option value="0">Script 1</option>
-        <option value="1">Script 2</option>
-        <option value="2">Script 3</option>
+        <option value="0">Discount Card</option>
+        <option value="1">Response Card</option>
+        <option value="2">Aged Mortgage</option>
       </select>
     </div>
     <div class="script-body empty" id="script-body">Load a lead to see script</div>
@@ -202,9 +201,35 @@ summary:hover{color:var(--tx)}
 'use strict';
 // ══ HARDCODED SCRIPTS — PASTE YOUR REAL ONES HERE ══
 const SCRIPTS = [
-  { name:'Script 1', text:`Lorem ipsum dolor sit amet {name}, dolor sit amet {address} and {lender} sit amet consectetur. {name} adipiscing elit sed do eiusmod.` },
-  { name:'Script 2', text:`Lorem ipsum {name} — placeholder 2. Replace this whole string.` },
-  { name:'Script 3', text:`Lorem ipsum {name} — placeholder 3. Replace this whole string.` },
+  { name:'Discount Card', text:`Hello hello {name}?
+Hey name this is name with Globe Life American Income division insurance company how are you doing today?
+
+If yes continue
+If no, you have the $2000 policy with us, it came accross…
+
+great I'm calling about that smaller policy you got with us, the $2,000 policy it just came across my desk and it was showing me that we don't have a beneficiary for you we also just got to make sure that we have you updated on the company wide updates for 2026 make sure you get the claims forms all that good stuff now we do this over the phone virtually to save you time we don't have to come out to the house anymore like we used to so what usually works better mornings or evenings?
+.` },
+  { name:'Response Card', text:`Hey (name)? Hey (name) this is (agent) with American Income Life, we handle some of your permanent benefits through the (Union). I’m calling because we just got back your 
+beneficiary card and I just need to verify to make sure everything is up to date.
+
+It looks like you have your (relation), (name) down as the beneficiary. Is that still correct? Okay perfect, and you still want the benefit package to come down to (address)? Okay cool, and then just to verify your birthday I have (birthday)? 
+Okay perfect, now the (union) set you up with a permanent benefits package, and it looks like in our files here you are still one of the members who have not received it yet. So my job is to get you caught up with all the other members in your local (#). 
+Now (name), do you have a spouse or is it just yourself? 
+(only ask if they do not have spouse as beneficiary) 
+
+
+(ALWAYS GIVE IT A SHOT - “IF YOU GUYS HAVE 15 MINUTES TOGETHER WE CAN GET THIS KNOCKED OUT RIGHT NOW”) 
+Okay perfect, now I’m sure you/you guys are really busy people, but what usually works better for you, mornings or evenings? 
+I gotcha, let me check my schedule so I can get you/you guys in. It’ll be nice and quick 
+because we are all virtual now. . . (pause) So as far as availability I have ___ or ___ today, or ___ tomorrow, what works the best? .` },
+  { name:'Aged Mortgage', text:`Hello hello %name%, its _____. Giving you a quick call here, I manage the brokerage, that handles the mortgage protection for %lender%. Reason for my call, Your file that’s associated with your property on %address% came, across our system, as flagged for review or incomplete… Not a problem, %name%, the only reason for that is, sometime around when, you closed or refinanced the home…. We sent you like, several things in the mail, about the mortgage, protection Right, where, it pays off the home if you, get sick or, pass away, Does, that ring a bell at all %name%?
+You did the right thing. I mean, you filled out the card, you mailed it back to us… But for some reason, on our end, we haven’t gotten that completed…. I’m the senior underwriter in the area here. So, I just wanted to make sure we took care of you.
+Now, is it just you in the home or is there a significant other or family there with you?
+Gotcha, and im assuming that god forbid, you where to pass, your (Beneficiary) would be the one, taking over the mortgage, right?
+Ok so correct me if im wrong, you just wanted to make sure that (beneficiary) is taken care of right, so they dont have to take care of that financial burden.
+Gotcha so usually you get the mortgage protection taken care of at closing, its showing youve got the homeowners insurance, which takes care of damages, and the PMI, that makes sure the bank gets their money if you default on the mortgage, and the mortgage protection is the 3rd and most important insurance takes care of the home god forbid you where to pass, does that make sense?
+Ok is there a reason why you never got this taken care of, or you don’t know?
+BOOK APPOINTMENT!` },
 ];
 
 // ══ TWILIO NUMBERS (frontend picks closest) ══
@@ -238,11 +263,9 @@ function renderPendingSyncs(){$('pending-syncs').innerHTML=pendingSync.length?`<
 
 // ══ PERSISTED CONFIG ══
 $('worker').value=LS('dialer_worker','');
-$('gas-url').value=LS('dialer_gas','');
-$('gas-token').value=LS('dialer_token','');
+$('gas-depid').value=LS('dialer_depid','');
 $('worker').addEventListener('change',e=>SS('dialer_worker',e.target.value));
-$('gas-url').addEventListener('change',e=>SS('dialer_gas',e.target.value));
-$('gas-token').addEventListener('change',e=>SS('dialer_token',e.target.value));
+$('gas-depid').addEventListener('change',e=>SS('dialer_depid',e.target.value.trim()));
 
 // ══ MIC ══
 $('mic').onclick=async()=>{
@@ -261,11 +284,11 @@ $('mic').onclick=async()=>{
 
 // ══ GOOGLE SHEETS (via GAS — bound to one spreadsheet) ══
 async function gasCall(action,payload={}){
-  const url=$('gas-url').value.trim();
-  const token=$('gas-token').value.trim();
-  if(!url)throw new Error('GAS URL not set');
-  const body=JSON.stringify({action,token,...payload});
-  const r=await fetch(url,{method:'POST',body,headers:{'Content-Type':'text/plain'}});
+  const depid=$('gas-depid').value.trim();
+  if(!depid)throw new Error('Deployment ID not set');
+  const url='https://script.google.com/macros/s/'+depid+'/exec';
+  const body=JSON.stringify({action,...payload});
+  const r=await fetch(url,{method:'POST',body,headers:{'Content-Type':'text/plain'},redirect:'follow'});
   if(!r.ok)throw new Error('GAS HTTP '+r.status);
   const d=await r.json();
   if(!d.ok)throw new Error(d.error||'GAS error');
@@ -273,7 +296,7 @@ async function gasCall(action,payload={}){
 }
 
 $('load-tabs').onclick=async()=>{
-  if(!$('gas-url').value.trim()){alert('Enter GAS URL first');return}
+  if(!$('gas-depid').value.trim()){alert('Enter Deployment ID first');return}
   $('load-tabs').disabled=true;log('Loading tabs…');
   try{
     const d=await gasCall('listTabs');
@@ -330,7 +353,7 @@ async function syncOutcome(lead,outcome){
 }
 async function flushSync(){
   if(!pendingSync.length)return;
-  if(!$('gas-url').value.trim()){log('GAS URL not set — '+pendingSync.length+' outcomes queued','warn');return}
+  if(!$('gas-depid').value.trim()){log('Deployment ID not set — '+pendingSync.length+' outcomes queued','warn');return}
   const batch=pendingSync.slice(0,10);
   try{
     await gasCall('logOutcomes',{items:batch});
