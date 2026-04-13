@@ -75,6 +75,19 @@ button:disabled{opacity:.35;cursor:not-allowed}
 .kp-bs{background:var(--s2)}
 .btn-vm{background:none;border-color:#c084fc;color:#c084fc}
 .btn-vm:hover:not(:disabled){background:rgba(192,132,252,.1)}
+.script-wrap{background:var(--s2);border:1px solid var(--b);border-radius:8px;margin:14px 0;overflow:hidden}
+.script-hdr{padding:10px 14px;background:var(--s3);display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--b)}
+.script-hdr h3{font-size:11px;font-family:'SF Mono',monospace;letter-spacing:.08em;color:var(--green);font-weight:500;margin:0}
+.script-hdr .spacer{flex:1}
+.script-hdr label{cursor:pointer;padding:4px 10px;border:1px solid var(--b);border-radius:4px;font-size:10px;color:var(--t2)}
+.script-hdr label:hover{border-color:var(--b2);color:var(--tx)}
+.script-hdr button{padding:4px 10px;border:1px solid var(--b);background:none;color:var(--t2);border-radius:4px;font-size:10px;cursor:pointer}
+.script-hdr button:hover{border-color:var(--b2);color:var(--tx)}
+.script-body{padding:14px;max-height:340px;overflow:auto;font-size:13px;line-height:1.6;white-space:pre-wrap;color:var(--tx);font-family:-apple-system,'Inter',sans-serif}
+.script-body.empty{color:var(--t3);text-align:center;padding:30px;font-style:italic}
+.script-body .tok{background:rgba(0,230,118,.15);color:var(--green);padding:1px 5px;border-radius:3px;font-weight:500}
+.script-body .tok-missing{background:rgba(255,77,109,.15);color:var(--red);padding:1px 5px;border-radius:3px;font-weight:500;text-decoration:line-through}
+.script-body h1,.script-body h2,.script-body h3{color:var(--blue);font-size:14px;margin:12px 0 6px;font-weight:600}
 @media(max-width:1180px){body{grid-template-columns:1fr 300px}}
 @media(max-width:880px){body{grid-template-columns:1fr}}
 </style>
@@ -115,6 +128,20 @@ button:disabled{opacity:.35;cursor:not-allowed}
   <div style="font-family:'SF Mono',monospace;font-size:11px;color:var(--t3)" id="att"></div>
 
   <div class="info" id="info"><div style="color:var(--t3);text-align:center;padding:20px">Load a CSV to begin</div></div>
+
+  <div class="script-wrap">
+    <div class="script-hdr">
+      <h3>◆ SCRIPT</h3>
+      <span id="script-status" style="font-size:10px;color:var(--t3);font-family:'SF Mono',monospace"></span>
+      <span class="spacer"></span>
+      <label>
+        📄 Upload .txt
+        <input type="file" id="script-file" accept=".txt" style="display:none">
+      </label>
+      <button id="script-clear">✕ Clear</button>
+    </div>
+    <div class="script-body empty" id="script-body">Upload a script .txt file. Use %name%, %address%, %lender%, or any CSV column name as placeholders — they'll auto-fill from the current lead.</div>
+  </div>
 
   <div class="stats">
     <div class="stat"><div class="stat-v" id="s-total">0</div><div class="stat-l">Total</div></div>
@@ -286,7 +313,87 @@ function showLead(i){
   $('info').innerHTML = l.extra.length
     ? l.extra.map(x=>`<div class="info-row"><div class="info-k">${esc(x.k)}</div><div class="info-v">${esc(x.v)}</div></div>`).join('')
     : '<div style="color:var(--t3);text-align:center;padding:20px">No extra info</div>';
+  renderScript(l);
 }
+
+// ── SCRIPT RENDERING ──
+let scriptTemplate = '';
+function renderScript(lead){
+  const body = $('script-body');
+  if(!scriptTemplate){
+    body.className='script-body empty';
+    body.textContent='Upload a script .txt file. Use %name%, %address%, %lender%, or any CSV column name as placeholders — they\'ll auto-fill from the current lead.';
+    return;
+  }
+  if(!lead){
+    body.className='script-body empty';
+    body.textContent='Waiting for current lead…';
+    return;
+  }
+  // Build case-insensitive lookup from lead data
+  const lookup = {};
+  // All extra columns
+  lead.extra.forEach(x=>{ lookup[x.k.toLowerCase().trim()] = x.v; });
+  // Core fields
+  lookup['name'] = (lead.name||'').split(/\s+/)[0] || lead.name || '';
+  lookup['fullname'] = lead.name || '';
+  lookup['phone'] = lead.phone || '';
+  // Common aliases — check if any column roughly matches and alias it
+  const aliasMap = {
+    'address':['address','addr','street','property','property address','home address','mailing address'],
+    'lender':['lender','bank','mortgage company','mortgage lender','servicer'],
+    'beneficiary':['beneficiary','spouse','partner'],
+    'city':['city','town'],
+    'state':['state','st'],
+    'zip':['zip','zipcode','postal'],
+  };
+  for(const [k,aliases] of Object.entries(aliasMap)){
+    if(lookup[k]) continue;
+    for(const a of aliases){
+      if(lookup[a]){ lookup[k] = lookup[a]; break; }
+    }
+  }
+  // Render: escape HTML, then replace tokens with highlighted spans
+  let html = esc(scriptTemplate);
+  html = html.replace(/%([^%\n]+)%/g, (match, key)=>{
+    const k = key.toLowerCase().trim();
+    const v = lookup[k];
+    if(v) return `<span class="tok">${esc(v)}</span>`;
+    return `<span class="tok-missing">%${esc(key)}%</span>`;
+  });
+  body.className='script-body';
+  body.innerHTML = html;
+}
+
+// Upload handler
+$('script-file').onchange = e=>{
+  const f = e.target.files[0]; if(!f) return;
+  const rd = new FileReader();
+  rd.onload = ev=>{
+    scriptTemplate = ev.target.result;
+    try{ localStorage.setItem('dialer_script', scriptTemplate); }catch{}
+    $('script-status').textContent = '✓ '+f.name;
+    log('Script loaded: '+f.name+' ('+scriptTemplate.length+' chars)','ok');
+    renderScript(leads[idx]);
+  };
+  rd.readAsText(f);
+};
+$('script-clear').onclick = ()=>{
+  scriptTemplate='';
+  try{ localStorage.removeItem('dialer_script'); }catch{}
+  $('script-status').textContent='';
+  $('script-file').value='';
+  renderScript(null);
+  log('Script cleared');
+};
+// Restore script from previous session
+try{
+  const saved = localStorage.getItem('dialer_script');
+  if(saved){
+    scriptTemplate = saved;
+    $('script-status').textContent='✓ restored from last session';
+  }
+}catch{}
 function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
 
 function renderQueue(){
