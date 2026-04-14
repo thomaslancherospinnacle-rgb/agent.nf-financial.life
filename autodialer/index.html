@@ -200,6 +200,7 @@ summary:hover{color:var(--tx)}
       <button class="obtn o-ni"    data-out="Not Interested">❌ Not Interested</button>
       <button class="obtn o-wn"    data-out="Wrong Number">📵 Wrong Number</button>
       <button class="obtn o-dnc"   data-out="DNC">🚫 DNC</button>
+      <button class="obtn o-retry" data-out="__RETRY__" style="grid-column:span 3;background:var(--s3);border-color:var(--amber);color:var(--amber)">↻ False alarm — retry this lead</button>
     </div>
   </div>
 
@@ -771,6 +772,24 @@ function promptOutcome(lead){
 }
 document.querySelectorAll('.obtn').forEach(b=>b.onclick=()=>{
   const out=b.dataset.out;const lead=leads[idx];if(!lead)return;
+  // False-alarm retry path: no disposition, don't mark done, just count as attempt and move on
+  if(out==='__RETRY__'){
+    log('False alarm → retrying '+lead.name,'warn');
+    // undo the "human answered" bookkeeping we did before opening this panel
+    if(lead.status==='human'){lead.status='pending';stats.conn=Math.max(0,stats.conn-1);}
+    $('outcome-panel').classList.remove('show');awaitingOutcome=false;
+    running=true;
+    attempt++; // count this as a failed attempt
+    if(attempt>=+$('maxAtt').value){
+      // out of attempts — bail on this lead and move on
+      lead.status='fail';stats.fail++;
+      syncOutcome(lead,'No Answer (max attempts)');
+      idx++;attempt=0;
+    }
+    updateStats();renderQueue();
+    setTimeout(dialNext,+$('gap').value*1000);
+    return;
+  }
   log('Outcome: '+out+' for '+lead.name,'ok');
   syncOutcome(lead,out);
   // ── Tracker: bump pickups + specific outcome counters ──
