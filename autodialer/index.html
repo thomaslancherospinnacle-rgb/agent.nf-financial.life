@@ -135,6 +135,10 @@ summary:hover{color:var(--tx)}
   <div class="row" style="margin-top:12px">
     <label>Max Attempts</label><input type="number" id="maxAtt" value="3" min="1" max="10">
     <label>Gap (s)</label><input type="number" id="gap" value="2" min="0" max="60">
+    <label style="display:flex;align-items:center;gap:5px;cursor:pointer;user-select:none">
+      <input type="checkbox" id="vmDetect" checked style="width:14px;height:14px;cursor:pointer;accent-color:var(--pink)">
+      <span style="font-size:10px;color:var(--pink);font-family:'SF Mono',monospace;letter-spacing:.05em">🎯 VM DETECT</span>
+    </label>
     <span style="font-size:10px;color:var(--pink);font-family:'SF Mono',monospace;letter-spacing:.05em">⚡ AUTO VM SKIP</span>
   </div>
 
@@ -488,7 +492,8 @@ async function fastRedial(from,reason){
     setState('DIALING','ring');
     log('⚡ '+reason+': '+lead.name+' from '+from.lbl);
     try{
-      conn=await device.connect({params:{To:lead.phone,callerId:from.n,leadName:lead.name,MachineDetection:'DetectMessageEnd',MachineDetectionTimeout:'6'}});
+      const vmd=$('vmDetect').checked?'on':'off';
+      conn=await device.connect({params:{To:lead.phone,callerId:from.n,leadName:lead.name,VmDetect:vmd,MachineDetection:'DetectMessageEnd',MachineDetectionTimeout:'6'}});
       lead._lastCallerId=from.n;
       bindCall(lead);
     }catch(e){log('Redial failed: '+e.message,'err');dialing=false}
@@ -546,7 +551,8 @@ async function dialNext(){
   const from=closestNum(lead.phone);
   setState('DIALING','ring');log('Dialing '+lead.name+' from '+from.lbl+' ('+(attempt+1)+'/'+$('maxAtt').value+')');
   try{
-    conn=await device.connect({params:{To:lead.phone,callerId:from.n,leadName:lead.name,MachineDetection:'DetectMessageEnd',MachineDetectionTimeout:'6',MachineDetectionSpeechThreshold:'2400'}});
+    const vmd=$('vmDetect').checked?'on':'off';
+    conn=await device.connect({params:{To:lead.phone,callerId:from.n,leadName:lead.name,VmDetect:vmd,MachineDetection:'DetectMessageEnd',MachineDetectionTimeout:'6',MachineDetectionSpeechThreshold:'2400'}});
     lead._lastCallerId=from.n;
     bindCall(lead);
   }catch(e){log('connect() failed: '+e.message,'err');dialing=false;attempt++;setTimeout(dialNext,1500)}
@@ -569,21 +575,24 @@ function bindCall(lead){
     }
 
     // ══ CHECK VM DETECTION VERDICT from vm-detect Worker ══
+    // Skip the poll entirely if toggle is off (saves a round-trip)
     let vmVerdict=null;
-    try{
-      const callSid=conn?.parameters?.CallSid;
-      if(callSid){
-        const w=$('worker').value.replace(/\/$/,'');
-        const r=await fetch(w+'/vm-verdict/'+callSid,{method:'GET'});
-        if(r.ok){
-          const data=await r.json();
-          vmVerdict=data.verdict;
-          if(vmVerdict){
-            log('VM Worker verdict: '+vmVerdict+' ('+data.reason+', '+data.elapsedMs+'ms)',vmVerdict==='vm'?'warn':'ok');
+    if($('vmDetect').checked){
+      try{
+        const callSid=conn?.parameters?.CallSid;
+        if(callSid){
+          const w=$('worker').value.replace(/\/$/,'');
+          const r=await fetch(w+'/vm-verdict/'+callSid,{method:'GET'});
+          if(r.ok){
+            const data=await r.json();
+            vmVerdict=data.verdict;
+            if(vmVerdict){
+              log('VM Worker verdict: '+vmVerdict+' ('+data.reason+', '+data.elapsedMs+'ms)',vmVerdict==='vm'?'warn':'ok');
+            }
           }
         }
-      }
-    }catch(e){log('VM verdict poll failed: '+e.message,'warn')}
+      }catch(e){log('VM verdict poll failed: '+e.message,'warn')}
+    }
 
     if(vmVerdict==='vm'){
       // Deepgram detected voicemail — route into retry logic
@@ -779,6 +788,13 @@ $('kp-call').onclick=async()=>{
 };
 $('kp-end').onclick=()=>{if(conn)try{conn.disconnect()}catch{}};
 function endManual(r){log(r);clearInterval(callTimer);beepStop();resetMuteUI();conn=null;manualCall=false;$('timer').textContent='00:00';$('timer').className='timer idle';setState('IDLE');$('kp-call').style.display='block';$('kp-end').style.display='none'}
+
+// VM Detect toggle — persist on/off in localStorage
+$('vmDetect').checked=LS('dialer_vm_detect','1')==='1';
+$('vmDetect').addEventListener('change',e=>{
+  SS('dialer_vm_detect',e.target.checked?'1':'0');
+  log('🎯 VM Detect '+(e.target.checked?'ENABLED':'DISABLED — saving Deepgram cost'),e.target.checked?'ok':'warn');
+});
 
 renderPendingSyncs();log('Ready. Setup → Connect Mic → Refresh Tabs → Load Leads → Start.');
 </script></body></html>
