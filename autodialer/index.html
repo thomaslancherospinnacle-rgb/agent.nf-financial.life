@@ -176,6 +176,10 @@ summary:hover{color:var(--tx)}
       <input type="checkbox" id="vmDetect" checked style="width:14px;height:14px;cursor:pointer;accent-color:var(--pink)">
       <span style="font-size:10px;color:var(--pink);font-family:'SF Mono',monospace;letter-spacing:.05em">🎯 VM DETECT</span>
     </label>
+    <label style="display:flex;align-items:center;gap:5px;cursor:pointer;user-select:none" title="On each retry of the same lead, rotate to the next-closest caller ID. Helps when one number is getting filtered/blocked.">
+      <input type="checkbox" id="altDial" style="width:14px;height:14px;cursor:pointer;accent-color:var(--blue)">
+      <span style="font-size:10px;color:var(--blue);font-family:'SF Mono',monospace;letter-spacing:.05em">🔀 ALT DIAL</span>
+    </label>
     <span style="font-size:10px;color:var(--pink);font-family:'SF Mono',monospace;letter-spacing:.05em">⚡ AUTO VM SKIP</span>
   </div>
 
@@ -185,7 +189,7 @@ summary:hover{color:var(--tx)}
     <button id="force-stop" class="btn-force-stop" title="NUCLEAR: kill any in-progress call, cancel pending retries, reset all state. Use if dialer is stuck or buggin.">⛔ FORCE STOP</button>
     <button id="vm" class="btn-vm" disabled>📬 SENT TO VM</button>
     <button id="beep" class="btn-beep" disabled title="Press & HOLD to spam #01 tones through the line">🔔 BEEP!</button>
-    <button id="mute" class="btn-mute" disabled title="Mute your mic — they can't hear you, you can still hear them">🎤 MUTE</button>
+    <button id="mute" class="btn-mute" title="Mute your mic (sticky — stays across calls). Can toggle with or without active call.">🎤 MUTE</button>
     <button id="redial" class="btn-redial" disabled title="Hang up and instantly redial this same number from the same caller ID">⚡ REDIAL</button>
     <button id="block-redial" class="btn-block" disabled title="Hang up and instantly redial from the NEXT closest caller ID (for when they've blocked the current number)">🚫 BLOCKED REDIAL</button>
     <button id="skip" class="btn-skip" disabled>⏭ SKIP</button>
@@ -560,7 +564,7 @@ setInterval(()=>{
 
 // ══ DIALING ══
 $('start').onclick=()=>{if(!device){alert('Connect mic');return}running=true;$('start').disabled=true;$('stop').disabled=false;$('vm').disabled=false;$('skip').disabled=false;$('beep').disabled=false;$('mute').disabled=false;$('redial').disabled=false;$('block-redial').disabled=false;log('Started','ok');dialNext()};
-$('stop').onclick=()=>{running=false;dialing=false;$('stop').disabled=true;$('start').disabled=!leads.length;$('vm').disabled=true;$('skip').disabled=true;$('beep').disabled=true;$('mute').disabled=true;$('redial').disabled=true;$('block-redial').disabled=true;clearTimeout(gapTimer);if(conn)try{conn.disconnect()}catch{};setState('STOPPED');log('Stopped','warn')};
+$('stop').onclick=()=>{running=false;dialing=false;$('stop').disabled=true;$('start').disabled=!leads.length;$('vm').disabled=true;$('skip').disabled=true;$('beep').disabled=true;$('redial').disabled=true;$('block-redial').disabled=true;clearTimeout(gapTimer);if(conn)try{conn.disconnect()}catch{};setState('STOPPED');log('Stopped','warn')};
 $('force-stop').onclick=()=>{
   log('⛔ FORCE STOP — killing all state','err');
   running=false;dialing=false;awaitingOutcome=false;manualCall=false;
@@ -576,7 +580,7 @@ $('force-stop').onclick=()=>{
   $('timer').textContent='00:00';$('timer').className='timer idle';
   $('stop').disabled=true;$('start').disabled=!leads.length;
   $('vm').disabled=true;$('skip').disabled=true;$('beep').disabled=true;
-  $('mute').disabled=true;$('redial').disabled=true;$('block-redial').disabled=true;
+  $('redial').disabled=true;$('block-redial').disabled=true;
   $('kp-call').style.display='block';$('kp-end').style.display='none';
   setState('FORCE STOPPED','err');
   log('✓ All state reset — press START to resume','ok');
@@ -615,20 +619,29 @@ $('beep').addEventListener('touchcancel',beepStop);
 // Prevent context menu on long-press (mobile)
 $('beep').addEventListener('contextmenu',e=>e.preventDefault());
 
-// MUTE toggle — mutes your mic so they can't hear you, you can still hear them
+// MUTE — sticky global state. Can be toggled any time (even with no active call)
+// and the preference persists across calls. Applied to every new conn via bindCall.
+let muteEnabled=false;
+function applyMuteToConn(){
+  if(!conn)return;
+  try{conn.mute(muteEnabled)}catch{}
+}
+function renderMuteBtn(){
+  $('mute').classList.toggle('muted',muteEnabled);
+  $('mute').textContent=muteEnabled?'🔇 MUTED':'🎤 MUTE';
+}
 $('mute').onclick=()=>{
-  if(!conn){log('MUTE: no active call','warn');return}
-  try{
-    const newState=!conn.isMuted();
-    conn.mute(newState);
-    $('mute').classList.toggle('muted',newState);
-    $('mute').textContent=newState?'🔇 MUTED':'🎤 MUTE';
-    log(newState?'🔇 Mic muted (they can\'t hear you)':'🎤 Mic unmuted','warn');
-  }catch(e){log('Mute failed: '+e.message,'err')}
+  muteEnabled=!muteEnabled;
+  renderMuteBtn();
+  applyMuteToConn();
+  log(muteEnabled?'🔇 Mic muted (sticky — will stay muted on next call)':'🎤 Mic unmuted','warn');
 };
+// Keep the button enabled always so mute can be pre-set before a call starts.
+$('mute').disabled=false;
+
 function resetMuteUI(){
-  $('mute').classList.remove('muted');
-  $('mute').textContent='🎤 MUTE';
+  // Don't reset mute across calls — it's sticky now. Just re-render current state.
+  renderMuteBtn();
 }
 
 // Ranked list of caller IDs by distance to a given destination
@@ -712,7 +725,29 @@ async function dialNext(){
     updateStats();renderQueue();idx++;attempt=0;showLead(idx);return setTimeout(dialNext,300);
   }
   dialing=true;showLead(idx);
-  const from=closestNum(lead.phone);
+
+  // Pick caller ID: if ALT DIAL is on and this is a retry (attempt > 0),
+  // rotate through ranked numbers skipping any already tried on this lead.
+  // Otherwise use the closest number to the lead's area code.
+  let from;
+  const altDialOn=$('altDial').checked;
+  if(altDialOn&&attempt>0){
+    if(!lead._triedIds)lead._triedIds=new Set();
+    if(lead._lastCallerId)lead._triedIds.add(lead._lastCallerId);
+    const ranked=rankedNumbers(lead.phone);
+    from=ranked.find(n=>!lead._triedIds.has(n.n));
+    if(!from){
+      // Cycled through all — reset and use the closest again
+      log('🔀 All caller IDs tried on this lead — restarting rotation','warn');
+      lead._triedIds=new Set();
+      from=ranked[0];
+    } else {
+      log('🔀 ALT DIAL → rotating to '+from.lbl,'info');
+    }
+  } else {
+    from=closestNum(lead.phone);
+  }
+
   setState('DIALING','ring');log('Dialing '+lead.name+' from '+from.lbl+' ('+(attempt+1)+'/'+$('maxAtt').value+')');
   try{
     const vmd=$('vmDetect').checked?'on':'off';
@@ -728,7 +763,7 @@ function bindCall(lead){
   const finalize=reason=>{if(finalized)return;finalized=true;clearInterval(callTimer);afterCall(reason)};
   callTimer=setInterval(()=>{const s=Math.floor((Date.now()-callStart)/1000);$('timer').className='timer';$('timer').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')},250);
   conn.on('ringing',()=>{setState('RINGING','ring');log('Ringing…')});
-  conn.on('accept',()=>{accepted=true;setState('CONNECTED','live');log('Accepted','ok')});
+  conn.on('accept',()=>{accepted=true;setState('CONNECTED','live');log('Accepted','ok');applyMuteToConn()});
   conn.on('messageReceived',msg=>{const c=msg?.content||{};const ab=c.AnsweredBy||c.answeredBy;if(ab)handleAMD(ab,lead)});
   conn.on('disconnect',async()=>{
     const dur=Math.floor((Date.now()-callStart)/1000);
@@ -1044,7 +1079,7 @@ $('kp-call').onclick=async()=>{
   callTimer=setInterval(()=>{const s=Math.floor((Date.now()-callStart)/1000);$('timer').className='timer';$('timer').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')},250);
   try{
     conn=await device.connect({params:{To:num,callerId:from.n,leadName:'Manual'}});
-    conn.on('accept',()=>{setState('CONNECTED','live');log('Connected','ok')});
+    conn.on('accept',()=>{setState('CONNECTED','live');log('Connected','ok');applyMuteToConn()});
     conn.on('disconnect',()=>endManual('Disconnected'));conn.on('error',e=>{log('Error: '+e.message,'err');endManual('Error')});
     conn.on('cancel',()=>endManual('Cancel'));conn.on('reject',()=>endManual('Reject'));
   }catch(e){log('Manual dial failed: '+e.message,'err');endManual('Failed')}
@@ -1161,6 +1196,13 @@ $('vmDetect').checked=LS('dialer_vm_detect','1')==='1';
 $('vmDetect').addEventListener('change',e=>{
   SS('dialer_vm_detect',e.target.checked?'1':'0');
   log('🎯 VM Detect '+(e.target.checked?'ENABLED':'DISABLED — saving Deepgram cost'),e.target.checked?'ok':'warn');
+});
+
+// ALT DIAL toggle — rotate caller IDs on retries for no-pickup situations
+$('altDial').checked=LS('dialer_alt_dial','0')==='1';
+$('altDial').addEventListener('change',e=>{
+  SS('dialer_alt_dial',e.target.checked?'1':'0');
+  log('🔀 ALT DIAL '+(e.target.checked?'ENABLED — rotating caller IDs per retry':'DISABLED — using closest caller ID'),e.target.checked?'ok':'warn');
 });
 
 renderPendingSyncs();log('Ready. Setup → Connect Mic → Refresh Tabs → Load Leads → Start.');
