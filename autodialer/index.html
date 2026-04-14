@@ -20,6 +20,9 @@ button:hover:not(:disabled){border-color:var(--b2)}
 button:disabled{opacity:.35;cursor:not-allowed}
 .btn-go{background:var(--gdim);color:#000;border-color:var(--gdim)}
 .btn-stop{background:none;border-color:var(--red);color:var(--red)}
+.btn-force-stop{background:var(--red);color:#fff;border-color:var(--red);font-weight:700;letter-spacing:.05em;animation:fs-pulse 2s ease-in-out infinite}
+.btn-force-stop:hover{background:#ff7a92;transform:scale(1.02)}
+@keyframes fs-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,77,109,.5)}50%{box-shadow:0 0 0 6px rgba(255,77,109,0)}}
 .btn-skip{background:none;border-color:var(--amber);color:var(--amber)}
 .btn-vm{background:none;border-color:var(--pink);color:var(--pink)}
 .btn-mute{background:none;border-color:var(--t2);color:var(--t2);min-width:70px}
@@ -175,6 +178,7 @@ summary:hover{color:var(--tx)}
   <div class="row" style="margin-bottom:0">
     <button id="start" class="btn-go" disabled>▶ START</button>
     <button id="stop" class="btn-stop" disabled>■ STOP</button>
+    <button id="force-stop" class="btn-force-stop" title="NUCLEAR: kill any in-progress call, cancel pending retries, reset all state. Use if dialer is stuck or buggin.">⛔ FORCE STOP</button>
     <button id="vm" class="btn-vm" disabled>📬 SENT TO VM</button>
     <button id="beep" class="btn-beep" disabled title="Press & HOLD to spam #01 tones through the line">🔔 BEEP!</button>
     <button id="mute" class="btn-mute" disabled title="Mute your mic — they can't hear you, you can still hear them">🎤 MUTE</button>
@@ -192,15 +196,14 @@ summary:hover{color:var(--tx)}
 
   <div class="info" id="info"><div style="color:var(--t3);text-align:center;padding:18px">Load a tab to begin</div></div>
 
-  <div class="outcome-panel" id="outcome-panel">
-    <h3>▸ LOG CALL OUTCOME <span style="font-weight:400;color:var(--t2);font-size:10px;margin-left:8px">(human answered)</span></h3>
+  <div class="outcome-panel show" id="outcome-panel">
+    <h3>▸ LOG OUTCOME <span style="font-weight:400;color:var(--t2);font-size:10px;margin-left:8px">(click to tag current lead — does NOT pause dialer)</span></h3>
     <div class="out-grid">
       <button class="obtn o-book"  data-out="Booked">✅ Booked</button>
       <button class="obtn o-cb"    data-out="Callback">🔄 Callback</button>
       <button class="obtn o-ni"    data-out="Not Interested">❌ Not Interested</button>
       <button class="obtn o-wn"    data-out="Wrong Number">📵 Wrong Number</button>
       <button class="obtn o-dnc"   data-out="DNC">🚫 DNC</button>
-      <button class="obtn o-retry" data-out="__RETRY__" style="grid-column:span 3;background:var(--s3);border-color:var(--amber);color:var(--amber)">↻ False alarm — retry this lead</button>
     </div>
   </div>
 
@@ -526,8 +529,28 @@ async function flushSync(){
 setInterval(flushSync,15000);
 
 // ══ DIALING ══
-$('start').onclick=()=>{if(!device){alert('Connect mic');return}running=true;awaitingOutcome=false;$('outcome-panel').classList.remove('show');$('start').disabled=true;$('stop').disabled=false;$('vm').disabled=false;$('skip').disabled=false;$('beep').disabled=false;$('mute').disabled=false;$('redial').disabled=false;$('block-redial').disabled=false;log('Started','ok');dialNext()};
+$('start').onclick=()=>{if(!device){alert('Connect mic');return}running=true;$('start').disabled=true;$('stop').disabled=false;$('vm').disabled=false;$('skip').disabled=false;$('beep').disabled=false;$('mute').disabled=false;$('redial').disabled=false;$('block-redial').disabled=false;log('Started','ok');dialNext()};
 $('stop').onclick=()=>{running=false;dialing=false;$('stop').disabled=true;$('start').disabled=!leads.length;$('vm').disabled=true;$('skip').disabled=true;$('beep').disabled=true;$('mute').disabled=true;$('redial').disabled=true;$('block-redial').disabled=true;clearTimeout(gapTimer);if(conn)try{conn.disconnect()}catch{};setState('STOPPED');log('Stopped','warn')};
+$('force-stop').onclick=()=>{
+  log('⛔ FORCE STOP — killing all state','err');
+  running=false;dialing=false;awaitingOutcome=false;manualCall=false;
+  // Kill every timer
+  try{clearTimeout(gapTimer)}catch{};gapTimer=null;
+  try{clearInterval(callTimer)}catch{};callTimer=null;
+  beepStop();resetMuteUI();
+  // Hang up any active Twilio call
+  if(conn){try{conn.disconnect()}catch{};try{conn.reject()}catch{};conn=null;}
+  // Reset any Twilio device-level pending calls
+  if(device){try{device.disconnectAll()}catch{}}
+  // UI reset
+  $('timer').textContent='00:00';$('timer').className='timer idle';
+  $('stop').disabled=true;$('start').disabled=!leads.length;
+  $('vm').disabled=true;$('skip').disabled=true;$('beep').disabled=true;
+  $('mute').disabled=true;$('redial').disabled=true;$('block-redial').disabled=true;
+  $('kp-call').style.display='block';$('kp-end').style.display='none';
+  setState('FORCE STOPPED','err');
+  log('✓ All state reset — press START to resume','ok');
+};
 // BEEP spam — press & hold fires #01 on repeat, release stops
 let beepInterval=null, beepSeq=['#','0','1'], beepIdx=0;
 function beepStart(e){
@@ -722,23 +745,27 @@ function bindCall(lead){
       return finalize('vm-deepgram');
     }
     if(vmVerdict==='human'){
-      // Deepgram confirmed human — fall through to normal handling
+      // Human detected — advance to next lead automatically. If user wants
+      // to log a disposition they can click an outcome button during/after
+      // the call; never auto-pause the sequence.
       if(lead.status==='pending'&&dur>=12){
         lead.status='human';stats.conn++;
-        promptOutcome(lead);
-        return finalize('human');
+        updateStats();
       }
-      return finalize(lead.status==='pending'?'noanswer':lead.status);
-    }
-
-    // No VM verdict (Deepgram unavailable, timeout, or call too short) —
-    // fall through to original short-connect heuristic.
-    if(lead.status==='pending'&&dur>=12){
-      lead.status='human';stats.conn++;
-      promptOutcome(lead);
       return finalize('human');
     }
-    if(lead.status==='pending'&&dur>=3&&dur<12){
+    if(vmVerdict==='unsure'){
+      // AI couldn't decide — always retry, never pause.
+      log('VM verdict unsure → retry','warn');
+      return finalize('unsure-retry');
+    }
+
+    // No VM verdict (Deepgram toggle off or endpoint unreachable) —
+    // fall through to short-connect heuristic.
+    if(lead.status==='pending'&&dur>=12){
+      lead.status='human';stats.conn++;
+      updateStats();
+    } else if(lead.status==='pending'&&dur>=3&&dur<12){
       log('Short connect → No Pickup (no VM verdict)','warn');
       stats.vm++;
       lead.history.push('No Pickup');
@@ -757,7 +784,7 @@ function handleAMD(ab,lead){
     setState('VM','vm');
     stats.vm++;
     lead.history.push('No Pickup');
-    lead._manualVm=true; // prevent disconnect handler from double-logging or prompting
+    lead._manualVm=true; // prevent disconnect handler from double-logging
     syncOutcome(lead,'No Pickup');
     updateStats();
     // Stay on lead — afterCall will retry if attempts remain
@@ -765,46 +792,27 @@ function handleAMD(ab,lead){
   }
 }
 
-function promptOutcome(lead){
-  awaitingOutcome=true;
-  $('outcome-panel').classList.add('show');
-  running=false; // pause auto-dialer until outcome logged
-}
+// Outcome panel is now always visible once leads are loaded; clicking
+// an outcome logs it for the CURRENT lead without pausing the dialer.
+// It never auto-opens and never blocks.
+function promptOutcome(lead){ /* no-op — kept for backward compat */ }
 document.querySelectorAll('.obtn').forEach(b=>b.onclick=()=>{
   const out=b.dataset.out;const lead=leads[idx];if(!lead)return;
-  // False-alarm retry path: no disposition, don't mark done, just count as attempt and move on
-  if(out==='__RETRY__'){
-    log('False alarm → retrying '+lead.name,'warn');
-    // undo the "human answered" bookkeeping we did before opening this panel
-    if(lead.status==='human'){lead.status='pending';stats.conn=Math.max(0,stats.conn-1);}
-    $('outcome-panel').classList.remove('show');awaitingOutcome=false;
-    running=true;
-    attempt++; // count this as a failed attempt
-    if(attempt>=+$('maxAtt').value){
-      // out of attempts — bail on this lead and move on
-      lead.status='fail';stats.fail++;
-      syncOutcome(lead,'No Answer (max attempts)');
-      idx++;attempt=0;
-    }
-    updateStats();renderQueue();
-    setTimeout(dialNext,+$('gap').value*1000);
-    return;
-  }
-  log('Outcome: '+out+' for '+lead.name,'ok');
+  log('Outcome logged: '+out+' for '+lead.name,'ok');
   syncOutcome(lead,out);
-  // ── Tracker: bump pickups + specific outcome counters ──
-  // Pickups = any human-answered outcome (everything except No Pickup and DNC)
+  // Tracker
   if(out!=='No Pickup'&&out!=='DNC')trkBump('pickups');
   if(out==='Booked')trkBump('booked');
   else if(out==='Not Interested')trkBump('ni');
   else if(out==='Callback')trkBump('cb');
+  // Stats
   if(out==='Booked'){lead.status='booked';stats.book++}
   else if(out==='DNC'){lead.status='dnc'}
   else{lead.status='done'}
-  $('outcome-panel').classList.remove('show');awaitingOutcome=false;
   updateStats();renderQueue();
-  idx++;attempt=0;running=true;
-  setTimeout(dialNext,+$('gap').value*1000);
+  // If the current call is still active, hang it up so dialer moves on.
+  // Dialer advances via afterCall on disconnect — no manual running=true needed.
+  if(conn)try{conn.disconnect()}catch{}
 });
 
 function afterCall(reason){
@@ -813,17 +821,16 @@ function afterCall(reason){
   resetMuteUI();
   $('timer').textContent='00:00';$('timer').className='timer idle';
   renderQueue();updateStats();
-  if(awaitingOutcome)return; // human answered — wait for user to log outcome
-  if(!running)return;        // user hit Stop
+  if(!running)return;        // user hit Stop — only way to halt the sequence
   const lead=leads[idx];
   if(!lead){return;}
-  // Lead is truly finished (booked / DNC / done outcome / max-failed) → advance
-  if(['booked','dnc','done','fail'].includes(lead.status)){
+  // Lead is truly finished (human answered / booked / DNC / done / failed) → advance
+  if(['human','booked','dnc','done','fail'].includes(lead.status)){
     idx++;attempt=0;
     setTimeout(dialNext,+$('gap').value*1000);
     return;
   }
-  // Everything else (VM, short connect, no answer, call error, cancel, reject)
+  // Everything else (VM, short connect, no answer, call error, cancel, reject, human)
   // counts as a failed attempt. Retry up to maxAtt, then auto-advance.
   attempt++;
   const maxAtt=+$('maxAtt').value;
