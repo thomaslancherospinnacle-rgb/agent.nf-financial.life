@@ -627,7 +627,8 @@ async function fastRedial(from,reason){
       const vmd=$('vmDetect').checked?'on':'off';
       conn=await device.connect({params:{To:lead.phone,callerId:from.n,leadName:lead.name,VmDetect:vmd,MachineDetection:'DetectMessageEnd',MachineDetectionTimeout:'6'}});
       lead._lastCallerId=from.n;
-      trkBump('dials');  // ← tracker: count this dial
+      lead._manualRedial=true; // flag so afterCall doesn't count this as a per-lead attempt
+      trkBump('dials');  // ← tracker: still count this dial
       bindCall(lead);
     }catch(e){log('Redial failed: '+e.message,'err');dialing=false}
   },150);
@@ -830,7 +831,15 @@ function afterCall(reason){
     setTimeout(dialNext,+$('gap').value*1000);
     return;
   }
-  // Everything else (VM, short connect, no answer, call error, cancel, reject, human)
+  // Manual redial (REDIAL / BLOCKED REDIAL button) — doesn't count against
+  // per-lead attempt limit. Clear the flag and let the user decide what's next.
+  if(lead._manualRedial){
+    lead._manualRedial=false;
+    log(`Manual redial ended → ${reason||'end'} (attempt ${attempt}/${+$('maxAtt').value} unchanged)`,'info');
+    setTimeout(dialNext,+$('gap').value*1000);
+    return;
+  }
+  // Everything else (VM, short connect, no answer, call error, cancel, reject)
   // counts as a failed attempt. Retry up to maxAtt, then auto-advance.
   attempt++;
   const maxAtt=+$('maxAtt').value;
