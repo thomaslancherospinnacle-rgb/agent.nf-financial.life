@@ -559,7 +559,7 @@ function bindCall(lead){
   conn.on('ringing',()=>{setState('RINGING','ring');log('Ringing…')});
   conn.on('accept',()=>{setState('CONNECTED','live');log('Accepted','ok')});
   conn.on('messageReceived',msg=>{const c=msg?.content||{};const ab=c.AnsweredBy||c.answeredBy;if(ab)handleAMD(ab,lead)});
-  conn.on('disconnect',()=>{
+  conn.on('disconnect',async()=>{
     const dur=Math.floor((Date.now()-callStart)/1000);
     log('Disconnected after '+dur+'s');
     // If user hit the manual VM button, skip all automatic analysis — they already logged it
@@ -567,13 +567,52 @@ function bindCall(lead){
       lead._manualVm=false;
       return finalize('vm-manual');
     }
+
+    // ══ CHECK VM DETECTION VERDICT from vm-detect Worker ══
+    let vmVerdict=null;
+    try{
+      const callSid=conn?.parameters?.CallSid;
+      if(callSid){
+        const w=$('worker').value.replace(/\/$/,'');
+        const r=await fetch(w+'/vm-verdict/'+callSid,{method:'GET'});
+        if(r.ok){
+          const data=await r.json();
+          vmVerdict=data.verdict;
+          if(vmVerdict){
+            log('VM Worker verdict: '+vmVerdict+' ('+data.reason+', '+data.elapsedMs+'ms)',vmVerdict==='vm'?'warn':'ok');
+          }
+        }
+      }
+    }catch(e){log('VM verdict poll failed: '+e.message,'warn')}
+
+    if(vmVerdict==='vm'){
+      // Deepgram detected voicemail — route into retry logic
+      setState('VM','vm');
+      stats.vm++;
+      lead.history.push('No Pickup');
+      syncOutcome(lead,'No Pickup');
+      updateStats();
+      return finalize('vm-deepgram');
+    }
+    if(vmVerdict==='human'){
+      // Deepgram confirmed human — fall through to normal handling
+      if(lead.status==='pending'&&dur>=12){
+        lead.status='human';stats.conn++;
+        promptOutcome(lead);
+        return finalize('human');
+      }
+      return finalize(lead.status==='pending'?'noanswer':lead.status);
+    }
+
+    // No VM verdict (Deepgram unavailable, timeout, or call too short) —
+    // fall through to original short-connect heuristic.
     if(lead.status==='pending'&&dur>=12){
       lead.status='human';stats.conn++;
       promptOutcome(lead);
       return finalize('human');
     }
     if(lead.status==='pending'&&dur>=3&&dur<12){
-      log('Short connect → No Pickup','warn');
+      log('Short connect → No Pickup (no VM verdict)','warn');
       stats.vm++;
       lead.history.push('No Pickup');
       syncOutcome(lead,'No Pickup');
