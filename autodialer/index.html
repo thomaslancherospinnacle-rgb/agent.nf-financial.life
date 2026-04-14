@@ -353,7 +353,7 @@ let device=null,conn=null,leads=[],idx=0,attempt=0,running=false,dialing=false,c
 try{pendingSync=JSON.parse(LS('dialer_pendingSync','[]'))}catch{pendingSync=[]}
 
 function log(m,t=''){const d=document.createElement('div');d.className=t;d.textContent='['+new Date().toLocaleTimeString()+'] '+m;$('log').appendChild(d);$('log').scrollTop=1e9}
-function setState(t,c=''){const p=$('state');p.className='pill '+c;p.innerHTML='<span class="dot"></span>'+t}
+function setState(t,c=''){const p=$('state');p.className='pill '+c;p.innerHTML='<span class="dot"></span>'+t;if(typeof setTitle==='function'){const lead=leads[idx];setTitle(t,lead)}}
 function setDev(t,c=''){const p=$('devpill');p.className='pill '+c;p.innerHTML='<span class="dot"></span>'+t}
 function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
 function escAttr(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -776,14 +776,12 @@ function bindCall(lead){
       return finalize('vm-deepgram');
     }
     if(vmVerdict==='human'){
-      // Human detected — advance to next lead automatically. If user wants
-      // to log a disposition they can click an outcome button during/after
-      // the call; never auto-pause the sequence.
-      if(lead.status==='pending'&&dur>=12){
-        lead.status='human';stats.conn++;
-        updateStats();
-      }
-      return finalize('human');
+      // Human was on the line but the call ended (they hung up, we hung up, etc).
+      // DON'T mark lead terminal — just track the connection stat and retry.
+      // Only an outcome-button click or max attempts ends the lead.
+      if(dur>=12) stats.conn++;
+      updateStats();
+      return finalize('human-hangup');
     }
     if(vmVerdict==='unsure'){
       // AI couldn't decide — always retry, never pause.
@@ -793,18 +791,18 @@ function bindCall(lead){
 
     // No VM verdict (Deepgram toggle off or endpoint unreachable) —
     // fall through to short-connect heuristic.
-    if(lead.status==='pending'&&dur>=12){
-      lead.status='human';stats.conn++;
+    if(dur>=12){
+      // Long call without verdict — likely human who hung up. Count it but retry.
+      stats.conn++;
       updateStats();
-    } else if(lead.status==='pending'&&dur>=3&&dur<12){
+    } else if(dur>=3&&dur<12){
       log('Short connect → No Pickup (no VM verdict)','warn');
       stats.vm++;
       lead.history.push('No Pickup');
       syncOutcome(lead,'No Pickup');
       updateStats();
-      // don't set status — let afterCall retry if attempts remain
     }
-    finalize(lead.status==='pending'?'noanswer':lead.status);
+    finalize('disconnect');
   });
   conn.on('error',e=>{
     log('Call error: '+(e.message||e.code||'unknown'),'err');
@@ -860,8 +858,9 @@ function afterCall(reason){
   if(!running){log('afterCall('+reason+') but !running — halted by Stop','warn');return}
   const lead=leads[idx];
   if(!lead){log('afterCall('+reason+') but no lead at idx '+idx,'warn');return}
-  // Lead is truly finished (human answered / booked / DNC / done / failed) → advance
-  if(['human','booked','dnc','done','fail'].includes(lead.status)){
+  // Lead is truly finished ONLY via: outcome-button click (booked/dnc/done),
+  // or max attempts reached (fail). Every other disconnect = retry.
+  if(['booked','dnc','done','fail'].includes(lead.status)){
     idx++;attempt=0;
     scheduleDial(+$('gap').value*1000,'lead-done');
     return;
@@ -908,8 +907,17 @@ function scheduleDial(ms,reason){
 }
 
 // ══ UI RENDER ══
+function firstName(full){return String(full||'').trim().split(/\s+/)[0]||''}
+function setTitle(state,lead){
+  // Tab title format: "🟢 DIALING Robert" / "📞 CONNECTED Robert" / "Auto Dialer v2"
+  if(!lead){document.title='Auto Dialer v2';return}
+  const f=firstName(lead.name);
+  const prefix={DIALING:'🟢 DIALING',RINGING:'🔔 RINGING',CONNECTED:'📞',VM:'📵 VM',IDLE:'⏸',STOPPED:'■ STOP'}[state]||'▶';
+  document.title=`${prefix} ${f}`;
+}
+
 function showLead(i){
-  if(i>=leads.length){$('name').textContent='—';$('phone').textContent='—';$('info').innerHTML='<div style="color:var(--t3);text-align:center;padding:18px">Done</div>';renderScript(null);return}
+  if(i>=leads.length){$('name').textContent='—';$('phone').textContent='—';$('info').innerHTML='<div style="color:var(--t3);text-align:center;padding:18px">Done</div>';renderScript(null);document.title='Auto Dialer v2 — Done';return}
   savePosition();
   const l=leads[i];const from=closestNum(l.phone);
   $('name').textContent=l.name;$('phone').textContent=l.phone;
@@ -917,6 +925,7 @@ function showLead(i){
   const entries=Object.entries(l.cells).filter(([k,v])=>v&&!/^(name|phone|cell|mobile)$/i.test(k));
   $('info').innerHTML=entries.length?entries.map(([k,v])=>`<div class="info-row"><div class="info-k">${esc(k)}</div><div class="info-v">${renderCellValue(k,v)}</div></div>`).join(''):'<div style="color:var(--t3);text-align:center;padding:18px">No extra info</div>';
   renderScript(l);
+  setTitle('IDLE',l);
 }
 
 function renderScript(lead){
