@@ -88,6 +88,28 @@ button:disabled{opacity:.35;cursor:not-allowed}
 .q-st.vm{background:#1a0828;color:var(--pink)}
 .q-st.fail{background:#200a10;color:var(--red)}
 .q-st.dnc{background:var(--red);color:#fff;font-weight:700}
+.q-del{background:none;border:1px solid var(--b);color:var(--t3);border-radius:4px;padding:2px 6px;font-size:10px;cursor:pointer;opacity:0;transition:opacity .12s,all .12s;margin-left:4px}
+.q-item:hover .q-del{opacity:1}
+.q-del:hover{border-color:var(--red);color:var(--red);background:rgba(255,77,109,.08)}
+.tracker{margin-top:14px;background:var(--s2);border:1px solid var(--b);border-radius:8px;padding:12px}
+.tracker h3{font-size:10px;color:var(--blue);letter-spacing:.08em;font-family:'SF Mono',monospace;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.tracker h3 .live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:p 1.4s infinite}
+.trk-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px}
+.trk-cell{background:var(--bg);border:1px solid var(--b);border-radius:6px;padding:9px 4px;text-align:center}
+.trk-v{font-family:'SF Mono',monospace;font-size:18px;color:var(--tx);font-weight:500}
+.trk-l{font-size:8px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-top:3px}
+.trk-cell.dials .trk-v{color:var(--blue)}
+.trk-cell.pickups .trk-v{color:var(--amber)}
+.trk-cell.booked .trk-v{color:var(--green)}
+.trk-cell.ni .trk-v{color:var(--purple)}
+.trk-cell.cb .trk-v{color:var(--pink)}
+.trk-history{margin-top:8px;max-height:140px;overflow:auto;font-family:'SF Mono',monospace;font-size:10px}
+.trk-row{display:grid;grid-template-columns:80px repeat(5,1fr);gap:4px;padding:3px 0;border-bottom:1px solid var(--b);color:var(--t2)}
+.trk-row.header{color:var(--t3);font-size:9px;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--b2)}
+.trk-row.today{color:var(--tx);font-weight:600}
+.trk-row span{text-align:right}
+.trk-row span:first-child{text-align:left}
+.trk-sync{font-size:9px;color:var(--t3);font-family:'SF Mono',monospace;margin-top:6px;text-align:right}
 .log{background:#000;border:1px solid var(--b);border-radius:6px;padding:9px;height:130px;overflow:auto;font-family:'SF Mono',monospace;font-size:10px;color:var(--t2);margin-top:10px}
 .log div{padding:1px 0}.log .ok{color:var(--green)}.log .warn{color:var(--amber)}.log .err{color:var(--red)}
 .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px}
@@ -121,7 +143,7 @@ summary:hover{color:var(--tx)}
       <span class="pill" id="devpill"><span class="dot"></span>OFFLINE</span>
     </div>
     <div class="row">
-      <label>Deployment ID</label><input id="gas-depid" style="flex:1;min-width:240px" placeholder="AKfycbw...TgfyZ5">
+      <label>Passcode</label><input id="gas-depid" type="password" autocomplete="off" style="flex:1;min-width:240px" placeholder="••••••••">
       <button id="load-tabs">↻ Refresh Tabs</button>
     </div>
     <div class="tabs-row">
@@ -194,6 +216,25 @@ summary:hover{color:var(--tx)}
     <div class="stat"><div class="stat-v" id="s-fail">0</div><div class="stat-l">No Ans</div></div>
   </div>
   <div class="log" id="log"></div>
+
+  <div class="tracker" id="tracker-panel">
+    <h3><span class="live-dot"></span>📊 DAILY TRACKER <span id="trk-date" style="color:var(--t3);font-weight:400;margin-left:auto"></span></h3>
+    <div class="trk-grid">
+      <div class="trk-cell dials"><div class="trk-v" id="trk-dials">0</div><div class="trk-l">Dials</div></div>
+      <div class="trk-cell pickups"><div class="trk-v" id="trk-pickups">0</div><div class="trk-l">Pickups</div></div>
+      <div class="trk-cell booked"><div class="trk-v" id="trk-booked">0</div><div class="trk-l">Booked</div></div>
+      <div class="trk-cell ni"><div class="trk-v" id="trk-ni">0</div><div class="trk-l">Not Int</div></div>
+      <div class="trk-cell cb"><div class="trk-v" id="trk-cb">0</div><div class="trk-l">Callback</div></div>
+    </div>
+    <details>
+      <summary>📅 LAST 7 DAYS</summary>
+      <div class="trk-history" id="trk-history">
+        <div class="trk-row header"><span>Date</span><span>Dials</span><span>Pick</span><span>Book</span><span>NI</span><span>CB</span></div>
+        <div style="color:var(--t3);text-align:center;padding:14px;font-size:10px">No history yet</div>
+      </div>
+    </details>
+    <div class="trk-sync" id="trk-sync">Not synced</div>
+  </div>
 </div>
 
 <div class="panel">
@@ -273,8 +314,8 @@ Now we do this over the phone virtually to save you time, we don't have to come 
   },
 ];
 
-// ══ TWILIO NUMBERS (frontend picks closest) ══
-const NUMBERS = [
+// ══ TWILIO NUMBERS (default fallback — overridden by NUMBERS tab from GAS if present) ══
+let NUMBERS = [
   {n:'+15862215707',lbl:'(586) Mount Clemens',lat:42.5973,lng:-82.8779},
   {n:'+12693869670',lbl:'(269) Colon',        lat:41.9559,lng:-85.3253},
   {n:'+18108193812',lbl:'(810) Brighton',     lat:42.5295,lng:-83.7799},
@@ -350,6 +391,24 @@ $('load-tabs').onclick=async()=>{
     });
     $('file-name').textContent='📂 '+d.fileName+' — '+d.tabs.length+' tabs';
     log('Found '+d.tabs.length+' tabs in "'+d.fileName+'"','ok');
+
+    // ── Load NUMBERS tab from GAS if present ──
+    if(Array.isArray(d.numbers)&&d.numbers.length){
+      NUMBERS=d.numbers.map(x=>{
+        const ac=(x.n||'').replace(/\D/g,'').slice(-10).slice(0,3);
+        const coord=AC_COORDS[ac]||AC_COORDS.default;
+        // Auto-generate label from area code only — no label column needed
+        const label='('+ac+')';
+        return{n:x.n,lbl:label,lat:coord.lat,lng:coord.lng};
+      });
+      log('📞 Loaded '+NUMBERS.length+' caller IDs from NUMBERS tab','ok');
+      // Rebuild keypad dropdown
+      $('kp-from').innerHTML='<option value="auto">Auto (closest match)</option>';
+      NUMBERS.forEach(n=>{const o=document.createElement('option');o.value=n.n;o.textContent=n.lbl;$('kp-from').appendChild(o)});
+      $('kp-from').value=LS('kp_from','auto');
+    }else{
+      log('No NUMBERS tab found — using default caller IDs','warn');
+    }
   }catch(e){log('Tab load failed: '+e.message,'err');alert('Load tabs failed: '+e.message)}
   finally{$('load-tabs').disabled=false}
 };
@@ -370,6 +429,8 @@ $('load-leads').onclick=async()=>{
       if(!phone)return null;
       const name=ni>=0?(cells[headers[ni]]||'').trim()||'Row '+(i+2):'Row '+(i+2);
       const existingOutcomes=row.slice(headers.length).map(c=>String(c||'').trim()).filter(Boolean);
+      // Skip leads marked DELETED — manual clear of that cell in the sheet re-enables them
+      if(existingOutcomes.some(o=>/^DELETED/i.test(o)))return null;
       const isDNC=existingOutcomes.some(o=>/DNC/i.test(o));
       return{rowIdx:i+2,name,phone,cells,status:isDNC?'dnc':'pending',attempts:0,history:existingOutcomes};
     }).filter(Boolean);
@@ -495,6 +556,7 @@ async function fastRedial(from,reason){
       const vmd=$('vmDetect').checked?'on':'off';
       conn=await device.connect({params:{To:lead.phone,callerId:from.n,leadName:lead.name,VmDetect:vmd,MachineDetection:'DetectMessageEnd',MachineDetectionTimeout:'6'}});
       lead._lastCallerId=from.n;
+      trkBump('dials');  // ← tracker: count this dial
       bindCall(lead);
     }catch(e){log('Redial failed: '+e.message,'err');dialing=false}
   },150);
@@ -554,6 +616,7 @@ async function dialNext(){
     const vmd=$('vmDetect').checked?'on':'off';
     conn=await device.connect({params:{To:lead.phone,callerId:from.n,leadName:lead.name,VmDetect:vmd,MachineDetection:'DetectMessageEnd',MachineDetectionTimeout:'6',MachineDetectionSpeechThreshold:'2400'}});
     lead._lastCallerId=from.n;
+    trkBump('dials');  // ← tracker: count this dial
     bindCall(lead);
   }catch(e){log('connect() failed: '+e.message,'err');dialing=false;attempt++;setTimeout(dialNext,1500)}
 }
@@ -656,6 +719,12 @@ document.querySelectorAll('.obtn').forEach(b=>b.onclick=()=>{
   const out=b.dataset.out;const lead=leads[idx];if(!lead)return;
   log('Outcome: '+out+' for '+lead.name,'ok');
   syncOutcome(lead,out);
+  // ── Tracker: bump pickups + specific outcome counters ──
+  // Pickups = any human-answered outcome (everything except No Pickup and DNC)
+  if(out!=='No Pickup'&&out!=='DNC')trkBump('pickups');
+  if(out==='Booked')trkBump('booked');
+  else if(out==='Not Interested')trkBump('ni');
+  else if(out==='Callback')trkBump('cb');
   if(out==='Booked'){lead.status='booked';stats.book++}
   else if(out==='DNC'){lead.status='dnc'}
   else{lead.status='done'}
@@ -757,11 +826,53 @@ function jumpToLead(i){
 }
 
 function renderQueue(){
-  $('queue').innerHTML=leads.map((l,i)=>`<div class="q-item ${i===idx?'cur':''} ${l.status!=='pending'?'done':''}" data-idx="${i}" title="Click to jump to this lead"><div class="q-num">${i+1}</div><div class="q-name">${esc(l.name)}</div><div class="q-st ${l.status}">${l.status.toUpperCase()}</div></div>`).join('');
+  $('queue').innerHTML=leads.map((l,i)=>`<div class="q-item ${i===idx?'cur':''} ${l.status!=='pending'?'done':''}" data-idx="${i}" title="Click to jump to this lead"><div class="q-num">${i+1}</div><div class="q-name">${esc(l.name)}</div><div class="q-st ${l.status}">${l.status.toUpperCase()}</div><button class="q-del" data-del="${i}" title="Delete lead">✕</button></div>`).join('');
   // Wire click handlers for jump-to-lead
   document.querySelectorAll('#queue .q-item').forEach(el=>{
-    el.onclick=()=>jumpToLead(+el.dataset.idx);
+    el.onclick=(e)=>{
+      // Ignore clicks on the delete button
+      if(e.target.classList.contains('q-del'))return;
+      jumpToLead(+el.dataset.idx);
+    };
   });
+  // Wire delete handlers
+  document.querySelectorAll('#queue .q-del').forEach(btn=>{
+    btn.onclick=(e)=>{
+      e.stopPropagation();
+      deleteLead(+btn.dataset.del);
+    };
+  });
+}
+
+// Delete a lead — marks it DELETED in the sheet, removes from local list
+async function deleteLead(i){
+  const lead=leads[i];if(!lead)return;
+  if(!confirm('Delete lead '+lead.name+'?\n\nThis will mark the row as DELETED in your Google Sheet.\nTo restore later, manually clear that cell in the sheet.'))return;
+  log('🗑 Deleting '+lead.name+'…','warn');
+  // If this is the currently-dialing lead, hang up first
+  if(i===idx&&conn){try{conn.disconnect()}catch{}}
+  try{
+    const r=await gasCall('markDeleted',{tab:tabName,rowIdx:lead.rowIdx});
+    if(!r.ok)throw new Error(r.error||'mark failed');
+    log('✓ Deleted '+lead.name,'ok');
+  }catch(e){
+    log('Delete failed: '+e.message,'err');
+    alert('Delete failed: '+e.message+'\n\nThe lead was NOT removed from the sheet. Try again or edit the sheet manually.');
+    return;
+  }
+  // Remove from local array
+  leads.splice(i,1);
+  // Fix up idx — if we deleted a lead before the current one, shift back
+  if(i<idx)idx--;
+  else if(i===idx){
+    // Deleted the current lead — stay at same idx (which now points to next lead)
+    attempt=0;
+    if(idx>=leads.length)idx=Math.max(0,leads.length-1);
+  }
+  renderQueue();
+  if(leads.length)showLead(idx);
+  else{$('name').textContent='—';$('phone').textContent='—';$('info').innerHTML='<div style="color:var(--t3);text-align:center;padding:18px">All leads deleted</div>';renderScript(null);}
+  updateStats();
 }
 function updateStats(){$('s-total').textContent=leads.length;$('s-book').textContent=stats.book;$('s-conn').textContent=stats.conn;$('s-vm').textContent=stats.vm;$('s-fail').textContent=stats.fail}
 
@@ -788,6 +899,110 @@ $('kp-call').onclick=async()=>{
 };
 $('kp-end').onclick=()=>{if(conn)try{conn.disconnect()}catch{}};
 function endManual(r){log(r);clearInterval(callTimer);beepStop();resetMuteUI();conn=null;manualCall=false;$('timer').textContent='00:00';$('timer').className='timer idle';setState('IDLE');$('kp-call').style.display='block';$('kp-end').style.display='none'}
+
+// ══ DAILY TRACKER ══
+// Counts dials, pickups, and outcomes per day. Buffers in localStorage,
+// syncs to TRACKER tab in GS via gasCall every 30s and on every outcome.
+//
+// Counter rules:
+//   dials   = every device.connect() from the auto-dialer (manual keypad excluded)
+//   pickups = any outcome click EXCEPT "No Pickup" and "DNC"
+//   booked  = "Booked" outcome
+//   ni      = "Not Interested" outcome
+//   cb      = "Callback" outcome
+//
+// Local timezone for date keying (Detroit by default, change if needed)
+const TRK_TZ = 'America/Detroit';
+
+function trkDateKey(d=new Date()){
+  // Returns YYYY-MM-DD in TRK_TZ
+  const parts=new Intl.DateTimeFormat('en-CA',{timeZone:TRK_TZ,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d);
+  const y=parts.find(p=>p.type==='year').value;
+  const m=parts.find(p=>p.type==='month').value;
+  const day=parts.find(p=>p.type==='day').value;
+  return y+'-'+m+'-'+day;
+}
+
+function trkLoad(){
+  try{return JSON.parse(LS('dialer_tracker','{}')||'{}')}catch{return{}}
+}
+function trkSave(t){SS('dialer_tracker',JSON.stringify(t))}
+
+function trkToday(){
+  const t=trkLoad();
+  const k=trkDateKey();
+  if(!t[k])t[k]={dials:0,pickups:0,booked:0,ni:0,cb:0,dirty:false};
+  return{store:t,key:k,row:t[k]};
+}
+
+function trkBump(field,n=1){
+  const{store,key,row}=trkToday();
+  row[field]=(row[field]||0)+n;
+  row.dirty=true;
+  store[key]=row;
+  trkSave(store);
+  trkRender();
+  // Schedule a sync (debounced)
+  trkScheduleSync();
+}
+
+function trkRender(){
+  const{key,row}=trkToday();
+  $('trk-date').textContent=key;
+  $('trk-dials').textContent=row.dials||0;
+  $('trk-pickups').textContent=row.pickups||0;
+  $('trk-booked').textContent=row.booked||0;
+  $('trk-ni').textContent=row.ni||0;
+  $('trk-cb').textContent=row.cb||0;
+  // Render last 7 days history
+  const t=trkLoad();
+  const keys=Object.keys(t).sort().reverse().slice(0,7);
+  if(keys.length){
+    const hist=$('trk-history');
+    hist.innerHTML='<div class="trk-row header"><span>Date</span><span>Dials</span><span>Pick</span><span>Book</span><span>NI</span><span>CB</span></div>'+
+      keys.map(k=>{
+        const r=t[k];
+        const isToday=k===key;
+        return `<div class="trk-row${isToday?' today':''}"><span>${k.slice(5)}</span><span>${r.dials||0}</span><span>${r.pickups||0}</span><span>${r.booked||0}</span><span>${r.ni||0}</span><span>${r.cb||0}</span></div>`;
+      }).join('');
+  }
+}
+
+let trkSyncTimer=null;
+let trkLastSync=0;
+function trkScheduleSync(){
+  if(trkSyncTimer)return;
+  trkSyncTimer=setTimeout(()=>{trkSyncTimer=null;trkSync()},2000);
+}
+
+async function trkSync(){
+  if(!$('gas-depid').value.trim())return;
+  const t=trkLoad();
+  const dirty=Object.entries(t).filter(([k,r])=>r.dirty);
+  if(!dirty.length)return;
+  try{
+    const items=dirty.map(([k,r])=>({date:k,dials:r.dials||0,pickups:r.pickups||0,booked:r.booked||0,ni:r.ni||0,cb:r.cb||0}));
+    const res=await gasCall('upsertTracker',{items});
+    if(res.ok){
+      // Mark synced
+      dirty.forEach(([k])=>{t[k].dirty=false});
+      trkSave(t);
+      trkLastSync=Date.now();
+      $('trk-sync').textContent='Synced '+new Date().toLocaleTimeString();
+      $('trk-sync').style.color='var(--t3)';
+    }else{
+      throw new Error(res.error||'sync failed');
+    }
+  }catch(e){
+    $('trk-sync').textContent='Sync failed: '+e.message;
+    $('trk-sync').style.color='var(--amber)';
+  }
+}
+
+// Periodic sync every 30s
+setInterval(trkSync,30000);
+// Render on load
+trkRender();
 
 // VM Detect toggle — persist on/off in localStorage
 $('vmDetect').checked=LS('dialer_vm_detect','1')==='1';
