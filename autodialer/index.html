@@ -48,11 +48,19 @@ button:disabled{opacity:.35;cursor:not-allowed}
 .bigphone{font-family:'SF Mono',monospace;font-size:16px;color:var(--blue);margin-bottom:10px}
 .timer{font-family:'SF Mono',monospace;font-size:36px;color:var(--green);margin:8px 0}
 .timer.idle{color:var(--t3)}
-.info{background:var(--s2);border:1px solid var(--b);border-radius:7px;padding:12px;margin:12px 0;max-height:200px;overflow:auto}
-.info-row{display:flex;padding:4px 0;border-bottom:1px solid var(--b);font-size:11px}
+.info{background:var(--s2);border:1px solid var(--b);border-radius:7px;padding:12px;margin:12px 0;max-height:320px;overflow:auto}
+.info-row{display:flex;padding:4px 0;border-bottom:1px solid var(--b);font-size:11px;align-items:flex-start}
 .info-row:last-child{border:none}
-.info-k{color:var(--t2);min-width:120px;font-family:'SF Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.04em}
+.info-k{color:var(--t2);min-width:120px;font-family:'SF Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.04em;padding-top:2px}
 .info-v{color:var(--tx);flex:1;word-break:break-word}
+.info-v a{color:var(--blue);text-decoration:none;border-bottom:1px dotted var(--blue)}
+.info-v a:hover{color:#81d4fa;border-bottom-style:solid}
+.info-v a.tel{color:var(--green);border-bottom-color:var(--green)}
+.info-v a.tel:hover{color:#5ff5a0;border-bottom-style:solid}
+.info-thumb{display:inline-block;margin-top:4px}
+.info-thumb img{max-width:180px;max-height:120px;border-radius:5px;border:1px solid var(--b);display:block;margin-bottom:4px;cursor:pointer;transition:transform .15s}
+.info-thumb img:hover{transform:scale(1.02);border-color:var(--b2)}
+.info-thumb a{font-size:10px;font-family:'SF Mono',monospace}
 .script-wrap{background:var(--s2);border:1px solid var(--b);border-radius:7px;margin:12px 0;overflow:hidden}
 .script-hdr{padding:8px 12px;background:var(--s3);display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--b)}
 .script-hdr select{flex:1}
@@ -341,6 +349,46 @@ function log(m,t=''){const d=document.createElement('div');d.className=t;d.textC
 function setState(t,c=''){const p=$('state');p.className='pill '+c;p.innerHTML='<span class="dot"></span>'+t}
 function setDev(t,c=''){const p=$('devpill');p.className='pill '+c;p.innerHTML='<span class="dot"></span>'+t}
 function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+function escAttr(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+// Detect image URLs: Drive files, direct image URLs, or lead-card endpoints
+function isImageUrl(u){return /drive\.google\.com\/file\/|\/Lead\/GetLeadCard|\.(?:jpe?g|png|gif|webp|bmp|svg)(?:\?|$)/i.test(u)}
+// Convert a Drive file URL to a thumbnail URL Google serves publicly (respects sharing)
+function driveThumbUrl(u){
+  const m=u.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if(m)return 'https://drive.google.com/thumbnail?id='+m[1]+'&sz=w400';
+  return u;
+}
+// Turn a cell value into HTML: images → thumbnails, URLs → <a target=_blank>, phones → tel:
+function renderCellValue(header,raw){
+  const v=String(raw||'').trim();if(!v)return '';
+  // Split on whitespace/commas so "555-1212, 555-3434" becomes two links
+  const parts=v.split(/(\s*[,;]\s*|\s{2,})/);
+  const out=parts.map(part=>{
+    const p=part.trim();
+    if(!p)return esc(part);
+    // URL?
+    if(/^https?:\/\/\S+$/i.test(p)){
+      if(isImageUrl(p)){
+        const thumb=driveThumbUrl(p);
+        return `<div class="info-thumb"><a href="${escAttr(p)}" target="_blank" rel="noopener"><img src="${escAttr(thumb)}" alt="" onerror="this.style.display='none'"></a><a href="${escAttr(p)}" target="_blank" rel="noopener">open image ↗</a></div>`;
+      }
+      return `<a href="${escAttr(p)}" target="_blank" rel="noopener">${esc(p)}</a>`;
+    }
+    // Phone-ish? Only linkify if header suggests phone, or value is clearly a phone pattern
+    const phoneLike=/^[+\d][\d\s().\-]{6,}$/.test(p)&&(p.replace(/\D/g,'').length>=7);
+    const headerIsPhone=/phone|cell|mobile|home|tele|fax|number/i.test(header);
+    if(phoneLike&&(headerIsPhone||p.replace(/\D/g,'').length>=10)){
+      const digits=p.replace(/[^\d+]/g,'');
+      return `<a class="tel" href="tel:${escAttr(digits)}">${esc(p)}</a>`;
+    }
+    // Email
+    if(/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(p)){
+      return `<a href="mailto:${escAttr(p)}">${esc(p)}</a>`;
+    }
+    return esc(p);
+  }).join('');
+  return out;
+}
 function renderPendingSyncs(){$('pending-syncs').innerHTML=pendingSync.length?`<span class="pending-syncs">${pendingSync.length} pending sync</span>`:''}
 
 // ══ PERSISTED CONFIG ══
@@ -771,8 +819,8 @@ function showLead(i){
   const l=leads[i];const from=closestNum(l.phone);
   $('name').textContent=l.name;$('phone').textContent=l.phone;
   $('att').textContent='Lead '+(i+1)+'/'+leads.length+' • Try '+(attempt+1)+'/'+$('maxAtt').value+' • '+from.lbl+(l.history.length?' • '+l.history.length+' prior':'');
-  const entries=Object.entries(l.cells).filter(([k,v])=>v&&!/name|phone|cell|mobile/i.test(k));
-  $('info').innerHTML=entries.length?entries.map(([k,v])=>`<div class="info-row"><div class="info-k">${esc(k)}</div><div class="info-v">${esc(v)}</div></div>`).join(''):'<div style="color:var(--t3);text-align:center;padding:18px">No extra info</div>';
+  const entries=Object.entries(l.cells).filter(([k,v])=>v&&!/^(name|phone|cell|mobile)$/i.test(k));
+  $('info').innerHTML=entries.length?entries.map(([k,v])=>`<div class="info-row"><div class="info-k">${esc(k)}</div><div class="info-v">${renderCellValue(k,v)}</div></div>`).join(''):'<div style="color:var(--t3);text-align:center;padding:18px">No extra info</div>';
   renderScript(l);
 }
 
