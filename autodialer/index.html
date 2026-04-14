@@ -154,6 +154,10 @@ summary:hover{color:var(--tx)}
       <span class="pill" id="devpill"><span class="dot"></span>OFFLINE</span>
     </div>
     <div class="row">
+      <label>Your Name</label><input id="agent-name" style="flex:1;min-width:180px" placeholder="e.g. thomas or danya" autocomplete="off">
+      <span style="font-size:10px;color:var(--t3);font-family:'SF Mono',monospace">Multiple agents? Each needs a unique name.</span>
+    </div>
+    <div class="row">
       <label>Passcode</label><input id="gas-depid" type="password" autocomplete="off" style="flex:1;min-width:240px" placeholder="••••••••">
       <button id="load-tabs">↻ Refresh Tabs</button>
     </div>
@@ -397,20 +401,31 @@ function renderPendingSyncs(){$('pending-syncs').innerHTML=pendingSync.length?`<
 // ══ PERSISTED CONFIG ══
 $('worker').value=LS('dialer_worker','');
 $('gas-depid').value=LS('dialer_depid','');
+$('agent-name').value=LS('dialer_agent','');
 $('worker').addEventListener('change',e=>SS('dialer_worker',e.target.value));
 $('gas-depid').addEventListener('change',e=>SS('dialer_depid',e.target.value.trim()));
+$('agent-name').addEventListener('change',e=>SS('dialer_agent',e.target.value.trim()));
+
+// Build token URL with agent name as query param so multiple agents get
+// distinct Twilio identities and can hold concurrent calls.
+function tokenUrl(base){
+  const agent=$('agent-name').value.trim();
+  const clean=base.replace(/\/$/,'');
+  return clean+'/token'+(agent?('?agent='+encodeURIComponent(agent)):'');
+}
 
 // ══ MIC ══
 $('mic').onclick=async()=>{
   const url=$('worker').value.trim();if(!url){alert('Enter Worker URL');return}
   $('mic').disabled=true;
   try{
-    const r=await fetch(url+'/token');const d=await r.json();
+    const r=await fetch(tokenUrl(url));const d=await r.json();
     if(!d.token)throw new Error(d.error||'No token');
+    log('Registered as identity: '+d.identity,'info');
     device=new Twilio.Device(d.token,{codecPreferences:['opus','pcmu'],logLevel:1});
     device.on('registered',()=>{setDev('READY','live');log('Device ready','ok');$('mic').textContent='Reconnect';$('mic').disabled=false;checkCanStart()});
     device.on('error',e=>{setDev('ERROR','err');log('Device: '+e.message,'err')});
-    device.on('tokenWillExpire',async()=>{try{const r=await fetch(url+'/token');const d=await r.json();if(d.token)device.updateToken(d.token);log('Token refreshed')}catch{}});
+    device.on('tokenWillExpire',async()=>{try{const r=await fetch(tokenUrl(url));const d=await r.json();if(d.token)device.updateToken(d.token);log('Token refreshed')}catch{}});
     await device.register();
   }catch(e){log('Mic init failed: '+e.message,'err');setDev('ERROR','err');$('mic').disabled=false}
 };
@@ -527,6 +542,21 @@ async function flushSync(){
   }catch(e){log('Sync failed (will retry): '+e.message,'warn')}
 }
 setInterval(flushSync,15000);
+
+// ── HEARTBEAT WATCHDOG ──
+// Every 5 seconds, if the dialer should be dialing but isn't, kick it.
+// This catches any case where setTimeout got dropped, an unhandled exception
+// killed a handler, or the state got wedged.
+setInterval(()=>{
+  if(!running)return;
+  if(dialing)return;    // a call is in flight
+  if(conn)return;       // manually on a call
+  if(gapTimer)return;   // retry is scheduled
+  if(awaitingOutcome)return; // (vestigial but safe)
+  if(!leads.length||idx>=leads.length)return;
+  log('⚕ Watchdog: dialer idle but should be running — kicking','warn');
+  dialNext();
+},5000);
 
 // ══ DIALING ══
 $('start').onclick=()=>{if(!device){alert('Connect mic');return}running=true;$('start').disabled=true;$('stop').disabled=false;$('vm').disabled=false;$('skip').disabled=false;$('beep').disabled=false;$('mute').disabled=false;$('redial').disabled=false;$('block-redial').disabled=false;log('Started','ok');dialNext()};
@@ -776,7 +806,12 @@ function bindCall(lead){
     }
     finalize(lead.status==='pending'?'noanswer':lead.status);
   });
-  conn.on('error',e=>{log('Call error: '+e.message,'err');finalize('error')});
+  conn.on('error',e=>{
+    log('Call error: '+(e.message||e.code||'unknown'),'err');
+    // Don't wait for disconnect event — retry immediately. Some Twilio
+    // errors (like 31000) never emit a clean disconnect after.
+    finalize('error');
+  });
   conn.on('cancel',()=>finalize('cancel'));conn.on('reject',()=>finalize('reject'));
 }
 function handleAMD(ab,lead){
@@ -822,13 +857,13 @@ function afterCall(reason){
   resetMuteUI();
   $('timer').textContent='00:00';$('timer').className='timer idle';
   renderQueue();updateStats();
-  if(!running)return;        // user hit Stop — only way to halt the sequence
+  if(!running){log('afterCall('+reason+') but !running — halted by Stop','warn');return}
   const lead=leads[idx];
-  if(!lead){return;}
+  if(!lead){log('afterCall('+reason+') but no lead at idx '+idx,'warn');return}
   // Lead is truly finished (human answered / booked / DNC / done / failed) → advance
   if(['human','booked','dnc','done','fail'].includes(lead.status)){
     idx++;attempt=0;
-    setTimeout(dialNext,+$('gap').value*1000);
+    scheduleDial(+$('gap').value*1000,'lead-done');
     return;
   }
   // Manual redial (REDIAL / BLOCKED REDIAL button) — doesn't count against
@@ -836,7 +871,7 @@ function afterCall(reason){
   if(lead._manualRedial){
     lead._manualRedial=false;
     log(`Manual redial ended → ${reason||'end'} (attempt ${attempt}/${+$('maxAtt').value} unchanged)`,'info');
-    setTimeout(dialNext,+$('gap').value*1000);
+    scheduleDial(+$('gap').value*1000,'manual-redial-end');
     return;
   }
   // Everything else (VM, short connect, no answer, call error, cancel, reject)
@@ -853,7 +888,23 @@ function afterCall(reason){
     }
     idx++;attempt=0;
   }
-  setTimeout(dialNext,+$('gap').value*1000);
+  // Errors retry fast (200ms) — no benefit to waiting. Normal gap otherwise.
+  const gap=(reason==='error'||reason==='no-connect')?200:+$('gap').value*1000;
+  scheduleDial(gap,reason||'end');
+}
+
+// Scheduled dial with watchdog — if the setTimeout gets eaten by the browser
+// or some unhandled error, the watchdog fires after 2x the gap and retries.
+function scheduleDial(ms,reason){
+  clearTimeout(gapTimer);
+  const fireAt=Date.now()+ms;
+  log(`→ Next dial in ${ms}ms (reason: ${reason})`,'info');
+  gapTimer=setTimeout(()=>{
+    gapTimer=null;
+    if(!running){log('Watchdog: running=false, abort','warn');return}
+    if(dialing){log('Watchdog: already dialing, skip','warn');return}
+    dialNext();
+  },ms);
 }
 
 // ══ UI RENDER ══
