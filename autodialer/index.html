@@ -193,13 +193,12 @@ summary:hover{color:var(--tx)}
   <div class="info" id="info"><div style="color:var(--t3);text-align:center;padding:18px">Load a tab to begin</div></div>
 
   <div class="outcome-panel" id="outcome-panel">
-    <h3>▸ LOG CALL OUTCOME</h3>
+    <h3>▸ LOG CALL OUTCOME <span style="font-weight:400;color:var(--t2);font-size:10px;margin-left:8px">(human answered)</span></h3>
     <div class="out-grid">
       <button class="obtn o-book"  data-out="Booked">✅ Booked</button>
       <button class="obtn o-cb"    data-out="Callback">🔄 Callback</button>
       <button class="obtn o-ni"    data-out="Not Interested">❌ Not Interested</button>
       <button class="obtn o-wn"    data-out="Wrong Number">📵 Wrong Number</button>
-      <button class="obtn o-np"    data-out="No Pickup">📵 No Pickup</button>
       <button class="obtn o-dnc"   data-out="DNC">🚫 DNC</button>
     </div>
   </div>
@@ -294,7 +293,7 @@ Ok is there a reason why you never got this taken care of, or you don't know?`
     name: 'HARD CARD',
     text: `Hey {name}? Hey {name} this is _____ with American Income Life, we handle some of your permanent benefits through the {group}. I'm calling because we just got back your beneficiary card and I just need to verify to make sure everything is up to date.
 
-It looks like you have your {relation}, {beneficiary} down as the beneficiary. Is that still correct? Okay perfect, and you still want the benefit package to come down to {address}? Okay cool, and then just to verify your birthday I have {DOB}?
+It looks like you have your {relation}, {beneficiary} down as the beneficiary. Is that still correct? Okay perfect, and you still want the benefit package to come down to {address}? Okay cool, and then just to verify your birthday I have {birthday}?
 
 Okay perfect, now the {group} set you up with a permanent benefits package, and it looks like in our files here you are still one of the members who have not received it yet. So my job is to get you caught up with all the other members in your local {local}.
 
@@ -788,20 +787,23 @@ function afterCall(reason){
   resetMuteUI();
   $('timer').textContent='00:00';$('timer').className='timer idle';
   renderQueue();updateStats();
-  if(awaitingOutcome)return; // wait for user to log outcome
-  if(!running)return;
+  if(awaitingOutcome)return; // human answered — wait for user to log outcome
+  if(!running)return;        // user hit Stop
   const lead=leads[idx];
+  if(!lead){return;}
   // Lead is truly finished (booked / DNC / done outcome / max-failed) → advance
   if(['booked','dnc','done','fail'].includes(lead.status)){
     idx++;attempt=0;
     setTimeout(dialNext,+$('gap').value*1000);
     return;
   }
-  // Otherwise: count this attempt (including VM) and retry or give up
+  // Everything else (VM, short connect, no answer, call error, cancel, reject)
+  // counts as a failed attempt. Retry up to maxAtt, then auto-advance.
   attempt++;
-  if(attempt>=+$('maxAtt').value){
+  const maxAtt=+$('maxAtt').value;
+  log(`Attempt ${attempt}/${maxAtt} for ${lead.name} → ${reason||'end'}`,'info');
+  if(attempt>=maxAtt){
     if(lead.status==='pending'){
-      // Decide final status from history
       const hadVm=lead.history.includes('No Pickup');
       lead.status=hadVm?'vm':'fail';
       if(!hadVm)stats.fail++;
