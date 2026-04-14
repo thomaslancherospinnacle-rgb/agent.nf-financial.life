@@ -525,7 +525,7 @@ async function flushSync(){
 setInterval(flushSync,15000);
 
 // ══ DIALING ══
-$('start').onclick=()=>{if(!device){alert('Connect mic');return}running=true;$('start').disabled=true;$('stop').disabled=false;$('vm').disabled=false;$('skip').disabled=false;$('beep').disabled=false;$('mute').disabled=false;$('redial').disabled=false;$('block-redial').disabled=false;log('Started','ok');dialNext()};
+$('start').onclick=()=>{if(!device){alert('Connect mic');return}running=true;awaitingOutcome=false;$('outcome-panel').classList.remove('show');$('start').disabled=true;$('stop').disabled=false;$('vm').disabled=false;$('skip').disabled=false;$('beep').disabled=false;$('mute').disabled=false;$('redial').disabled=false;$('block-redial').disabled=false;log('Started','ok');dialNext()};
 $('stop').onclick=()=>{running=false;dialing=false;$('stop').disabled=true;$('start').disabled=!leads.length;$('vm').disabled=true;$('skip').disabled=true;$('beep').disabled=true;$('mute').disabled=true;$('redial').disabled=true;$('block-redial').disabled=true;clearTimeout(gapTimer);if(conn)try{conn.disconnect()}catch{};setState('STOPPED');log('Stopped','warn')};
 // BEEP spam — press & hold fires #01 on repeat, release stops
 let beepInterval=null, beepSeq=['#','0','1'], beepIdx=0;
@@ -669,11 +669,11 @@ async function dialNext(){
 }
 
 function bindCall(lead){
-  callStart=Date.now();let finalized=false;
+  callStart=Date.now();let finalized=false;let accepted=false;
   const finalize=reason=>{if(finalized)return;finalized=true;clearInterval(callTimer);afterCall(reason)};
   callTimer=setInterval(()=>{const s=Math.floor((Date.now()-callStart)/1000);$('timer').className='timer';$('timer').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')},250);
   conn.on('ringing',()=>{setState('RINGING','ring');log('Ringing…')});
-  conn.on('accept',()=>{setState('CONNECTED','live');log('Accepted','ok')});
+  conn.on('accept',()=>{accepted=true;setState('CONNECTED','live');log('Accepted','ok')});
   conn.on('messageReceived',msg=>{const c=msg?.content||{};const ab=c.AnsweredBy||c.answeredBy;if(ab)handleAMD(ab,lead)});
   conn.on('disconnect',async()=>{
     const dur=Math.floor((Date.now()-callStart)/1000);
@@ -682,6 +682,13 @@ function bindCall(lead){
     if(lead._manualVm){
       lead._manualVm=false;
       return finalize('vm-manual');
+    }
+    // If the call was never accepted (pure ringing → error/cancel), it can't have
+    // been a human conversation no matter how long it "lasted". Skip VM polling
+    // and all duration heuristics — just retry.
+    if(!accepted){
+      log('Call never connected → retry','warn');
+      return finalize('no-connect');
     }
 
     // ══ CHECK VM DETECTION VERDICT from vm-detect Worker ══
