@@ -29,6 +29,12 @@ button:disabled{opacity:.35;cursor:not-allowed}
 .btn-mute:hover:not(:disabled){border-color:var(--tx);color:var(--tx)}
 .btn-mute.muted{background:var(--red);color:#fff;border-color:var(--red)}
 .btn-mute.muted:hover{background:#ff7a92}
+.btn-mute-big{padding:12px 22px;font-size:14px;font-weight:800;letter-spacing:.06em;border-radius:8px;min-width:180px;border-width:2px;transition:all .15s}
+.btn-mute-big.mute-off{background:var(--gdim);color:#00220f;border-color:var(--green)}
+.btn-mute-big.mute-off:hover{background:var(--green);transform:scale(1.03)}
+.btn-mute-big.mute-on{background:var(--red);color:#fff;border-color:var(--red);animation:mute-pulse 1.4s ease-in-out infinite}
+.btn-mute-big.mute-on:hover{background:#ff7a92;transform:scale(1.03)}
+@keyframes mute-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,77,109,.6)}50%{box-shadow:0 0 0 8px rgba(255,77,109,0)}}
 .btn-redial{background:var(--blue);color:#000;border-color:var(--blue);font-weight:600}
 .btn-redial:hover:not(:disabled){background:#81d4fa}
 .btn-redial:disabled{opacity:.3}
@@ -189,12 +195,12 @@ summary:hover{color:var(--tx)}
     <button id="force-stop" class="btn-force-stop" title="NUCLEAR: kill any in-progress call, cancel pending retries, reset all state. Use if dialer is stuck or buggin.">⛔ FORCE STOP</button>
     <button id="vm" class="btn-vm" disabled>📬 SENT TO VM</button>
     <button id="beep" class="btn-beep" disabled title="Press & HOLD to spam #01 tones through the line">🔔 BEEP!</button>
-    <button id="mute" class="btn-mute" title="Mute your mic (sticky — stays across calls). Can toggle with or without active call.">🎤 MUTE</button>
     <button id="redial" class="btn-redial" disabled title="Hang up and instantly redial this same number from the same caller ID">⚡ REDIAL</button>
     <button id="block-redial" class="btn-block" disabled title="Hang up and instantly redial from the NEXT closest caller ID (for when they've blocked the current number)">🚫 BLOCKED REDIAL</button>
     <button id="skip" class="btn-skip" disabled>⏭ SKIP</button>
-    <span class="pill" id="state" style="margin-left:auto"><span class="dot"></span>IDLE</span>
+    <span class="pill" id="state"><span class="dot"></span>IDLE</span>
     <span id="pending-syncs"></span>
+    <button id="mute" class="btn-mute-big mute-off" title="Mute your mic (sticky — stays across calls). Can toggle with or without active call." style="margin-left:auto">🎤 MUTE OFF</button>
   </div>
 
   <div class="bigname" id="name">—</div>
@@ -627,8 +633,15 @@ function applyMuteToConn(){
   try{conn.mute(muteEnabled)}catch{}
 }
 function renderMuteBtn(){
-  $('mute').classList.toggle('muted',muteEnabled);
-  $('mute').textContent=muteEnabled?'🔇 MUTED':'🎤 MUTE';
+  const b=$('mute');
+  b.classList.remove('mute-on','mute-off','muted');
+  if(muteEnabled){
+    b.classList.add('mute-on');
+    b.textContent='🔇 MUTE ON';
+  } else {
+    b.classList.add('mute-off');
+    b.textContent='🎤 MUTE OFF';
+  }
 }
 $('mute').onclick=()=>{
   muteEnabled=!muteEnabled;
