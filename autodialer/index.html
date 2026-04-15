@@ -19,11 +19,35 @@ button{padding:7px 12px;border-radius:6px;border:1px solid var(--b);background:v
 button:hover:not(:disabled){border-color:var(--b2)}
 button:disabled{opacity:.35;cursor:not-allowed}
 .btn-go{background:var(--gdim);color:#000;border-color:var(--gdim)}
+.btn-big-action{font-size:14px;font-weight:700;padding:10px 18px;letter-spacing:.04em}
+.btn-hangup{background:#c62828;color:#fff;border-color:#c62828;font-weight:700}
+.btn-hangup:hover:not(:disabled){background:#e53935}
+.btn-hangup:disabled{opacity:.3}
 .btn-dial{background:#7c4dff;color:#fff;border-color:#7c4dff;font-weight:600}
 .btn-dial:hover:not(:disabled){background:#9575ff}
 .btn-dial:disabled{opacity:.3}
 .btn-note{background:none;border-color:#ffd54f;color:#ffd54f}
 .btn-note:hover:not(:disabled){background:rgba(255,213,79,.15)}
+/* Notes panel */
+.notes-panel{background:rgba(255,213,79,.06);border:1px solid rgba(255,213,79,.4);border-radius:8px;padding:12px;margin:12px 0}
+.notes-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.btn-note-add{background:none;border:1px solid #ffd54f;color:#ffd54f;font-family:'SF Mono',monospace;font-size:10px;letter-spacing:.06em;padding:4px 10px;border-radius:5px;cursor:pointer}
+.btn-note-add:hover{background:rgba(255,213,79,.18)}
+.note-display{font-size:12px;color:#ffe082;white-space:pre-wrap;word-break:break-word;line-height:1.5;padding:8px 10px;background:rgba(0,0,0,.25);border-radius:5px;min-height:30px}
+.note-display.empty{color:var(--t3);font-style:italic}
+/* Note modal */
+.note-modal{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}
+.note-modal-inner{background:#1a1a1a;border:1px solid #ffd54f;border-radius:10px;width:100%;max-width:560px;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.note-modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--b);font-family:'SF Mono',monospace;font-size:13px;color:#ffd54f;letter-spacing:.05em}
+.note-modal-x{background:none;border:none;color:var(--t2);font-size:24px;line-height:1;cursor:pointer;padding:0 4px}
+.note-modal-x:hover{color:#fff}
+#note-textarea{width:100%;min-height:180px;background:#0d0d0d;color:#ffe082;border:1px solid var(--b);border-radius:0;padding:12px 14px;font-family:'SF Mono',monospace;font-size:13px;line-height:1.5;resize:vertical;outline:none;box-sizing:border-box}
+#note-textarea:focus{border-color:#ffd54f}
+.note-modal-footer{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:1px solid var(--b)}
+.btn-note-cancel{background:none;border:1px solid var(--b);color:var(--t2);padding:6px 14px;border-radius:5px;font-family:'SF Mono',monospace;font-size:11px;cursor:pointer}
+.btn-note-cancel:hover{color:#fff;border-color:var(--t2)}
+.btn-note-save{background:#ffd54f;border:1px solid #ffd54f;color:#000;padding:6px 14px;border-radius:5px;font-family:'SF Mono',monospace;font-size:11px;font-weight:600;cursor:pointer}
+.btn-note-save:hover{background:#ffe082}
 .btn-stop{background:none;border-color:var(--red);color:var(--red)}
 .btn-force-stop{background:var(--red);color:#fff;border-color:var(--red);font-weight:700;letter-spacing:.05em;animation:fs-pulse 2s ease-in-out infinite}
 .btn-force-stop:hover{background:#ff7a92;transform:scale(1.02)}
@@ -195,9 +219,10 @@ summary:hover{color:var(--tx)}
   </div>
 
   <div class="row" style="margin-bottom:0">
-    <button id="start" class="btn-go" disabled title="Auto-dialer with Deepgram VM detection — blasts through leads at full speed">🚀 TURBO</button>
-    <button id="dial" class="btn-dial" disabled title="Manual single-dial mode — dials current lead at YOUR pace, no VM detection, no auto-advance. Hang up and press DIAL again for the next.">📞 DIAL</button>
-    <button id="stop" class="btn-stop" disabled>■ STOP</button>
+    <button id="start" class="btn-go btn-big-action" disabled title="Auto-dialer with Deepgram VM detection — blasts through leads at full speed">🚀 TURBO</button>
+    <button id="dial" class="btn-dial btn-big-action" disabled title="Manual single-dial mode — dials current lead at YOUR pace, no VM detection, no auto-advance. Each click = one attempt. After max attempts, advances to next lead.">📞 DIAL</button>
+    <button id="hangup" class="btn-hangup btn-big-action" disabled title="Hang up the active manual call (does not advance to next lead)">📵 HANGUP</button>
+    <button id="stop" class="btn-stop" disabled>■ STOP</button>■ STOP</button>
     <button id="force-stop" class="btn-force-stop" title="NUCLEAR: kill any in-progress call, cancel pending retries, reset all state. Use if dialer is stuck or buggin.">⛔ FORCE STOP</button>
     <button id="vm" class="btn-vm" disabled>📬 SENT TO VM</button>
     <button id="beep" class="btn-beep" disabled title="Press & HOLD to spam #01 tones through the line">🔔 BEEP!</button>
@@ -224,9 +249,33 @@ summary:hover{color:var(--tx)}
       <button class="obtn o-ni"    data-out="Not Interested">❌ Not Interested</button>
       <button class="obtn o-wn"    data-out="Wrong Number">📵 Wrong Number</button>
       <button class="obtn o-dnc"   data-out="DNC">🚫 DNC</button>
-      <button class="obtn btn-note" id="note-btn" title="Add a free-text note attached to this lead — saved as @NOTE(...) in the sheet and shown next time this lead loads">📝 NOTE</button>
     </div>
-    <div id="note-display" style="display:none;margin-top:10px;padding:8px 10px;background:rgba(255,213,79,.08);border-left:3px solid #ffd54f;border-radius:4px;font-size:11px;color:#ffd54f;font-family:'SF Mono',monospace;white-space:pre-wrap;word-break:break-word"></div>
+  </div>
+
+  <div class="notes-panel" id="notes-panel">
+    <div class="notes-hdr">
+      <span style="font-size:10px;font-family:'SF Mono',monospace;color:#ffd54f;letter-spacing:.08em">📝 NOTES</span>
+      <button id="note-btn" class="btn-note-add" title="Add or edit a note for the current lead">+ ADD / EDIT NOTE</button>
+    </div>
+    <div id="note-display" class="note-display empty">No note for this lead</div>
+  </div>
+
+  <!-- Note editor modal -->
+  <div id="note-modal" class="note-modal" style="display:none">
+    <div class="note-modal-inner">
+      <div class="note-modal-hdr">
+        <span id="note-modal-title">📝 Note</span>
+        <button id="note-modal-close" class="note-modal-x" title="Close (Esc)">×</button>
+      </div>
+      <textarea id="note-textarea" placeholder="Type your note here…&#10;&#10;Anything you want to remember about this lead — context, objections, callback details, etc." spellcheck="true"></textarea>
+      <div class="note-modal-footer">
+        <span style="font-size:10px;color:var(--t3);font-family:'SF Mono',monospace">⌘/Ctrl+Enter to save · Esc to cancel</span>
+        <div style="display:flex;gap:8px">
+          <button id="note-cancel" class="btn-note-cancel">Cancel</button>
+          <button id="note-save" class="btn-note-save">💾 Save Note</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="script-wrap">
@@ -540,7 +589,7 @@ $('load-leads').onclick=async()=>{
 function findLastNonEmpty(arr){for(let i=arr.length-1;i>=0;i--)if(String(arr[i]||'').trim())return i;return-1}
 function normalizePhone(p){let d=p.replace(/[^\d+]/g,'');if(!d)return'';if(d.startsWith('+'))return d;if(d.length===10)return'+1'+d;if(d.length===11&&d[0]==='1')return'+'+d;return'+'+d}
 
-function checkCanStart(){const ready=!(!device||!leads.length);$('start').disabled=!ready;$('dial').disabled=!ready||dialing}
+function checkCanStart(){const ready=!(!device||!leads.length);$('start').disabled=!ready;$('dial').disabled=!ready||dialing;updateDialBtnLabel()}
 
 // ══ SYNC QUEUE (offline-safe) ══
 async function syncOutcome(lead,outcome){
@@ -582,50 +631,106 @@ $('dial').onclick=()=>{
   if(!device){alert('Connect mic');return}
   if(dialing){log('Already on a call','warn');return}
   if(idx>=leads.length){log('No leads left','warn');return}
+  const maxAtt=+$('maxAtt').value;
+  const lead=leads[idx];
+  // If the current lead is already terminal OR has hit max attempts, advance.
+  if(lead && (['booked','dnc','done','fail','vm'].includes(lead.status) || attempt>=maxAtt)){
+    if(attempt>=maxAtt && lead.status==='pending'){
+      const hadVm=lead.history.includes('No Pickup');
+      lead.status=hadVm?'vm':'fail';
+      if(!hadVm)stats.fail++;
+      syncOutcome(lead,hadVm?'Max No Pickup reached':'No Answer (max attempts)');
+    }
+    idx++;attempt=0;
+    if(idx>=leads.length){log('All leads done','ok');setState('IDLE');showLead(idx);updateDialBtnLabel();return}
+    showLead(idx);
+  }
   // Manual mode: one dial at a time, user-paced, no VM detect, no auto-advance.
-  manualMode=true;running=false; // running=false so afterCall doesn't re-schedule
+  manualMode=true;running=false;
   $('start').disabled=true;$('dial').disabled=true;
   $('stop').disabled=false;$('vm').disabled=false;$('skip').disabled=false;
   $('beep').disabled=false;$('mute').disabled=false;
   $('redial').disabled=false;$('block-redial').disabled=false;
-  log('📞 Manual DIAL — your pace, no VM AI','info');
+  $('hangup').disabled=false;
   manualDial();
 };
-// Manual single dial — no VM detect, no auto-advance
+$('hangup').onclick=()=>{
+  if(!conn){log('No active call to hang up','warn');return}
+  log('📵 Manual hangup','warn');
+  try{conn.disconnect()}catch{}
+  $('hangup').disabled=true;
+};
+// Manual single dial — no VM detect, no auto-advance. Counts toward attempt cap.
 async function manualDial(){
   if(dialing)return;
   const lead=leads[idx];
   if(!lead){log('No lead','warn');return}
+  const maxAtt=+$('maxAtt').value;
   dialing=true;showLead(idx);
   const from=closestNum(lead.phone);
   setState('DIALING','ring');
-  log('📞 Manual dial '+lead.name+' from '+from.lbl);
+  log('📞 Manual dial '+lead.name+' from '+from.lbl+' ('+(attempt+1)+'/'+maxAtt+')');
   try{
     conn=await device.connect({params:{To:lead.phone,callerId:from.n,leadName:lead.name,VmDetect:'off'}});
     lead._lastCallerId=from.n;
     lead._manualDial=true;
+    attempt++;             // <-- this dial counts as an attempt
     trkBump('dials');
     bindCall(lead);
+    updateDialBtnLabel();
   }catch(e){
     log('Manual dial failed: '+e.message,'err');
     dialing=false;
     $('dial').disabled=!device||!leads.length;
+    $('hangup').disabled=true;
+    updateDialBtnLabel();
   }
 }
-// NOTE — prompt and log as @NOTE("...")
-$('note-btn').onclick=()=>{
+// Update DIAL button label to show n/max for current lead
+function updateDialBtnLabel(){
+  const btn=$('dial');if(!btn)return;
+  if(!leads.length||idx>=leads.length){btn.textContent='📞 DIAL';return}
+  const maxAtt=+$('maxAtt').value;
+  const lead=leads[idx];
+  if(lead && ['booked','dnc','done','fail','vm'].includes(lead.status)){
+    btn.textContent='📞 DIAL → next lead';
+    return;
+  }
+  if(attempt>=maxAtt){
+    btn.textContent='📞 DIAL → next lead';
+  } else {
+    btn.textContent='📞 DIAL '+(attempt+1)+'/'+maxAtt;
+  }
+}
+// NOTE — modal-based editor
+$('note-btn').onclick=()=>openNoteModal();
+$('note-modal-close').onclick=()=>closeNoteModal();
+$('note-cancel').onclick=()=>closeNoteModal();
+$('note-modal').addEventListener('click',e=>{if(e.target.id==='note-modal')closeNoteModal()});
+$('note-save').onclick=()=>saveNoteFromModal();
+$('note-textarea').addEventListener('keydown',e=>{
+  if(e.key==='Escape'){e.preventDefault();closeNoteModal()}
+  if((e.metaKey||e.ctrlKey)&&e.key==='Enter'){e.preventDefault();saveNoteFromModal()}
+});
+function openNoteModal(){
   const lead=leads[idx];if(!lead){alert('No lead loaded');return}
-  const existing=getLatestNote(lead);
-  const txt=prompt('Note for '+lead.name+':',existing||'');
-  if(txt===null)return;
-  const clean=txt.trim().replace(/"/g,"'");
-  if(!clean)return;
+  $('note-modal-title').textContent='📝 Note · '+lead.name;
+  $('note-textarea').value=getLatestNote(lead)||'';
+  $('note-modal').style.display='flex';
+  setTimeout(()=>$('note-textarea').focus(),50);
+}
+function closeNoteModal(){$('note-modal').style.display='none'}
+function saveNoteFromModal(){
+  const lead=leads[idx];if(!lead)return closeNoteModal();
+  const clean=$('note-textarea').value.trim().replace(/"/g,"'");
+  if(!clean){closeNoteModal();return}
   const tag='@NOTE("'+clean+'")';
   lead.history.push(tag);
   syncOutcome(lead,tag);
   renderNote(lead);
   log('📝 Note saved for '+lead.name,'ok');
-};
+  closeNoteModal();
+}
 function getLatestNote(lead){
   if(!lead||!lead.history)return '';
   for(let i=lead.history.length-1;i>=0;i--){
@@ -637,10 +742,10 @@ function getLatestNote(lead){
 function renderNote(lead){
   const el=$('note-display');if(!el)return;
   const n=lead?getLatestNote(lead):'';
-  if(n){el.style.display='block';el.textContent='📝 '+n}
-  else{el.style.display='none';el.textContent=''}
+  if(n){el.classList.remove('empty');el.textContent=n}
+  else{el.classList.add('empty');el.textContent='No note for this lead'}
 }
-$('stop').onclick=()=>{running=false;dialing=false;manualMode=false;$('stop').disabled=true;$('start').disabled=!leads.length;$('dial').disabled=!leads.length||!device;$('vm').disabled=true;$('skip').disabled=true;$('beep').disabled=true;$('redial').disabled=true;$('block-redial').disabled=true;clearTimeout(gapTimer);if(conn)try{conn.disconnect()}catch{};setState('STOPPED');log('Stopped','warn')};
+$('stop').onclick=()=>{running=false;dialing=false;manualMode=false;$('stop').disabled=true;$('start').disabled=!leads.length;$('dial').disabled=!leads.length||!device;$('hangup').disabled=true;$('vm').disabled=true;$('skip').disabled=true;$('beep').disabled=true;$('redial').disabled=true;$('block-redial').disabled=true;clearTimeout(gapTimer);if(conn)try{conn.disconnect()}catch{};setState('STOPPED');log('Stopped','warn');updateDialBtnLabel()};
 $('force-stop').onclick=()=>{
   log('⛔ FORCE STOP — killing all state','err');
   running=false;dialing=false;awaitingOutcome=false;manualCall=false;manualMode=false;
@@ -655,11 +760,13 @@ $('force-stop').onclick=()=>{
   // UI reset
   $('timer').textContent='00:00';$('timer').className='timer idle';
   $('stop').disabled=true;$('start').disabled=!leads.length;
+  $('dial').disabled=!leads.length||!device;$('hangup').disabled=true;
   $('vm').disabled=true;$('skip').disabled=true;$('beep').disabled=true;
   $('redial').disabled=true;$('block-redial').disabled=true;
   $('kp-call').style.display='block';$('kp-end').style.display='none';
   setState('FORCE STOPPED','err');
   log('✓ All state reset — press START to resume','ok');
+  updateDialBtnLabel();
 };
 // BEEP spam — press & hold fires #01 on repeat, release stops
 let beepInterval=null, beepSeq=['#','0','1'], beepIdx=0;
@@ -981,8 +1088,16 @@ function afterCall(reason){
       if(['booked','dnc','done'].includes(l.status)){idx++;attempt=0;showLead(idx)}
     }
     $('dial').disabled=!device||!leads.length||idx>=leads.length;
+    $('hangup').disabled=true;
+    updateDialBtnLabel();
     setState('IDLE');
-    log('📞 Call ended → press 📞 DIAL for next, or 🚀 TURBO for auto','info');
+    const cur=leads[idx];
+    const maxAtt=+$('maxAtt').value;
+    if(cur && attempt>=maxAtt){
+      log('📞 Max attempts hit for '+cur.name+' → next DIAL click advances to next lead','warn');
+    } else {
+      log('📞 Call ended → press 📞 DIAL again, or 🚀 TURBO for auto','info');
+    }
     return;
   }
   if(!running){log('afterCall('+reason+') but !running — halted by Stop','warn');return}
@@ -1056,6 +1171,7 @@ function showLead(i){
   $('info').innerHTML=entries.length?entries.map(([k,v])=>`<div class="info-row"><div class="info-k">${esc(k)}</div><div class="info-v">${renderCellValue(k,v)}</div></div>`).join(''):'<div style="color:var(--t3);text-align:center;padding:18px">No extra info</div>';
   renderScript(l);
   renderNote(l);
+  updateDialBtnLabel();
   setTitle('IDLE',l);
 }
 
