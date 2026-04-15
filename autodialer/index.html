@@ -109,7 +109,18 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .btn-dial:hover:not(:disabled){background:color-mix(in srgb, var(--brand) 18%, var(--sf));border-color:var(--brand);color:var(--brand-2)}
 .btn-dial:disabled{opacity:.4}
 
-/* HANGUP */
+/* DTMF dropdown pad */
+.dtmf-wrap{position:relative;display:inline-block}
+.btn-dtmf{background:var(--sf);border:1px solid var(--b);color:var(--tx);font-weight:500;padding:11px 14px;border-radius:8px;font-size:13px}
+.btn-dtmf:hover:not(:disabled){background:var(--s2);border-color:var(--b2)}
+.btn-dtmf.open{background:var(--brand-soft);color:var(--brand-2);border-color:color-mix(in srgb, var(--brand) 30%, transparent)}
+.dtmf-pad{position:absolute;top:calc(100% + 8px);left:0;background:var(--sf);border:1px solid var(--b);border-radius:var(--radius);padding:12px;box-shadow:var(--shadow-lg);z-index:100;min-width:200px}
+.dtmf-pad-hdr{font-size:11px;color:var(--t2);font-weight:500;margin-bottom:10px;text-align:center}
+.dtmf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.dtmf-key{background:var(--s2);border:1px solid var(--b);border-radius:8px;padding:14px 0;font-family:'Geist Mono',monospace;font-size:18px;font-weight:600;color:var(--tx);cursor:pointer;transition:all .1s;text-align:center}
+.dtmf-key:hover:not(:disabled){background:var(--brand-soft);color:var(--brand-2);border-color:color-mix(in srgb, var(--brand) 35%, transparent)}
+.dtmf-key:active:not(:disabled){transform:scale(.94);background:var(--brand);color:#fff}
+.dtmf-key:disabled{opacity:.35;cursor:not-allowed}
 .btn-hangup{background:var(--red);color:#fff;border-color:var(--red);font-weight:600}
 .btn-hangup:hover:not(:disabled){filter:brightness(1.05)}
 .btn-hangup:disabled{opacity:.35}
@@ -363,7 +374,19 @@ summary:hover{color:var(--tx)}
     <button id="start" class="btn-go btn-big-action" disabled title="Auto-dialer with Deepgram VM detection — blasts through leads at full speed">🚀 TURBO</button>
     <button id="dial" class="btn-dial btn-big-action" disabled title="Manual single-dial mode — dials current lead at YOUR pace, no VM detection, no auto-advance. Each click = one attempt. After max attempts, advances to next lead.">📞 DIAL</button>
     <button id="hangup" class="btn-hangup btn-big-action" disabled title="Hang up the active manual call (does not advance to next lead)">📵 HANGUP</button>
-    <button id="stop" class="btn-stop" disabled>■ STOP</button>■ STOP</button>
+    <div class="dtmf-wrap">
+      <button id="dtmf-toggle" class="btn-dtmf" title="Open dialpad to send DTMF tones during an active call (e.g. press 1 to bypass spam screening)">⌨ DTMF ▾</button>
+      <div id="dtmf-pad" class="dtmf-pad" style="display:none">
+        <div class="dtmf-pad-hdr">Send to active call</div>
+        <div class="dtmf-grid">
+          <button class="dtmf-key" data-d="1">1</button><button class="dtmf-key" data-d="2">2</button><button class="dtmf-key" data-d="3">3</button>
+          <button class="dtmf-key" data-d="4">4</button><button class="dtmf-key" data-d="5">5</button><button class="dtmf-key" data-d="6">6</button>
+          <button class="dtmf-key" data-d="7">7</button><button class="dtmf-key" data-d="8">8</button><button class="dtmf-key" data-d="9">9</button>
+          <button class="dtmf-key" data-d="*">*</button><button class="dtmf-key" data-d="0">0</button><button class="dtmf-key" data-d="#">#</button>
+        </div>
+      </div>
+    </div>
+    <button id="stop" class="btn-stop" disabled>■ STOP</button>
     <button id="force-stop" class="btn-force-stop" title="NUCLEAR: kill any in-progress call, cancel pending retries, reset all state. Use if dialer is stuck or buggin.">⛔ FORCE STOP</button>
     <button id="vm" class="btn-vm" disabled>📬 SENT TO VM</button>
     <button id="beep" class="btn-beep" disabled title="Press & HOLD to spam #01 tones through the line">🔔 BEEP!</button>
@@ -628,6 +651,69 @@ $('agent-name').addEventListener('change',e=>SS('dialer_agent',e.target.value.tr
   const cur=document.documentElement.getAttribute('data-theme')||'light';
   setTheme(cur);
 })();
+
+// ── DTMF dropdown pad ──
+(function(){
+  const toggle=$('dtmf-toggle'), pad=$('dtmf-pad');
+  function close(){pad.style.display='none';toggle.classList.remove('open')}
+  function open(){pad.style.display='block';toggle.classList.add('open');refreshKeys()}
+  function refreshKeys(){
+    const live=!!conn;
+    pad.querySelectorAll('.dtmf-key').forEach(k=>k.disabled=!live);
+  }
+  toggle.onclick=e=>{e.stopPropagation();pad.style.display==='none'?open():close()};
+  document.addEventListener('click',e=>{
+    if(!pad.contains(e.target)&&e.target!==toggle)close();
+  });
+  pad.querySelectorAll('.dtmf-key').forEach(k=>{
+    k.onclick=e=>{e.stopPropagation();sendDtmf(k.dataset.d)};
+  });
+  // Refresh disabled state when pad is open and conn changes
+  setInterval(()=>{if(pad.style.display!=='none')refreshKeys()},500);
+})();
+function sendDtmf(d){
+  if(!conn){log('DTMF: no active call','warn');return}
+  try{conn.sendDigits(d);log('⌨ DTMF sent: '+d,'ok')}
+  catch(e){log('DTMF failed: '+e.message,'err')}
+}
+
+// ── Auto spam-screen bypass ──
+// Polls vm-detect Worker after accept. If worker returns
+// {action:"send-dtmf", digit:"X"} (meaning it heard a spam-screening prompt),
+// we auto-send the digit to bypass it. Polls every 600ms for up to 6s.
+let spamWatchTimer=null;
+function startSpamScreenWatch(lead){
+  if(!$('vmDetect').checked || lead._manualDial)return; // honor toggle + manual mode
+  stopSpamScreenWatch();
+  const callSid=conn?.parameters?.CallSid;
+  if(!callSid){return}
+  const w=$('worker').value.replace(/\/$/,'');
+  if(!w)return;
+  const startedAt=Date.now();
+  const MAX_MS=6000, INTERVAL=600;
+  let bypassed=false;
+  const poll=async()=>{
+    if(bypassed||!conn)return stopSpamScreenWatch();
+    if(Date.now()-startedAt>MAX_MS)return stopSpamScreenWatch();
+    try{
+      const r=await fetch(w+'/spam-check/'+callSid,{method:'GET'});
+      if(r.ok){
+        const data=await r.json();
+        if(data && data.action==='send-dtmf' && data.digit){
+          bypassed=true;
+          log('🛡 Spam screen detected → auto-pressing '+data.digit+(data.reason?' ('+data.reason+')':''),'warn');
+          try{conn.sendDigits(String(data.digit))}catch(e){log('Auto-DTMF failed: '+e.message,'err')}
+          return stopSpamScreenWatch();
+        }
+      }
+    }catch(e){/* worker may not have endpoint yet — silent fail */}
+  };
+  poll(); // fire immediately
+  spamWatchTimer=setInterval(poll,INTERVAL);
+}
+function stopSpamScreenWatch(){
+  if(spamWatchTimer){clearInterval(spamWatchTimer);spamWatchTimer=null}
+}
 
 // Build token URL with agent name as query param so multiple agents get
 // distinct Twilio identities and can hold concurrent calls.
@@ -1105,18 +1191,32 @@ async function dialNext(){
 }
 
 function bindCall(lead){
-  callStart=Date.now();let finalized=false;let accepted=false;
+  callStart=Date.now();let finalized=false;let accepted=false;let acceptedAt=0;let pickupCounted=false;
   const finalize=reason=>{if(finalized)return;finalized=true;clearInterval(callTimer);afterCall(reason)};
   callTimer=setInterval(()=>{const s=Math.floor((Date.now()-callStart)/1000);$('timer').className='timer';$('timer').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')},250);
   conn.on('ringing',()=>{setState('RINGING','ring');log('Ringing…')});
-  conn.on('accept',()=>{accepted=true;setState('CONNECTED','live');log('Accepted','ok');applyMuteToConn()});
+  conn.on('accept',()=>{accepted=true;acceptedAt=Date.now();setState('CONNECTED','live');log('Accepted','ok');applyMuteToConn();startSpamScreenWatch(lead)});
   conn.on('messageReceived',msg=>{const c=msg?.content||{};const ab=c.AnsweredBy||c.answeredBy;if(ab)handleAMD(ab,lead)});
   conn.on('disconnect',async()=>{
     const dur=Math.floor((Date.now()-callStart)/1000);
-    log('Disconnected after '+dur+'s');
+    const talkSec=accepted?Math.floor((Date.now()-acceptedAt)/1000):0;
+    log('Disconnected after '+dur+'s (talk: '+talkSec+'s)');
+    // ── 20s+ talk time = pickup (counted once, regardless of VM verdict path) ──
+    const markPickup=()=>{
+      if(pickupCounted)return;
+      if(talkSec>=20){
+        pickupCounted=true;
+        lead._pickupCounted=true;
+        stats.conn++;
+        trkBump('pickups');
+        log('✓ Pickup logged ('+talkSec+'s talk)','ok');
+      }
+    };
     // If user hit the manual VM button, skip all automatic analysis — they already logged it
     if(lead._manualVm){
       lead._manualVm=false;
+      markPickup();
+      updateStats();
       return finalize('vm-manual');
     }
     // If the call was never accepted (pure ringing → error/cancel), it can't have
@@ -1148,7 +1248,12 @@ function bindCall(lead){
     }
 
     if(vmVerdict==='vm'){
-      // Deepgram detected voicemail — route into retry logic
+      // Deepgram detected voicemail — but if talk was 20s+, treat it as a real pickup anyway.
+      if(talkSec>=20){
+        markPickup();
+        updateStats();
+        return finalize('vm-but-pickup');
+      }
       setState('VM','vm');
       stats.vm++;
       lead.history.push('No Pickup');
@@ -1157,27 +1262,26 @@ function bindCall(lead){
       return finalize('vm-deepgram');
     }
     if(vmVerdict==='human'){
-      // Human was on the line but the call ended (they hung up, we hung up, etc).
-      // DON'T mark lead terminal — just track the connection stat and retry.
-      // Only an outcome-button click or max attempts ends the lead.
-      if(dur>=12) stats.conn++;
+      markPickup();
       updateStats();
       return finalize('human-hangup');
     }
     if(vmVerdict==='unsure'){
-      // AI couldn't decide — always retry, never pause.
+      // AI couldn't decide — if 20s+ talk, count it. Otherwise retry.
+      markPickup();
+      updateStats();
+      if(pickupCounted)return finalize('unsure-pickup');
       log('VM verdict unsure → retry','warn');
       return finalize('unsure-retry');
     }
 
     // No VM verdict (Deepgram toggle off or endpoint unreachable) —
-    // fall through to short-connect heuristic.
-    if(dur>=12){
-      // Long call without verdict — likely human who hung up. Count it but retry.
-      stats.conn++;
+    // fall through to talk-time heuristic.
+    if(talkSec>=20){
+      markPickup();
       updateStats();
-    } else if(dur>=3&&dur<12){
-      log('Short connect → No Pickup (no VM verdict)','warn');
+    } else if(talkSec>=3&&talkSec<20){
+      log('Short connect ('+talkSec+'s talk) → No Pickup','warn');
       stats.vm++;
       lead.history.push('No Pickup');
       syncOutcome(lead,'No Pickup');
@@ -1215,8 +1319,8 @@ document.querySelectorAll('.obtn').forEach(b=>b.onclick=()=>{
   const out=b.dataset.out;const lead=leads[idx];if(!lead)return;
   log('Outcome logged: '+out+' for '+lead.name,'ok');
   syncOutcome(lead,out);
-  // Tracker
-  if(out!=='No Pickup'&&out!=='DNC')trkBump('pickups');
+  // Tracker — don't double-count pickup if 20s+ talk already auto-bumped it
+  if(out!=='No Pickup'&&out!=='DNC'&&!lead._pickupCounted){trkBump('pickups');lead._pickupCounted=true}
   if(out==='Booked')trkBump('booked');
   else if(out==='Not Interested')trkBump('ni');
   else if(out==='Callback')trkBump('cb');
@@ -1232,6 +1336,7 @@ document.querySelectorAll('.obtn').forEach(b=>b.onclick=()=>{
 
 function afterCall(reason){
   conn=null;dialing=false;
+  stopSpamScreenWatch();
   beepStop();
   resetMuteUI();
   $('timer').textContent='00:00';$('timer').className='timer idle';
