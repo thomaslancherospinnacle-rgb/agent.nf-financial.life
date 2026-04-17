@@ -180,7 +180,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .info-v a.tel{color:var(--green);border-bottom-color:color-mix(in srgb, var(--green) 35%, transparent)}
 .info-v a.tel:hover{border-bottom-color:var(--green)}
 .info-thumb{display:inline-block;margin-top:6px}
-.info-thumb img{max-width:360px;max-height:260px;border-radius:8px;border:1px solid var(--b);display:block;margin-bottom:4px;cursor:pointer;transition:all .15s;box-shadow:var(--shadow-sm)}
+.info-thumb img{max-width:600px;max-height:440px;width:100%;height:auto;border-radius:8px;border:1px solid var(--b);display:block;margin-bottom:4px;cursor:pointer;transition:all .15s;box-shadow:var(--shadow-sm)}
 .info-thumb img:hover{transform:scale(1.02);box-shadow:var(--shadow)}
 .info-thumb a{font-size:11px;color:var(--t2)}
 
@@ -593,7 +593,7 @@ function isImageUrl(u){return /drive\.google\.com\/file\/|\/Lead\/GetLeadCard|\.
 // Convert a Drive file URL to a thumbnail URL Google serves publicly (respects sharing)
 function driveThumbUrl(u){
   const m=u.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-  if(m)return 'https://drive.google.com/thumbnail?id='+m[1]+'&sz=w800';
+  if(m)return 'https://drive.google.com/thumbnail?id='+m[1]+'&sz=w1200';
   return u;
 }
 // Turn a cell value into HTML: images → thumbnails, URLs → <a target=_blank>, phones → tel:
