@@ -166,8 +166,18 @@ button:disabled{opacity:.45;cursor:not-allowed}
 /* Lead display */
 .bigname{font-family:'Fraunces','Georgia',serif;font-size:34px;font-weight:600;letter-spacing:-.02em;margin:18px 0 4px;min-height:42px;color:var(--tx)}
 .bigphone{font-family:'Geist Mono',monospace;font-size:17px;color:var(--brand);margin-bottom:10px;font-weight:500}
-.timer{font-family:'Geist Mono',monospace;font-size:38px;color:var(--green);margin:8px 0;font-weight:500;letter-spacing:-.02em}
+.timer{font-family:'Geist Mono',monospace;font-size:38px;color:var(--green);margin:8px 0 2px;font-weight:500;letter-spacing:-.02em}
 .timer.idle{color:var(--t3)}
+.callstatus{font-family:'Geist Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin:0 0 8px;min-height:14px;color:var(--t3)}
+.callstatus.ring{color:var(--brand)}
+.callstatus.ring::before{content:'● ';animation:blink 1s infinite}
+.callstatus.live{color:var(--green)}
+.callstatus.live::before{content:'● '}
+.callstatus.retry{color:var(--orange,#f0a040)}
+.callstatus.retry::before{content:'↻ '}
+.callstatus.vm{color:var(--t2)}
+.callstatus.vm::before{content:'📵 '}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:.3}}
 
 /* Info table */
 .info{background:var(--s2);border:1px solid var(--b);border-radius:var(--radius-sm);padding:14px;margin:14px 0;max-height:340px;overflow:auto}
@@ -401,6 +411,7 @@ summary:hover{color:var(--tx)}
   <div class="bigname" id="name">—</div>
   <div class="bigphone" id="phone">—</div>
   <div class="timer idle" id="timer">00:00</div>
+  <div class="callstatus" id="callstatus"></div>
   <div style="font-family:'SF Mono',monospace;font-size:10px;color:var(--t3)" id="att"></div>
 
   <div class="info" id="info"><div style="color:var(--t3);text-align:center;padding:18px">Load a tab to begin</div></div>
@@ -584,7 +595,22 @@ let device=null,conn=null,leads=[],idx=0,attempt=0,running=false,dialing=false,m
 try{pendingSync=JSON.parse(LS('dialer_pendingSync','[]'))}catch{pendingSync=[]}
 
 function log(m,t=''){const d=document.createElement('div');d.className=t;d.textContent='['+new Date().toLocaleTimeString()+'] '+m;$('log').appendChild(d);$('log').scrollTop=1e9}
-function setState(t,c=''){const p=$('state');p.className='pill '+c;p.innerHTML='<span class="dot"></span>'+t;if(typeof setTitle==='function'){const lead=leads[idx];setTitle(t,lead)}}
+function setState(t,c=''){const p=$('state');p.className='pill '+c;p.innerHTML='<span class="dot"></span>'+t;if(typeof setTitle==='function'){const lead=leads[idx];setTitle(t,lead)}updateCallStatus(t)}
+function updateCallStatus(state){
+  const el=$('callstatus');if(!el)return;
+  // Map dialer state -> user-facing status text + style class
+  const map={
+    DIALING:   ['Dialing…',     'ring'],
+    RINGING:   ['Ringing',      'ring'],
+    CONNECTED: ['Connected',    'live'],
+    VM:        ['Voicemail',    'vm'],
+    IDLE:      ['',             ''],
+    STOPPED:   ['',             ''],
+    'FORCE STOPPED':['',        '']
+  };
+  const [txt,cls]=map[state]||['',''];
+  el.textContent=txt;el.className='callstatus'+(cls?' '+cls:'')
+}
 function setDev(t,c=''){const p=$('devpill');p.className='pill '+c;p.innerHTML='<span class="dot"></span>'+t}
 function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
 function escAttr(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -1404,6 +1430,12 @@ function scheduleDial(ms,reason){
   clearTimeout(gapTimer);
   const fireAt=Date.now()+ms;
   log(`→ Next dial in ${ms}ms (reason: ${reason})`,'info');
+  // Show retry status under the timer if we're retrying the same lead
+  // (attempt>0 means afterCall incremented but didn't advance idx)
+  if(running && attempt>0){
+    const el=$('callstatus');
+    if(el){el.textContent='Trying again…';el.className='callstatus retry'}
+  }
   gapTimer=setTimeout(()=>{
     gapTimer=null;
     if(!running){log('Watchdog: running=false, abort','warn');return}
