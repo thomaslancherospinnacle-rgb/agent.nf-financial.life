@@ -153,6 +153,16 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .btn-mute-big.mute-on{background:var(--red);color:#fff;border-color:var(--red);animation:mute-pulse 1.6s ease-in-out infinite}
 @keyframes mute-pulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb, var(--red) 50%, transparent)}50%{box-shadow:0 0 0 8px color-mix(in srgb, var(--red) 0%, transparent)}}
 
+/* Mic input level meter */
+.mic-meter{display:inline-flex;align-items:center;gap:8px;padding:0 10px;height:38px;background:var(--s2);border:1px solid var(--b);border-radius:8px;font-family:'Geist Mono',monospace;font-size:10px;color:var(--t2);letter-spacing:.04em}
+.mic-meter .mic-icon{font-size:13px;opacity:.7}
+.mic-meter .mic-bar-track{position:relative;width:120px;height:8px;background:var(--s3);border-radius:4px;overflow:hidden;border:1px solid var(--b)}
+.mic-meter .mic-bar-fill{position:absolute;left:0;top:0;bottom:0;width:0%;background:linear-gradient(90deg, var(--green) 0%, var(--green) 60%, var(--amber) 80%, var(--red) 100%);border-radius:3px;transition:width 60ms linear}
+.mic-meter.muted .mic-bar-fill{background:var(--t3);opacity:.4}
+.mic-meter.muted .mic-icon{opacity:.3}
+.mic-meter.inactive{opacity:.5}
+.mic-meter.inactive .mic-bar-fill{width:0% !important}
+
 /* Status pill */
 .pill{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;font-family:'Geist Mono',monospace;font-size:11px;font-weight:500;letter-spacing:0;background:var(--s2);color:var(--t2);border:1px solid var(--b)}
 .pill.live{background:color-mix(in srgb, var(--green) 12%, var(--sf));color:var(--green);border-color:color-mix(in srgb, var(--green) 30%, transparent)}
@@ -405,7 +415,8 @@ summary:hover{color:var(--tx)}
     <button id="skip" class="btn-skip" disabled>⏭ SKIP</button>
     <span class="pill" id="state"><span class="dot"></span>IDLE</span>
     <span id="pending-syncs"></span>
-    <button id="mute" class="btn-mute-big mute-off" title="Mute your mic (sticky — stays across calls). Can toggle with or without active call." style="margin-left:auto">🎤 MUTE OFF</button>
+    <div class="mic-meter inactive" id="mic-meter" style="margin-left:auto" title="Live microphone input level"><span class="mic-icon">🎙</span><div class="mic-bar-track"><div class="mic-bar-fill" id="mic-bar-fill"></div></div><span id="mic-meter-label">MIC</span></div>
+    <button id="mute" class="btn-mute-big mute-off" title="Mute your mic (sticky — stays across calls). Can toggle with or without active call.">🎤 MUTE OFF</button>
   </div>
 
   <div class="bigname" id="name">—</div>
@@ -940,6 +951,7 @@ async function manualDial(){
   log('📞 Manual dial '+lead.name+' from '+from.lbl+' ('+(attempt+1)+'/'+maxAtt+')');
   try{
     conn=await device.connect({params:{To:lead.phone,callerId:from.n,leadName:lead.name,VmDetect:'off'}});
+    attachMicMeter(conn);
     lead._lastCallerId=from.n;
     lead._manualDial=true;
     attempt++;             // <-- this dial counts as an attempt
@@ -1020,7 +1032,7 @@ $('force-stop').onclick=()=>{
   // Kill every timer
   try{clearTimeout(gapTimer)}catch{};gapTimer=null;
   try{clearInterval(callTimer)}catch{};callTimer=null;
-  beepStop();resetMuteUI();
+  beepStop();resetMuteUI();resetMicMeter();
   // Hang up any active Twilio call
   if(conn){try{conn.disconnect()}catch{};try{conn.reject()}catch{};conn=null;}
   // Reset any Twilio device-level pending calls
@@ -1092,6 +1104,12 @@ $('mute').onclick=()=>{
   muteEnabled=!muteEnabled;
   renderMuteBtn();
   applyMuteToConn();
+  // Update meter's muted state immediately (don't wait for next volume tick)
+  const meter=$('mic-meter');
+  if(meter&&!meter.classList.contains('inactive')){
+    if(muteEnabled){meter.classList.add('muted');$('mic-bar-fill').style.width='0%';$('mic-meter-label').textContent='MUTED'}
+    else{meter.classList.remove('muted');$('mic-meter-label').textContent='MIC'}
+  }
   log(muteEnabled?'🔇 Mic muted (sticky — will stay muted on next call)':'🎤 Mic unmuted','warn');
 };
 // Keep the button enabled always so mute can be pre-set before a call starts.
@@ -1100,6 +1118,45 @@ $('mute').disabled=false;
 function resetMuteUI(){
   // Don't reset mute across calls — it's sticky now. Just re-render current state.
   renderMuteBtn();
+}
+
+// ── MIC INPUT LEVEL METER ────────────────────────────────────────
+// Twilio Voice SDK fires a 'volume' event during active calls with
+// input/output volumes in the 0–1 range. We use the input volume to
+// drive a live bar so the agent can see their mic is actually working.
+function attachMicMeter(call){
+  if(!call)return;
+  try{
+    call.on('volume', (inputVolume /*, outputVolume */) => {
+      const meter=$('mic-meter');
+      const fill=$('mic-bar-fill');
+      const label=$('mic-meter-label');
+      if(!meter||!fill)return;
+      meter.classList.remove('inactive');
+      if(muteEnabled){
+        meter.classList.add('muted');
+        fill.style.width='0%';
+        if(label)label.textContent='MUTED';
+        return;
+      }
+      meter.classList.remove('muted');
+      // Apply a slight curve so quiet speech is visible but the bar
+      // doesn't peg on background noise. input volume is 0–1.
+      const v=Math.max(0, Math.min(1, inputVolume));
+      const pct=Math.round(Math.pow(v, 0.7) * 100);
+      fill.style.width=pct+'%';
+      if(label)label.textContent=(pct+'').padStart(3,' ')+'%';
+    });
+  }catch(e){/* older SDKs may not support volume */}
+}
+function resetMicMeter(){
+  const meter=$('mic-meter');
+  const fill=$('mic-bar-fill');
+  const label=$('mic-meter-label');
+  if(meter)meter.classList.add('inactive');
+  if(meter)meter.classList.remove('muted');
+  if(fill)fill.style.width='0%';
+  if(label)label.textContent='MIC';
 }
 
 // Ranked list of caller IDs by distance to a given destination
@@ -1127,6 +1184,7 @@ async function fastRedial(from,reason){
     try{
       const vmd=$('vmDetect').checked?'on':'off';
       conn=await device.connect({params:{To:lead.phone,callerId:from.n,leadName:lead.name,VmDetect:vmd,MachineDetection:'DetectMessageEnd',MachineDetectionTimeout:'6'}});
+      attachMicMeter(conn);
       lead._lastCallerId=from.n;
       lead._manualRedial=true; // flag so afterCall doesn't count this as a per-lead attempt
       trkBump('dials');  // ← tracker: still count this dial
@@ -1210,6 +1268,7 @@ async function dialNext(){
   try{
     const vmd=$('vmDetect').checked?'on':'off';
     conn=await device.connect({params:{To:lead.phone,callerId:from.n,leadName:lead.name,VmDetect:vmd,MachineDetection:'DetectMessageEnd',MachineDetectionTimeout:'6',MachineDetectionSpeechThreshold:'2400'}});
+    attachMicMeter(conn);
     lead._lastCallerId=from.n;
     trkBump('dials');  // ← tracker: count this dial
     bindCall(lead);
@@ -1365,6 +1424,7 @@ function afterCall(reason){
   stopSpamScreenWatch();
   beepStop();
   resetMuteUI();
+  resetMicMeter();
   $('timer').textContent='00:00';$('timer').className='timer idle';
   renderQueue();updateStats();
   // Manual DIAL mode: don't auto-advance, don't retry. Re-arm the DIAL button.
@@ -1584,13 +1644,14 @@ $('kp-call').onclick=async()=>{
   callTimer=setInterval(()=>{const s=Math.floor((Date.now()-callStart)/1000);$('timer').className='timer';$('timer').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')},250);
   try{
     conn=await device.connect({params:{To:num,callerId:from.n,leadName:'Manual'}});
+    attachMicMeter(conn);
     conn.on('accept',()=>{setState('CONNECTED','live');log('Connected','ok');applyMuteToConn()});
     conn.on('disconnect',()=>endManual('Disconnected'));conn.on('error',e=>{log('Error: '+e.message,'err');endManual('Error')});
     conn.on('cancel',()=>endManual('Cancel'));conn.on('reject',()=>endManual('Reject'));
   }catch(e){log('Manual dial failed: '+e.message,'err');endManual('Failed')}
 };
 $('kp-end').onclick=()=>{if(conn)try{conn.disconnect()}catch{}};
-function endManual(r){log(r);clearInterval(callTimer);beepStop();resetMuteUI();conn=null;manualCall=false;$('timer').textContent='00:00';$('timer').className='timer idle';setState('IDLE');$('kp-call').style.display='block';$('kp-end').style.display='none'}
+function endManual(r){log(r);clearInterval(callTimer);beepStop();resetMuteUI();resetMicMeter();conn=null;manualCall=false;$('timer').textContent='00:00';$('timer').className='timer idle';setState('IDLE');$('kp-call').style.display='block';$('kp-end').style.display='none'}
 
 // ══ DAILY TRACKER ══
 // Counts dials, pickups, and outcomes per day. Buffers in localStorage,
