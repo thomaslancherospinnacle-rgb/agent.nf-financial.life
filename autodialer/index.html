@@ -368,6 +368,10 @@ summary:hover{color:var(--tx)}
       <label>Passcode</label><input id="gas-depid" type="password" autocomplete="off" style="flex:1;min-width:240px" placeholder="••••••••">
       <button id="load-tabs">↻ Refresh Tabs</button>
     </div>
+    <div class="row" title="Google Apps Script /exec URL of the Impact Sync Queue. When a dial fires, the current lead's Impact URL (from column H) is posted here so the Tampermonkey script on Impact can auto-mark No Answer.">
+      <label>Impact Sync</label><input id="impact-sync-url" style="flex:1;min-width:240px" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off">
+      <span id="impact-sync-pending" style="font-size:10px;color:var(--t3);font-family:'SF Mono',monospace"></span>
+    </div>
     <div class="tabs-row">
       <label>Tab</label>
       <select id="tab-sel"><option value="">— pick a tab —</option></select>
@@ -889,6 +893,77 @@ async function flushSync(){
 }
 setInterval(flushSync,15000);
 
+// ══ IMPACT SYNC (column H → Tampermonkey on Impact) ══
+// When a dial fires, we grab the lead's Impact URL from column H (8th column,
+// index 7 of the headers array) and POST it to a Google Apps Script queue.
+// The Tampermonkey userscript on mobile.impact.ailife.com pulls from that
+// same queue and auto-clicks "Call Mobile" → "No Answer" to keep Impact
+// dispositions in sync with what the autodialer actually dialed.
+//
+// Offline-safe: queued in localStorage, flushed on an interval and on each
+// new dial. One enqueue per dial attempt (not per retry outcome).
+let impactSyncQueue=[];
+try{impactSyncQueue=JSON.parse(LS('dialer_impactSync','[]'))}catch{impactSyncQueue=[]}
+$('impact-sync-url').value=LS('dialer_impact_sync_url','');
+$('impact-sync-url').addEventListener('change',e=>SS('dialer_impact_sync_url',e.target.value.trim()));
+function renderImpactSyncPending(){
+  const el=$('impact-sync-pending');if(!el)return;
+  el.textContent=impactSyncQueue.length?impactSyncQueue.length+' queued':'';
+  el.style.color=impactSyncQueue.length?'var(--amber)':'var(--t3)';
+}
+renderImpactSyncPending();
+// Pull the Impact URL out of column H. Headers are dynamic — H is the 8th
+// column (index 7). We accept either a full InboxDetail URL or a bare LeadId.
+function impactLeadIdFromLead(lead){
+  if(!lead||!lead.cells||!headers||headers.length<8)return null;
+  const raw=String(lead.cells[headers[7]]||'').trim();
+  if(!raw)return null;
+  const m=raw.match(/LeadId=(\d+)/i);
+  if(m)return{leadId:m[1],url:raw};
+  if(/^\d+$/.test(raw))return{leadId:raw,url:''};
+  return null;
+}
+function enqueueImpactSync(lead){
+  const url=$('impact-sync-url').value.trim();
+  if(!url)return; // feature disabled
+  const info=impactLeadIdFromLead(lead);
+  if(!info){log('Impact sync: no LeadId in column H for '+lead.name,'warn');return}
+  impactSyncQueue.push({
+    leadId:info.leadId,
+    phone:lead.phone||'',
+    source:'autodialer:'+(tabName||'unknown'),
+    ts:new Date().toISOString()
+  });
+  SS('dialer_impactSync',JSON.stringify(impactSyncQueue));
+  renderImpactSyncPending();
+  flushImpactSync();
+}
+async function flushImpactSync(){
+  if(!impactSyncQueue.length)return;
+  const url=$('impact-sync-url').value.trim();
+  if(!url){renderImpactSyncPending();return}
+  // Flush sequentially — the Apps Script uses a script lock anyway, and we
+  // want ordering preserved so older dials don't override newer ones.
+  const item=impactSyncQueue[0];
+  try{
+    const r=await fetch(url,{
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'}, // avoids CORS preflight
+      body:JSON.stringify({action:'enqueue',leadId:item.leadId,phone:item.phone,source:item.source})
+    });
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    if(!d.ok)throw new Error(d.error||'enqueue failed');
+    impactSyncQueue.shift();
+    SS('dialer_impactSync',JSON.stringify(impactSyncQueue));
+    renderImpactSyncPending();
+    if(impactSyncQueue.length)setTimeout(flushImpactSync,250);
+  }catch(e){
+    log('Impact sync failed (will retry): '+e.message,'warn');
+  }
+}
+setInterval(flushImpactSync,20000);
+
 // ── HEARTBEAT WATCHDOG ──
 // Every 5 seconds, if the dialer should be dialing but isn't, kick it.
 // This catches any case where setTimeout got dropped, an unhandled exception
@@ -956,6 +1031,7 @@ async function manualDial(){
     lead._manualDial=true;
     attempt++;             // <-- this dial counts as an attempt
     trkBump('dials');
+    enqueueImpactSync(lead);  // ← Impact queue: mirror this dial as No Answer
     bindCall(lead);
     updateDialBtnLabel();
   }catch(e){
@@ -1288,6 +1364,7 @@ async function dialNext(){
 
     lead._lastCallerId=from.n;
     trkBump('dials');  // ← tracker: count this dial
+    enqueueImpactSync(lead);  // ← Impact queue: mirror this dial as No Answer
     bindCall(lead);
   }catch(e){log('connect() failed: '+e.message,'err');dialing=false;attempt++;setTimeout(dialNext,1500)}
 }
