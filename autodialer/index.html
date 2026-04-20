@@ -1450,7 +1450,7 @@ function setTitle(state,lead){
   // Tab title format: "🟢 DIALING Robert" / "📞 CONNECTED Robert" / "Auto Dialer v2"
   if(!lead){document.title='Auto Dialer v2';return}
   const f=firstName(lead.name);
-  const prefix={DIALING:'🟢 DIALING',RINGING:'🔔 RINGING',CONNECTED:'📞',VM:'📵 VM',IDLE:'⏸',STOPPED:'■ STOP'}[state]||'▶';
+  const prefix={DIALING:'🟢 DIALING',RINGING:'🔔 RINGING',CONNECTED:'📞 [MUTE-OTHERS]',VM:'📵 VM',IDLE:'⏸',STOPPED:'■ STOP'}[state]||'▶';
   document.title=`${prefix} ${f}`;
 }
 
