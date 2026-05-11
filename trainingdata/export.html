@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIL CSV to JSON Export</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --card: #111c2e;
+      --line: rgba(255,255,255,.12);
+      --text: #eef4ff;
+      --muted: #9fb0c7;
+      --blue: #2f7df6;
+      --green: #18a058;
+      --gold: #f6c85f;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: radial-gradient(circle at top, #17345c 0%, var(--bg) 42%, #030711 100%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .wrap { max-width: 1050px; margin: 0 auto; }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 28px;
+      letter-spacing: -0.03em;
+    }
+
+    .sub {
+      margin: 0 0 18px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .card {
+      background: rgba(17, 28, 46, .94);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: 0 18px 60px rgba(0,0,0,.28);
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: 700;
+      letter-spacing: .03em;
+      text-transform: uppercase;
+    }
+
+    input, textarea {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,.15);
+      background: #07111f;
+      color: var(--text);
+      border-radius: 12px;
+      padding: 11px 12px;
+      outline: none;
+      font-size: 14px;
+    }
+
+    textarea {
+      min-height: 420px;
+      resize: vertical;
+      line-height: 1.35;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 12px;
+    }
+
+    button {
+      border: 0;
+      color: white;
+      background: #334155;
+      padding: 10px 13px;
+      border-radius: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    button.primary { background: var(--blue); }
+    button.green { background: var(--green); }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    .status {
+      min-height: 20px;
+      color: var(--gold);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .mini {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>AIL CSV to JSON Export</h1>
+    <p class="sub">
+      Export your Google Sheet as CSV, drop it here, and this converts the rows into clean JSON for prompt libraries, evals, or fine-tuning prep.
+    </p>
+
+    <div class="card">
+      <label for="csvFile">CSV File</label>
+      <input id="csvFile" type="file" accept=".csv,text/csv" />
+      <div class="row">
+        <button id="convertBtn" class="primary" type="button">Convert CSV to JSON</button>
+        <button id="copyBtn" type="button">Copy JSON</button>
+        <button id="downloadBtn" class="green" type="button">Download JSON</button>
+        <span id="status" class="status"></span>
+      </div>
+      <div class="mini">
+        This page runs locally in the browser. It does not upload the CSV anywhere.
+      </div>
+    </div>
+
+    <div class="card">
+      <label for="jsonOutput">JSON Output</label>
+      <textarea id="jsonOutput" placeholder="JSON appears here..."></textarea>
+    </div>
+  </div>
+
+<script>
+(() => {
+  "use strict";
+
+  const $ = (id) => document.getElementById(id);
+  const csvFile = $("csvFile");
+  const convertBtn = $("convertBtn");
+  const copyBtn = $("copyBtn");
+  const downloadBtn = $("downloadBtn");
+  const jsonOutput = $("jsonOutput");
+  const status = $("status");
+
+  function setStatus(msg) {
+    status.textContent = msg || "";
+    if (msg) setTimeout(() => status.textContent = "", 3000);
+  }
+
+  function parseCSV(text) {
+    const rows = [];
+    let row = [];
+    let cell = "";
+    let i = 0;
+    let inQuotes = false;
+
+    while (i < text.length) {
+      const char = text[i];
+      const next = text[i + 1];
+
+      if (inQuotes) {
+        if (char === '"' && next === '"') {
+          cell += '"';
+          i += 2;
+          continue;
+        }
+
+        if (char === '"') {
+          inQuotes = false;
+          i++;
+          continue;
+        }
+
+        cell += char;
+        i++;
+        continue;
+      }
+
+      if (char === '"') {
+        inQuotes = true;
+        i++;
+        continue;
+      }
+
+      if (char === ",") {
+        row.push(cell);
+        cell = "";
+        i++;
+        continue;
+      }
+
+      if (char === "\r") {
+        i++;
+        continue;
+      }
+
+      if (char === "\n") {
+        row.push(cell);
+        rows.push(row);
+        row = [];
+        cell = "";
+        i++;
+        continue;
+      }
+
+      cell += char;
+      i++;
+    }
+
+    row.push(cell);
+    rows.push(row);
+
+    return rows.filter(r => r.some(c => String(c || "").trim() !== ""));
+  }
+
+  function normalizeHeader(header) {
+    return String(header || "")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "");
+  }
+
+  function rowsToObjects(rows) {
+    if (!rows.length) return [];
+
+    const headers = rows[0].map(normalizeHeader);
+
+    return rows.slice(1).map((row, index) => {
+      const obj = { row_number: index + 2 };
+
+      headers.forEach((header, i) => {
+        if (!header) return;
+        obj[header] = row[i] == null ? "" : String(row[i]).trim();
+      });
+
+      return obj;
+    });
+  }
+
+  function toTrainingObject(row) {
+    return {
+      id: "case_" + String(row.row_number || "").padStart(5, "0"),
+      timestamp: row.timestamp || row.client_timestamp || "",
+      producer_name: row.producer_name || "",
+      market: row.market || "",
+      phase: row.phase || "",
+      client_type: row.client_type || "",
+      product_presented: row.product_presented || "",
+      objection: row.objection || "",
+      situation: row.situation || "",
+      ammo: row.ammo || "",
+      rebuttal_used: row.rebuttal_used || "",
+      client_reaction: row.client_reaction || "",
+      outcome: row.outcome || "",
+      why_it_worked: row.why_it_worked || "",
+      ideal_ai_response: row.ideal_ai_response || "",
+      quality_score: row.quality_score || "",
+      monthly_premium: row.monthly_premium || "",
+      policy_result: row.policy_result || "",
+      recording_transcript: row.recording_transcript || "",
+      raw: row
+    };
+  }
+
+  async function convert() {
+    const file = csvFile.files && csvFile.files[0];
+    if (!file) {
+      alert("Choose a CSV file first.");
+      return;
+    }
+
+    const text = await file.text();
+    const rows = parseCSV(text);
+    const objects = rowsToObjects(rows);
+    const trainingCases = objects.map(toTrainingObject);
+
+    jsonOutput.value = JSON.stringify(trainingCases, null, 2);
+    setStatus("Converted " + trainingCases.length + " rows.");
+  }
+
+  async function copyJSON() {
+    const text = jsonOutput.value.trim();
+    if (!text) return;
+    await navigator.clipboard.writeText(text);
+    setStatus("Copied.");
+  }
+
+  function downloadJSON() {
+    const text = jsonOutput.value.trim();
+    if (!text) return;
+
+    const blob = new Blob([text], { type: "application/json;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+
+    a.href = url;
+    a.download = "ail_objection_cases.json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    URL.revokeObjectURL(url);
+    setStatus("Downloaded.");
+  }
+
+  convertBtn.addEventListener("click", convert);
+  copyBtn.addEventListener("click", copyJSON);
+  downloadBtn.addEventListener("click", downloadJSON);
+})();
+</script>
+</body>
+</html>
