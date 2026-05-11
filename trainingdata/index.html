@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIL Objection Case Input</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --card: #111c2e;
+      --line: rgba(255,255,255,.12);
+      --text: #eef4ff;
+      --muted: #9fb0c7;
+      --blue: #2f7df6;
+      --green: #18a058;
+      --red: #d64545;
+      --gold: #f6c85f;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: radial-gradient(circle at top, #17345c 0%, var(--bg) 42%, #030711 100%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .wrap {
+      max-width: 1050px;
+      margin: 0 auto;
+    }
+
+    .top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 28px;
+      letter-spacing: -0.03em;
+    }
+
+    .sub {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .card {
+      background: rgba(17, 28, 46, .94);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: 0 18px 60px rgba(0,0,0,.28);
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: 700;
+      letter-spacing: .03em;
+      text-transform: uppercase;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,.15);
+      background: #07111f;
+      color: var(--text);
+      border-radius: 12px;
+      padding: 11px 12px;
+      outline: none;
+      font-size: 14px;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+      line-height: 1.38;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(47,125,246,.18);
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      border: 0;
+      color: white;
+      background: #334155;
+      padding: 10px 13px;
+      border-radius: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    button.primary { background: var(--blue); }
+    button.green { background: var(--green); }
+    button.red { background: var(--red); }
+    button.gold { background: #9b6a09; }
+    button:disabled { opacity: .55; cursor: not-allowed; }
+
+    .hint {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+      margin-top: 8px;
+    }
+
+    .status {
+      min-height: 20px;
+      color: var(--gold);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(255,255,255,.05);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 99px;
+      background: var(--red);
+    }
+
+    .dot.live { background: var(--green); }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 900;
+      color: #dbeafe;
+      margin: 0 0 12px;
+      letter-spacing: .02em;
+    }
+
+    .mini {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    .required { color: #fca5a5; }
+
+    .config-ok { color: #86efac; }
+    .config-bad { color: #fca5a5; }
+
+    @media (max-width: 760px) {
+      body { padding: 12px; }
+      .top, .grid, .grid-3 { grid-template-columns: 1fr; display: grid; }
+      .top { gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>AIL Objection Case Input</h1>
+        <p class="sub">
+          Agents can type the case manually or record the rebuttal/situation using Deepgram STT.
+          Config loads from <strong>secret.env</strong> in the same folder as this HTML file.
+        </p>
+      </div>
+      <div class="pill"><span id="liveDot" class="dot"></span><span id="liveLabel">Recorder Off</span></div>
+    </div>
+
+    <div class="card">
+      <p class="section-title">Config</p>
+      <div class="grid">
+        <div>
+          <label>Google Apps Script</label>
+          <input id="gasUrlDisplay" readonly placeholder="Loading from secret.env..." />
+          <div class="hint">Loaded from <code>GAS_WEB_APP_URL</code>.</div>
+        </div>
+        <div>
+          <label>Deepgram Key</label>
+          <input id="dgKeyDisplay" readonly placeholder="Loading from secret.env..." />
+          <div class="hint">Loaded from <code>DEEPGRAM_API_KEY</code>.</div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px;">
+        <button id="reloadConfig" class="primary" type="button">Reload Config</button>
+        <span id="configStatus" class="status"></span>
+      </div>
+      <div class="mini">
+        This is intentionally basic. Anyone who can load this webpage can inspect the browser and see <code>secret.env</code>.
+      </div>
+    </div>
+
+    <form id="caseForm" method="POST" target="hiddenSubmitFrame">
+      <input type="hidden" name="source" value="agent_input_html_env_v1" />
+      <input type="hidden" name="client_timestamp" id="clientTimestamp" />
+      <input type="hidden" name="recording_transcript" id="recordingTranscriptHidden" />
+      <input type="hidden" name="user_agent" id="userAgentHidden" />
+
+      <div class="card">
+        <p class="section-title">Case Details</p>
+        <div class="grid-3">
+          <div>
+            <label for="producer_name">Producer Name <span class="required">*</span></label>
+            <input name="producer_name" id="producer_name" required placeholder="Agent name" />
+          </div>
+          <div>
+            <label for="market">Market / State</label>
+            <input name="market" id="market" placeholder="MI, FL, OH..." />
+          </div>
+          <div>
+            <label for="phase">Phase</label>
+            <select name="phase" id="phase">
+              <option value="rapport">Rapport / Discovery</option>
+              <option value="benefits">Benefits Explanation</option>
+              <option value="options_pitched">Options Pitched</option>
+              <option value="close">Close</option>
+              <option value="referrals">Referrals</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-3" style="margin-top:14px;">
+          <div>
+            <label for="client_type">Client Type</label>
+            <select name="client_type" id="client_type">
+              <option value="">Unknown</option>
+              <option value="male_young">Male Young</option>
+              <option value="female_young">Female Young</option>
+              <option value="male_senior">Male Senior</option>
+              <option value="female_senior">Female Senior</option>
+              <option value="couple">Couple</option>
+              <option value="parent">Parent Involved</option>
+              <option value="referral">Referral</option>
+              <option value="union_member">Union Member</option>
+            </select>
+          </div>
+          <div>
+            <label for="product_presented">Product / Option Presented</label>
+            <input name="product_presented" id="product_presented" placeholder="WL, A71, Bronze, 1 hour, 2 hour..." />
+          </div>
+          <div>
+            <label for="outcome">Outcome <span class="required">*</span></label>
+            <select name="outcome" id="outcome" required>
+              <option value="">Select...</option>
+              <option value="closed">Closed</option>
+              <option value="no_sale">No Sale</option>
+              <option value="callback">Callback</option>
+              <option value="spouse_needed">Spouse Needed</option>
+              <option value="underwriting">Underwriting</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="section-title">Record or Type</p>
+        <div class="row">
+          <button id="startRec" class="green" type="button">Start Recording</button>
+          <button id="stopRec" class="red" type="button" disabled>Stop Recording</button>
+          <button id="appendTranscript" class="gold" type="button">Append Recording to Situation</button>
+          <button id="clearTranscript" type="button">Clear Recording Text</button>
+          <span id="recStatus" class="status"></span>
+        </div>
+        <div style="margin-top:12px;">
+          <label for="recordingTranscript">Live Recording Transcript</label>
+          <textarea id="recordingTranscript" placeholder="Deepgram transcript appears here. You can edit it before submitting."></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="section-title">Training Fields</p>
+        <div>
+          <label for="objection">Client Objection <span class="required">*</span></label>
+          <textarea name="objection" id="objection" required placeholder="Example: I already have life insurance through work."></textarea>
+        </div>
+
+        <div class="grid" style="margin-top:14px;">
+          <div>
+            <label for="situation">Situation / Context <span class="required">*</span></label>
+            <textarea name="situation" id="situation" required placeholder="What was happening? Options pitched? Budget? Family? Existing coverage?"></textarea>
+          </div>
+          <div>
+            <label for="ammo">Ammo Collected</label>
+            <textarea name="ammo" id="ammo" placeholder="Wife, kids, dangerous job, mortgage, 401k, policy amount, values, fears, etc."></textarea>
+          </div>
+        </div>
+
+        <div class="grid" style="margin-top:14px;">
+          <div>
+            <label for="rebuttal_used">Producer Rebuttal Used <span class="required">*</span></label>
+            <textarea name="rebuttal_used" id="rebuttal_used" required placeholder="Write exactly what the agent said."></textarea>
+          </div>
+          <div>
+            <label for="client_reaction">Client Reaction</label>
+            <textarea name="client_reaction" id="client_reaction" placeholder="What did client say/do after rebuttal?"></textarea>
+          </div>
+        </div>
+
+        <div class="grid" style="margin-top:14px;">
+          <div>
+            <label for="why_it_worked">Why It Worked / Why It Failed</label>
+            <textarea name="why_it_worked" id="why_it_worked" placeholder="Did it separate the gap? Did it make them admit the issue? Did it overtalk?"></textarea>
+          </div>
+          <div>
+            <label for="ideal_ai_response">Ideal AI Response</label>
+            <textarea name="ideal_ai_response" id="ideal_ai_response" placeholder="Optional: what should the AI have suggested live?"></textarea>
+          </div>
+        </div>
+
+        <div class="grid-3" style="margin-top:14px;">
+          <div>
+            <label for="quality_score">Quality Score</label>
+            <select name="quality_score" id="quality_score">
+              <option value="">Not scored</option>
+              <option value="10">10 - Perfect</option>
+              <option value="9">9</option>
+              <option value="8">8</option>
+              <option value="7">7</option>
+              <option value="6">6</option>
+              <option value="5">5 - Average</option>
+              <option value="4">4</option>
+              <option value="3">3</option>
+              <option value="2">2</option>
+              <option value="1">1 - Bad</option>
+            </select>
+          </div>
+          <div>
+            <label for="monthly_premium">Premium / Option Price</label>
+            <input name="monthly_premium" id="monthly_premium" placeholder="$42/mo, $78/mo, etc." />
+          </div>
+          <div>
+            <label for="policy_result">Policy Result</label>
+            <input name="policy_result" id="policy_result" placeholder="Bronze sold, 1 hour sold, no app, etc." />
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row">
+          <button type="submit" class="primary">Submit Case to Sheet</button>
+          <button type="button" id="resetForm">Reset Form</button>
+          <span id="submitStatus" class="status"></span>
+        </div>
+        <div class="mini">
+          Submission uses a normal form POST into a hidden iframe. No cross-origin browser <code>fetch()</code> is used for Apps Script.
+        </div>
+      </div>
+    </form>
+
+    <iframe name="hiddenSubmitFrame" id="hiddenSubmitFrame" style="display:none;"></iframe>
+  </div>
+
+<script>
+(() => {
+  "use strict";
+
+  const ENV_FILE = "./secret.env";
+
+  const DG_MODEL = "nova-3";
+  const DG_LANGUAGE = "en-US";
+  const TARGET_SAMPLE_RATE = 16000;
+
+  let CONFIG = {
+    GAS_WEB_APP_URL: "",
+    DEEPGRAM_API_KEY: ""
+  };
+
+  let ws = null;
+  let mediaStream = null;
+  let audioCtx = null;
+  let sourceNode = null;
+  let processorNode = null;
+  let recording = false;
+
+  const $ = (id) => document.getElementById(id);
+
+  const els = {
+    caseForm: $("caseForm"),
+    gasUrlDisplay: $("gasUrlDisplay"),
+    dgKeyDisplay: $("dgKeyDisplay"),
+    reloadConfig: $("reloadConfig"),
+    configStatus: $("configStatus"),
+    clientTimestamp: $("clientTimestamp"),
+    userAgentHidden: $("userAgentHidden"),
+    recordingTranscriptHidden: $("recordingTranscriptHidden"),
+    recordingTranscript: $("recordingTranscript"),
+    startRec: $("startRec"),
+    stopRec: $("stopRec"),
+    appendTranscript: $("appendTranscript"),
+    clearTranscript: $("clearTranscript"),
+    recStatus: $("recStatus"),
+    submitStatus: $("submitStatus"),
+    resetForm: $("resetForm"),
+    liveDot: $("liveDot"),
+    liveLabel: $("liveLabel"),
+    situation: $("situation")
+  };
+
+  function parseEnv(text) {
+    const env = {};
+
+    String(text || "").split(/\r?\n/).forEach((line) => {
+      const trimmed = line.trim();
+
+      if (!trimmed || trimmed.startsWith("#")) return;
+
+      const eq = trimmed.indexOf("=");
+      if (eq === -1) return;
+
+      const key = trimmed.slice(0, eq).trim();
+      let value = trimmed.slice(eq + 1).trim();
+
+      if (
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))
+      ) {
+        value = value.slice(1, -1);
+      }
+
+      env[key] = value;
+    });
+
+    return env;
+  }
+
+  function maskSecret(value) {
+    const s = String(value || "");
+    if (!s) return "";
+    if (s.length <= 10) return "********";
+    return s.slice(0, 5) + "..." + s.slice(-4);
+  }
+
+  function setConfigStatus(msg, good) {
+    els.configStatus.textContent = msg || "";
+    els.configStatus.className = "status " + (good ? "config-ok" : "config-bad");
+  }
+
+  async function loadConfig() {
+    try {
+      setConfigStatus("Loading secret.env...", true);
+
+      const resp = await fetch(ENV_FILE, { cache: "no-store" });
+
+      if (!resp.ok) {
+        throw new Error("Could not load secret.env. Host these files on a web server; file:// usually blocks fetch().");
+      }
+
+      const text = await resp.text();
+      const env = parseEnv(text);
+
+      CONFIG.GAS_WEB_APP_URL = env.GAS_WEB_APP_URL || "";
+      CONFIG.DEEPGRAM_API_KEY = env.DEEPGRAM_API_KEY || "";
+
+      els.gasUrlDisplay.value = CONFIG.GAS_WEB_APP_URL || "Missing GAS_WEB_APP_URL";
+      els.dgKeyDisplay.value = CONFIG.DEEPGRAM_API_KEY ? maskSecret(CONFIG.DEEPGRAM_API_KEY) : "Missing DEEPGRAM_API_KEY";
+
+      if (!CONFIG.GAS_WEB_APP_URL || CONFIG.GAS_WEB_APP_URL.includes("PASTE_")) {
+        throw new Error("Missing GAS_WEB_APP_URL in secret.env.");
+      }
+
+      if (!CONFIG.DEEPGRAM_API_KEY || CONFIG.DEEPGRAM_API_KEY.includes("PASTE_")) {
+        throw new Error("Missing DEEPGRAM_API_KEY in secret.env.");
+      }
+
+      els.caseForm.action = CONFIG.GAS_WEB_APP_URL;
+      setConfigStatus("Config loaded.", true);
+    } catch (err) {
+      console.error(err);
+      els.caseForm.removeAttribute("action");
+      setConfigStatus(err.message || String(err), false);
+    }
+  }
+
+  function setRecStatus(msg) {
+    els.recStatus.textContent = msg || "";
+  }
+
+  function setLive(isLive) {
+    els.liveDot.classList.toggle("live", isLive);
+    els.liveLabel.textContent = isLive ? "Recorder Live" : "Recorder Off";
+    els.startRec.disabled = isLive;
+    els.stopRec.disabled = !isLive;
+  }
+
+  function buildDeepgramUrl() {
+    const params = new URLSearchParams({
+      model: DG_MODEL,
+      language: DG_LANGUAGE,
+      encoding: "linear16",
+      sample_rate: String(TARGET_SAMPLE_RATE),
+      channels: "1",
+      interim_results: "true",
+      punctuate: "true",
+      smart_format: "true",
+      endpointing: "350",
+      vad_events: "true"
+    });
+
+    return "wss://api.deepgram.com/v1/listen?" + params.toString();
+  }
+
+  function connectDeepgram(key) {
+    return new Promise((resolve, reject) => {
+      ws = new WebSocket(buildDeepgramUrl(), ["token", key]);
+      ws.binaryType = "arraybuffer";
+
+      ws.onopen = () => resolve();
+
+      ws.onerror = () => reject(new Error("Deepgram WebSocket error. Check API key/token."));
+
+      ws.onclose = () => {
+        if (recording) stopRecording();
+      };
+
+      ws.onmessage = (event) => {
+        let data;
+        try { data = JSON.parse(event.data); } catch { return; }
+
+        const transcript = data?.channel?.alternatives?.[0]?.transcript;
+        if (!transcript) return;
+
+        if (data.is_final) {
+          const clean = transcript.trim();
+          if (clean) {
+            const current = els.recordingTranscript.value.trim();
+            els.recordingTranscript.value = current ? current + "\n" + clean : clean;
+            els.recordingTranscriptHidden.value = els.recordingTranscript.value;
+            setRecStatus("Recording live...");
+          }
+        } else {
+          setRecStatus("Hearing: " + transcript.slice(0, 80));
+        }
+      };
+    });
+  }
+
+  function float32ToInt16PCM(float32Array) {
+    const buffer = new ArrayBuffer(float32Array.length * 2);
+    const view = new DataView(buffer);
+
+    for (let i = 0; i < float32Array.length; i++) {
+      let sample = Math.max(-1, Math.min(1, float32Array[i]));
+      sample = sample < 0 ? sample * 0x8000 : sample * 0x7fff;
+      view.setInt16(i * 2, sample, true);
+    }
+
+    return buffer;
+  }
+
+  function downsampleBuffer(inputBuffer, inputSampleRate, outputSampleRate) {
+    if (inputSampleRate === outputSampleRate) return float32ToInt16PCM(inputBuffer);
+    if (outputSampleRate > inputSampleRate) throw new Error("Output sample rate cannot exceed input sample rate.");
+
+    const ratio = inputSampleRate / outputSampleRate;
+    const newLength = Math.round(inputBuffer.length / ratio);
+    const result = new Float32Array(newLength);
+
+    let offsetResult = 0;
+    let offsetBuffer = 0;
+
+    while (offsetResult < result.length) {
+      const nextOffsetBuffer = Math.round((offsetResult + 1) * ratio);
+      let accum = 0;
+      let count = 0;
+
+      for (let i = offsetBuffer; i < nextOffsetBuffer && i < inputBuffer.length; i++) {
+        accum += inputBuffer[i];
+        count++;
+      }
+
+      result[offsetResult] = count ? accum / count : 0;
+      offsetResult++;
+      offsetBuffer = nextOffsetBuffer;
+    }
+
+    return float32ToInt16PCM(result);
+  }
+
+  async function startRecording() {
+    try {
+      if (!CONFIG.DEEPGRAM_API_KEY || CONFIG.DEEPGRAM_API_KEY.includes("PASTE_")) {
+        alert("DEEPGRAM_API_KEY is missing in secret.env.");
+        return;
+      }
+
+      setRecStatus("Starting recorder...");
+      await connectDeepgram(CONFIG.DEEPGRAM_API_KEY);
+
+      mediaStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        },
+        video: false
+      });
+
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") await audioCtx.resume();
+
+      sourceNode = audioCtx.createMediaStreamSource(mediaStream);
+      processorNode = audioCtx.createScriptProcessor(4096, 1, 1);
+
+      processorNode.onaudioprocess = (event) => {
+        if (!recording || !ws || ws.readyState !== WebSocket.OPEN) return;
+
+        const input = event.inputBuffer.getChannelData(0);
+        const pcm16 = downsampleBuffer(input, audioCtx.sampleRate, TARGET_SAMPLE_RATE);
+
+        if (pcm16.byteLength > 0) ws.send(pcm16);
+
+        const output = event.outputBuffer.getChannelData(0);
+        output.fill(0);
+      };
+
+      sourceNode.connect(processorNode);
+      processorNode.connect(audioCtx.destination);
+
+      mediaStream.getTracks().forEach(track => {
+        track.onended = () => {
+          if (recording) stopRecording();
+        };
+      });
+
+      recording = true;
+      setLive(true);
+      setRecStatus("Recording live...");
+    } catch (err) {
+      console.error(err);
+      alert(err.message || String(err));
+      stopRecording();
+    }
+  }
+
+  function stopRecording() {
+    recording = false;
+
+    try {
+      if (processorNode) {
+        processorNode.disconnect();
+        processorNode.onaudioprocess = null;
+      }
+    } catch {}
+
+    try { if (sourceNode) sourceNode.disconnect(); } catch {}
+    try { if (audioCtx && audioCtx.state !== "closed") audioCtx.close(); } catch {}
+    try { if (mediaStream) mediaStream.getTracks().forEach(track => track.stop()); } catch {}
+
+    try {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: "CloseStream" }));
+        ws.close();
+      }
+    } catch {}
+
+    ws = null;
+    mediaStream = null;
+    audioCtx = null;
+    sourceNode = null;
+    processorNode = null;
+
+    els.recordingTranscriptHidden.value = els.recordingTranscript.value;
+    setLive(false);
+    setRecStatus("Stopped.");
+  }
+
+  function appendRecordingToSituation() {
+    const text = els.recordingTranscript.value.trim();
+    if (!text) return;
+
+    const currentSituation = els.situation.value.trim();
+    els.situation.value = currentSituation ? currentSituation + "\n\n[Recording]\n" + text : "[Recording]\n" + text;
+    els.recordingTranscriptHidden.value = text;
+  }
+
+  function clearRecordingTranscript() {
+    els.recordingTranscript.value = "";
+    els.recordingTranscriptHidden.value = "";
+    setRecStatus("");
+  }
+
+  function prepareSubmit(e) {
+    if (!CONFIG.GAS_WEB_APP_URL || CONFIG.GAS_WEB_APP_URL.includes("PASTE_")) {
+      e.preventDefault();
+      alert("GAS_WEB_APP_URL is missing in secret.env.");
+      return;
+    }
+
+    els.caseForm.action = CONFIG.GAS_WEB_APP_URL;
+    els.clientTimestamp.value = new Date().toISOString();
+    els.userAgentHidden.value = navigator.userAgent || "";
+    els.recordingTranscriptHidden.value = els.recordingTranscript.value;
+
+    els.submitStatus.textContent = "Submitted. Check the Google Sheet.";
+    setTimeout(() => els.submitStatus.textContent = "", 4000);
+  }
+
+  function resetForm() {
+    els.caseForm.reset();
+    els.gasUrlDisplay.value = CONFIG.GAS_WEB_APP_URL || "";
+    els.dgKeyDisplay.value = CONFIG.DEEPGRAM_API_KEY ? maskSecret(CONFIG.DEEPGRAM_API_KEY) : "";
+    els.recordingTranscript.value = "";
+    els.recordingTranscriptHidden.value = "";
+    els.submitStatus.textContent = "";
+  }
+
+  els.reloadConfig.addEventListener("click", loadConfig);
+  els.startRec.addEventListener("click", startRecording);
+  els.stopRec.addEventListener("click", stopRecording);
+  els.appendTranscript.addEventListener("click", appendRecordingToSituation);
+  els.clearTranscript.addEventListener("click", clearRecordingTranscript);
+  els.caseForm.addEventListener("submit", prepareSubmit);
+  els.resetForm.addEventListener("click", resetForm);
+
+  setLive(false);
+  loadConfig();
+})();
+</script>
+</body>
+</html>
