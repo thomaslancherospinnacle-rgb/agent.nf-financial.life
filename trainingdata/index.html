@@ -178,12 +178,30 @@
       font-size: 12px;
       color: var(--muted);
       margin-top: 8px;
+      line-height: 1.4;
     }
 
     .required { color: #fca5a5; }
+    .ok { color: #86efac; }
+    .bad { color: #fca5a5; }
 
-    .config-ok { color: #86efac; }
-    .config-bad { color: #fca5a5; }
+    .config-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .config-line:last-child {
+      border-bottom: 0;
+    }
+
+    .config-value {
+      font-weight: 900;
+    }
 
     @media (max-width: 760px) {
       body { padding: 12px; }
@@ -198,38 +216,33 @@
       <div>
         <h1>AIL Objection Case Input</h1>
         <p class="sub">
-          Agents can type the case manually or record the rebuttal/situation using Deepgram STT.
-          Config loads from <strong>secret.env</strong> in the same folder as this HTML file.
+          Type the case manually or record with Deepgram. The Sheet URL and API key are loaded silently from config.
         </p>
       </div>
       <div class="pill"><span id="liveDot" class="dot"></span><span id="liveLabel">Recorder Off</span></div>
     </div>
 
     <div class="card">
-      <p class="section-title">Config</p>
-      <div class="grid">
-        <div>
-          <label>Google Apps Script</label>
-          <input id="gasUrlDisplay" readonly placeholder="Loading from secret.env..." />
-          <div class="hint">Loaded from <code>GAS_WEB_APP_URL</code>.</div>
-        </div>
-        <div>
-          <label>Deepgram Key</label>
-          <input id="dgKeyDisplay" readonly placeholder="Loading from secret.env..." />
-          <div class="hint">Loaded from <code>DEEPGRAM_API_KEY</code>.</div>
-        </div>
+      <p class="section-title">System Status</p>
+      <div class="config-line">
+        <span>Google Sheet connection</span>
+        <span id="gasStatus" class="config-value bad">Not loaded</span>
+      </div>
+      <div class="config-line">
+        <span>Deepgram recorder</span>
+        <span id="dgStatus" class="config-value bad">Not loaded</span>
       </div>
       <div class="row" style="margin-top:12px;">
         <button id="reloadConfig" class="primary" type="button">Reload Config</button>
         <span id="configStatus" class="status"></span>
       </div>
       <div class="mini">
-        This is intentionally basic. Anyone who can load this webpage can inspect the browser and see <code>secret.env</code>.
+        Values are intentionally not printed on the page.
       </div>
     </div>
 
-    <form id="caseForm" method="POST" target="hiddenSubmitFrame">
-      <input type="hidden" name="source" value="agent_input_html_env_v1" />
+    <form id="caseForm" method="POST" target="hiddenSubmitFrame" autocomplete="off">
+      <input type="hidden" name="source" value="agent_input_hidden_env_v2" />
       <input type="hidden" name="client_timestamp" id="clientTimestamp" />
       <input type="hidden" name="recording_transcript" id="recordingTranscriptHidden" />
       <input type="hidden" name="user_agent" id="userAgentHidden" />
@@ -382,7 +395,7 @@
           <span id="submitStatus" class="status"></span>
         </div>
         <div class="mini">
-          Submission uses a normal form POST into a hidden iframe. No cross-origin browser <code>fetch()</code> is used for Apps Script.
+          Submission uses a normal form POST into a hidden iframe. No cross-origin browser fetch is used for Apps Script.
         </div>
       </div>
     </form>
@@ -416,10 +429,10 @@
 
   const els = {
     caseForm: $("caseForm"),
-    gasUrlDisplay: $("gasUrlDisplay"),
-    dgKeyDisplay: $("dgKeyDisplay"),
     reloadConfig: $("reloadConfig"),
     configStatus: $("configStatus"),
+    gasStatus: $("gasStatus"),
+    dgStatus: $("dgStatus"),
     clientTimestamp: $("clientTimestamp"),
     userAgentHidden: $("userAgentHidden"),
     recordingTranscriptHidden: $("recordingTranscriptHidden"),
@@ -441,7 +454,6 @@
 
     String(text || "").split(/\r?\n/).forEach((line) => {
       const trimmed = line.trim();
-
       if (!trimmed || trimmed.startsWith("#")) return;
 
       const eq = trimmed.indexOf("=");
@@ -463,50 +475,52 @@
     return env;
   }
 
-  function maskSecret(value) {
-    const s = String(value || "");
-    if (!s) return "";
-    if (s.length <= 10) return "********";
-    return s.slice(0, 5) + "..." + s.slice(-4);
+  function setConfigStatus(message, ok) {
+    els.configStatus.textContent = message || "";
+    els.configStatus.className = "status " + (ok ? "ok" : "bad");
   }
 
-  function setConfigStatus(msg, good) {
-    els.configStatus.textContent = msg || "";
-    els.configStatus.className = "status " + (good ? "config-ok" : "config-bad");
+  function setLoadedStatus(el, loaded) {
+    el.textContent = loaded ? "Loaded" : "Missing";
+    el.className = "config-value " + (loaded ? "ok" : "bad");
   }
 
   async function loadConfig() {
     try {
-      setConfigStatus("Loading secret.env...", true);
+      setConfigStatus("Loading config...", true);
+      setLoadedStatus(els.gasStatus, false);
+      setLoadedStatus(els.dgStatus, false);
+      els.caseForm.removeAttribute("action");
 
       const resp = await fetch(ENV_FILE, { cache: "no-store" });
-
       if (!resp.ok) {
-        throw new Error("Could not load secret.env. Host these files on a web server; file:// usually blocks fetch().");
+        throw new Error("secret.env not found or blocked. Host input.html and secret.env in the same web folder.");
       }
 
-      const text = await resp.text();
-      const env = parseEnv(text);
+      const envText = await resp.text();
+      const env = parseEnv(envText);
 
-      CONFIG.GAS_WEB_APP_URL = env.GAS_WEB_APP_URL || "";
-      CONFIG.DEEPGRAM_API_KEY = env.DEEPGRAM_API_KEY || "";
+      const gas = String(env.GAS_WEB_APP_URL || "").trim();
+      const dg = String(env.DEEPGRAM_API_KEY || "").trim();
 
-      els.gasUrlDisplay.value = CONFIG.GAS_WEB_APP_URL || "Missing GAS_WEB_APP_URL";
-      els.dgKeyDisplay.value = CONFIG.DEEPGRAM_API_KEY ? maskSecret(CONFIG.DEEPGRAM_API_KEY) : "Missing DEEPGRAM_API_KEY";
-
-      if (!CONFIG.GAS_WEB_APP_URL || CONFIG.GAS_WEB_APP_URL.includes("PASTE_")) {
-        throw new Error("Missing GAS_WEB_APP_URL in secret.env.");
+      if (!gas || gas.includes("PASTE_")) {
+        throw new Error("GAS_WEB_APP_URL missing in secret.env.");
       }
 
-      if (!CONFIG.DEEPGRAM_API_KEY || CONFIG.DEEPGRAM_API_KEY.includes("PASTE_")) {
-        throw new Error("Missing DEEPGRAM_API_KEY in secret.env.");
+      if (!dg || dg.includes("PASTE_")) {
+        throw new Error("DEEPGRAM_API_KEY missing in secret.env.");
       }
 
-      els.caseForm.action = CONFIG.GAS_WEB_APP_URL;
+      CONFIG.GAS_WEB_APP_URL = gas;
+      CONFIG.DEEPGRAM_API_KEY = dg;
+
+      setLoadedStatus(els.gasStatus, true);
+      setLoadedStatus(els.dgStatus, true);
       setConfigStatus("Config loaded.", true);
     } catch (err) {
       console.error(err);
-      els.caseForm.removeAttribute("action");
+      CONFIG.GAS_WEB_APP_URL = "";
+      CONFIG.DEEPGRAM_API_KEY = "";
       setConfigStatus(err.message || String(err), false);
     }
   }
@@ -545,9 +559,7 @@
       ws.binaryType = "arraybuffer";
 
       ws.onopen = () => resolve();
-
-      ws.onerror = () => reject(new Error("Deepgram WebSocket error. Check API key/token."));
-
+      ws.onerror = () => reject(new Error("Deepgram WebSocket error. Check key/token."));
       ws.onclose = () => {
         if (recording) stopRecording();
       };
@@ -568,7 +580,7 @@
             setRecStatus("Recording live...");
           }
         } else {
-          setRecStatus("Hearing: " + transcript.slice(0, 80));
+          setRecStatus("Hearing audio...");
         }
       };
     });
@@ -618,8 +630,8 @@
 
   async function startRecording() {
     try {
-      if (!CONFIG.DEEPGRAM_API_KEY || CONFIG.DEEPGRAM_API_KEY.includes("PASTE_")) {
-        alert("DEEPGRAM_API_KEY is missing in secret.env.");
+      if (!CONFIG.DEEPGRAM_API_KEY) {
+        alert("Deepgram config is missing. Check secret.env.");
         return;
       }
 
@@ -720,9 +732,9 @@
   }
 
   function prepareSubmit(e) {
-    if (!CONFIG.GAS_WEB_APP_URL || CONFIG.GAS_WEB_APP_URL.includes("PASTE_")) {
+    if (!CONFIG.GAS_WEB_APP_URL) {
       e.preventDefault();
-      alert("GAS_WEB_APP_URL is missing in secret.env.");
+      alert("Google Sheet config is missing. Check secret.env.");
       return;
     }
 
@@ -737,8 +749,6 @@
 
   function resetForm() {
     els.caseForm.reset();
-    els.gasUrlDisplay.value = CONFIG.GAS_WEB_APP_URL || "";
-    els.dgKeyDisplay.value = CONFIG.DEEPGRAM_API_KEY ? maskSecret(CONFIG.DEEPGRAM_API_KEY) : "";
     els.recordingTranscript.value = "";
     els.recordingTranscriptHidden.value = "";
     els.submitStatus.textContent = "";
