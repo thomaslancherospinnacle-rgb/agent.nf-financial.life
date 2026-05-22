@@ -61,6 +61,20 @@
     .weeklyBlock .amount{display:block;font-size:48px;font-weight:1000;letter-spacing:-.07em;color:#fff;line-height:.9}
     .monthlyBlock .amount{display:block;font-size:29px;font-weight:1000;letter-spacing:-.05em;color:#fff;line-height:1}
     .budgetLine{margin-top:12px;border:1px solid rgba(241,223,173,.24);background:rgba(196,154,69,.12);border-radius:999px;padding:9px 12px;color:#f1dfad;font-size:11px;font-weight:1000;letter-spacing:.08em;text-transform:uppercase}
+
+
+    .priceToggle{position:fixed;right:330px;bottom:16px;z-index:62;height:42px;border-radius:999px;border:1px solid rgba(7,31,56,.18);background:rgba(255,255,255,.78);color:rgba(7,31,56,.62);box-shadow:0 12px 32px rgba(7,31,56,.10);backdrop-filter:blur(8px);padding:0 15px;font-size:12px;font-weight:1000;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;opacity:.86;transition:.18s ease}
+    .priceToggle:hover{opacity:1;background:var(--navy);color:#fff;transform:translateY(-2px)}
+    body.hidePrices .weeklyBlock,
+    body.hidePrices .monthlyBlock,
+    body.hidePrices .budgetLine,
+    body.hidePrices .personMoney{display:none!important}
+    body.hidePrices #monthlyBox:not(.hasAssocLogoBox){display:none!important}
+    body.hidePrices #monthlyBox.hasAssocLogoBox{min-width:0;background:transparent;border-color:transparent;box-shadow:none;padding:0;backdrop-filter:none}
+    body.hidePrices #monthlyBox.hasAssocLogoBox .topNumbers{display:flex;justify-content:flex-end;align-items:center}
+    body.hidePrices #monthlyBox.hasAssocLogoBox .assocLogoMini{width:92px;min-height:74px}
+    @media(max-width:760px){.priceToggle{left:16px;right:auto;bottom:64px}}
+
     .hourSwitch{position:fixed;right:136px;bottom:16px;z-index:61;height:42px;border-radius:999px;border:1px solid rgba(7,31,56,.18);background:rgba(255,255,255,.78);box-shadow:0 12px 32px rgba(7,31,56,.10);backdrop-filter:blur(8px);padding:4px;display:flex;gap:4px;opacity:.86}
     .hourSwitch button{border:0;border-radius:999px;padding:0 13px;font-size:12px;font-weight:1000;letter-spacing:.08em;text-transform:uppercase;color:rgba(7,31,56,.58);background:transparent;cursor:pointer}
     .hourSwitch button.active{background:var(--navy);color:#fff;box-shadow:0 7px 18px rgba(7,31,56,.18)}
@@ -122,7 +136,7 @@
     .recSummary{border:1px solid #dbe6ef;background:#fff;border-radius:14px;padding:11px;color:#445c74;font-size:12px;font-weight:850;line-height:1.35;white-space:pre-line}
     .hint{font-size:12px;color:#8191a3;text-align:center;font-weight:750;line-height:1.35}.hidden{display:none!important}
     @media(max-width:1040px){.heroInner{grid-template-columns:1fr}.people{grid-template-columns:1fr}.totalCost{text-align:left}.benefitRow,.totalRow{grid-template-columns:1fr}.rowAmount,.rowAmountGroup,.rowAmountStack{text-align:left;align-items:flex-start;justify-content:flex-start}.wrap{padding:18px}.hero{padding:28px}.a71Grid{grid-template-columns:1fr 1fr}.grid3{grid-template-columns:1fr}}
-    @media print{.agentHotspot,.hourSwitch,.drawer,.drawerShade{display:none!important}.wrap{padding:0}.hero,.personCard{box-shadow:none}.people{grid-template-columns:1fr 1fr}}
+    @media print{.agentHotspot,.hourSwitch,.priceToggle,.drawer,.drawerShade{display:none!important}.wrap{padding:0}.hero,.personCard{box-shadow:none}.people{grid-template-columns:1fr 1fr}}
   
     .simpleWizard{display:grid;gap:14px}
     .simpleStep{border:1px solid #d9e4ee;background:linear-gradient(180deg,#fff,#f8fbfd);border-radius:20px;padding:16px;box-shadow:0 10px 24px rgba(7,31,56,.05)}
@@ -193,6 +207,7 @@
     <main class="people" id="people"></main>
   </div>
 
+  <button class="priceToggle" id="priceToggle" type="button">Hide Prices</button>
   <div class="hourSwitch" id="hourSwitch"><button type="button" id="hour1">Option 1</button><button type="button" id="hour2">Option 2</button></div>
   <button class="agentHotspot" id="openSettings" title="Agent settings — Ctrl+Shift+S"><span>⚙</span><span>Agent</span></button>
   <div class="drawerShade" id="shade"></div>
@@ -208,13 +223,13 @@
           <div class="simplePersonBox">
             <div class="simplePersonHead"><span>Main</span><span>Required</span></div>
             <div class="simpleGrid">
-              <div class="simpleField"><label>Age</label><input type="number" id="mainAge" min="0" max="120" step="1"></div>
+              <div class="simpleField"><label>Age</label><input type="text" inputmode="numeric" pattern="[0-9]*" id="mainAge" min="0" max="120" step="1" autocomplete="off"></div>
               <div class="simpleField"><label>Gender</label><select id="mainSex"><option value="M">Male</option><option value="F">Female</option></select></div>
               <div class="simpleField"><label>Smoke?</label><select id="mainTobacco"><option value="NTU">No</option><option value="TU">Yes</option></select></div>
               <div class="simpleField"><label>Union / Association</label><select id="selectedUnion"><option value="">Loading associations...</option></select><div class="unionStatus" id="unionStatus">Pick a union to auto-fill the package title.</div></div>
               <div class="simpleField"><label>Logo</label><select id="selectedLogo"><option value="">AIL default</option></select><img class="logoPreviewMini" id="logoPreviewMini" src="https://agent.nf-financial.life/assoc-logos/Globe-Life-AIL.png" alt="Logo preview"></div>
               <div class="simpleField"><label>Occupation / Package</label><input type="text" id="mainOccupation" placeholder="Electrician"></div>
-              <div class="simpleField"><label>Monthly Income</label><input type="number" id="mainMonthlyIncome" min="0" step="100"></div>
+              <div class="simpleField"><label>Monthly Income</label><input type="text" inputmode="decimal" id="mainMonthlyIncome" min="0" step="100" autocomplete="off"></div>
             </div>
           </div>
 
@@ -224,20 +239,20 @@
           <div class="simplePersonBox" id="spouseGroup">
             <div class="simplePersonHead"><span>Spouse</span><span>Optional</span></div>
             <div class="simpleGrid">
-              <div class="simpleField"><label>Age</label><input type="number" id="spouseAge" min="0" max="120" step="1"></div>
+              <div class="simpleField"><label>Age</label><input type="text" inputmode="numeric" pattern="[0-9]*" id="spouseAge" min="0" max="120" step="1" autocomplete="off"></div>
               <div class="simpleField"><label>Gender</label><select id="spouseSex"><option value="F">Female</option><option value="M">Male</option></select></div>
               <div class="simpleField"><label>Smoke?</label><select id="spouseTobacco"><option value="NTU">No</option><option value="TU">Yes</option></select></div>
               <div class="simpleField"><label>Occupation</label><input type="text" id="spouseOccupation" placeholder="Homemaker"></div>
-              <div class="simpleField"><label>Monthly Income</label><input type="number" id="spouseMonthlyIncome" min="0" step="100"></div>
+              <div class="simpleField"><label>Monthly Income</label><input type="text" inputmode="decimal" id="spouseMonthlyIncome" min="0" step="100" autocomplete="off"></div>
             </div>
           </div>
 
           <div style="height:10px"></div>
           <div class="simpleGrid two">
-            <div class="simpleField"><label>Hourly Wage</label><input type="number" id="hourlyWage" min="0" step="1"></div>
+            <div class="simpleField"><label>Hourly Wage</label><input type="text" inputmode="decimal" id="hourlyWage" min="0" step="1" autocomplete="off"></div>
             <div class="simpleField"><label>Sickness Display</label><select id="sicknessMode"><option value="months">Funeral + Months</option><option value="combined">Total Sickness Payout</option></select></div>
           </div>
-          <div class="simpleHint">Set the client info once. Build Option 1 and Option 2 manually. Coverage inputs move in $100 steps and premiums calculate from the JSON ratebooks.</div>
+          <div class="simpleHint">Set the client info once. Build Option 1 and Option 2 manually. Type full numbers normally. Premiums recalculate after you press Enter or click outside a field.</div>
         </section>
 
         <section class="simpleStep">
@@ -394,6 +409,13 @@
   function baseAmount(p){ return (Number(p.funeral)||0) + incomeAmount(p); }
 
   function n(v){ return (v === '' || v === null || v === undefined) ? 0 : (Number(v)||0); }
+  function parseLooseNumber(v){
+    const cleaned = String(v == null ? '' : v).replace(/[^0-9.]/g, '');
+    if(cleaned === '' || cleaned === '.') return 0;
+    const parts = cleaned.split('.');
+    const normalized = parts.length > 1 ? parts.shift() + '.' + parts.join('') : cleaned;
+    return Math.max(0, Number(normalized) || 0);
+  }
   function roundTo(v, step){ step = step || 1000; return Math.max(0, Math.round((Number(v)||0)/step)*step); }
   function rowFor(book, age){
     const rows = RATEBOOKS[book] || [];
@@ -566,17 +588,25 @@
     const valueIds = ['mainSex','mainTobacco','mainOccupation','spouseSex','spouseTobacco','spouseOccupation','sicknessMode'];
     valueIds.forEach(k=>{ if($(k)) state[k]=$(k).value; });
     const numberIds = ['mainAge','mainMonthlyIncome','spouseAge','spouseMonthlyIncome','hourlyWage'];
-    numberIds.forEach(k=>{ if($(k)) state[k]=Math.max(0, Number($(k).value)||0); });
+    numberIds.forEach(k=>{ if($(k)) state[k]=parseLooseNumber($(k).value); });
     if($('spouseEnabled')) state.spouseEnabled = $('spouseEnabled').checked;
     save();
     render();
   }
 
   function syncForm(){
+    const active = document.activeElement;
     Object.keys(defaults).forEach(k=>{
-      if(!$(k)) return;
-      if(typeof defaults[k] === 'boolean') $(k).checked = !!state[k];
-      else $(k).value = state[k];
+      const el = $(k);
+      if(!el) return;
+      if(typeof defaults[k] === 'boolean'){
+        el.checked = !!state[k];
+      } else {
+        // Do not overwrite the field the agent is currently typing in.
+        // That was forcing one-digit-at-a-time number entry because render() reset the input/caret.
+        if(el === active && /^(INPUT|TEXTAREA)$/i.test(el.tagName)) return;
+        el.value = state[k];
+      }
     });
     if($('spouseGroup')) $('spouseGroup').classList.toggle('hidden', !state.spouseEnabled);
   }
@@ -626,7 +656,7 @@
     const showWorkAccident = total > 0 && (regularAdb > 0 || p.a71);
 
     if(showCarAccident) rows += `<div class="totalRow carDeath"><div><div class="rowKicker">If death in car accident</div><div class="rowDesc">Death in Car Accident<small>Funeral benefit + income protection${regularAdb>0?` + ${money(regularAdb)} regular ADB`:''}${p.a71?` + ${money(A71.car)} A71 car accident benefit`:''}.</small></div></div><div class="rowAmount">${money(carDeathTotal)}</div></div>`;
-    if(showWorkAccident) rows += `<div class="totalRow"><div><div class="rowKicker">If death from common accident</div><div class="rowDesc">If death from common accident<small>Funeral benefit + income protection${regularAdb>0?` + ${money(regularAdb)} regular ADB`:''}${p.a71?` + ${money(A71.accident)} A71 base ADB`:''}. No car accident extra included.</small></div></div><div class="rowAmount">${money(workAccidentTotal)}</div></div>`;
+    if(showWorkAccident) rows += `<div class="totalRow"><div><div class="rowKicker">If death at workplace</div><div class="rowDesc">Death at Work Place<small>Funeral benefit + income protection${regularAdb>0?` + ${money(regularAdb)} regular ADB`:''}${p.a71?` + ${money(A71.accident)} A71 base ADB`:''}. No car accident extra included.</small></div></div><div class="rowAmount">${money(workAccidentTotal)}</div></div>`;
     if(total>0) rows += `<div class="totalRow"><div><div class="rowKicker">If death from sickness</div><div class="rowDesc">Death From Sickness<small>${state.sicknessMode==='combined' ? `Total payout from sickness${income>0?` including income protection`:''}` : `${money(p.funeral)} funeral benefit${income>0?` + ${p.months} months income protection (${money(income)})`:''}`}</small></div></div>${renderSicknessAmount(p)}</div>`;
     if(!rows) rows = `<div class="empty">No active benefits selected.</div>`;
 
@@ -691,11 +721,11 @@
     return total;
   }
 
-  function manualOptionNumber(num, prefix, field, value){
+  function manualOptionNumber(num, prefix, field, value, shouldRender=false){
     const k = optKey(num, prefix, field);
-    state[k] = Math.max(0, Number(value)||0);
+    state[k] = parseLooseNumber(value);
     save();
-    render();
+    if(shouldRender) render();
   }
 
   function manualOptionToggle(num, prefix, field, checked){
@@ -732,9 +762,9 @@
       return `<div class="optionPerson">
         <div class="optionPersonName">${prefix==='spouse'?'Spouse':'Main'} — ${money2(pm)}/mo</div>
         <div class="optionManualGrid">
-          <div class="manualField"><label>WL / Funeral</label><input type="number" min="0" step="100" value="${Math.round(p.funeral)}" oninput="manualOptionNumber(${num},'${prefix}','Funeral',this.value)"></div>
-          <div class="manualField"><label>10RC / Income</label><input type="number" min="0" step="100" value="${Math.round(p.term)}" oninput="manualOptionNumber(${num},'${prefix}','Term',this.value)"></div>
-          <div class="manualField"><label>Regular ADB</label><input type="number" min="0" step="100" value="${Math.round(p.adb)}" oninput="manualOptionNumber(${num},'${prefix}','ADB',this.value)"></div>
+          <div class="manualField"><label>WL / Funeral</label><input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" min="0" step="100" value="${Math.round(p.funeral)}" oninput="manualOptionNumber(${num},'${prefix}','Funeral',this.value,false)" onblur="manualOptionNumber(${num},'${prefix}','Funeral',this.value,true)" onkeydown="if(event.key==='Enter'){this.blur();}"></div>
+          <div class="manualField"><label>10RC / Income</label><input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" min="0" step="100" value="${Math.round(p.term)}" oninput="manualOptionNumber(${num},'${prefix}','Term',this.value,false)" onblur="manualOptionNumber(${num},'${prefix}','Term',this.value,true)" onkeydown="if(event.key==='Enter'){this.blur();}"></div>
+          <div class="manualField"><label>Regular ADB</label><input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" min="0" step="100" value="${Math.round(p.adb)}" oninput="manualOptionNumber(${num},'${prefix}','ADB',this.value,false)" onblur="manualOptionNumber(${num},'${prefix}','ADB',this.value,true)" onkeydown="if(event.key==='Enter'){this.blur();}"></div>
           <label class="manualCheck"><input type="checkbox" ${p.a71?'checked':''} onchange="manualOptionToggle(${num},'${prefix}','A71',this.checked)"> A71?</label>
         </div>
         <div class="manualLine"><b>10RC:</b> ${money(p.term)}${p.monthlyIncome>0?` = ${months.toFixed(1)} months of income`:''} · <b>Premium:</b> ${money2(pm)} / month</div>
@@ -744,7 +774,7 @@
       <div class="optionPill"><b>Weekly Target</b><span>${money2(weeklyTarget)}</span></div>
       <div class="optionPill"><b>Monthly Budget</b><span>${money2(monthlyBudget)}</span></div>
       <div class="optionPill"><b>Built Monthly</b><span style="color:${over?'#a7392f':'#0b2b49'}">${money2(monthly)}</span></div>
-    </div>${people}<div class="simpleHint">Every coverage box is manual. Use the arrows for $100 moves or type the exact amount.</div>`;
+    </div>${people}<div class="simpleHint">Every coverage box is manual. Type the full amount, then press Enter or click outside the box to recalculate.</div>`;
   }
 
   function render(){
@@ -768,6 +798,7 @@
     const assocLogoMarkup = selectedAssocLogo ? `<div class="assocLogoMini"><img src="${escapeAttr(selectedAssocLogo)}" alt="Association logo"></div>` : '';
     const topNumbersClass = selectedAssocLogo ? 'topNumbers hasAssocLogo' : 'topNumbers';
     $('monthlyBox').innerHTML = `<div class="${topNumbersClass}">${assocLogoMarkup}<div class="weeklyBlock"><span class="label">Weekly</span><span class="amount">${money2(weekly)}</span></div><div class="monthlyBlock"><span class="label">Total Monthly</span><span class="amount">${money2(totalMonthly)}</span></div></div><div class="budgetLine">Option ${state.hourMode} selected · ${money2(hourBudget())}/wk target</div>`;
+    $('monthlyBox').classList.toggle('hasAssocLogoBox', !!selectedAssocLogo);
     if($('optionOneManual')) $('optionOneManual').innerHTML = optionManualHtml(1);
     if($('optionTwoManual')) $('optionTwoManual').innerHTML = optionManualHtml(2);
     $('hour1').classList.toggle('active', String(state.hourMode)==='1');
@@ -782,13 +813,33 @@
     return `Regular ADB rate book: ${money2(regularAdbMonthly(p))}/mo for ${money(amount)}.`;
   }
 
+
+
+  function syncPriceToggle(){
+    const hidden = document.body.classList.contains('hidePrices');
+    const btn = $('priceToggle');
+    if(btn) btn.textContent = hidden ? 'Show Prices' : 'Hide Prices';
+    const box = $('monthlyBox');
+    if(box) box.classList.toggle('hasAssocLogoBox', !!box.querySelector('.assocLogoMini img'));
+  }
+  function togglePrices(){
+    document.body.classList.toggle('hidePrices');
+    syncPriceToggle();
+  }
+
   function openDrawer(){ $('drawer').classList.add('open'); $('shade').classList.add('open'); $('drawer').setAttribute('aria-hidden','false'); }
   function closeDrawer(){ $('drawer').classList.remove('open'); $('shade').classList.remove('open'); $('drawer').setAttribute('aria-hidden','true'); }
 
-  ['mainAge','mainMonthlyIncome','mainOccupation','spouseAge','spouseMonthlyIncome','spouseOccupation','hourlyWage'].forEach(id=>{ if($(id)) $(id).addEventListener('input', readForm); });
+  ['mainAge','mainMonthlyIncome','mainOccupation','spouseAge','spouseMonthlyIncome','spouseOccupation','hourlyWage'].forEach(id=>{
+    const el = $(id);
+    if(!el) return;
+    el.addEventListener('change', readForm);
+    el.addEventListener('keydown', e=>{ if(e.key === 'Enter') el.blur(); });
+  });
   ['mainSex','mainTobacco','spouseSex','spouseTobacco','spouseEnabled','sicknessMode'].forEach(id=>{ if($(id)) $(id).addEventListener('change', readForm); });
   if($('selectedUnion')) $('selectedUnion').addEventListener('change', handleUnionChange);
   if($('selectedLogo')) $('selectedLogo').addEventListener('change', handleLogoChange);
+  if($('priceToggle')) $('priceToggle').addEventListener('click', togglePrices);
   $('openSettings').addEventListener('click', openDrawer);
   $('closeSettings').addEventListener('click', closeDrawer);
   $('shade').addEventListener('click', closeDrawer);
@@ -806,6 +857,7 @@
     }
   });
   render();
+  syncPriceToggle();
   loadAssociations();
 </script>
 </body>
