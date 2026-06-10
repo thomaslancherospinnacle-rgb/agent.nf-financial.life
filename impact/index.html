@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>IMPACT Clone - Sheet Tabs + Calendly - Mobile Wrap Fix</title>
+<title>IMPACT Clone - Sheet Tabs + Calendly - Correct Prefill</title>
 <style>
   :root{
     --blue:#00558c;--blue2:#0068aa;--dark:#303235;--line:#cfcfcf;--soft:#f5f6f7;--stripe:#eeeeee;
@@ -157,7 +157,29 @@ async function loadAllFromBackend(){
 }
 function filteredLeads(){let a=(state.leads||[]).slice(); if(state.activeTab&&state.activeTab!=='All')a=a.filter(l=>l.tab===state.activeTab); if(state.activity&&state.activity!=='All')a=a.filter(l=>(l.status||'New')===state.activity); const q=clean(state.search).toLowerCase(); if(q)a=a.filter(l=>[l.name,l.phone,l.cell,l.email,l.address,l.city,l.state,l.zip,l.group,l.notes,l.sponsor,l.referredBy,l.referralFirstName,l.referralLastName,l.referralPhone,l.referralEmail].join(' ').toLowerCase().includes(q)); if(state.sort==='Name A-Z')a.sort((x,y)=>clean(x.name).localeCompare(clean(y.name))); else if(state.sort==='Status')a.sort((x,y)=>clean(x.status).localeCompare(clean(y.status))); else if(state.sort==='Oldest Sheet First')a.sort((x,y)=>(Number(x.rowIdx)||0)-(Number(y.rowIdx)||0)); else a.sort((x,y)=>String(y.tab).localeCompare(String(x.tab))||((Number(y.rowIdx)||0)-(Number(x.rowIdx)||0))); return a;}
 function statusHTML(){const bits=[]; if(state.loading)bits.push('<b>Loading from Sheets...</b>'); else if(state.loadedAt)bits.push('Last sheet load: <b>'+h(dateHuman(state.loadedAt))+'</b>'); if(sheetTabs().length)bits.push('Tabs: <b>'+sheetTabs().length+'</b>'); if(state.sheetError)bits.push('<span style="color:#a00000">'+h(state.sheetError)+'</span>'); return bits.length?'<div class="status '+(state.sheetError?'err':'ok')+'">'+bits.join(' &nbsp; | &nbsp; ')+'</div>':'';}
-function calendlyUrl(lead){const base=clean(state.config.calendlyUrl)||CALENDLY_DEFAULT; const params=new URLSearchParams(); if(lead.name)params.set('name',lead.name); if(lead.email)params.set('email',lead.email); if(lead.phone)params.set('a1',phoneFmt(lead.phone)); const loc=[lead.address,lead.city,lead.state,lead.zip].filter(Boolean).join(', '); if(loc)params.set('a2',loc); const extra=[lead.group,lead.tab,lead.language,lead.sponsor?'Sponsor: '+lead.sponsor:'',lead.referredBy?'Referred By: '+lead.referredBy:'',lead.notes].filter(Boolean).join(' | '); if(extra)params.set('a3',extra.slice(0,250)); return base+(base.includes('?')?'&':'?')+params.toString();}
+function calendlyPhone(v){const d=phoneDigits(v); if(d.length===10)return '+1'+d; if(d.length>10&&String(v||'').trim().startsWith('+'))return String(v).trim(); return d||clean(v);}
+function calendlyDOB(v){const s=clean(v); if(!s)return ''; const m=s.match(/^(\d{4})-(\d{2})-(\d{2})/); if(m)return m[2]+'/'+m[3]+'/'+m[1]; const d=new Date(s); if(!isNaN(d)){const mm=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0'); return mm+'/'+dd+'/'+d.getFullYear();} return s;}
+function calendlyUrl(lead){
+  const base=clean(state.config.calendlyUrl)||CALENDLY_DEFAULT;
+  const params=new URLSearchParams();
+  const email=first(lead.email,lead.referralEmail);
+  const phone=calendlyPhone(first(lead.phone,lead.cell,lead.referralPhone));
+  const stateAnswer=clean(lead.state);
+  const dobAnswer=calendlyDOB(lead.dob);
+
+  // Calendly form shown in this setup:
+  // name/email = built-in Calendly fields
+  // a1 = State/Estado
+  // a2 = Age or DOB/Edad o fecha de nacimiento
+  // a3 = Number
+  // The SMS reminder field is intentionally left alone because Calendly will not reliably prefill it.
+  if(lead.name)params.set('name',lead.name);
+  if(email)params.set('email',email);
+  if(stateAnswer)params.set('a1',stateAnswer);
+  if(dobAnswer)params.set('a2',dobAnswer);
+  if(phone)params.set('a3',phone);
+  return base+(base.includes('?')?'&':'?')+params.toString();
+}
 async function saveOutcome(lead,status,detail){if(!lead)return; const ts=nowIso(); const outcome=clean(detail)?status+' - '+clean(detail):status; const ev={eventId:'local:'+Date.now()+':'+Math.random().toString(36).slice(2),timestamp:ts,agentName:state.config.agentName||'',leadId:lead.leadId,leadName:lead.name,phone:lead.phone,email:lead.email,city:lead.city,state:lead.state,zip:lead.zip,group:lead.group,tab:lead.tab,rowIdx:lead.rowIdx,action:status,status,notes:detail||'',source:'impact-clone',syncedAt:'',syncError:''}; state.events.unshift(ev); lead.status=status; lead.lastActivity=status; lead.lastActivityAt=ts; saveAll(); render(); try{if(lead.tab&&lead.rowIdx){await postNoCors({action:'logOutcomes',items:[{tab:lead.tab,rowIdx:lead.rowIdx,outcome:outcome,ts:ts}]}); ev.syncedAt=nowIso(); ev.syncError=''; saveAll(); flash(status+' saved to Sheets.','ok');}else flash(status+' saved locally.','warn');}catch(err){ev.syncError=String(err&&err.message?err.message:err); saveAll(); flash('Saved locally, Sheets sync failed.','err');}}
 async function markDeleted(lead){if(!lead)return; await saveOutcome(lead,'Deleted',''); try{if(lead.tab&&lead.rowIdx)await postNoCors({action:'markDeleted',tab:lead.tab,rowIdx:lead.rowIdx});}catch(e){} }
 function openCalendly(lead){const url=calendlyUrl(lead); const w=window.open(url,'_blank','popup=yes,width=1120,height=850,noopener,noreferrer'); if(!w){navigator.clipboard&&navigator.clipboard.writeText(url).catch(()=>{}); flash('Popup blocked. Calendly link copied.','err');} else flash('Calendly opened.','ok'); if(state.config.autoLogCalendly)saveOutcome(lead,'Calendly Opened','Prefilled from lead card');}
