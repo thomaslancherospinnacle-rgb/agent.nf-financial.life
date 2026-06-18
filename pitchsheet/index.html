@@ -3,862 +3,521 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Funeral Benefit Plan | Presentation</title>
+  <title>Agent Controls | Benefit Presentation</title>
   <style>
     :root{
-      --navy:#071f38;
-      --navy2:#0b2b4a;
-      --blue:#123d66;
-      --gold:#c49a45;
-      --gold2:#f1dfad;
-      --green:#1b8a5a;
-      --green2:#0f6d46;
-      --paper:#f5f8fb;
-      --card:#ffffff;
-      --ink:#102033;
-      --muted:#6b7c90;
-      --line:#dce6ef;
-      --shadow:0 28px 70px rgba(7,31,56,.16);
-      --radius:30px;
+      --navy:#071f38; --navy2:#0b2b4a; --blue:#123d66; --gold:#c49a45; --gold2:#f1dfad;
+      --green:#1b8a5a; --green2:#0f6d46; --paper:#f5f8fb; --card:#ffffff; --ink:#102033;
+      --muted:#6b7c90; --line:#dce6ef; --danger:#a7392f; --shadow:0 28px 70px rgba(7,31,56,.16); --radius:26px;
     }
     *{box-sizing:border-box}
-    html,body{height:100%}
+    html,body{min-height:100%; margin:0}
     body{
-      margin:0;
       font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
       color:var(--ink);
       background:
-        radial-gradient(circle at 8% 8%, rgba(196,154,69,.17), transparent 29%),
-        radial-gradient(circle at 92% 12%, rgba(21,63,102,.10), transparent 30%),
-        linear-gradient(145deg,#edf3f8 0%,#fff 43%,#eef5f9 100%);
+        radial-gradient(circle at 8% 8%, color-mix(in srgb, var(--gold) 20%, transparent), transparent 29%),
+        radial-gradient(circle at 92% 12%, color-mix(in srgb, var(--blue) 13%, transparent), transparent 30%),
+        linear-gradient(145deg,#edf3f8 0%,#fff 44%,#eef5f9 100%);
       overflow-x:hidden;
     }
-    .wrap{min-height:100%;padding:28px;display:flex;flex-direction:column;gap:24px}
-    .topbar{display:flex;align-items:center;justify-content:space-between;gap:18px}
+    button,input,select{font:inherit}
+    .controlApp{min-height:100vh; padding:22px; display:grid; gap:18px}
+    .controlHeader{background:linear-gradient(135deg,var(--navy),var(--navy2)); color:#fff; border-radius:30px; padding:22px; box-shadow:var(--shadow); display:grid; grid-template-columns:1fr auto; gap:18px; align-items:center; overflow:hidden; position:relative}
+    .controlHeader:before{content:"";position:absolute;right:-120px;top:-140px;width:360px;height:360px;border-radius:50%;background:rgba(196,154,69,.18)}
+    .controlHeader > *{position:relative; z-index:1}
     .brand{display:flex;align-items:center;gap:16px}
-    .logoBox{background:var(--blue);border:1px solid rgba(7,31,56,.18);border-radius:18px;padding:10px 14px;box-shadow:0 10px 28px rgba(7,31,56,.08)}
-    .logoBox img{display:block;height:46px;width:auto;object-fit:contain}
-    .brandText b{display:block;font-size:15px;letter-spacing:.13em;text-transform:uppercase;color:var(--navy)}
-    .brandText span{display:block;margin-top:3px;color:var(--muted);font-size:13px;font-weight:800;letter-spacing:.04em}
-    .presoBadge{border:1px solid rgba(196,154,69,.35);background:rgba(196,154,69,.12);color:#76571e;border-radius:999px;padding:10px 16px;font-size:12px;font-weight:1000;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+    .logoBox{width:82px;height:60px;border:1px solid rgba(255,255,255,.22);border-radius:18px;background:#fff;padding:8px;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 30px rgba(0,0,0,.12)}
+    .logoBox img{max-width:100%;max-height:100%;object-fit:contain}
+    .brandText b{display:block;font-size:14px;letter-spacing:.13em;text-transform:uppercase;color:#f1dfad}
+    .brandText h1{margin:3px 0 0;font-size:clamp(30px,4vw,54px);line-height:.94;letter-spacing:-.06em}
+    .brandText p{margin:8px 0 0;color:#c7d4e0;font-size:14px;font-weight:750;line-height:1.35;max-width:820px}
+    .actionStack{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
+    .bigBtn,.lightBtn,.dangerBtn{height:48px;border:0;border-radius:15px;padding:0 18px;font-weight:1000;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;box-shadow:0 14px 30px rgba(0,0,0,.10);white-space:nowrap}
+    .bigBtn{background:linear-gradient(180deg,var(--gold2),var(--gold));color:#071f38}
+    .lightBtn{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.20)}
+    .dangerBtn{background:#eef3f8;color:var(--navy);border:1px solid var(--line);box-shadow:none}
+    .controlGrid{display:grid;grid-template-columns:minmax(420px,0.92fr) minmax(420px,1.08fr);gap:18px;align-items:start}
+    .panel{background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:26px;box-shadow:0 18px 48px rgba(7,31,56,.09);overflow:hidden}
+    .panelHeader{padding:18px 20px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fff,#f7fafc);display:flex;justify-content:space-between;gap:12px;align-items:center}
+    .panelHeader h2{margin:0;color:var(--navy);font-size:18px;letter-spacing:-.02em}.panelHeader span{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:1000}
+    .panelBody{padding:18px;display:grid;gap:16px}.section{border:1px solid #dbe6ef;border-radius:22px;background:#fbfdff;padding:16px;display:grid;gap:14px}.section h3{margin:0;color:var(--navy);font-size:14px;text-transform:uppercase;letter-spacing:.12em}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+    .field{display:grid;gap:6px}.field label{font-size:10px;font-weight:1000;letter-spacing:.10em;text-transform:uppercase;color:#7a8ca0}.field input,.field select{width:100%;height:44px;border:1px solid #cedbe7;border-radius:13px;background:#fff;padding:0 12px;color:var(--navy);font-size:15px;font-weight:900;outline:none}.field input:focus,.field select:focus{border-color:var(--gold);box-shadow:0 0 0 3px color-mix(in srgb, var(--gold) 18%, transparent)}
+    .check,.toggleCard{display:flex;align-items:center;gap:10px;border:1px solid #d9e4ee;border-radius:15px;background:#fff;padding:12px;min-height:44px;color:var(--navy);font-size:13px;font-weight:950;cursor:pointer}.check input,.toggleCard input{width:18px;height:18px;accent-color:var(--green)}
+    .seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#eef4f8;border:1px solid #d9e4ee;border-radius:16px;padding:5px}.seg button{height:42px;border:0;border-radius:12px;background:transparent;color:#51677d;font-weight:1000;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}.seg button.active{background:var(--navy);color:white;box-shadow:0 8px 18px rgba(7,31,56,.16)}
+    .modeHint{border:1px solid #d9e4ee;background:#fff;border-radius:16px;padding:12px;color:#51677d;font-size:12px;font-weight:800;line-height:1.42}.modeHint b{color:var(--navy)}
+    .logoPreviewMini{height:34px;max-width:170px;object-fit:contain;display:block;border:1px solid #d6e0ea;border-radius:10px;padding:5px;background:#fff}.unionStatus{font-size:11px;font-weight:850;color:#667a8d;line-height:1.35}.unionStatus b{color:var(--navy)}
+    .personBlock{border:1px solid #e1e9f1;background:#fff;border-radius:18px;overflow:hidden}.personHead{padding:11px 13px;background:#f1f6fa;border-bottom:1px solid #e1e9f1;display:flex;justify-content:space-between;gap:10px;align-items:center;color:var(--navy);font-size:12px;font-weight:1000;letter-spacing:.08em;text-transform:uppercase}.personBody{padding:13px;display:grid;gap:12px}.hidden{display:none!important}
+    .optionTabs{display:flex;gap:8px;flex-wrap:wrap}.miniBtn{height:40px;border:1px solid #d9e4ee;background:#fff;color:var(--navy);border-radius:13px;padding:0 13px;font-size:12px;font-weight:1000;letter-spacing:.07em;text-transform:uppercase;cursor:pointer}.miniBtn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+    .optionBox,.tierBox{border:1px solid #e1e9f1;border-radius:20px;background:#fff;overflow:hidden}.optionName,.tierName{padding:12px 14px;background:linear-gradient(180deg,#f7fafc,#eef4f8);border-bottom:1px solid #e1e9f1;display:flex;justify-content:space-between;gap:12px;align-items:center}.optionName b,.tierName b{font-size:14px;color:var(--navy);text-transform:uppercase;letter-spacing:.09em}.optionName span,.tierName span{font-size:12px;color:#526a80;font-weight:950}.manualGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:12px}.manualLine{border-top:1px solid #edf2f6;background:#fbfdff;padding:10px 12px;color:#667a8d;font-size:12px;font-weight:850;line-height:1.35}.manualLine b{color:var(--navy)}
+    .tierCards{display:grid;gap:14px}.tierBox.bronze{--tier:#a96f35}.tierBox.silver{--tier:#7b8794}.tierBox.gold{--tier:#c49a45}.tierName{border-left:8px solid var(--tier)}.tierName b{color:var(--tier)}.tierTotals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:12px;background:#fbfdff;border-top:1px solid #edf2f6}.pill{background:#fff;border:1px solid #dbe6ef;border-radius:14px;padding:10px;text-align:center}.pill b{display:block;font-size:10px;letter-spacing:.10em;text-transform:uppercase;color:#7c8fa2;margin-bottom:4px}.pill span{font-size:18px;font-weight:1000;color:var(--navy)}
+    .previewFrame{min-height:720px;background:#f4f8fb}.previewInner{padding:18px}.presentMiniNote{border:1px solid #d9e4ee;background:#fff;border-radius:18px;padding:13px;color:#526a80;font-size:12px;font-weight:850;line-height:1.4;margin-bottom:14px}
+    .toast{position:fixed;right:18px;bottom:18px;background:var(--navy);color:#fff;border-radius:15px;padding:12px 15px;font-weight:950;box-shadow:0 18px 40px rgba(7,31,56,.25);opacity:0;transform:translateY(8px);pointer-events:none;transition:.2s ease;z-index:99}.toast.show{opacity:1;transform:translateY(0)}
+    @media(max-width:1080px){.controlGrid{grid-template-columns:1fr}.controlHeader{grid-template-columns:1fr}.actionStack{justify-content:flex-start}.manualGrid,.grid4{grid-template-columns:1fr 1fr}.tierTotals{grid-template-columns:1fr}.previewFrame{min-height:0}}
+    @media(max-width:680px){.controlApp{padding:12px}.controlHeader{border-radius:22px}.grid2,.grid3,.grid4,.manualGrid{grid-template-columns:1fr}.brand{align-items:flex-start}.logoBox{width:70px;height:54px}.bigBtn,.lightBtn,.dangerBtn{width:100%}.actionStack{display:grid;width:100%}}
 
-    .hero{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 54%,#10395f 100%);color:white;border-radius:34px;padding:34px 42px;box-shadow:var(--shadow);position:relative;overflow:hidden}
-    .hero:before{content:"";position:absolute;inset:-110px -120px auto auto;width:430px;height:430px;border-radius:50%;background:rgba(196,154,69,.20)}
-    .hero:after{content:"";position:absolute;inset:auto auto -150px -80px;width:380px;height:380px;border-radius:50%;background:rgba(27,138,90,.16)}
-    .heroInner{position:relative;z-index:1;display:grid;grid-template-columns:1fr auto;gap:26px;align-items:end}
-    .eyebrow{color:#d9c38f;font-weight:1000;font-size:13px;letter-spacing:.20em;text-transform:uppercase;margin-bottom:12px}
-    h1{font-size:clamp(42px,6vw,82px);line-height:.92;margin:0;letter-spacing:-.06em;font-weight:1000}
-    .hero p{margin:14px 0 0;color:#c7d4e0;font-size:18px;max-width:760px;line-height:1.42;font-weight:700}
-    .totalCost{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:22px;padding:20px 22px;min-width:250px;text-align:center;backdrop-filter:blur(8px)}
-    .totalCost .label{display:block;color:#adc0d0;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:1000;margin-bottom:8px}
-    .totalCost .amount{display:block;font-size:34px;font-weight:1000;letter-spacing:-.04em;color:#fff}
-    .totalCost .note{display:block;margin-top:6px;color:#d7e1ea;font-size:12px;font-weight:800}
-
-    .topNumbers{display:grid;grid-template-columns:1.15fr .85fr;gap:12px;align-items:stretch}
-    .topNumbers.hasAssocLogo{grid-template-columns:92px 1.15fr .85fr}
-    .weeklyBlock,.monthlyBlock{border:1px solid rgba(255,255,255,.16);border-radius:18px;background:rgba(255,255,255,.08);padding:14px 14px 13px;text-align:center}
-    .weeklyBlock .label,.monthlyBlock .label{display:block;color:#adc0d0;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:1000;margin-bottom:6px}
-    .weeklyBlock .amount{display:block;font-size:48px;font-weight:1000;letter-spacing:-.07em;color:#fff;line-height:.9}
-    .monthlyBlock .amount{display:block;font-size:29px;font-weight:1000;letter-spacing:-.05em;color:#fff;line-height:1}
-    .budgetLine{margin-top:12px;border:1px solid rgba(241,223,173,.24);background:rgba(196,154,69,.12);border-radius:999px;padding:9px 12px;color:#f1dfad;font-size:11px;font-weight:1000;letter-spacing:.08em;text-transform:uppercase}
-
-
-    .priceToggle{position:fixed;right:330px;bottom:16px;z-index:62;height:42px;border-radius:999px;border:1px solid rgba(7,31,56,.18);background:rgba(255,255,255,.78);color:rgba(7,31,56,.62);box-shadow:0 12px 32px rgba(7,31,56,.10);backdrop-filter:blur(8px);padding:0 15px;font-size:12px;font-weight:1000;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;opacity:.86;transition:.18s ease}
-    .priceToggle:hover{opacity:1;background:var(--navy);color:#fff;transform:translateY(-2px)}
-    body.hidePrices .weeklyBlock,
-    body.hidePrices .monthlyBlock,
-    body.hidePrices .budgetLine,
-    body.hidePrices .personMoney{display:none!important}
-    body.hidePrices #monthlyBox:not(.hasAssocLogoBox){display:none!important}
-    body.hidePrices #monthlyBox.hasAssocLogoBox{min-width:0;background:transparent;border-color:transparent;box-shadow:none;padding:0;backdrop-filter:none}
-    body.hidePrices #monthlyBox.hasAssocLogoBox .topNumbers{display:flex;justify-content:flex-end;align-items:center}
-    body.hidePrices #monthlyBox.hasAssocLogoBox .assocLogoMini{width:92px;min-height:74px}
-    @media(max-width:760px){.priceToggle{left:16px;right:auto;bottom:64px}}
-
-    .hourSwitch{position:fixed;right:136px;bottom:16px;z-index:61;height:42px;border-radius:999px;border:1px solid rgba(7,31,56,.18);background:rgba(255,255,255,.78);box-shadow:0 12px 32px rgba(7,31,56,.10);backdrop-filter:blur(8px);padding:4px;display:flex;gap:4px;opacity:.86}
-    .hourSwitch button{border:0;border-radius:999px;padding:0 13px;font-size:12px;font-weight:1000;letter-spacing:.08em;text-transform:uppercase;color:rgba(7,31,56,.58);background:transparent;cursor:pointer}
-    .hourSwitch button.active{background:var(--navy);color:#fff;box-shadow:0 7px 18px rgba(7,31,56,.18)}
-    .personMoney{display:grid;grid-template-columns:1.15fr .85fr;gap:10px;padding:18px 24px 0;align-items:stretch}
-    .personMoney.hasAssocLogo{grid-template-columns:92px 1.15fr .85fr}
-    .assocLogoMini{border:1px solid rgba(255,255,255,.22);border-radius:18px;background:#fff;padding:10px;display:flex;align-items:center;justify-content:center;min-height:74px;box-shadow:0 8px 20px rgba(7,31,56,.12);overflow:hidden}
-    .assocLogoMini img{display:block;max-width:72px;max-height:52px;width:auto;height:auto;object-fit:contain}
-    .personMoney .weeklyMini,.personMoney .monthlyMini{border:1px solid var(--line);border-radius:18px;background:#f9fbfd;padding:13px;text-align:center}
-    .personMoney b{display:block;font-size:10px;color:#6f8194;text-transform:uppercase;letter-spacing:.12em;margin-bottom:5px}
-    .personMoney .weeklyMini span{font-size:36px;font-weight:1000;letter-spacing:-.06em;color:var(--green2);line-height:.9}
-    .personMoney .monthlyMini span{font-size:25px;font-weight:1000;letter-spacing:-.04em;color:var(--navy);line-height:1}
-
-    .people{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;align-items:start}
-    .personCard{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 20px 54px rgba(7,31,56,.10);overflow:hidden}
-    .personHead{padding:24px 28px 18px;display:flex;align-items:flex-start;justify-content:space-between;gap:14px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fff,#f9fbfd)}
-    .personTitle{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:28px;letter-spacing:.10em;text-transform:uppercase;color:var(--navy)}
-    .subTitle{margin-top:5px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.11em;font-weight:1000}
-    .locked{display:inline-flex;align-items:center;gap:7px;border:1px solid #d7e4dc;background:#eefaf3;color:var(--green2);border-radius:999px;padding:8px 11px;font-size:11px;font-weight:1000;letter-spacing:.10em;text-transform:uppercase;white-space:nowrap}
-    .rows{padding:24px;display:grid;gap:16px}
-    .benefitRow{border:1px solid var(--line);border-radius:24px;padding:20px 22px;background:#fff;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center}
-    .benefitRow.funeral{border-color:rgba(196,154,69,.46);background:linear-gradient(180deg,#fff,#fffaf0)}
-    .benefitRow.income{border-color:#c9e3d4;background:linear-gradient(180deg,#fff,#f3fbf6)}
-    .rowKicker{font-size:12px;color:var(--muted);text-transform:uppercase;font-weight:1000;letter-spacing:.13em;margin-bottom:6px}
-    .rowDesc{font-size:22px;font-weight:1000;color:#172c43;line-height:1.18;text-transform:uppercase;letter-spacing:-.02em}
-    .rowDesc small{display:block;margin-top:7px;font-size:12px;color:var(--muted);font-weight:850;line-height:1.3;text-transform:none;letter-spacing:0}
-    .rowAmount{font-size:clamp(36px,4.2vw,60px);font-weight:1000;letter-spacing:-.06em;color:var(--navy);white-space:nowrap;text-align:right;line-height:.95}
-.rowAmountGroup{display:flex;align-items:flex-end;justify-content:flex-end;gap:14px;flex-wrap:wrap}.rowAmountStack{display:flex;flex-direction:column;align-items:flex-end;gap:8px}.monthBig{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;min-width:128px;border-radius:20px;padding:10px 14px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:inherit}.monthBig b{font-size:46px;line-height:.88;letter-spacing:-.06em}.monthBig span{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:1000;opacity:.86}.benefitRow .monthBig{background:#f7fafc;border-color:#dbe6ef;color:var(--navy)}.totalRow .monthBig{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.18);color:#fff}.benefitRow .rowAmountGroup,.totalRow .rowAmountGroup{justify-content:flex-end}.moneySubline{font-size:12px;font-weight:900;color:#cbd8e4;text-transform:uppercase;letter-spacing:.10em}.benefitRow .moneySubline{color:#6f8194}
-    .totalRow{border-radius:24px;background:linear-gradient(135deg,var(--navy),#123d66);color:#fff;padding:20px 22px;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;box-shadow:0 16px 42px rgba(7,31,56,.18)}
-    .totalRow .rowKicker{color:#c8d5e0}.totalRow .rowDesc{color:#fff}.totalRow .rowAmount{color:#fff}
-    .totalRow.carDeath{background:linear-gradient(135deg,#071f38 0%,#10395f 60%,#8a6a26 100%);border:1px solid rgba(241,223,173,.40);box-shadow:0 22px 58px rgba(7,31,56,.25)}
-    .totalRow.carDeath .rowKicker{color:#f1dfad}.totalRow.carDeath small{color:#dbe7f0}.totalRow.carDeath .rowAmount{font-size:clamp(44px,5vw,68px)}
-    .a71Box{margin:0 24px 24px;border:1px solid #cde6d6;border-radius:24px;background:linear-gradient(180deg,#f5fbf7,#fff);padding:18px 18px 16px}
-    .a71Title{display:flex;justify-content:space-between;gap:10px;align-items:center;color:var(--green2);font-size:13px;text-transform:uppercase;letter-spacing:.13em;font-weight:1000;margin-bottom:12px}
-    .a71Grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-    .a71Item{background:#fff;border:1px solid var(--line);border-radius:17px;padding:12px;text-align:center}
-    .a71Item b{display:block;font-size:23px;color:var(--navy);letter-spacing:-.04em;margin-bottom:4px}
-    .a71Item span{display:block;color:var(--muted);font-size:10px;font-weight:1000;text-transform:uppercase;letter-spacing:.08em;line-height:1.25}
-    .chips{padding:0 24px 24px;display:flex;gap:10px;flex-wrap:wrap}
-    .chip{border:1px solid var(--line);background:#f7fafc;border-radius:999px;padding:9px 12px;color:#42576b;font-size:12px;font-weight:900;letter-spacing:.04em}
-    .empty{background:white;border:1px dashed #cbd7e3;border-radius:20px;padding:24px;text-align:center;color:var(--muted);font-weight:900}
-
-    .agentHotspot{position:fixed;right:16px;bottom:16px;z-index:60;min-width:108px;height:42px;border-radius:999px;border:1px solid rgba(7,31,56,.18);background:rgba(255,255,255,.72);color:rgba(7,31,56,.55);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;opacity:.48;transition:.18s ease;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:1000;box-shadow:0 12px 32px rgba(7,31,56,.10);backdrop-filter:blur(8px)}
-    .agentHotspot:hover{opacity:1;color:white;background:var(--navy);transform:translateY(-2px)}
-    .drawerShade{position:fixed;inset:0;background:rgba(3,16,28,.42);backdrop-filter:blur(4px);z-index:70;opacity:0;pointer-events:none;transition:.18s ease}
-    .drawerShade.open{opacity:1;pointer-events:auto}
-    .drawer{position:fixed;top:0;right:0;height:100%;width:min(620px,96vw);background:#fff;z-index:80;transform:translateX(105%);transition:.22s ease;box-shadow:-28px 0 70px rgba(7,31,56,.25);display:flex;flex-direction:column;border-left:1px solid var(--line)}
-    .drawer.open{transform:translateX(0)}
-    .drawerHeader{padding:24px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:14px;align-items:flex-start;background:linear-gradient(180deg,#fff,#f6f9fc)}
-    .drawerHeader h2{margin:0;color:var(--navy);font-size:24px;letter-spacing:-.03em}.drawerHeader p{margin:5px 0 0;color:var(--muted);font-size:13px;font-weight:750}.closeBtn{border:0;background:var(--navy);color:#fff;border-radius:12px;padding:10px 13px;font-weight:1000;cursor:pointer}
-    .drawerBody{padding:22px;overflow:auto;display:grid;gap:18px}.group{border:1px solid var(--line);border-radius:22px;padding:18px;background:#fbfdff}.group h3{margin:0 0 14px;color:var(--navy);font-size:15px;text-transform:uppercase;letter-spacing:.12em}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}.field{display:grid;gap:6px}.field label{font-size:11px;font-weight:1000;text-transform:uppercase;letter-spacing:.1em;color:#77889a}.field input,.field select{width:100%;height:46px;border:1px solid #cfdae6;border-radius:13px;padding:0 12px;font-size:17px;font-weight:900;color:var(--navy);background:#fff}.check{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);border-radius:14px;background:#fff;font-weight:900;color:#24384c}.check input{width:20px;height:20px;accent-color:var(--green)}
-    .lockedBox{background:linear-gradient(180deg,#f4faf6,#fff);border:1px solid #cde6d6;border-radius:20px;padding:16px;color:#244130}.lockedBox h4{margin:0 0 10px;color:var(--green2);font-size:13px;text-transform:uppercase;letter-spacing:.12em}.lockedBox ul{margin:0;padding-left:18px;display:grid;gap:5px;font-size:13px;font-weight:800}.footerBtns{display:flex;gap:10px;position:sticky;bottom:0;background:#fff;padding:16px 0 0}.primary,.secondary{height:46px;border-radius:14px;border:0;font-weight:1000;cursor:pointer;flex:1}.primary{background:var(--navy);color:white}.secondary{background:#eef3f8;color:var(--navy);border:1px solid var(--line)}
-
-    .recommendBox{border:1px solid #d6e2ec;background:linear-gradient(180deg,#fff,#f7fafc);border-radius:18px;padding:14px;margin-top:12px;display:grid;gap:12px}
-    .recommendHead{display:flex;justify-content:space-between;gap:10px;align-items:center;color:var(--navy);font-size:12px;text-transform:uppercase;letter-spacing:.12em;font-weight:1000}
-    .recBudgetGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .recBudget{border:1px solid var(--line);background:#fff;border-radius:15px;padding:11px;text-align:center;color:var(--navy)}
-    .recBudget b{display:block;font-size:10px;color:#708295;text-transform:uppercase;letter-spacing:.11em;margin-bottom:4px}.recBudget span{display:block;font-size:20px;font-weight:1000;letter-spacing:-.04em}.recBudget small{display:block;color:#789;line-height:1.25;font-size:11px;font-weight:800;margin-top:3px}
-    .recBtnGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.recBtn{border:0;border-radius:14px;background:var(--navy);color:#fff;height:44px;font-weight:1000;letter-spacing:.07em;text-transform:uppercase;cursor:pointer}.recBtn.alt{background:#eef3f8;color:var(--navy);border:1px solid var(--line)}
-    .recSummary{border:1px solid #dbe6ef;background:#fff;border-radius:14px;padding:11px;color:#445c74;font-size:12px;font-weight:850;line-height:1.35;white-space:pre-line}
-    .hint{font-size:12px;color:#8191a3;text-align:center;font-weight:750;line-height:1.35}.hidden{display:none!important}
-    @media(max-width:1040px){.heroInner{grid-template-columns:1fr}.people{grid-template-columns:1fr}.totalCost{text-align:left}.benefitRow,.totalRow{grid-template-columns:1fr}.rowAmount,.rowAmountGroup,.rowAmountStack{text-align:left;align-items:flex-start;justify-content:flex-start}.wrap{padding:18px}.hero{padding:28px}.a71Grid{grid-template-columns:1fr 1fr}.grid3{grid-template-columns:1fr}}
-    @media print{.agentHotspot,.hourSwitch,.priceToggle,.drawer,.drawerShade{display:none!important}.wrap{padding:0}.hero,.personCard{box-shadow:none}.people{grid-template-columns:1fr 1fr}}
-  
-    .simpleWizard{display:grid;gap:14px}
-    .simpleStep{border:1px solid #d9e4ee;background:linear-gradient(180deg,#fff,#f8fbfd);border-radius:20px;padding:16px;box-shadow:0 10px 24px rgba(7,31,56,.05)}
-    .stepTitle{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
-    .stepTitle h3{margin:0;font-size:15px;letter-spacing:.08em;text-transform:uppercase;color:var(--navy)}
-    .stepBadge{font-size:11px;font-weight:1000;letter-spacing:.08em;text-transform:uppercase;color:#6b7f93;background:#eef4f8;border:1px solid #d9e4ee;border-radius:999px;padding:6px 10px;white-space:nowrap}
-    .simplePersonBox{border:1px solid #e1e9f1;background:#fff;border-radius:16px;padding:12px;margin-top:10px}
-    .simplePersonHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;font-size:13px;font-weight:1000;color:#0b2b49;letter-spacing:.08em;text-transform:uppercase}
-    .simpleGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
-    .simpleGrid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
-    .simpleGrid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
-    .simpleField label{display:block;font-size:10px;font-weight:1000;letter-spacing:.09em;text-transform:uppercase;color:#7e91a4;margin:0 0 5px 3px}
-    .simpleField input,.simpleField select{width:100%;height:42px;border:1px solid #d6e0ea;border-radius:12px;background:#fff;padding:0 10px;font-size:15px;font-weight:900;color:#082944;outline:none}
-    .simpleField input:focus,.simpleField select:focus{border-color:#c9a24a;box-shadow:0 0 0 3px rgba(201,162,74,.15)}
-    .simpleCheck{display:flex;align-items:center;gap:10px;border:1px solid #d6e0ea;border-radius:14px;padding:12px;background:#fff;font-size:14px;font-weight:950;color:#0b2b49;cursor:pointer}
-    .simpleCheck input{width:18px;height:18px;accent-color:#0b2b49}
-    .optionBox{display:grid;gap:10px}
-    .optionTotals{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:6px}
-    .optionPill{flex:1;min-width:130px;border:1px solid #d9e4ee;border-radius:14px;background:#fff;padding:10px;text-align:center}
-    .optionPill b{display:block;font-size:10px;letter-spacing:.10em;text-transform:uppercase;color:#7c8fa2;margin-bottom:4px}
-    .optionPill span{font-size:18px;font-weight:1000;color:#0b2b49}
-    .optionPerson{border:1px solid #e1e9f1;border-radius:16px;background:#fff;overflow:hidden}
-    .optionPersonName{background:#f1f6fa;border-bottom:1px solid #e1e9f1;padding:9px 12px;font-size:12px;font-weight:1000;letter-spacing:.08em;text-transform:uppercase;color:#314d67}
-    .optionCoverageGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0}
-    .optionCoverage{padding:12px 10px;border-right:1px solid #edf2f6;text-align:center}
-    .optionCoverage:last-child{border-right:0}
-    .optionCoverage b{display:block;font-size:10px;letter-spacing:.10em;text-transform:uppercase;color:#8a9aad;margin-bottom:5px}
-    .optionCoverage span{display:block;font-size:15px;font-weight:1000;color:#082944;line-height:1.1}
-    .optionCoverage small{display:block;margin-top:4px;color:#6c7f91;font-size:11px;font-weight:800}
-    .useOptionBtn{width:100%;height:46px;border-radius:14px;border:0;background:linear-gradient(180deg,#143c60,#082944);color:#fff;font-size:14px;font-weight:1000;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;box-shadow:0 12px 24px rgba(8,41,68,.18)}
-    .useOptionBtn.alt{background:linear-gradient(180deg,#c9a24a,#a57d22);color:#081f36}
-    .simpleHint{font-size:12px;line-height:1.45;color:#6d7e90;font-weight:800;margin-top:8px}
-
-    .optionManualGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:12px;background:#fff}
-    .manualField label{display:block;font-size:10px;font-weight:1000;letter-spacing:.10em;text-transform:uppercase;color:#8a9aad;margin:0 0 5px 3px}
-    .manualField input{width:100%;height:42px;border:1px solid #d6e0ea;border-radius:12px;background:#fff;padding:0 10px;font-size:14px;font-weight:950;color:#082944;text-align:right;outline:none}
-    .manualField input:focus{border-color:#c9a24a;box-shadow:0 0 0 3px rgba(201,162,74,.15)}
-    .manualCheck{height:42px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #d6e0ea;border-radius:12px;background:#fff;color:#082944;font-weight:1000;font-size:13px;cursor:pointer}
-    .manualCheck input{width:18px;height:18px;accent-color:#0b2b49}
-    .manualLine{border-top:1px solid #edf2f6;padding:9px 12px;color:#667a8d;font-size:12px;font-weight:850;line-height:1.35;background:#fbfdff}
-    .manualLine b{color:#0b2b49}
-.unionStatus{font-size:11px;font-weight:850;color:#667a8d;margin-top:8px;line-height:1.35}.unionStatus b{color:#0b2b49}.logoPreviewMini{height:32px;max-width:160px;object-fit:contain;display:block;margin-top:8px;border:1px solid #d6e0ea;border-radius:10px;padding:5px;background:#fff}
-    @media(max-width:760px){.simpleGrid,.simpleGrid.three,.simpleGrid.two,.optionCoverageGrid,.optionManualGrid{grid-template-columns:1fr 1fr}.optionCoverage:nth-child(2){border-right:0}.optionCoverage:nth-child(-n+2){border-bottom:1px solid #edf2f6}}
-
+    /* Presentation skin reused inside preview and popout */
+    .presWrap{min-height:100%;padding:28px;display:flex;flex-direction:column;gap:24px;color:var(--ink);background:radial-gradient(circle at 8% 8%, color-mix(in srgb, var(--gold) 17%, transparent), transparent 29%),linear-gradient(145deg,#edf3f8 0%,#fff 43%,#eef5f9 100%)}
+    .presTopbar{display:flex;align-items:center;justify-content:space-between;gap:18px}.presBrand{display:flex;align-items:center;gap:16px}.presLogo{background:var(--blue);border:1px solid rgba(7,31,56,.18);border-radius:18px;padding:10px 14px;box-shadow:0 10px 28px rgba(7,31,56,.08)}.presLogo img{display:block;height:46px;width:auto;max-width:190px;object-fit:contain}.presBrandText b{display:block;font-size:15px;letter-spacing:.13em;text-transform:uppercase;color:var(--navy)}.presBrandText span{display:block;margin-top:3px;color:var(--muted);font-size:13px;font-weight:800;letter-spacing:.04em}.presBadge{border:1px solid color-mix(in srgb,var(--gold) 45%, transparent);background:color-mix(in srgb,var(--gold) 13%, transparent);color:#76571e;border-radius:999px;padding:10px 16px;font-size:12px;font-weight:1000;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+    .hero{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 54%,var(--blue) 100%);color:white;border-radius:34px;padding:34px 42px;box-shadow:var(--shadow);position:relative;overflow:hidden}.hero:before{content:"";position:absolute;inset:-110px -120px auto auto;width:430px;height:430px;border-radius:50%;background:color-mix(in srgb,var(--gold) 20%, transparent)}.heroInner{position:relative;z-index:1;display:grid;grid-template-columns:1fr auto;gap:26px;align-items:end}.eyebrow{color:var(--gold2);font-weight:1000;font-size:13px;letter-spacing:.20em;text-transform:uppercase;margin-bottom:12px}.hero h1{font-size:clamp(42px,6vw,82px);line-height:.92;margin:0;letter-spacing:-.06em;font-weight:1000}.hero p{margin:14px 0 0;color:#c7d4e0;font-size:18px;max-width:820px;line-height:1.42;font-weight:700}.topNumbers{display:grid;grid-template-columns:1.15fr .85fr;gap:12px;align-items:stretch}.weeklyBlock,.monthlyBlock{border:1px solid rgba(255,255,255,.16);border-radius:18px;background:rgba(255,255,255,.08);padding:14px;text-align:center}.weeklyBlock .label,.monthlyBlock .label{display:block;color:#adc0d0;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:1000;margin-bottom:6px}.weeklyBlock .amount{display:block;font-size:48px;font-weight:1000;letter-spacing:-.07em;color:#fff;line-height:.9}.monthlyBlock .amount{display:block;font-size:29px;font-weight:1000;letter-spacing:-.05em;color:#fff;line-height:1}.budgetLine{margin-top:12px;border:1px solid rgba(241,223,173,.24);background:rgba(196,154,69,.12);border-radius:999px;padding:9px 12px;color:#f1dfad;font-size:11px;font-weight:1000;letter-spacing:.08em;text-transform:uppercase;text-align:center}.presControls{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.presControls button{height:36px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.10);color:#fff;font-size:11px;font-weight:1000;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;padding:0 12px}.presControls button.active{background:#fff;color:var(--navy)}
+    .people{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;align-items:start}.personCardPres{background:var(--card);border:1px solid var(--line);border-radius:30px;box-shadow:0 20px 54px rgba(7,31,56,.10);overflow:hidden}.personHeadPres{padding:24px 28px 18px;display:flex;align-items:flex-start;justify-content:space-between;gap:14px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fff,#f9fbfd)}.personTitlePres{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:28px;letter-spacing:.10em;text-transform:uppercase;color:var(--navy)}.subTitlePres{margin-top:5px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.11em;font-weight:1000}.locked{display:inline-flex;align-items:center;gap:7px;border:1px solid #d7e4dc;background:#eefaf3;color:var(--green2);border-radius:999px;padding:8px 11px;font-size:11px;font-weight:1000;letter-spacing:.10em;text-transform:uppercase;white-space:nowrap}.personMoney{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:18px 24px 0}.weeklyMini,.monthlyMini{border:1px solid var(--line);border-radius:18px;background:#f9fbfd;padding:13px;text-align:center}.weeklyMini b,.monthlyMini b{display:block;font-size:10px;color:#6f8194;text-transform:uppercase;letter-spacing:.12em;margin-bottom:5px}.weeklyMini span{font-size:36px;font-weight:1000;letter-spacing:-.06em;color:var(--green2);line-height:.9}.monthlyMini span{font-size:25px;font-weight:1000;letter-spacing:-.04em;color:var(--navy);line-height:1}.rows{padding:24px;display:grid;gap:16px}.benefitRow,.totalRow{border:1px solid var(--line);border-radius:24px;padding:20px 22px;background:#fff;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center}.benefitRow.funeral{border-color:color-mix(in srgb,var(--gold) 50%, transparent);background:linear-gradient(180deg,#fff,#fffaf0)}.benefitRow.income{border-color:#c9e3d4;background:linear-gradient(180deg,#fff,#f3fbf6)}.benefitRow.pension{border-color:rgba(196,154,69,.50);background:linear-gradient(180deg,#fff,#fff8e8)}.rowKicker{font-size:12px;color:var(--muted);text-transform:uppercase;font-weight:1000;letter-spacing:.13em;margin-bottom:6px}.rowDesc{font-size:22px;font-weight:1000;color:#172c43;line-height:1.18;text-transform:uppercase;letter-spacing:-.02em}.rowDesc small{display:block;margin-top:7px;font-size:12px;color:var(--muted);font-weight:850;line-height:1.3;text-transform:none;letter-spacing:0}.rowAmount{font-size:clamp(36px,4.2vw,60px);font-weight:1000;letter-spacing:-.06em;color:var(--navy);white-space:nowrap;text-align:right;line-height:.95}.rowAmountGroup{display:flex;align-items:flex-end;justify-content:flex-end;gap:14px;flex-wrap:wrap}.rowAmountStack{display:flex;flex-direction:column;align-items:flex-end;gap:8px}.moneySubline{font-size:12px;font-weight:900;color:#cbd8e4;text-transform:uppercase;letter-spacing:.10em}.monthBig{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;min-width:128px;border-radius:20px;padding:10px 14px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);color:#fff}.monthBig b{font-size:46px;line-height:.88;letter-spacing:-.06em}.monthBig span{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:1000;opacity:.86}.totalRow{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;box-shadow:0 16px 42px rgba(7,31,56,.18)}.totalRow .rowKicker{color:#c8d5e0}.totalRow .rowDesc,.totalRow .rowAmount{color:#fff}.totalRow.carDeath{background:linear-gradient(135deg,#071f38 0%,var(--blue) 60%,#8a6a26 100%);border:1px solid rgba(241,223,173,.40);box-shadow:0 22px 58px rgba(7,31,56,.25)}.totalRow.carDeath .rowKicker{color:#f1dfad}.a71Box{margin:0 24px 24px;border:1px solid #cde6d6;border-radius:24px;background:linear-gradient(180deg,#f5fbf7,#fff);padding:18px}.a71Title{display:flex;justify-content:space-between;gap:10px;align-items:center;color:var(--green2);font-size:13px;text-transform:uppercase;letter-spacing:.13em;font-weight:1000;margin-bottom:12px}.a71Grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.a71Item{background:#fff;border:1px solid var(--line);border-radius:17px;padding:12px;text-align:center}.a71Item b{display:block;font-size:23px;color:var(--navy);letter-spacing:-.04em;margin-bottom:4px}.a71Item span{display:block;color:var(--muted);font-size:10px;font-weight:1000;text-transform:uppercase;letter-spacing:.08em;line-height:1.25}.chips{padding:0 24px 24px;display:flex;gap:10px;flex-wrap:wrap}.chip{border:1px solid var(--line);background:#f7fafc;border-radius:999px;padding:9px 12px;color:#42576b;font-size:12px;font-weight:900;letter-spacing:.04em}.tierStrip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.tierStripCard{border:1px solid rgba(255,255,255,.18);border-radius:18px;background:rgba(255,255,255,.08);padding:14px;cursor:pointer}.tierStripCard b{display:block;color:#fff;font-size:15px;text-transform:uppercase;letter-spacing:.11em}.tierStripCard span{display:block;margin-top:5px;color:#c7d4e0;font-size:12px;font-weight:850}.tierStripCard.bronze{--tier:#a96f35;border-color:rgba(169,111,53,.45);background:linear-gradient(180deg,rgba(169,111,53,.18),rgba(255,255,255,.06))}.tierStripCard.silver{--tier:#8c98a6;border-color:rgba(140,152,166,.55);background:linear-gradient(180deg,rgba(140,152,166,.22),rgba(255,255,255,.06))}.tierStripCard.gold{--tier:#c49a45;border-color:rgba(196,154,69,.55);background:linear-gradient(180deg,rgba(196,154,69,.25),rgba(255,255,255,.07))}.tierStripCard.active{background:#fff}.tierStripCard.active.bronze{box-shadow:0 0 0 3px rgba(169,111,53,.22) inset}.tierStripCard.active.silver{box-shadow:0 0 0 3px rgba(140,152,166,.25) inset}.tierStripCard.active.gold{box-shadow:0 0 0 3px rgba(196,154,69,.28) inset}.tierStripCard.active b{color:var(--tier)}.tierStripCard.active span{color:var(--navy)}
+    .sspConceptRow{grid-template-columns:1fr minmax(120px,auto);align-items:center}.sspConceptRow .conceptTitle{font-size:clamp(42px,6.5vw,78px);line-height:.86;font-weight:1000;letter-spacing:-.07em;color:var(--navy);text-transform:uppercase}.sspConceptRow.income .conceptTitle{color:var(--gold)}.sspConceptRow .conceptSub{display:block;margin-top:10px;font-size:13px;color:var(--muted);font-weight:900;line-height:1.35;text-transform:none;letter-spacing:0}.sspConceptRow .conceptAmount{text-align:right}.sspConceptRow .conceptAmount span{display:block;font-size:clamp(22px,2.4vw,32px);font-weight:1000;letter-spacing:-.05em;color:var(--navy);white-space:nowrap}.sspConceptRow .conceptAmount small{display:block;margin-top:5px;color:#6f8194;font-size:10px;font-weight:1000;letter-spacing:.10em;text-transform:uppercase}.sspConceptRow.bronze{border-color:rgba(169,111,53,.48);background:linear-gradient(180deg,#fff,#fff7ef)}.sspConceptRow.silver{border-color:rgba(140,152,166,.55);background:linear-gradient(180deg,#fff,#f5f7fa)}.sspConceptRow.gold{border-color:rgba(196,154,69,.58);background:linear-gradient(180deg,#fff,#fff8e8)}.sspChipTiny{opacity:.78;font-size:11px}.hidePrices .personMoney,.hidePrices .topNumbers,.hidePrices .budgetLine{display:none!important}
+    @media(max-width:1040px){.heroInner{grid-template-columns:1fr}.people{grid-template-columns:1fr}.benefitRow,.totalRow{grid-template-columns:1fr}.rowAmount{text-align:left}.rowAmountGroup{justify-content:flex-start}.rowAmountStack{align-items:flex-start}.presWrap{padding:18px}.hero{padding:28px}.a71Grid,.tierStrip{grid-template-columns:1fr}}
+    @media print{.presControls{display:none!important}.presWrap{padding:0}.hero,.personCardPres{box-shadow:none}.people{grid-template-columns:1fr 1fr}}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header class="topbar">
+  <main class="controlApp">
+    <header class="controlHeader">
       <div class="brand">
-        <div class="logoBox"><img id="topLogo" src="https://agent.nf-financial.life/assoc-logos/Globe-Life-AIL.png" alt="Globe Life AIL"></div>
-        <div class="brandText"><b>Funeral Benefit Plan</b><span>Simple family protection overview</span></div>
+        <div class="logoBox"><img id="topLogo" src="https://agent.nf-financial.life/assoc-logos/Globe-Life-AIL.png" alt="Logo"></div>
+        <div class="brandText">
+          <b>Agent Controls</b>
+          <h1>Control panel first. Presentation popout second.</h1>
+          <p>Build the regular pitch exactly like before, or flip into SSP with Bronze / Silver / Gold presets. Popout stays client-facing; this page stays agent-only.</p>
+        </div>
       </div>
-      <div class="presoBadge">Presentation Ready</div>
+      <div class="actionStack">
+        <button class="bigBtn" id="startPresentationBtn" type="button">Start Presentation</button>
+        <button class="lightBtn" id="refreshPopoutBtn" type="button">Refresh Popout</button>
+        <button class="lightBtn" id="togglePricesBtn" type="button">Hide Prices</button>
+        <button class="lightBtn" id="printPopoutBtn" type="button">Print Popout</button>
+      </div>
     </header>
 
-    <section class="hero">
-      <div class="heroInner">
-        <div>
-          <div class="eyebrow">Benefit Overview</div>
-          <h1 id="packageTitle">Base package</h1>
-          <p id="heroLine">A clean view of what the family has available when they need it most.</p>
+    <section class="controlGrid">
+      <div class="panel">
+        <div class="panelHeader"><h2>Build the case</h2><span id="modeBadge">Regular Pitch</span></div>
+        <div class="panelBody">
+          <section class="section">
+            <h3>Pitch Mode</h3>
+            <div class="seg">
+              <button type="button" id="regularModeBtn">Regular</button>
+              <button type="button" id="sspModeBtn">SSP</button>
+            </div>
+            <div class="grid2">
+              <div class="field"><label>Color Theme</label><select id="theme"><option value="navy">Navy / Gold</option></select></div>
+              <div class="field"><label>Sickness Display</label><select id="sicknessMode"><option value="months">Funeral Benefit + Income Protection in Months</option><option value="combined">Total Sickness Payout</option></select></div>
+            </div>
+            <div class="modeHint" id="modeHint"></div>
+          </section>
+
+          <section class="section">
+            <h3>Association + Package</h3>
+            <div class="grid2">
+              <div class="field"><label>Union / Association</label><select id="selectedUnion"><option value="">Loading associations...</option></select><div class="unionStatus" id="unionStatus">Pick a union to auto-fill the package title.</div></div>
+              <div class="field"><label>Logo</label><select id="selectedLogo"><option value="">AIL default</option></select><img class="logoPreviewMini" id="logoPreviewMini" src="https://agent.nf-financial.life/assoc-logos/Globe-Life-AIL.png" alt="Logo preview"></div>
+            </div>
+            <div class="field"><label>Occupation / Package Title</label><input type="text" id="mainOccupation" placeholder="Electrician"></div>
+          </section>
+
+          <section class="section">
+            <h3>Family Basics</h3>
+            <div class="personBlock">
+              <div class="personHead"><span>Main</span><span>Required</span></div>
+              <div class="personBody">
+                <div class="grid4">
+                  <div class="field"><label>Age</label><input type="text" inputmode="numeric" pattern="[0-9]*" id="mainAge" autocomplete="off"></div>
+                  <div class="field"><label>Gender</label><select id="mainSex"><option value="M">Male</option><option value="F">Female</option></select></div>
+                  <div class="field"><label>Smoker?</label><select id="mainTobacco"><option value="NTU">No</option><option value="TU">Yes</option></select></div>
+                  <div class="field"><label>Individual SSI / income loss</label><input type="text" inputmode="decimal" id="mainMonthlyIncome" autocomplete="off"></div>
+                </div>
+                <div class="grid2" id="mainPensionFamilyWrap">
+                  <label class="check"><input type="checkbox" id="mainHasPension"> Pension?</label>
+                  <div class="field" id="mainPensionMonthlyWrap"><label>Pension Monthly</label><input type="text" inputmode="numeric" id="mainPensionMonthly" autocomplete="off" placeholder="Example: 3000"></div>
+                </div>
+              </div>
+            </div>
+            <label class="check"><input type="checkbox" id="spouseEnabled"> Include spouse</label>
+            <div class="personBlock" id="spouseGroup">
+              <div class="personHead"><span>Spouse</span><span>Optional</span></div>
+              <div class="personBody">
+                <div class="grid4">
+                  <div class="field"><label>Age</label><input type="text" inputmode="numeric" pattern="[0-9]*" id="spouseAge" autocomplete="off"></div>
+                  <div class="field"><label>Gender</label><select id="spouseSex"><option value="F">Female</option><option value="M">Male</option></select></div>
+                  <div class="field"><label>Smoker?</label><select id="spouseTobacco"><option value="NTU">No</option><option value="TU">Yes</option></select></div>
+                  <div class="field"><label>Individual SSI / income loss</label><input type="text" inputmode="decimal" id="spouseMonthlyIncome" autocomplete="off"></div>
+                </div>
+                <div class="grid2" id="spousePensionFamilyWrap">
+                  <label class="check"><input type="checkbox" id="spouseHasPension"> Pension?</label>
+                  <div class="field" id="spousePensionMonthlyWrap"><label>Pension Monthly</label><input type="text" inputmode="numeric" id="spousePensionMonthly" autocomplete="off" placeholder="Example: 1800"></div>
+                </div>
+                <div class="field"><label>Spouse Occupation / Note</label><input type="text" id="spouseOccupation" placeholder="Homemaker"></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="section" id="regularControls">
+            <h3>Regular Pitch Options</h3>
+            <div class="optionTabs"><button class="miniBtn" type="button" id="useOption1Top">Use Option 1</button><button class="miniBtn" type="button" id="useOption2Top">Use Option 2</button></div>
+            <div id="regularOptionMount"></div>
+          </section>
+
+          <section class="section" id="sspControls">
+            <h3>SSP Bronze / Silver / Gold</h3>
+            <label class="check"><input type="checkbox" id="sspCremationEnabled"> Cremation? <span style="font-size:11px;color:#6b7c90;font-weight:850">Shows cremation concept when checked. Default WL amount is $3,000.</span></label>
+            <div class="modeHint" id="sspPensionHint"></div>
+            <div class="modeHint" id="sspSurvivorHint"></div>
+            <div class="optionTabs"><button class="miniBtn" type="button" id="useBronzeTop">Use Bronze</button><button class="miniBtn" type="button" id="useSilverTop">Use Silver</button><button class="miniBtn" type="button" id="useGoldTop">Use Gold</button></div>
+            <div id="sspTierMount" class="tierCards"></div>
+          </section>
+
+          <div class="actionStack">
+            <button class="dangerBtn" id="resetBtn" type="button">Reset Sample</button>
+            <button class="dangerBtn" id="saveBtn" type="button">Save + Refresh</button>
+          </div>
         </div>
-        <div class="totalCost" id="monthlyBox"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panelHeader"><h2>Live client-facing preview</h2><span>Popout mirrors this</span></div>
+        <div class="previewFrame"><div class="previewInner"><div class="presentMiniNote">The main page is now the agent control panel. Click <b>Start Presentation</b> to launch the client view in a separate popout. Any changes here refresh the popout automatically.</div><div id="previewMount"></div></div></div>
       </div>
     </section>
-
-    <main class="people" id="people"></main>
-  </div>
-
-  <button class="priceToggle" id="priceToggle" type="button">Hide Prices</button>
-  <div class="hourSwitch" id="hourSwitch"><button type="button" id="hour1">Option 1</button><button type="button" id="hour2">Option 2</button></div>
-  <button class="agentHotspot" id="openSettings" title="Agent settings — Ctrl+Shift+S"><span>⚙</span><span>Agent</span></button>
-  <div class="drawerShade" id="shade"></div>
-  <aside class="drawer" id="drawer" aria-hidden="true">
-    <div class="drawerHeader">
-      <div><h2>Agent Settings</h2><p>Hidden from the client. Close before screensharing.</p></div>
-      <button class="closeBtn" id="closeSettings">Close</button>
-    </div>
-    <div class="drawerBody">
-      <div class="simpleWizard">
-        <section class="simpleStep">
-          <div class="stepTitle"><h3>1. Client Basics</h3><span class="stepBadge">Rates</span></div>
-          <div class="simplePersonBox">
-            <div class="simplePersonHead"><span>Main</span><span>Required</span></div>
-            <div class="simpleGrid">
-              <div class="simpleField"><label>Age</label><input type="text" inputmode="numeric" pattern="[0-9]*" id="mainAge" min="0" max="120" step="1" autocomplete="off"></div>
-              <div class="simpleField"><label>Gender</label><select id="mainSex"><option value="M">Male</option><option value="F">Female</option></select></div>
-              <div class="simpleField"><label>Smoke?</label><select id="mainTobacco"><option value="NTU">No</option><option value="TU">Yes</option></select></div>
-              <div class="simpleField"><label>Union / Association</label><select id="selectedUnion"><option value="">Loading associations...</option></select><div class="unionStatus" id="unionStatus">Pick a union to auto-fill the package title.</div></div>
-              <div class="simpleField"><label>Logo</label><select id="selectedLogo"><option value="">AIL default</option></select><img class="logoPreviewMini" id="logoPreviewMini" src="https://agent.nf-financial.life/assoc-logos/Globe-Life-AIL.png" alt="Logo preview"></div>
-              <div class="simpleField"><label>Occupation / Package</label><input type="text" id="mainOccupation" placeholder="Electrician"></div>
-              <div class="simpleField"><label>Monthly Income</label><input type="text" inputmode="decimal" id="mainMonthlyIncome" min="0" step="100" autocomplete="off"></div>
-            </div>
-          </div>
-
-          <div style="height:10px"></div>
-          <label class="simpleCheck"><input type="checkbox" id="spouseEnabled"> Include spouse</label>
-
-          <div class="simplePersonBox" id="spouseGroup">
-            <div class="simplePersonHead"><span>Spouse</span><span>Optional</span></div>
-            <div class="simpleGrid">
-              <div class="simpleField"><label>Age</label><input type="text" inputmode="numeric" pattern="[0-9]*" id="spouseAge" min="0" max="120" step="1" autocomplete="off"></div>
-              <div class="simpleField"><label>Gender</label><select id="spouseSex"><option value="F">Female</option><option value="M">Male</option></select></div>
-              <div class="simpleField"><label>Smoke?</label><select id="spouseTobacco"><option value="NTU">No</option><option value="TU">Yes</option></select></div>
-              <div class="simpleField"><label>Occupation</label><input type="text" id="spouseOccupation" placeholder="Homemaker"></div>
-              <div class="simpleField"><label>Monthly Income</label><input type="text" inputmode="decimal" id="spouseMonthlyIncome" min="0" step="100" autocomplete="off"></div>
-            </div>
-          </div>
-
-          <div style="height:10px"></div>
-          <div class="simpleGrid two">
-            <div class="simpleField"><label>Hourly Wage</label><input type="text" inputmode="decimal" id="hourlyWage" min="0" step="1" autocomplete="off"></div>
-            <div class="simpleField"><label>Sickness Display</label><select id="sicknessMode"><option value="months">Funeral + Months</option><option value="combined">Total Sickness Payout</option></select></div>
-          </div>
-          <div class="simpleHint">Set the client info once. Build Option 1 and Option 2 manually. Type full numbers normally. Premiums recalculate after you press Enter or click outside a field.</div>
-        </section>
-
-        <section class="simpleStep">
-          <div class="stepTitle"><h3>2. Option 1</h3><span class="stepBadge">Manual</span></div>
-          <div class="optionBox" id="optionOneManual"></div>
-          <button type="button" class="useOptionBtn" id="applyOption1Btn">Use Option 1</button>
-        </section>
-
-        <section class="simpleStep">
-          <div class="stepTitle"><h3>3. Option 2</h3><span class="stepBadge">Manual</span></div>
-          <div class="optionBox" id="optionTwoManual"></div>
-          <button type="button" class="useOptionBtn alt" id="applyOption2Btn">Use Option 2</button>
-        </section>
-
-        <div class="hint">Shortcut: Ctrl + Shift + S opens/closes settings. Esc closes. The gear is intentionally subtle for screenshare.</div>
-        <div class="footerBtns"><button class="secondary" id="resetBtn">Reset Sample</button><button class="primary" id="presoBtn">Close For Preso</button></div>
-      </div>
-    </div>
-  </aside>
+  </main>
+  <div id="toast" class="toast">Saved</div>
 
 <script>
   const RATEBOOKS = {"wl":[{"Age":0,"Male_NTU_per_$":0.0004075,"Male_TU_per_$":0,"Female_NTU_per_$":0.0003675,"Female_TU_per_$":0},{"Age":1,"Male_NTU_per_$":0.0004275,"Male_TU_per_$":0,"Female_NTU_per_$":0.0003825,"Female_TU_per_$":0},{"Age":2,"Male_NTU_per_$":0.0004466666667,"Male_TU_per_$":0,"Female_NTU_per_$":0.0004,"Female_TU_per_$":0},{"Age":3,"Male_NTU_per_$":0.0004675,"Male_TU_per_$":0,"Female_NTU_per_$":0.00042,"Female_TU_per_$":0},{"Age":4,"Male_NTU_per_$":0.0004875,"Male_TU_per_$":0,"Female_NTU_per_$":0.0004391666667,"Female_TU_per_$":0},{"Age":5,"Male_NTU_per_$":0.0005125,"Male_TU_per_$":0,"Female_NTU_per_$":0.0004608333333,"Female_TU_per_$":0},{"Age":6,"Male_NTU_per_$":0.0005375,"Male_TU_per_$":0,"Female_NTU_per_$":0.0004808333333,"Female_TU_per_$":0},{"Age":7,"Male_NTU_per_$":0.0005625,"Male_TU_per_$":0,"Female_NTU_per_$":0.0005041666667,"Female_TU_per_$":0},{"Age":8,"Male_NTU_per_$":0.00059,"Male_TU_per_$":0,"Female_NTU_per_$":0.0005283333333,"Female_TU_per_$":0},{"Age":9,"Male_NTU_per_$":0.0006183333333,"Male_TU_per_$":0,"Female_NTU_per_$":0.0005533333333,"Female_TU_per_$":0},{"Age":10,"Male_NTU_per_$":0.0006483333333,"Male_TU_per_$":0,"Female_NTU_per_$":0.0005833333333,"Female_TU_per_$":0},{"Age":11,"Male_NTU_per_$":0.0006808333333,"Male_TU_per_$":0,"Female_NTU_per_$":0.0006116666667,"Female_TU_per_$":0},{"Age":12,"Male_NTU_per_$":0.0007166666667,"Male_TU_per_$":0,"Female_NTU_per_$":0.0006466666667,"Female_TU_per_$":0},{"Age":13,"Male_NTU_per_$":0.0007541666667,"Male_TU_per_$":0,"Female_NTU_per_$":0.0006808333333,"Female_TU_per_$":0},{"Age":14,"Male_NTU_per_$":0.000795,"Male_TU_per_$":0,"Female_NTU_per_$":0.0007191666667,"Female_TU_per_$":0},{"Age":15,"Male_NTU_per_$":0.0008383333333,"Male_TU_per_$":0,"Female_NTU_per_$":0.00076,"Female_TU_per_$":0},{"Age":16,"Male_NTU_per_$":0.0008825,"Male_TU_per_$":0,"Female_NTU_per_$":0.0008025,"Female_TU_per_$":0},{"Age":17,"Male_NTU_per_$":0.0009141666667,"Male_TU_per_$":0,"Female_NTU_per_$":0.0008275,"Female_TU_per_$":0},{"Age":18,"Male_NTU_per_$":0.0008508333333,"Male_TU_per_$":0.0010675,"Female_NTU_per_$":0.0007666666667,"Female_TU_per_$":0.0009616666667},{"Age":19,"Male_NTU_per_$":0.0008808333333,"Male_TU_per_$":0.001083333333,"Female_NTU_per_$":0.0007958333333,"Female_TU_per_$":0.0009966666667},{"Age":20,"Male_NTU_per_$":0.0009125,"Male_TU_per_$":0.001145833333,"Female_NTU_per_$":0.0008258333333,"Female_TU_per_$":0.001034166667},{"Age":21,"Male_NTU_per_$":0.000945,"Male_TU_per_$":0.001190833333,"Female_NTU_per_$":0.0008575,"Female_TU_per_$":0.001071666667},{"Age":22,"Male_NTU_per_$":0.0009825,"Male_TU_per_$":0.001235,"Female_NTU_per_$":0.0008891666667,"Female_TU_per_$":0.0011125},{"Age":23,"Male_NTU_per_$":0.001020833333,"Male_TU_per_$":0.001285833333,"Female_NTU_per_$":0.000925,"Female_TU_per_$":0.001156666667},{"Age":24,"Male_NTU_per_$":0.001060833333,"Male_TU_per_$":0.001339166667,"Female_NTU_per_$":0.0009641666667,"Female_TU_per_$":0.001205833333},{"Age":25,"Male_NTU_per_$":0.001108333333,"Male_TU_per_$":0.0013975,"Female_NTU_per_$":0.001006666667,"Female_TU_per_$":0.001259166667},{"Age":26,"Male_NTU_per_$":0.0011625,"Male_TU_per_$":0.001463333333,"Female_NTU_per_$":0.001054166667,"Female_TU_per_$":0.001319166667},{"Age":27,"Male_NTU_per_$":0.001220833333,"Male_TU_per_$":0.001535833333,"Female_NTU_per_$":0.001106666667,"Female_TU_per_$":0.0013825},{"Age":28,"Male_NTU_per_$":0.001281666667,"Male_TU_per_$":0.001610833333,"Female_NTU_per_$":0.0011625,"Female_TU_per_$":0.001451666667},{"Age":29,"Male_NTU_per_$":0.001346666667,"Male_TU_per_$":0.001691666667,"Female_NTU_per_$":0.001221666667,"Female_TU_per_$":0.001524166667},{"Age":30,"Male_NTU_per_$":0.0014175,"Male_TU_per_$":0.00178,"Female_NTU_per_$":0.0012825,"Female_TU_per_$":0.0016025},{"Age":31,"Male_NTU_per_$":0.001495,"Male_TU_per_$":0.001873333333,"Female_NTU_per_$":0.001345,"Female_TU_per_$":0.001688333333},{"Age":32,"Male_NTU_per_$":0.001575833333,"Male_TU_per_$":0.0019725,"Female_NTU_per_$":0.001409166667,"Female_TU_per_$":0.001778333333},{"Age":33,"Male_NTU_per_$":0.0016625,"Male_TU_per_$":0.00208,"Female_NTU_per_$":0.001475833333,"Female_TU_per_$":0.001871666667},{"Age":34,"Male_NTU_per_$":0.001754166667,"Male_TU_per_$":0.002191666667,"Female_NTU_per_$":0.0015425,"Female_TU_per_$":0.001973333333},{"Age":35,"Male_NTU_per_$":0.001849166667,"Male_TU_per_$":0.0023125,"Female_NTU_per_$":0.001610833333,"Female_TU_per_$":0.002076666667},{"Age":36,"Male_NTU_per_$":0.001940833333,"Male_TU_per_$":0.002445833333,"Female_NTU_per_$":0.001679166667,"Female_TU_per_$":0.002180833333},{"Age":37,"Male_NTU_per_$":0.002039166667,"Male_TU_per_$":0.002585833333,"Female_NTU_per_$":0.001749166667,"Female_TU_per_$":0.002291666667},{"Age":38,"Male_NTU_per_$":0.002144166667,"Male_TU_per_$":0.002735,"Female_NTU_per_$":0.001821666667,"Female_TU_per_$":0.002406666667},{"Age":39,"Male_NTU_per_$":0.002253333333,"Male_TU_per_$":0.002891666667,"Female_NTU_per_$":0.001894166667,"Female_TU_per_$":0.002529166667},{"Age":40,"Male_NTU_per_$":0.002369166667,"Male_TU_per_$":0.0030575,"Female_NTU_per_$":0.001966666667,"Female_TU_per_$":0.0026575},{"Age":41,"Male_NTU_per_$":0.002490833333,"Male_TU_per_$":0.003235,"Female_NTU_per_$":0.002039166667,"Female_TU_per_$":0.002790833333},{"Age":42,"Male_NTU_per_$":0.00262,"Male_TU_per_$":0.003424166667,"Female_NTU_per_$":0.0021125,"Female_TU_per_$":0.0029325},{"Age":43,"Male_NTU_per_$":0.002753333333,"Male_TU_per_$":0.0036225,"Female_NTU_per_$":0.002190833333,"Female_TU_per_$":0.003084166667},{"Age":44,"Male_NTU_per_$":0.002895,"Male_TU_per_$":0.003834166667,"Female_NTU_per_$":0.0022825,"Female_TU_per_$":0.003241666667},{"Age":45,"Male_NTU_per_$":0.003050833333,"Male_TU_per_$":0.00405,"Female_NTU_per_$":0.0023925,"Female_TU_per_$":0.003401666667},{"Age":46,"Male_NTU_per_$":0.003214166667,"Male_TU_per_$":0.004269166667,"Female_NTU_per_$":0.002526666667,"Female_TU_per_$":0.003564166667},{"Age":47,"Male_NTU_per_$":0.00339,"Male_TU_per_$":0.004500833333,"Female_NTU_per_$":0.002680833333,"Female_TU_per_$":0.003733333333},{"Age":48,"Male_NTU_per_$":0.003575,"Male_TU_per_$":0.004746666667,"Female_NTU_per_$":0.00285,"Female_TU_per_$":0.003914166667},{"Age":49,"Male_NTU_per_$":0.003771666667,"Male_TU_per_$":0.00501,"Female_NTU_per_$":0.003030833333,"Female_TU_per_$":0.004103333333},{"Age":50,"Male_NTU_per_$":0.003981666667,"Male_TU_per_$":0.005285833333,"Female_NTU_per_$":0.003225,"Female_TU_per_$":0.004300833333},{"Age":51,"Male_NTU_per_$":0.004205,"Male_TU_per_$":0.005584166667,"Female_NTU_per_$":0.003428333333,"Female_TU_per_$":0.0045125},{"Age":52,"Male_NTU_per_$":0.00444,"Male_TU_per_$":0.0058975,"Female_NTU_per_$":0.003638333333,"Female_TU_per_$":0.0047325},{"Age":53,"Male_NTU_per_$":0.004690833333,"Male_TU_per_$":0.006228333333,"Female_NTU_per_$":0.003856666667,"Female_TU_per_$":0.0049675},{"Age":54,"Male_NTU_per_$":0.004956666667,"Male_TU_per_$":0.0065675,"Female_NTU_per_$":0.004084166667,"Female_TU_per_$":0.0052125},{"Age":55,"Male_NTU_per_$":0.005228333333,"Male_TU_per_$":0.006918333333,"Female_NTU_per_$":0.004316666667,"Female_TU_per_$":0.0054675},{"Age":56,"Male_NTU_per_$":0.005510833333,"Male_TU_per_$":0.0072775,"Female_NTU_per_$":0.004555833333,"Female_TU_per_$":0.0057375},{"Age":57,"Male_NTU_per_$":0.005806666667,"Male_TU_per_$":0.007646666667,"Female_NTU_per_$":0.004801666667,"Female_TU_per_$":0.0060175},{"Age":58,"Male_NTU_per_$":0.006123333333,"Male_TU_per_$":0.008035,"Female_NTU_per_$":0.005053333333,"Female_TU_per_$":0.006318333333},{"Age":59,"Male_NTU_per_$":0.006459166667,"Male_TU_per_$":0.0084475,"Female_NTU_per_$":0.005309166667,"Female_TU_per_$":0.006633333333}],"pr":[{"Age":0,"Male_NTU_per_$":0.0003483333333,"Male_TU_per_$":"","Female_NTU_per_$":0.0003133333333,"Female_TU_per_$":""},{"Age":1,"Male_NTU_per_$":0.000365,"Male_TU_per_$":"","Female_NTU_per_$":0.0003283333333,"Female_TU_per_$":""},{"Age":2,"Male_NTU_per_$":0.0003808333333,"Male_TU_per_$":"","Female_NTU_per_$":0.0003416666667,"Female_TU_per_$":""},{"Age":3,"Male_NTU_per_$":0.0003991666667,"Male_TU_per_$":"","Female_NTU_per_$":0.0003558333333,"Female_TU_per_$":""},{"Age":4,"Male_NTU_per_$":0.0004175,"Male_TU_per_$":"","Female_NTU_per_$":0.0003733333333,"Female_TU_per_$":""},{"Age":5,"Male_NTU_per_$":0.0004375,"Male_TU_per_$":"","Female_NTU_per_$":0.0003908333333,"Female_TU_per_$":""},{"Age":6,"Male_NTU_per_$":0.0004575,"Male_TU_per_$":"","Female_NTU_per_$":0.00041,"Female_TU_per_$":""},{"Age":7,"Male_NTU_per_$":0.0004791666667,"Male_TU_per_$":"","Female_NTU_per_$":0.00043,"Female_TU_per_$":""},{"Age":8,"Male_NTU_per_$":0.0005016666667,"Male_TU_per_$":"","Female_NTU_per_$":0.0004516666667,"Female_TU_per_$":""},{"Age":9,"Male_NTU_per_$":0.0005266666667,"Male_TU_per_$":"","Female_NTU_per_$":0.0004733333333,"Female_TU_per_$":""},{"Age":10,"Male_NTU_per_$":0.0005533333333,"Male_TU_per_$":"","Female_NTU_per_$":0.0004958333333,"Female_TU_per_$":""},{"Age":11,"Male_NTU_per_$":0.00058,"Male_TU_per_$":"","Female_NTU_per_$":0.0005216666667,"Female_TU_per_$":""},{"Age":12,"Male_NTU_per_$":0.00061,"Male_TU_per_$":"","Female_NTU_per_$":0.0005516666667,"Female_TU_per_$":""},{"Age":13,"Male_NTU_per_$":0.0006433333333,"Male_TU_per_$":"","Female_NTU_per_$":0.00058,"Female_TU_per_$":""},{"Age":14,"Male_NTU_per_$":0.0006775,"Male_TU_per_$":"","Female_NTU_per_$":0.0006125,"Female_TU_per_$":""},{"Age":15,"Male_NTU_per_$":0.0007133333333,"Male_TU_per_$":"","Female_NTU_per_$":0.0006466666667,"Female_TU_per_$":""},{"Age":16,"Male_NTU_per_$":0.0007516666667,"Male_TU_per_$":"","Female_NTU_per_$":0.0006833333333,"Female_TU_per_$":""},{"Age":17,"Male_NTU_per_$":0.0007791666667,"Male_TU_per_$":"","Female_NTU_per_$":0.0007058333333,"Female_TU_per_$":""},{"Age":18,"Male_NTU_per_$":0.0007416666667,"Male_TU_per_$":0.00093,"Female_NTU_per_$":0.0006675,"Female_TU_per_$":0.0008375},{"Age":19,"Male_NTU_per_$":0.0007675,"Male_TU_per_$":0.0009633333333,"Female_NTU_per_$":0.0006933333333,"Female_TU_per_$":0.0008691666667},{"Age":20,"Male_NTU_per_$":0.0007941666667,"Male_TU_per_$":0.0009966666667,"Female_NTU_per_$":0.0007191666667,"Female_TU_per_$":0.0009016666667},{"Age":21,"Male_NTU_per_$":0.000825,"Male_TU_per_$":0.001035833333,"Female_NTU_per_$":0.0007466666667,"Female_TU_per_$":0.0009333333333},{"Age":22,"Male_NTU_per_$":0.0008558333333,"Male_TU_per_$":0.0010775,"Female_NTU_per_$":0.000775,"Female_TU_per_$":0.00097},{"Age":23,"Male_NTU_per_$":0.00089,"Male_TU_per_$":0.001120833333,"Female_NTU_per_$":0.0008058333333,"Female_TU_per_$":0.001008333333},{"Age":24,"Male_NTU_per_$":0.0009258333333,"Male_TU_per_$":0.001165833333,"Female_NTU_per_$":0.0008391666667,"Female_TU_per_$":0.001050833333},{"Age":25,"Male_NTU_per_$":0.0009675,"Male_TU_per_$":0.001218333333,"Female_NTU_per_$":0.0008766666667,"Female_TU_per_$":0.001096666667},{"Age":26,"Male_NTU_per_$":0.001013333333,"Male_TU_per_$":0.001274166667,"Female_NTU_per_$":0.0009175,"Female_TU_per_$":0.0011475},{"Age":27,"Male_NTU_per_$":0.001063333333,"Male_TU_per_$":0.0013375,"Female_NTU_per_$":0.000965,"Female_TU_per_$":0.001204166667},{"Age":28,"Male_NTU_per_$":0.001116666667,"Male_TU_per_$":0.001403333333,"Female_NTU_per_$":0.001013333333,"Female_TU_per_$":0.001265},{"Age":29,"Male_NTU_per_$":0.001173333333,"Male_TU_per_$":0.001473333333,"Female_NTU_per_$":0.001064166667,"Female_TU_per_$":0.0013275},{"Age":30,"Male_NTU_per_$":0.001236666667,"Male_TU_per_$":0.00155,"Female_NTU_per_$":0.001116666667,"Female_TU_per_$":0.001396666667},{"Age":31,"Male_NTU_per_$":0.001304166667,"Male_TU_per_$":0.0016325,"Female_NTU_per_$":0.001170833333,"Female_TU_per_$":0.00147},{"Age":32,"Male_NTU_per_$":0.001371666667,"Male_TU_per_$":0.001719166667,"Female_NTU_per_$":0.0012275,"Female_TU_per_$":0.0015475},{"Age":33,"Male_NTU_per_$":0.001448333333,"Male_TU_per_$":0.0018125,"Female_NTU_per_$":0.001285,"Female_TU_per_$":0.001631666667},{"Age":34,"Male_NTU_per_$":0.001529166667,"Male_TU_per_$":0.00191,"Female_NTU_per_$":0.001343333333,"Female_TU_per_$":0.00172},{"Age":35,"Male_NTU_per_$":0.00161,"Male_TU_per_$":0.002014166667,"Female_NTU_per_$":0.0014025,"Female_TU_per_$":0.0018075},{"Age":36,"Male_NTU_per_$":0.00169,"Male_TU_per_$":0.002131666667,"Female_NTU_per_$":0.0014625,"Female_TU_per_$":0.0019},{"Age":37,"Male_NTU_per_$":0.0017775,"Male_TU_per_$":0.0022525,"Female_NTU_per_$":0.0015225,"Female_TU_per_$":0.001996666667},{"Age":38,"Male_NTU_per_$":0.00187,"Male_TU_per_$":0.002381666667,"Female_NTU_per_$":0.001585,"Female_TU_per_$":0.0020975},{"Age":39,"Male_NTU_per_$":0.001963333333,"Male_TU_per_$":0.002518333333,"Female_NTU_per_$":0.001648333333,"Female_TU_per_$":0.002201666667},{"Age":40,"Male_NTU_per_$":0.002063333333,"Male_TU_per_$":0.002664166667,"Female_NTU_per_$":0.001711666667,"Female_TU_per_$":0.002313333333},{"Age":41,"Male_NTU_per_$":0.002170833333,"Male_TU_per_$":0.002819166667,"Female_NTU_per_$":0.001775,"Female_TU_per_$":0.002431666667},{"Age":42,"Male_NTU_per_$":0.002280833333,"Male_TU_per_$":0.002981666667,"Female_NTU_per_$":0.00184,"Female_TU_per_$":0.002555},{"Age":43,"Male_NTU_per_$":0.0024,"Male_TU_per_$":0.003155833333,"Female_NTU_per_$":0.001909166667,"Female_TU_per_$":0.002685},{"Age":44,"Male_NTU_per_$":0.002523333333,"Male_TU_per_$":0.003340833333,"Female_NTU_per_$":0.001989166667,"Female_TU_per_$":0.002824166667},{"Age":45,"Male_NTU_per_$":0.0026575,"Male_TU_per_$":0.003528333333,"Female_NTU_per_$":0.002083333333,"Female_TU_per_$":0.002963333333},{"Age":46,"Male_NTU_per_$":0.0028,"Male_TU_per_$":0.00372,"Female_NTU_per_$":0.002200833333,"Female_TU_per_$":0.003104166667},{"Age":47,"Male_NTU_per_$":0.002953333333,"Male_TU_per_$":0.003920833333,"Female_NTU_per_$":0.002334166667,"Female_TU_per_$":0.003253333333},{"Age":48,"Male_NTU_per_$":0.003116666667,"Male_TU_per_$":0.004135,"Female_NTU_per_$":0.002483333333,"Female_TU_per_$":0.00341},{"Age":49,"Male_NTU_per_$":0.003285833333,"Male_TU_per_$":0.004364166667,"Female_NTU_per_$":0.002640833333,"Female_TU_per_$":0.003574166667},{"Age":50,"Male_NTU_per_$":0.003468333333,"Male_TU_per_$":0.004605833333,"Female_NTU_per_$":0.002806666667,"Female_TU_per_$":0.003745833333},{"Age":51,"Male_NTU_per_$":0.003661666667,"Male_TU_per_$":0.004864166667,"Female_NTU_per_$":0.002981666667,"Female_TU_per_$":0.003930833333},{"Age":52,"Male_NTU_per_$":0.00387,"Male_TU_per_$":0.005138333333,"Female_NTU_per_$":0.00317,"Female_TU_per_$":0.004125833333},{"Age":53,"Male_NTU_per_$":0.0040875,"Male_TU_per_$":0.005426666667,"Female_NTU_per_$":0.003361666667,"Female_TU_per_$":0.0043275},{"Age":54,"Male_NTU_per_$":0.0043175,"Male_TU_per_$":0.005724166667,"Female_NTU_per_$":0.0035575,"Female_TU_per_$":0.0045425},{"Age":55,"Male_NTU_per_$":0.004554166667,"Male_TU_per_$":0.0060275,"Female_NTU_per_$":0.003759166667,"Female_TU_per_$":0.0047625},{"Age":56,"Male_NTU_per_$":0.004799166667,"Male_TU_per_$":0.0063375,"Female_NTU_per_$":0.003964166667,"Female_TU_per_$":0.005},{"Age":57,"Male_NTU_per_$":0.005058333333,"Male_TU_per_$":0.0066575,"Female_NTU_per_$":0.004174166667,"Female_TU_per_$":0.005243333333},{"Age":58,"Male_NTU_per_$":0.005334166667,"Male_TU_per_$":0.007000833333,"Female_NTU_per_$":0.004393333333,"Female_TU_per_$":0.005504166667},{"Age":59,"Male_NTU_per_$":0.005626666667,"Male_TU_per_$":0.0073575,"Female_NTU_per_$":0.0046225,"Female_TU_per_$":0.0057775}],"ex":[{"Age":0,"Male_NTU_per_$":0.00031,"Male_TU_per_$":"","Female_NTU_per_$":0.0002783333333,"Female_TU_per_$":""},{"Age":1,"Male_NTU_per_$":0.000325,"Male_TU_per_$":"","Female_NTU_per_$":0.0002916666667,"Female_TU_per_$":""},{"Age":2,"Male_NTU_per_$":0.0003383333333,"Male_TU_per_$":"","Female_NTU_per_$":0.0003041666667,"Female_TU_per_$":""},{"Age":3,"Male_NTU_per_$":0.0003541666667,"Male_TU_per_$":"","Female_NTU_per_$":0.0003166666667,"Female_TU_per_$":""},{"Age":4,"Male_NTU_per_$":0.0003716666667,"Male_TU_per_$":"","Female_NTU_per_$":0.0003325,"Female_TU_per_$":""},{"Age":5,"Male_NTU_per_$":0.0003891666667,"Male_TU_per_$":"","Female_NTU_per_$":0.0003491666667,"Female_TU_per_$":""},{"Age":6,"Male_NTU_per_$":0.0004075,"Male_TU_per_$":"","Female_NTU_per_$":0.0003666666667,"Female_TU_per_$":""},{"Age":7,"Male_NTU_per_$":0.0004266666667,"Male_TU_per_$":"","Female_NTU_per_$":0.0003816666667,"Female_TU_per_$":""},{"Age":8,"Male_NTU_per_$":0.0004483333333,"Male_TU_per_$":"","Female_NTU_per_$":0.0004008333333,"Female_TU_per_$":""},{"Age":9,"Male_NTU_per_$":0.0004691666667,"Male_TU_per_$":"","Female_NTU_per_$":0.00042,"Female_TU_per_$":""},{"Age":10,"Male_NTU_per_$":0.0004916666667,"Male_TU_per_$":"","Female_NTU_per_$":0.0004408333333,"Female_TU_per_$":""},{"Age":11,"Male_NTU_per_$":0.0005175,"Male_TU_per_$":"","Female_NTU_per_$":0.000465,"Female_TU_per_$":""},{"Age":12,"Male_NTU_per_$":0.0005425,"Male_TU_per_$":"","Female_NTU_per_$":0.0004908333333,"Female_TU_per_$":""},{"Age":13,"Male_NTU_per_$":0.0005725,"Male_TU_per_$":"","Female_NTU_per_$":0.0005175,"Female_TU_per_$":""},{"Age":14,"Male_NTU_per_$":0.0006016666667,"Male_TU_per_$":"","Female_NTU_per_$":0.000545,"Female_TU_per_$":""},{"Age":15,"Male_NTU_per_$":0.000635,"Male_TU_per_$":"","Female_NTU_per_$":0.000575,"Female_TU_per_$":""},{"Age":16,"Male_NTU_per_$":0.0006683333333,"Male_TU_per_$":"","Female_NTU_per_$":0.0006083333333,"Female_TU_per_$":""},{"Age":17,"Male_NTU_per_$":0.0006933333333,"Male_TU_per_$":"","Female_NTU_per_$":0.0006283333333,"Female_TU_per_$":""},{"Age":18,"Male_NTU_per_$":0.0006441666667,"Male_TU_per_$":0.0008066666667,"Female_NTU_per_$":0.0005791666667,"Female_TU_per_$":0.0007275},{"Age":19,"Male_NTU_per_$":0.0006666666667,"Male_TU_per_$":0.000835,"Female_NTU_per_$":0.0006016666667,"Female_TU_per_$":0.0007541666667},{"Age":20,"Male_NTU_per_$":0.0006916666667,"Male_TU_per_$":0.0008675,"Female_NTU_per_$":0.0006241666667,"Female_TU_per_$":0.0007833333333},{"Age":21,"Male_NTU_per_$":0.0007141666667,"Male_TU_per_$":0.0009,"Female_NTU_per_$":0.0006483333333,"Female_TU_per_$":0.0008108333333},{"Age":22,"Male_NTU_per_$":0.000745,"Male_TU_per_$":0.0009341666667,"Female_NTU_per_$":0.0006725,"Female_TU_per_$":0.0008425},{"Age":23,"Male_NTU_per_$":0.0007725,"Male_TU_per_$":0.0009733333333,"Female_NTU_per_$":0.0007,"Female_TU_per_$":0.0008741666667},{"Age":24,"Male_NTU_per_$":0.0008033333333,"Male_TU_per_$":0.001011666667,"Female_NTU_per_$":0.0007291666667,"Female_TU_per_$":0.0009116666667},{"Age":25,"Male_NTU_per_$":0.0008383333333,"Male_TU_per_$":0.001056666667,"Female_NTU_per_$":0.0007616666667,"Female_TU_per_$":0.0009516666667},{"Age":26,"Male_NTU_per_$":0.0008783333333,"Male_TU_per_$":0.001106666667,"Female_NTU_per_$":0.0007975,"Female_TU_per_$":0.0009966666667},{"Age":27,"Male_NTU_per_$":0.0009216666667,"Male_TU_per_$":0.001161666667,"Female_NTU_per_$":0.0008366666667,"Female_TU_per_$":0.001045},{"Age":28,"Male_NTU_per_$":0.0009691666667,"Male_TU_per_$":0.001218333333,"Female_NTU_per_$":0.0008783333333,"Female_TU_per_$":0.001098333333},{"Age":29,"Male_NTU_per_$":0.00102,"Male_TU_per_$":0.00128,"Female_NTU_per_$":0.0009233333333,"Female_TU_per_$":0.001153333333},{"Age":30,"Male_NTU_per_$":0.001073333333,"Male_TU_per_$":0.001346666667,"Female_NTU_per_$":0.00097,"Female_TU_per_$":0.001211666667},{"Age":31,"Male_NTU_per_$":0.001130833333,"Male_TU_per_$":0.001416666667,"Female_NTU_per_$":0.001016666667,"Female_TU_per_$":0.001275833333},{"Age":32,"Male_NTU_per_$":0.001191666667,"Male_TU_per_$":0.001490833333,"Female_NTU_per_$":0.001065,"Female_TU_per_$":0.001345},{"Age":33,"Male_NTU_per_$":0.001259166667,"Male_TU_per_$":0.001574166667,"Female_NTU_per_$":0.001115833333,"Female_TU_per_$":0.001415833333},{"Age":34,"Male_NTU_per_$":0.001326666667,"Male_TU_per_$":0.0016575,"Female_NTU_per_$":0.001166666667,"Female_TU_per_$":0.001491666667},{"Age":35,"Male_NTU_per_$":0.0013975,"Male_TU_per_$":0.001748333333,"Female_NTU_per_$":0.001218333333,"Female_TU_per_$":0.00157},{"Age":36,"Male_NTU_per_$":0.001468333333,"Male_TU_per_$":0.001851666667,"Female_NTU_per_$":0.001270833333,"Female_TU_per_$":0.001649166667},{"Age":37,"Male_NTU_per_$":0.0015425,"Male_TU_per_$":0.001955,"Female_NTU_per_$":0.001323333333,"Female_TU_per_$":0.0017325},{"Age":38,"Male_NTU_per_$":0.001621666667,"Male_TU_per_$":0.00207,"Female_NTU_per_$":0.0013775,"Female_TU_per_$":0.00182},{"Age":39,"Male_NTU_per_$":0.001704166667,"Male_TU_per_$":0.0021875,"Female_NTU_per_$":0.0014325,"Female_TU_per_$":0.0019125},{"Age":40,"Male_NTU_per_$":0.0017925,"Male_TU_per_$":0.0023125,"Female_NTU_per_$":0.0014875,"Female_TU_per_$":0.002009166667},{"Age":41,"Male_NTU_per_$":0.001884166667,"Male_TU_per_$":0.002448333333,"Female_NTU_per_$":0.0015425,"Female_TU_per_$":0.0021125},{"Age":42,"Male_NTU_per_$":0.001980833333,"Male_TU_per_$":0.00259,"Female_NTU_per_$":0.0015975,"Female_TU_per_$":0.002219166667},{"Age":43,"Male_NTU_per_$":0.002081666667,"Male_TU_per_$":0.00274,"Female_NTU_per_$":0.001656666667,"Female_TU_per_$":0.002330833333},{"Age":44,"Male_NTU_per_$":0.002189166667,"Male_TU_per_$":0.0029,"Female_NTU_per_$":0.001726666667,"Female_TU_per_$":0.002450833333},{"Age":45,"Male_NTU_per_$":0.0023075,"Male_TU_per_$":0.003061666667,"Female_NTU_per_$":0.00181,"Female_TU_per_$":0.002571666667},{"Age":46,"Male_NTU_per_$":0.002430833333,"Male_TU_per_$":0.003230833333,"Female_NTU_per_$":0.001911666667,"Female_TU_per_$":0.002695833333},{"Age":47,"Male_NTU_per_$":0.002565833333,"Male_TU_per_$":0.003404166667,"Female_NTU_per_$":0.0020275,"Female_TU_per_$":0.002824166667},{"Age":48,"Male_NTU_per_$":0.002705,"Male_TU_per_$":0.00359,"Female_NTU_per_$":0.002155833333,"Female_TU_per_$":0.002961666667},{"Age":49,"Male_NTU_per_$":0.002853333333,"Male_TU_per_$":0.003789166667,"Female_NTU_per_$":0.0022925,"Female_TU_per_$":0.0031025},{"Age":50,"Male_NTU_per_$":0.003011666667,"Male_TU_per_$":0.004,"Female_NTU_per_$":0.002438333333,"Female_TU_per_$":0.003254166667},{"Age":51,"Male_NTU_per_$":0.003180833333,"Male_TU_per_$":0.0042225,"Female_NTU_per_$":0.0025925,"Female_TU_per_$":0.0034125},{"Age":52,"Male_NTU_per_$":0.003359166667,"Male_TU_per_$":0.0044575,"Female_NTU_per_$":0.002754166667,"Female_TU_per_$":0.003580833333},{"Age":53,"Male_NTU_per_$":0.0035475,"Male_TU_per_$":0.0047025,"Female_NTU_per_$":0.0029225,"Female_TU_per_$":0.003758333333},{"Age":54,"Male_NTU_per_$":0.00375,"Male_TU_per_$":0.0049575,"Female_NTU_per_$":0.003095,"Female_TU_per_$":0.003943333333},{"Age":55,"Male_NTU_per_$":0.003955833333,"Male_TU_per_$":0.005225,"Female_NTU_per_$":0.0032725,"Female_TU_per_$":0.004135},{"Age":56,"Male_NTU_per_$":0.0041675,"Male_TU_per_$":0.0055,"Female_NTU_per_$":0.0034525,"Female_TU_per_$":0.004339166667},{"Age":57,"Male_NTU_per_$":0.004393333333,"Male_TU_per_$":0.005785833333,"Female_NTU_per_$":0.003636666667,"Female_TU_per_$":0.0045525},{"Age":58,"Male_NTU_per_$":0.004631666667,"Male_TU_per_$":0.0060825,"Female_NTU_per_$":0.003825833333,"Female_TU_per_$":0.004778333333},{"Age":59,"Male_NTU_per_$":0.004885833333,"Male_TU_per_$":0.006390833333,"Female_NTU_per_$":0.004019166667,"Female_TU_per_$":0.0050175}],"sl":[{"Age":18,"Male_NTU_per_$":0.0005491666667,"Male_TU_per_$":0.0007025,"Female_NTU_per_$":0.0004966666667,"Female_TU_per_$":0.0005958333333},{"Age":19,"Male_NTU_per_$":0.0005633333333,"Male_TU_per_$":0.0007175,"Female_NTU_per_$":0.0005116666667,"Female_TU_per_$":0.0006125},{"Age":20,"Male_NTU_per_$":0.0005791666667,"Male_TU_per_$":0.0007358333333,"Female_NTU_per_$":0.0005275,"Female_TU_per_$":0.00063},{"Age":21,"Male_NTU_per_$":0.0006,"Male_TU_per_$":0.0007566666667,"Female_NTU_per_$":0.0005433333333,"Female_TU_per_$":0.00065},{"Age":22,"Male_NTU_per_$":0.0006175,"Male_TU_per_$":0.00078,"Female_NTU_per_$":0.0005608333333,"Female_TU_per_$":0.0006708333333},{"Age":23,"Male_NTU_per_$":0.0006391666667,"Male_TU_per_$":0.0008075,"Female_NTU_per_$":0.0005791666667,"Female_TU_per_$":0.0006925},{"Age":24,"Male_NTU_per_$":0.0006633333333,"Male_TU_per_$":0.0008391666667,"Female_NTU_per_$":0.0005991666667,"Female_TU_per_$":0.0007191666667},{"Age":25,"Male_NTU_per_$":0.00069,"Male_TU_per_$":0.0008758333333,"Female_NTU_per_$":0.0006208333333,"Female_TU_per_$":0.0007475},{"Age":26,"Male_NTU_per_$":0.00072,"Male_TU_per_$":0.0009191666667,"Female_NTU_per_$":0.0006441666667,"Female_TU_per_$":0.00078},{"Age":27,"Male_NTU_per_$":0.0007533333333,"Male_TU_per_$":0.0009683333333,"Female_NTU_per_$":0.00067,"Female_TU_per_$":0.0008175},{"Age":28,"Male_NTU_per_$":0.0007891666667,"Male_TU_per_$":0.001021666667,"Female_NTU_per_$":0.0006975,"Female_TU_per_$":0.0008575},{"Age":29,"Male_NTU_per_$":0.0008283333333,"Male_TU_per_$":0.001079166667,"Female_NTU_per_$":0.000725,"Female_TU_per_$":0.0008983333333},{"Age":30,"Male_NTU_per_$":0.0008691666667,"Male_TU_per_$":0.001138333333,"Female_NTU_per_$":0.0007558333333,"Female_TU_per_$":0.0009433333333},{"Age":31,"Male_NTU_per_$":0.0009041666667,"Male_TU_per_$":0.0012,"Female_NTU_per_$":0.0007891666667,"Female_TU_per_$":0.0009891666667},{"Age":32,"Male_NTU_per_$":0.0009591666667,"Male_TU_per_$":0.001264166667,"Female_NTU_per_$":0.0008258333333,"Female_TU_per_$":0.001036666667},{"Age":33,"Male_NTU_per_$":0.001008333333,"Male_TU_per_$":0.0013325,"Female_NTU_per_$":0.0008625,"Female_TU_per_$":0.001085833333},{"Age":34,"Male_NTU_per_$":0.00106,"Male_TU_per_$":0.001406666667,"Female_NTU_per_$":0.0009008333333,"Female_TU_per_$":0.001139166667},{"Age":35,"Male_NTU_per_$":0.001115833333,"Male_TU_per_$":0.001489166667,"Female_NTU_per_$":0.00094,"Female_TU_per_$":0.001195833333},{"Age":36,"Male_NTU_per_$":0.001174166667,"Male_TU_per_$":0.001580833333,"Female_NTU_per_$":0.00098,"Female_TU_per_$":0.001255833333},{"Age":37,"Male_NTU_per_$":0.001235,"Male_TU_per_$":0.001678333333,"Female_NTU_per_$":0.00102,"Female_TU_per_$":0.001318333333},{"Age":38,"Male_NTU_per_$":0.001300833333,"Male_TU_per_$":0.001784166667,"Female_NTU_per_$":0.001060833333,"Female_TU_per_$":0.001383333333},{"Age":39,"Male_NTU_per_$":0.001371666667,"Male_TU_per_$":0.001895,"Female_NTU_per_$":0.001105833333,"Female_TU_per_$":0.001449166667},{"Age":40,"Male_NTU_per_$":0.001446666667,"Male_TU_per_$":0.0020125,"Female_NTU_per_$":0.0011525,"Female_TU_per_$":0.001524166667},{"Age":41,"Male_NTU_per_$":0.0015275,"Male_TU_per_$":0.0021375,"Female_NTU_per_$":0.0012025,"Female_TU_per_$":0.0016025},{"Age":42,"Male_NTU_per_$":0.001613333333,"Male_TU_per_$":0.0022675,"Female_NTU_per_$":0.001265833333,"Female_TU_per_$":0.001683333333},{"Age":43,"Male_NTU_per_$":0.001704166667,"Male_TU_per_$":0.0024025,"Female_NTU_per_$":0.001333333333,"Female_TU_per_$":0.001769166667},{"Age":44,"Male_NTU_per_$":0.001798333333,"Male_TU_per_$":0.0025425,"Female_NTU_per_$":0.001406666667,"Female_TU_per_$":0.0018575},{"Age":45,"Male_NTU_per_$":0.001893333333,"Male_TU_per_$":0.002683333333,"Female_NTU_per_$":0.00148,"Female_TU_per_$":0.001945833333},{"Age":46,"Male_NTU_per_$":0.001989166667,"Male_TU_per_$":0.002825833333,"Female_NTU_per_$":0.001553333333,"Female_TU_per_$":0.002033333333},{"Age":47,"Male_NTU_per_$":0.002086666667,"Male_TU_per_$":0.002969166667,"Female_NTU_per_$":0.001626666667,"Female_TU_per_$":0.002123333333},{"Age":48,"Male_NTU_per_$":0.002190833333,"Male_TU_per_$":0.003119166667,"Female_NTU_per_$":0.001701666667,"Female_TU_per_$":0.002215833333},{"Age":49,"Male_NTU_per_$":0.002300833333,"Male_TU_per_$":0.003275833333,"Female_NTU_per_$":0.001785833333,"Female_TU_per_$":0.0023175},{"Age":50,"Male_NTU_per_$":0.002420833333,"Male_TU_per_$":0.00344,"Female_NTU_per_$":0.0018825,"Female_TU_per_$":0.002429166667},{"Age":51,"Male_NTU_per_$":0.002546666667,"Male_TU_per_$":0.003613333333,"Female_NTU_per_$":0.0019925,"Female_TU_per_$":0.002554166667},{"Age":52,"Male_NTU_per_$":0.002685,"Male_TU_per_$":0.003795833333,"Female_NTU_per_$":0.002115833333,"Female_TU_per_$":0.00269},{"Age":53,"Male_NTU_per_$":0.002834166667,"Male_TU_per_$":0.00399,"Female_NTU_per_$":0.002250833333,"Female_TU_per_$":0.002838333333},{"Age":54,"Male_NTU_per_$":0.003,"Male_TU_per_$":0.004200833333,"Female_NTU_per_$":0.002391666667,"Female_TU_per_$":0.0029925},{"Age":55,"Male_NTU_per_$":0.003180833333,"Male_TU_per_$":0.004434166667,"Female_NTU_per_$":0.002538333333,"Female_TU_per_$":0.003155833333},{"Age":56,"Male_NTU_per_$":0.0033825,"Male_TU_per_$":0.004690833333,"Female_NTU_per_$":0.0026875,"Female_TU_per_$":0.003321666667},{"Age":57,"Male_NTU_per_$":0.003601666667,"Male_TU_per_$":0.00497,"Female_NTU_per_$":0.0028425,"Female_TU_per_$":0.003496666667},{"Age":58,"Male_NTU_per_$":0.003839166667,"Male_TU_per_$":0.005269166667,"Female_NTU_per_$":0.00301,"Female_TU_per_$":0.003684166667},{"Age":59,"Male_NTU_per_$":0.004093333333,"Male_TU_per_$":0.005585,"Female_NTU_per_$":0.0031925,"Female_TU_per_$":0.003890833333}],"wlsenior":[{"Age":60,"Male_NTU_per_$":0.0069675,"Male_TU_per_$":0.00908,"Female_NTU_per_$":0.005695833333,"Female_TU_per_$":0.007119166667},{"Age":61,"Male_NTU_per_$":0.007356666667,"Male_TU_per_$":0.009551666667,"Female_NTU_per_$":0.005975,"Female_TU_per_$":0.007480833333},{"Age":62,"Male_NTU_per_$":0.00777,"Male_TU_per_$":0.01005166667,"Female_NTU_per_$":0.006271666667,"Female_TU_per_$":0.0078625},{"Age":63,"Male_NTU_per_$":0.008208333333,"Male_TU_per_$":0.01058,"Female_NTU_per_$":0.0065975,"Female_TU_per_$":0.008266666667},{"Age":64,"Male_NTU_per_$":0.008673333333,"Male_TU_per_$":0.01113666667,"Female_NTU_per_$":0.006963333333,"Female_TU_per_$":0.008693333333},{"Age":65,"Male_NTU_per_$":0.009185,"Male_TU_per_$":0.0117275,"Female_NTU_per_$":0.0073775,"Female_TU_per_$":0.0091725},{"Age":66,"Male_NTU_per_$":0.009744166667,"Male_TU_per_$":0.01246916667,"Female_NTU_per_$":0.007874166667,"Female_TU_per_$":0.009715833333},{"Age":67,"Male_NTU_per_$":0.01034333333,"Male_TU_per_$":0.01326,"Female_NTU_per_$":0.008426666667,"Female_TU_per_$":0.01029916667},{"Age":68,"Male_NTU_per_$":0.01098416667,"Male_TU_per_$":0.014105,"Female_NTU_per_$":0.009033333333,"Female_TU_per_$":0.01091916667},{"Age":69,"Male_NTU_per_$":0.01167416667,"Male_TU_per_$":0.01501333333,"Female_NTU_per_$":0.009695,"Female_TU_per_$":0.011585},{"Age":70,"Male_NTU_per_$":0.012415,"Male_TU_per_$":0.01599,"Female_NTU_per_$":0.01041166667,"Female_TU_per_$":0.0123},{"Age":71,"Male_NTU_per_$":0.0133325,"Male_TU_per_$":0.0170375,"Female_NTU_per_$":0.01117416667,"Female_TU_per_$":0.01307},{"Age":72,"Male_NTU_per_$":0.01432083333,"Male_TU_per_$":0.01815583333,"Female_NTU_per_$":0.011995,"Female_TU_per_$":0.01389083333},{"Age":73,"Male_NTU_per_$":0.01537833333,"Male_TU_per_$":0.01934333333,"Female_NTU_per_$":0.01287666667,"Female_TU_per_$":0.01476166667},{"Age":74,"Male_NTU_per_$":0.0165125,"Male_TU_per_$":0.02059833333,"Female_NTU_per_$":0.01382,"Female_TU_per_$":0.0156825},{"Age":75,"Male_NTU_per_$":0.01771666667,"Male_TU_per_$":0.02192083333,"Female_NTU_per_$":0.01483,"Female_TU_per_$":0.0166525},{"Age":76,"Male_NTU_per_$":0.01899416667,"Male_TU_per_$":"","Female_NTU_per_$":0.01592,"Female_TU_per_$":""},{"Age":77,"Male_NTU_per_$":0.02036166667,"Male_TU_per_$":"","Female_NTU_per_$":0.01707583333,"Female_TU_per_$":""},{"Age":78,"Male_NTU_per_$":0.0218275,"Male_TU_per_$":"","Female_NTU_per_$":0.01830166667,"Female_TU_per_$":""},{"Age":79,"Male_NTU_per_$":0.02341,"Male_TU_per_$":"","Female_NTU_per_$":0.01959416667,"Female_TU_per_$":""},{"Age":80,"Male_NTU_per_$":0.02506833333,"Male_TU_per_$":"","Female_NTU_per_$":0.02095666667,"Female_TU_per_$":""}],"adb":[{"Age":5,"Individual":8.333333333e-05},{"Age":6,"Individual":8.333333333e-05},{"Age":7,"Individual":8.333333333e-05},{"Age":8,"Individual":8.333333333e-05},{"Age":9,"Individual":8.333333333e-05},{"Age":10,"Individual":8.333333333e-05},{"Age":11,"Individual":8.333333333e-05},{"Age":12,"Individual":8.333333333e-05},{"Age":13,"Individual":8.333333333e-05},{"Age":14,"Individual":8.333333333e-05},{"Age":15,"Individual":8.333333333e-05},{"Age":16,"Individual":8.333333333e-05},{"Age":17,"Individual":8.333333333e-05},{"Age":18,"Individual":8.333333333e-05},{"Age":19,"Individual":8.333333333e-05},{"Age":20,"Individual":8.333333333e-05},{"Age":21,"Individual":8.333333333e-05},{"Age":22,"Individual":8.333333333e-05},{"Age":23,"Individual":8.333333333e-05},{"Age":24,"Individual":8.333333333e-05},{"Age":25,"Individual":8.333333333e-05},{"Age":26,"Individual":8.333333333e-05},{"Age":27,"Individual":8.333333333e-05},{"Age":28,"Individual":8.333333333e-05},{"Age":29,"Individual":8.333333333e-05},{"Age":30,"Individual":8.333333333e-05},{"Age":31,"Individual":8.333333333e-05},{"Age":32,"Individual":8.333333333e-05},{"Age":33,"Individual":8.333333333e-05},{"Age":34,"Individual":8.333333333e-05},{"Age":35,"Individual":8.333333333e-05},{"Age":36,"Individual":8.333333333e-05},{"Age":37,"Individual":8.333333333e-05},{"Age":38,"Individual":8.333333333e-05},{"Age":39,"Individual":8.333333333e-05},{"Age":40,"Individual":8.333333333e-05},{"Age":41,"Individual":8.333333333e-05},{"Age":42,"Individual":8.333333333e-05},{"Age":43,"Individual":8.333333333e-05},{"Age":44,"Individual":8.333333333e-05},{"Age":45,"Individual":8.333333333e-05},{"Age":46,"Individual":8.333333333e-05},{"Age":47,"Individual":8.333333333e-05},{"Age":48,"Individual":8.333333333e-05},{"Age":49,"Individual":8.333333333e-05},{"Age":50,"Individual":0.0001041666667},{"Age":51,"Individual":0.0001041666667},{"Age":52,"Individual":0.0001041666667},{"Age":53,"Individual":0.0001041666667},{"Age":54,"Individual":0.0001041666667},{"Age":55,"Individual":0.0001041666667},{"Age":56,"Individual":0.0001041666667},{"Age":57,"Individual":0.0001041666667},{"Age":58,"Individual":0.0001041666667},{"Age":59,"Individual":0.0001041666667}],"a71":[{"Age":18,"Individual":10.88},{"Age":19,"Individual":10.88},{"Age":20,"Individual":10.88},{"Age":21,"Individual":10.88},{"Age":22,"Individual":10.88},{"Age":23,"Individual":10.88},{"Age":24,"Individual":10.88},{"Age":25,"Individual":10.88},{"Age":26,"Individual":10.88},{"Age":27,"Individual":10.88},{"Age":28,"Individual":10.88},{"Age":29,"Individual":10.88},{"Age":30,"Individual":10.88},{"Age":31,"Individual":10.88},{"Age":32,"Individual":10.88},{"Age":33,"Individual":10.88},{"Age":34,"Individual":10.88},{"Age":35,"Individual":10.88},{"Age":36,"Individual":10.88},{"Age":37,"Individual":10.88},{"Age":38,"Individual":10.88},{"Age":39,"Individual":10.88},{"Age":40,"Individual":10.88},{"Age":41,"Individual":10.88},{"Age":42,"Individual":10.88},{"Age":43,"Individual":10.88},{"Age":44,"Individual":10.88},{"Age":45,"Individual":10.88},{"Age":46,"Individual":10.88},{"Age":47,"Individual":10.88},{"Age":48,"Individual":10.88},{"Age":49,"Individual":10.88},{"Age":50,"Individual":12.13},{"Age":51,"Individual":12.13},{"Age":52,"Individual":12.13},{"Age":53,"Individual":12.13},{"Age":54,"Individual":12.13},{"Age":55,"Individual":12.13},{"Age":56,"Individual":12.13},{"Age":57,"Individual":12.13},{"Age":58,"Individual":12.13},{"Age":59,"Individual":12.13},{"Age":60,"Individual":15.25},{"Age":61,"Individual":15.25},{"Age":62,"Individual":15.25},{"Age":63,"Individual":15.25},{"Age":64,"Individual":15.25},{"Age":65,"Individual":30.25},{"Age":66,"Individual":30.25},{"Age":67,"Individual":30.25},{"Age":68,"Individual":30.25},{"Age":69,"Individual":30.25},{"Age":70,"Individual":30.25},{"Age":71,"Individual":30.25},{"Age":72,"Individual":30.25},{"Age":73,"Individual":30.25},{"Age":74,"Individual":30.25},{"Age":75,"Individual":30.25},{"Age":76,"Individual":30.25},{"Age":77,"Individual":30.25},{"Age":78,"Individual":30.25},{"Age":79,"Individual":30.25},{"Age":80,"Individual":30.25}],"tenrc":[{"Age":18,"Male_NTU_per_$":0.0003083333333,"Male_TU_per_$":0.0003925,"Female_NTU_per_$":0.000265,"Female_TU_per_$":0.0003641666667},{"Age":19,"Male_NTU_per_$":0.0003091666667,"Male_TU_per_$":0.0003991666667,"Female_NTU_per_$":0.0002666666667,"Female_TU_per_$":0.0003683333333},{"Age":20,"Male_NTU_per_$":0.00031,"Male_TU_per_$":0.0004041666667,"Female_NTU_per_$":0.0002675,"Female_TU_per_$":0.0003725},{"Age":21,"Male_NTU_per_$":0.0003116666667,"Male_TU_per_$":0.0004091666667,"Female_NTU_per_$":0.0002683333333,"Female_TU_per_$":0.0003791666667},{"Age":22,"Male_NTU_per_$":0.0003133333333,"Male_TU_per_$":0.0004166666667,"Female_NTU_per_$":0.00027,"Female_TU_per_$":0.000385},{"Age":23,"Male_NTU_per_$":0.000315,"Male_TU_per_$":0.0004225,"Female_NTU_per_$":0.0002716666667,"Female_TU_per_$":0.0003916666667},{"Age":24,"Male_NTU_per_$":0.0003166666667,"Male_TU_per_$":0.0004291666667,"Female_NTU_per_$":0.0002725,"Female_TU_per_$":0.0004},{"Age":25,"Male_NTU_per_$":0.0003191666667,"Male_TU_per_$":0.0004375,"Female_NTU_per_$":0.0002741666667,"Female_TU_per_$":0.0004066666667},{"Age":26,"Male_NTU_per_$":0.0003241666667,"Male_TU_per_$":0.000445,"Female_NTU_per_$":0.0002766666667,"Female_TU_per_$":0.0004166666667},{"Age":27,"Male_NTU_per_$":0.0003275,"Male_TU_per_$":0.0004558333333,"Female_NTU_per_$":0.00028,"Female_TU_per_$":0.000425},{"Age":28,"Male_NTU_per_$":0.0003308333333,"Male_TU_per_$":0.000465,"Female_NTU_per_$":0.0002825,"Female_TU_per_$":0.0004358333333},{"Age":29,"Male_NTU_per_$":0.0003341666667,"Male_TU_per_$":0.0004766666667,"Female_NTU_per_$":0.0002866666667,"Female_TU_per_$":0.000445},{"Age":30,"Male_NTU_per_$":0.0003375,"Male_TU_per_$":0.0004883333333,"Female_NTU_per_$":0.00029,"Female_TU_per_$":0.000455},{"Age":31,"Male_NTU_per_$":0.0003425,"Male_TU_per_$":0.0005008333333,"Female_NTU_per_$":0.0002941666667,"Female_TU_per_$":0.000465},{"Age":32,"Male_NTU_per_$":0.0003491666667,"Male_TU_per_$":0.0005141666667,"Female_NTU_per_$":0.0002983333333,"Female_TU_per_$":0.000475},{"Age":33,"Male_NTU_per_$":0.0003558333333,"Male_TU_per_$":0.00053,"Female_NTU_per_$":0.0003075,"Female_TU_per_$":0.0004891666667},{"Age":34,"Male_NTU_per_$":0.0003666666667,"Male_TU_per_$":0.0005516666667,"Female_NTU_per_$":0.000315,"Female_TU_per_$":0.0005041666667},{"Age":35,"Male_NTU_per_$":0.0003825,"Male_TU_per_$":0.0005766666667,"Female_NTU_per_$":0.0003275,"Female_TU_per_$":0.0005258333333},{"Age":36,"Male_NTU_per_$":0.0004008333333,"Male_TU_per_$":0.0006075,"Female_NTU_per_$":0.0003441666667,"Female_TU_per_$":0.0005483333333},{"Age":37,"Male_NTU_per_$":0.0004225,"Male_TU_per_$":0.0006416666667,"Female_NTU_per_$":0.0003633333333,"Female_TU_per_$":0.0005766666667},{"Age":38,"Male_NTU_per_$":0.0004483333333,"Male_TU_per_$":0.0006825,"Female_NTU_per_$":0.000385,"Female_TU_per_$":0.00061},{"Age":39,"Male_NTU_per_$":0.0004775,"Male_TU_per_$":0.0007291666667,"Female_NTU_per_$":0.0004091666667,"Female_TU_per_$":0.0006483333333},{"Age":40,"Male_NTU_per_$":0.00051,"Male_TU_per_$":0.0007816666667,"Female_NTU_per_$":0.0004366666667,"Female_TU_per_$":0.00069},{"Age":41,"Male_NTU_per_$":0.0005458333333,"Male_TU_per_$":0.00084,"Female_NTU_per_$":0.0004666666667,"Female_TU_per_$":0.0007375},{"Age":42,"Male_NTU_per_$":0.000585,"Male_TU_per_$":0.0009041666667,"Female_NTU_per_$":0.0004991666667,"Female_TU_per_$":0.0007908333333},{"Age":43,"Male_NTU_per_$":0.0006291666667,"Male_TU_per_$":0.0009766666667,"Female_NTU_per_$":0.000535,"Female_TU_per_$":0.0008475},{"Age":44,"Male_NTU_per_$":0.0006783333333,"Male_TU_per_$":0.001055,"Female_NTU_per_$":0.0005758333333,"Female_TU_per_$":0.0009108333333},{"Age":45,"Male_NTU_per_$":0.0007333333333,"Male_TU_per_$":0.001143333333,"Female_NTU_per_$":0.0006225,"Female_TU_per_$":0.00098},{"Age":46,"Male_NTU_per_$":0.0007925,"Male_TU_per_$":0.001241666667,"Female_NTU_per_$":0.0006741666667,"Female_TU_per_$":0.001054166667},{"Age":47,"Male_NTU_per_$":0.0008591666667,"Male_TU_per_$":0.0013475,"Female_NTU_per_$":0.0007308333333,"Female_TU_per_$":0.001134166667},{"Age":48,"Male_NTU_per_$":0.0009316666667,"Male_TU_per_$":0.001461666667,"Female_NTU_per_$":0.0007933333333,"Female_TU_per_$":0.00122},{"Age":49,"Male_NTU_per_$":0.001011666667,"Male_TU_per_$":0.001580833333,"Female_NTU_per_$":0.0008608333333,"Female_TU_per_$":0.0013125},{"Age":50,"Male_NTU_per_$":0.001099166667,"Male_TU_per_$":0.001706666667,"Female_NTU_per_$":0.00093,"Female_TU_per_$":0.00141},{"Age":51,"Male_NTU_per_$":0.001194166667,"Male_TU_per_$":0.001834166667,"Female_NTU_per_$":0.0010025,"Female_TU_per_$":0.001509166667},{"Age":52,"Male_NTU_per_$":0.001299166667,"Male_TU_per_$":0.001973333333,"Female_NTU_per_$":0.001083333333,"Female_TU_per_$":0.00162},{"Age":53,"Male_NTU_per_$":0.001415833333,"Male_TU_per_$":0.002129166667,"Female_NTU_per_$":0.001175833333,"Female_TU_per_$":0.0017425},{"Age":54,"Male_NTU_per_$":0.001550833333,"Male_TU_per_$":0.002304166667,"Female_NTU_per_$":0.0012825,"Female_TU_per_$":0.00188},{"Age":55,"Male_NTU_per_$":0.001704166667,"Male_TU_per_$":0.002505833333,"Female_NTU_per_$":0.001405833333,"Female_TU_per_$":0.0020425},{"Age":56,"Male_NTU_per_$":0.0018775,"Male_TU_per_$":0.002735,"Female_NTU_per_$":0.001549166667,"Female_TU_per_$":0.002225833333},{"Age":57,"Male_NTU_per_$":0.00207,"Male_TU_per_$":0.002989166667,"Female_NTU_per_$":0.001709166667,"Female_TU_per_$":0.002430833333},{"Age":58,"Male_NTU_per_$":0.00228,"Male_TU_per_$":0.003266666667,"Female_NTU_per_$":0.001884166667,"Female_TU_per_$":0.002653333333},{"Age":59,"Male_NTU_per_$":0.002505,"Male_TU_per_$":0.003565,"Female_NTU_per_$":0.002074166667,"Female_TU_per_$":0.0028975}]};
   const A71 = Object.freeze({ accident:50000, car:100000, er:250, hospital:500, icu:1000, adult:10.88, adultCouple:22.75, senior:30.25, seniorCouple:60.50 });
   const GROUP_DB_GAS_URL = 'https://script.google.com/macros/s/AKfycbwcST34raI84xtn2PV5oGr4D3SKDQBlWXRreCBSSX6AgypMdpXvkNF1QJQnEpzCwELg/exec';
   const DEFAULT_LOGO_URL = 'https://agent.nf-financial.life/assoc-logos/Globe-Life-AIL.png';
+  const STORAGE_KEY = 'fbpPopoutSspControls_v5_noSeniorToggle';
+  const TIER_META = {
+    bronze:{label:'Bronze', months:3, css:'bronze'},
+    silver:{label:'Silver', months:6, css:'silver'},
+    gold:{label:'Gold', months:9, css:'gold'}
+  };
+  const THEME_MAP = {
+    navy:{navy:'#071f38',navy2:'#0b2b4a',blue:'#123d66',gold:'#c49a45',gold2:'#f1dfad',green:'#1b8a5a',green2:'#0f6d46'}
+  };
   let associationRows = [];
+  let presentationWindow = null;
+
   const defaults = {
-    spouseEnabled:false, hourMode:1, hourlyWage:25, sicknessMode:'months', selectedUnion:'', selectedLogo:'',
-    mainName:'Main', mainAge:45, mainSex:'M', mainTobacco:'NTU', mainOccupation:'', mainFuneral:15000, mainTerm:48000, mainADB:50000, mainMonthlyIncome:4000, mainMonths:12, mainA71:true,
-    spouseName:'Spouse', spouseAge:43, spouseSex:'F', spouseTobacco:'NTU', spouseOccupation:'', spouseFuneral:15000, spouseTerm:36000, spouseADB:50000, spouseMonthlyIncome:3000, spouseMonths:12, spouseA71:true,
+    pitchMode:'regular', selectedTier:'bronze', selectedOption:1, theme:'navy', sicknessMode:'months', pricesHidden:false, sspCremationEnabled:true, _sspA71DefaultOffV3:false, _sspSurvivorLossDefaultV1:false, _sspPensionAutoMathV1:false, _sspPensionOptionalV2:false,
+    selectedUnion:'', selectedLogo:'', spouseEnabled:false,
+    mainName:'Main', mainAge:45, mainSex:'M', mainTobacco:'NTU', mainOccupation:'', mainMonthlyIncome:4000, mainHasPension:false, mainPensionMonthly:0,
+    spouseName:'Spouse', spouseAge:43, spouseSex:'F', spouseTobacco:'NTU', spouseOccupation:'', spouseMonthlyIncome:3000, spouseHasPension:false, spousePensionMonthly:0,
+    mainFuneral:15000, mainTerm:48000, mainADB:50000, mainA71:true,
+    spouseFuneral:15000, spouseTerm:36000, spouseADB:50000, spouseA71:true,
     opt1MainFuneral:15000, opt1MainTerm:48000, opt1MainADB:50000, opt1MainA71:true,
     opt1SpouseFuneral:15000, opt1SpouseTerm:36000, opt1SpouseADB:50000, opt1SpouseA71:true,
     opt2MainFuneral:25000, opt2MainTerm:96000, opt2MainADB:100000, opt2MainA71:true,
-    opt2SpouseFuneral:25000, opt2SpouseTerm:72000, opt2SpouseADB:100000, opt2SpouseA71:true
-  };  let state = load();
+    opt2SpouseFuneral:25000, opt2SpouseTerm:72000, opt2SpouseADB:100000, opt2SpouseA71:true,
+    sspBronzeMainCremation:3000, sspBronzeMainLoss:1500, sspBronzeMainPension:0, sspBronzeMainMonths:3, sspBronzeMainA71:false,
+    sspBronzeSpouseCremation:3000, sspBronzeSpouseLoss:1200, sspBronzeSpousePension:0, sspBronzeSpouseMonths:3, sspBronzeSpouseA71:false,
+    sspSilverMainCremation:3000, sspSilverMainLoss:1500, sspSilverMainPension:0, sspSilverMainMonths:6, sspSilverMainA71:false,
+    sspSilverSpouseCremation:3000, sspSilverSpouseLoss:1200, sspSilverSpousePension:0, sspSilverSpouseMonths:6, sspSilverSpouseA71:false,
+    sspGoldMainCremation:3000, sspGoldMainLoss:1500, sspGoldMainPension:0, sspGoldMainMonths:9, sspGoldMainA71:false,
+    sspGoldSpouseCremation:3000, sspGoldSpouseLoss:1200, sspGoldSpousePension:0, sspGoldSpouseMonths:9, sspGoldSpouseA71:false
+  };
+  let state = load();
+  const SSP_TIERS = ['bronze','silver','gold'];
+  const SSP_PREFIXES = ['main','spouse'];
+  function turnOffSspA71(){ SSP_TIERS.forEach(t=>SSP_PREFIXES.forEach(prefix=>{ state['ssp'+t[0].toUpperCase()+t.slice(1)+(prefix==='spouse'?'Spouse':'Main')+'A71'] = false; })); }
+  function survivorSsiLoss(){
+    const main = Math.max(0, Number(state.mainMonthlyIncome)||0);
+    const spouse = Math.max(0, Number(state.spouseMonthlyIncome)||0);
+    if(state.spouseEnabled){
+      const kept = Math.max(main, spouse);
+      return Math.max(0, main + spouse - kept); // survivor keeps the greater check, so the smaller check is the lost income
+    }
+    return main;
+  }
+  function sspDefaultLossFor(prefix){
+    if(state.spouseEnabled) return survivorSsiLoss();
+    return prefix === 'spouse' ? Math.max(0, Number(state.spouseMonthlyIncome)||0) : Math.max(0, Number(state.mainMonthlyIncome)||0);
+  }
+  function syncSspLossFromSsi(){
+    SSP_TIERS.forEach(t=>SSP_PREFIXES.forEach(prefix=>{
+      state['ssp'+t[0].toUpperCase()+t.slice(1)+(prefix==='spouse'?'Spouse':'Main')+'Loss'] = sspDefaultLossFor(prefix);
+    }));
+  }
+  function personHasPension(prefix){ return !!state[prefix+'HasPension'] && (prefix !== 'spouse' || !!state.spouseEnabled); }
+  function pensionFullMonthly(prefix){ return personHasPension(prefix) ? Math.max(0, Number(state[prefix+'PensionMonthly'])||0) : 0; }
+  function pensionMonthlyLoss(prefix){ return Math.round(pensionFullMonthly(prefix) * 0.25); }
+  function syncSspPensionFromMonthly(){
+    SSP_TIERS.forEach(t=>SSP_PREFIXES.forEach(prefix=>{
+      state['ssp'+t[0].toUpperCase()+t.slice(1)+(prefix==='spouse'?'Spouse':'Main')+'Pension'] = pensionMonthlyLoss(prefix);
+    }));
+  }
+  function forceSspSeniorGradedDefaults(){
+    // SSP no longer depends on a senior toggle and never forces ages up to 60.
+    // Actual entered ages stay intact, so a 59/62 couple can still be pitched SSP correctly.
+    turnOffSspA71();
+    state.mainA71 = false; state.spouseA71 = false;
+    state.opt1MainA71 = false; state.opt1SpouseA71 = false;
+    state.opt2MainA71 = false; state.opt2SpouseA71 = false;
+  }
+  if(!state._sspA71DefaultOffV3){ turnOffSspA71(); state._sspA71DefaultOffV3 = true; try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
+  if(!state._sspSurvivorLossDefaultV1){ syncSspLossFromSsi(); state._sspSurvivorLossDefaultV1 = true; try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
+  if(!state._sspPensionAutoMathV1){
+    if(!Number(state.mainPensionMonthly) && Number(state.sspBronzeMainPension)) state.mainPensionMonthly = Math.round(Number(state.sspBronzeMainPension) * 4);
+    if(!Number(state.spousePensionMonthly) && Number(state.sspBronzeSpousePension)) state.spousePensionMonthly = Math.round(Number(state.sspBronzeSpousePension) * 4);
+    syncSspPensionFromMonthly(); state._sspPensionAutoMathV1 = true; try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+  if(!state._sspPensionOptionalV2){
+    state.mainHasPension = Number(state.mainPensionMonthly)>0 || Number(state.sspBronzeMainPension)>0;
+    state.spouseHasPension = Number(state.spousePensionMonthly)>0 || Number(state.sspBronzeSpousePension)>0;
+    syncSspPensionFromMonthly(); state._sspPensionOptionalV2 = true; try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+  }
   const $ = id => document.getElementById(id);
   const money = n => (Number(n)||0).toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0});
   const money2 = n => (Number(n)||0).toLocaleString('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2});
-
-  function cleanText(v){ return String(v == null ? '' : v).trim(); }
+  const cleanText = v => String(v == null ? '' : v).trim();
   function escapeHtml(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-  function escapeAttr(s){ return escapeHtml(s); }
+  const escapeAttr = escapeHtml;
+  function load(){ try{ return {...defaults, ...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')}; }catch(e){ return {...defaults}; } }
+  function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  function toast(msg){ const t=$('toast'); if(!t) return; t.textContent=msg||'Saved'; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),1400); }
+  function parseLooseNumber(v){ const cleaned = String(v == null ? '' : v).replace(/[^0-9.]/g, ''); if(cleaned===''||cleaned==='.') return 0; const parts=cleaned.split('.'); const normalized = parts.length > 1 ? parts.shift()+'.'+parts.join('') : cleaned; return Math.max(0, Number(normalized)||0); }
+  function isSenior(age){ return Number(age) >= 60; }
+  function n(v){ return (v === '' || v === null || v === undefined) ? 0 : (Number(v)||0); }
+  function rowFor(book, age){ const rows = RATEBOOKS[book] || []; age = Number(age)||0; return rows.find(r => Number(r.Age) === age) || null; }
+  function rateKey(p){ return (p.sex === 'F' ? 'Female' : 'Male') + '_' + ((p.tobacco || 'NTU') === 'TU' ? 'TU' : 'NTU') + '_per_$'; }
+  function autoFuneralProduct(face, age){ age=Number(age)||0; face=Number(face)||0; if(age>=60) return 'wlsenior'; if(face<=0) return 'wl'; if(face<=34999) return 'wl'; if(face<=59999) return 'pr'; if(face<=119999) return 'ex'; return 'sl'; }
+  function lookupRate(product, p){ const row = rowFor(product, p.age); if(!row) return null; const r = n(row[rateKey(p)]); return r > 0 ? r : null; }
+  function funeralMonthly(p){ const amt = Math.max(0, Number(p.funeral)||0); if(!amt) return 0; const r = lookupRate(autoFuneralProduct(amt, p.age), p); return r ? amt * r : 0; }
+  function incomeAmount(p){ return Math.max(0, Number(p.term)||0); }
+  function monthsFromTerm(term, monthlyIncome){ const income=Math.max(0,Number(monthlyIncome)||0), amt=Math.max(0,Number(term)||0); return income>0 ? Math.round((amt/income)*10)/10 : 0; }
+  function incomeMonthly(p){ const amt=incomeAmount(p); if(!amt) return 0; const r=lookupRate('tenrc', p); return r ? amt*r : 0; }
+  function regularAdbRate(age){ const row = rowFor('adb', age); return row ? n(row.Individual) : null; }
+  function regularAdbMonthly(p){ const amount=Math.max(0,Number(p.adb)||0); const rate=regularAdbRate(p.age); return rate == null ? 0 : amount*rate; }
+  function a71IndividualPremium(age){ const row = rowFor('a71', age); if(row && n(row.Individual)>0) return n(row.Individual); return isSenior(age) ? A71.senior : A71.adult; }
+  function a71Premiums(active){
+    const people = active.filter(x=>x.a71);
+    if(!people.length) return new Map(active.map(x=>[x.key,0]));
+    const out = new Map(active.map(x=>[x.key,0]));
+    if(people.length === 1){ out.set(people[0].key, a71IndividualPremium(people[0].age)); return out; }
+    if(people.length === 2){
+      const seniors = people.filter(p=>isSenior(p.age)).length;
+      if(seniors===2){ people.forEach(p=>out.set(p.key,A71.seniorCouple/2)); return out; }
+      if(seniors===0){ people.forEach(p=>out.set(p.key,A71.adultCouple/2)); return out; }
+      people.forEach(p=>out.set(p.key,a71IndividualPremium(p.age))); return out;
+    }
+    people.forEach(p=>out.set(p.key,a71IndividualPremium(p.age))); return out;
+  }
   function assocLabel(row){ return cleanText(row['DISPLAY NAME']) || cleanText(row['GROUP']) || cleanText(row['Group']) || cleanText(row['group']) || 'Unnamed Association'; }
   function assocKey(row){ return cleanText(row['GROUP']) || assocLabel(row); }
   function assocLogo(row){ return cleanText(row['LOGO LINK']) || cleanText(row['Logo Link']) || cleanText(row['logo']) || cleanText(row['Logo']); }
   function findAssocByKey(key){ key = cleanText(key); return associationRows.find(r => assocKey(r) === key) || null; }
-
-  function setLogo(url){
-    const selected = cleanText(url);
-    if($('topLogo')) $('topLogo').src = DEFAULT_LOGO_URL;
-    if($('logoPreviewMini')) $('logoPreviewMini').src = selected || DEFAULT_LOGO_URL;
-  }
-
-  function populateAssociationDropdowns(){
-    const unionSelect = $('selectedUnion');
-    const logoSelect = $('selectedLogo');
-    if(!unionSelect || !logoSelect) return;
-    const unionOptions = ['<option value="">Base / no union selected</option>'].concat(
-      associationRows.map(row=>`<option value="${escapeAttr(assocKey(row))}">${escapeHtml(assocLabel(row))}</option>`)
-    );
-    unionSelect.innerHTML = unionOptions.join('');
-    const seen = new Set();
-    const logoOptions = ['<option value="">AIL default</option>'];
-    associationRows.forEach(row=>{
-      const logo = assocLogo(row);
-      if(!logo || seen.has(logo)) return;
-      seen.add(logo);
-      logoOptions.push(`<option value="${escapeAttr(logo)}">${escapeHtml(assocLabel(row))}</option>`);
-    });
-    logoSelect.innerHTML = logoOptions.join('');
-    unionSelect.value = state.selectedUnion || '';
-    logoSelect.value = state.selectedLogo || '';
-    setLogo(state.selectedLogo || DEFAULT_LOGO_URL);
-    updateUnionStatus();
-  }
-
-  function updateUnionStatus(){
-    const status = $('unionStatus');
-    if(!status) return;
-    const row = findAssocByKey(state.selectedUnion);
-    if(row){
-      const label = assocLabel(row);
-      const logo = assocLogo(row);
-      status.innerHTML = `Selected: <b>${escapeHtml(label)}</b>${logo ? ' · logo auto-loaded' : ' · no logo in sheet'}`;
-    } else {
-      status.textContent = 'Pick a union to auto-fill the package title.';
-    }
-  }
-
+  function setLogo(url){ const selected=cleanText(url); if($('topLogo')) $('topLogo').src=selected || DEFAULT_LOGO_URL; if($('logoPreviewMini')) $('logoPreviewMini').src=selected || DEFAULT_LOGO_URL; }
   async function loadAssociations(){
-    try{
-      const res = await fetch(GROUP_DB_GAS_URL + '?format=json&v=' + Date.now(), {cache:'no-store'});
-      if(!res.ok) throw new Error('HTTP ' + res.status);
-      const rows = await res.json();
-      associationRows = Array.isArray(rows) ? rows.filter(r=>assocLabel(r) !== 'Unnamed Association') : [];
-      associationRows.sort((a,b)=>assocLabel(a).localeCompare(assocLabel(b)));
-      populateAssociationDropdowns();
-    }catch(err){
-      associationRows = [];
-      populateAssociationDropdowns();
-      if($('unionStatus')) $('unionStatus').textContent = 'Association list could not load. Check the GAS deployment/CORS if this stays blank.';
-      console.warn('Association DB failed to load:', err);
-    }
+    try{ const res = await fetch(GROUP_DB_GAS_URL + '?format=json&v=' + Date.now(), {cache:'no-store'}); if(!res.ok) throw new Error('HTTP '+res.status); const rows = await res.json(); associationRows = Array.isArray(rows) ? rows.filter(r=>assocLabel(r) !== 'Unnamed Association') : []; associationRows.sort((a,b)=>assocLabel(a).localeCompare(assocLabel(b))); }
+    catch(err){ associationRows=[]; if($('unionStatus')) $('unionStatus').textContent='Association list could not load. Check the GAS deployment/CORS if this stays blank.'; console.warn('Association DB failed:', err); }
+    populateAssociationDropdowns(); renderAll(false);
   }
+  function populateAssociationDropdowns(){
+    const unionSelect=$('selectedUnion'), logoSelect=$('selectedLogo'); if(!unionSelect || !logoSelect) return;
+    unionSelect.innerHTML = ['<option value="">Base / no union selected</option>'].concat(associationRows.map(row=>`<option value="${escapeAttr(assocKey(row))}">${escapeHtml(assocLabel(row))}</option>`)).join('');
+    const seen=new Set(); const logoOptions=['<option value="">AIL default</option>'];
+    associationRows.forEach(row=>{ const logo=assocLogo(row); if(!logo || seen.has(logo)) return; seen.add(logo); logoOptions.push(`<option value="${escapeAttr(logo)}">${escapeHtml(assocLabel(row))}</option>`); });
+    logoSelect.innerHTML = logoOptions.join(''); unionSelect.value=state.selectedUnion||''; logoSelect.value=state.selectedLogo||''; setLogo(state.selectedLogo||DEFAULT_LOGO_URL); updateUnionStatus();
+  }
+  function updateUnionStatus(){ const status=$('unionStatus'); if(!status) return; const row=findAssocByKey(state.selectedUnion); if(row){ const label=assocLabel(row); const logo=assocLogo(row); status.innerHTML=`Selected: <b>${escapeHtml(label)}</b>${logo?' · logo auto-loaded':' · no logo in sheet'}`; } else status.textContent='Pick a union to auto-fill the package title.'; }
+  function handleUnionChange(){ const key=$('selectedUnion') ? $('selectedUnion').value : ''; state.selectedUnion=key; const row=findAssocByKey(key); if(row){ const label=assocLabel(row), logo=assocLogo(row); state.mainOccupation=label; if(logo) state.selectedLogo=logo; } else { state.mainOccupation=''; state.selectedLogo=''; } save(); syncForm(); updateUnionStatus(); renderAll(); }
+  function handleLogoChange(){ state.selectedLogo=$('selectedLogo') ? $('selectedLogo').value : ''; save(); renderAll(); }
+  function themeVars(theme){ return THEME_MAP[theme] || THEME_MAP.navy; }
+  function applyTheme(){ const vars=themeVars(state.theme); Object.keys(vars).forEach(k=>document.documentElement.style.setProperty('--'+k, vars[k])); }
 
-  function handleUnionChange(){
-    const key = $('selectedUnion') ? $('selectedUnion').value : '';
-    state.selectedUnion = key;
-    const row = findAssocByKey(key);
-    if(row){
-      const label = assocLabel(row);
-      const logo = assocLogo(row);
-      state.mainOccupation = label;
-      if($('mainOccupation')) $('mainOccupation').value = label;
-      if(logo){
-        state.selectedLogo = logo;
-        if($('selectedLogo')) $('selectedLogo').value = logo;
-        setLogo(logo);
-      }
-    } else {
-      state.mainOccupation = '';
-      state.selectedLogo = '';
-      if($('mainOccupation')) $('mainOccupation').value = '';
-      if($('selectedLogo')) $('selectedLogo').value = '';
-      setLogo(DEFAULT_LOGO_URL);
-    }
-    updateUnionStatus();
-    save();
-    render();
-  }
+  function regularPerson(prefix){ return {key:prefix, label:prefix==='spouse'?'Spouse':'Main', age:state[prefix+'Age'], sex:state[prefix+'Sex'], tobacco:state[prefix+'Tobacco'], occupation:state[prefix+'Occupation']||'', monthlyIncome:state[prefix+'MonthlyIncome'], funeral:state[prefix+'Funeral'], term:state[prefix+'Term'], adb:state[prefix+'ADB'], a71:!!state[prefix+'A71'], months:monthsFromTerm(state[prefix+'Term'], state[prefix+'MonthlyIncome'])}; }
+  function regularActivePeople(){ const arr=[regularPerson('main')]; if(state.spouseEnabled) arr.push(regularPerson('spouse')); return arr; }
+  function regularPersonMonthly(p, premiums){ return funeralMonthly(p) + incomeMonthly(p) + regularAdbMonthly(p) + (premiums.get(p.key)||0); }
+  function regularA71PremiumMap(){ return a71Premiums(regularActivePeople().map(p=>({key:p.key,age:p.age,a71:p.a71}))); }
+  function accidentDeathAmount(p){ return Math.max(0,Number(p.funeral)||0) + Math.max(0,Number(p.term)||0) + Math.max(0,Number(p.adb)||0) + (p.a71 ? A71.accident : 0); }
+  function carAccidentDeathAmount(p){ return Math.max(0,Number(p.funeral)||0) + Math.max(0,Number(p.term)||0) + Math.max(0,Number(p.adb)||0) + (p.a71 ? A71.car : 0); }
 
-  function handleLogoChange(){
-    const logo = $('selectedLogo') ? $('selectedLogo').value : '';
-    state.selectedLogo = logo;
-    setLogo(logo || DEFAULT_LOGO_URL);
-    save();
-    render();
-  }
+  function optKey(num,prefix,field){ return 'opt'+num+(prefix==='spouse'?'Spouse':'Main')+field; }
+  function optionPersonData(num,prefix){ const term=Math.max(0,Number(state[optKey(num,prefix,'Term')])||0); return {key:prefix,label:prefix==='spouse'?'Spouse':'Main',age:state[prefix+'Age'],sex:state[prefix+'Sex'],tobacco:state[prefix+'Tobacco'],monthlyIncome:state[prefix+'MonthlyIncome'],occupation:state[prefix+'Occupation']||'',funeral:Math.max(0,Number(state[optKey(num,prefix,'Funeral')])||0),term,months:monthsFromTerm(term,state[prefix+'MonthlyIncome']),adb:Math.max(0,Number(state[optKey(num,prefix,'ADB')])||0),a71:!!state[optKey(num,prefix,'A71')]}; }
+  function optionActivePeople(num){ const arr=[optionPersonData(num,'main')]; if(state.spouseEnabled) arr.push(optionPersonData(num,'spouse')); return arr; }
+  function optionMonthlyTotal(num){ const people=optionActivePeople(num); const premiums=a71Premiums(people.map(p=>({key:p.key,age:p.age,a71:p.a71}))); return people.reduce((sum,p)=>sum+regularPersonMonthly(p,premiums),0); }
+  function optionPersonMonthly(num,prefix){ const people=optionActivePeople(num); const premiums=a71Premiums(people.map(p=>({key:p.key,age:p.age,a71:p.a71}))); const p=people.find(x=>x.key===prefix); return p ? regularPersonMonthly(p,premiums) : 0; }
+  window.manualOptionNumber = function(num,prefix,field,value,shouldRender){ state[optKey(num,prefix,field)] = parseLooseNumber(value); if(shouldRender){ save(); renderAll(); } };
+  window.manualOptionToggle = function(num,prefix,field,checked){ state[optKey(num,prefix,field)] = !!checked; save(); renderAll(); };
+  window.applyRegularOption = function(num){ ['main','spouse'].forEach(prefix=>{ if(prefix==='spouse' && !state.spouseEnabled) return; state[prefix+'Funeral']=Math.max(0,Number(state[optKey(num,prefix,'Funeral')])||0); state[prefix+'Term']=Math.max(0,Number(state[optKey(num,prefix,'Term')])||0); state[prefix+'ADB']=Math.max(0,Number(state[optKey(num,prefix,'ADB')])||0); state[prefix+'A71']=!!state[optKey(num,prefix,'A71')]; }); state.pitchMode='regular'; state.selectedOption=Number(num); save(); renderAll(); toast('Option '+num+' applied'); };
 
-
-  function load(){ try{ return {...defaults, ...JSON.parse(localStorage.getItem('fbpJsonAutoRecommendSettings')||'{}')}; }catch(e){ return {...defaults}; } }
-  function save(){ localStorage.setItem('fbpJsonAutoRecommendSettings', JSON.stringify(state)); }
-  function isSenior(age){ return Number(age) >= 65; }
-  function incomeAmount(p){
-    const direct = Number(p.term);
-    if(Number.isFinite(direct) && direct > 0) return Math.max(0, direct);
-    return Math.max(0,(Number(p.monthlyIncome)||0) * (Number(p.months)||0));
-  }
-  function monthsFromTerm(term, monthlyIncome){
-    const income = Math.max(0, Number(monthlyIncome)||0);
-    const amt = Math.max(0, Number(term)||0);
-    return income > 0 ? Math.round((amt / income) * 10) / 10 : 0;
-  }
-  function baseAmount(p){ return (Number(p.funeral)||0) + incomeAmount(p); }
-
-  function n(v){ return (v === '' || v === null || v === undefined) ? 0 : (Number(v)||0); }
-  function parseLooseNumber(v){
-    const cleaned = String(v == null ? '' : v).replace(/[^0-9.]/g, '');
-    if(cleaned === '' || cleaned === '.') return 0;
-    const parts = cleaned.split('.');
-    const normalized = parts.length > 1 ? parts.shift() + '.' + parts.join('') : cleaned;
-    return Math.max(0, Number(normalized) || 0);
-  }
-  function roundTo(v, step){ step = step || 1000; return Math.max(0, Math.round((Number(v)||0)/step)*step); }
-  function rowFor(book, age){
-    const rows = RATEBOOKS[book] || [];
-    age = Number(age)||0;
-    return rows.find(r => Number(r.Age) === age) || null;
-  }
-  function rateKey(p){ return (p.sex === 'F' ? 'Female' : 'Male') + '_' + ((p.tobacco || 'NTU') === 'TU' ? 'TU' : 'NTU') + '_per_$'; }
-  function autoFuneralProduct(face, age){
-    age = Number(age)||0; face = Number(face)||0;
-    if(age >= 60) return 'wlsenior';
-    if(face <= 0) return 'wl';
-    if(face <= 34999) return 'wl';
-    if(face <= 59999) return 'pr';
-    if(face <= 119999) return 'ex';
-    return 'sl';
-  }
-  function productLabel(product){ return ({wl:'WL',pr:'PR',ex:'EX',sl:'SL',wlsenior:'Senior WL',tenrc:'10RC',adb:'ADB',a71:'A71'})[product] || product; }
-  function lookupRate(product, p){
-    const row = rowFor(product, p.age);
-    if(!row) return null;
-    const r = n(row[rateKey(p)]);
-    return r > 0 ? r : null;
-  }
-  function funeralMonthly(p){
-    const amt = Math.max(0, Number(p.funeral)||0);
-    if(!amt) return 0;
-    const r = lookupRate(autoFuneralProduct(amt, p.age), p);
-    return r ? amt * r : 0;
-  }
-  function incomeMonthly(p){
-    const amt = incomeAmount(p);
-    if(!amt) return 0;
-    const r = lookupRate('tenrc', p);
-    return r ? amt * r : 0;
-  }
-  function a71IndividualPremium(age){
-    const row = rowFor('a71', age);
-    return row ? n(row.Individual) : 0;
-  }
-  function activeA71People(){
-    const arr=[];
-    if(state.mainA71) arr.push({key:'main', age:state.mainAge, senior:isSenior(state.mainAge)});
-    if(state.spouseEnabled && state.spouseA71) arr.push({key:'spouse', age:state.spouseAge, senior:isSenior(state.spouseAge)});
-    return arr;
-  }
-  function a71PremiumFor(key){
-    const active = activeA71People();
-    const who = active.find(p=>p.key===key);
-    if(!who) return 0;
-    if(active.length===1) return a71IndividualPremium(who.age);
-    if(active.length===2){
-      const seniors = active.filter(p=>p.senior).length;
-      // Preserve the ratebook/couple pricing conventions from the prior app when both people are in the same bracket.
-      if(seniors===2) return 60.50/2;
-      if(seniors===0) return 22.75/2;
-      return a71IndividualPremium(who.age);
-    }
-    return a71IndividualPremium(who.age);
-  }
-  function personMonthly(key, p){
-    return funeralMonthly(p) + incomeMonthly(p) + regularAdbMonthly(p) + a71PremiumFor(key);
-  }
-  function weeklyPremium(monthly){ return (Number(monthly)||0) / 4; }
-  function hourBudget(){ return (Number(state.hourlyWage)||0) * (Number(state.hourMode)||1); }
-  function hourMonthlyBudget(hours){ return (Number(state.hourlyWage)||0) * Number(hours||1) * 4; }
-
-  function regularAdbRate(age){
-    const row = rowFor('adb', age);
-    return row ? n(row.Individual) : null;
-  }
-  function regularAdbMonthly(p){
-    const amount = Math.max(0, Number(p.adb)||0);
-    const rate = regularAdbRate(p.age);
-    return rate == null ? 0 : amount * rate;
-  }
-  function accidentDeathAmount(p){ return baseAmount(p) + Math.max(0,Number(p.adb)||0) + (p.a71 ? A71.accident : 0); }
-  function carAccidentDeathAmount(p){ return baseAmount(p) + Math.max(0,Number(p.adb)||0) + (p.a71 ? A71.car : 0); }
-
-  function quotePersonMonthly(p, key){
-    return funeralMonthly(p) + incomeMonthly(p) + regularAdbMonthly(p) + (p.a71 ? quoteA71Premium(p.age, key) : 0);
-  }
-  function quoteA71Premium(age, key){ return a71IndividualPremium(age); }
-  function makePersonFromState(prefix){
-    return {
-      label:state[prefix+'Name'] || (prefix==='main'?'Main':'Spouse'),
-      age:state[prefix+'Age'], sex:state[prefix+'Sex'], tobacco:state[prefix+'Tobacco'],
-      funeral:state[prefix+'Funeral'], term:state[prefix+'Term'], adb:state[prefix+'ADB'], monthlyIncome:state[prefix+'MonthlyIncome'], months:monthsFromTerm(state[prefix+'Term'], state[prefix+'MonthlyIncome']), a71:state[prefix+'A71']
-    };
-  }
-  function fitRecommendationForPerson(input, allocation, hourCount){
-    allocation = Math.max(0, Number(allocation)||0);
-    const income = Math.max(0, Number(input.monthlyIncome)||0);
-    const age = Number(input.age)||0;
-    const base = {...input, funeral:0, adb:0, months:0, a71:false};
-    const senior = isSenior(age);
-    const funeralCandidates = senior
-      ? [0,5000,7500,10000,15000,20000,25000,30000]
-      : [0,5000,10000,15000,20000,25000,30000,35000,40000,50000,60000,75000,100000,120000];
-    const monthCandidates = income > 0 ? [0,3,6,9,12,18,24,36] : [0];
-    const adbCandidates = [0,25000,50000,75000,100000];
-    const a71Candidates = [false,true];
-    let best = {...base};
-    let bestScore = -Infinity;
-    let bestMonthly = 0;
-    const buffer = allocation * 1.005 + 0.01;
-    for(const funeral of funeralCandidates){
-      for(const months of monthCandidates){
-        for(const adb of adbCandidates){
-          for(const a71 of a71Candidates){
-            const p = {...base, funeral, months, adb, a71};
-            const monthly = quotePersonMonthly(p, input.key || 'main');
-            if(monthly > buffer) continue;
-            const sickness = funeral + income*months;
-            const score =
-              (funeral/1000)*3.2 +
-              months*8 +
-              (adb/1000)*0.65 +
-              (a71?42:0) +
-              (sickness/1000)*0.8 -
-              Math.max(0,(allocation-monthly))*0.015 +
-              (funeral>=10000?18:0) +
-              (months>=12?22:0) +
-              (monthly>0 ? Math.min(12, monthly/allocation*12) : 0);
-            if(score > bestScore){ bestScore = score; best = p; bestMonthly = monthly; }
-          }
-        }
-      }
-    }
-    best._monthly = bestMonthly;
-    best._budget = allocation;
-    return best;
-  }
-  function buildRecommendation(hourCount, apply=false){
-    const totalBudget = hourMonthlyBudget(hourCount);
-    const people = [{prefix:'main', key:'main', p:makePersonFromState('main')}];
-    if(state.spouseEnabled) people.push({prefix:'spouse', key:'spouse', p:makePersonFromState('spouse')});
-    const totalIncome = people.reduce((s,x)=>s+Math.max(0,Number(x.p.monthlyIncome)||0),0);
-    const allocations = people.map(x=>{
-      if(people.length===1) return totalBudget;
-      const raw = totalIncome > 0 ? totalBudget * (Math.max(0,Number(x.p.monthlyIncome)||0) / totalIncome) : totalBudget/people.length;
-      return Math.max(totalBudget*0.32, Math.min(totalBudget*0.68, raw));
-    });
-    // normalize allocations after floors/caps
-    const allocSum = allocations.reduce((a,b)=>a+b,0) || 1;
-    const normalized = allocations.map(a=>a/allocSum*totalBudget);
-    const recs = people.map((x,i)=>fitRecommendationForPerson({...x.p,key:x.key}, normalized[i], hourCount));
-    if(apply){
-      people.forEach((x,i)=>{
-        const r = recs[i];
-        state[x.prefix+'Funeral'] = Math.round(r.funeral);
-        state[x.prefix+'ADB'] = Math.round(r.adb);
-        state[x.prefix+'Months'] = Math.round(r.months);
-        state[x.prefix+'A71'] = !!r.a71;
-      });
-      state.hourMode = String(hourCount);
-      save();
-    }
-    return {hourCount, totalBudget, people, recs, totalMonthly:recs.reduce((s,r)=>s+(r._monthly||0),0)};
-  }
-  function recommendationText(rec){
-    const weekly = (Number(state.hourlyWage)||0) * Number(rec.hourCount||1);
-    const lines = [`${rec.hourCount}-Hour option: ${money2(weekly)}/wk target | ${money2(rec.totalBudget)}/mo budget | ${money2(rec.totalMonthly)}/mo recommended`];
-    rec.recs.forEach((r,i)=>{
-      const label = rec.people[i].p.label || rec.people[i].prefix;
-      lines.push(`${label}: ${money(r.funeral)} funeral + ${r.months} months income + ${money(r.adb)} ADB${r.a71?' + Get Hurt, Get Paid':''}`);
-    });
-    return lines.join('\n');
-  }
-  function readForm(){
-    const valueIds = ['mainSex','mainTobacco','mainOccupation','spouseSex','spouseTobacco','spouseOccupation','sicknessMode'];
-    valueIds.forEach(k=>{ if($(k)) state[k]=$(k).value; });
-    const numberIds = ['mainAge','mainMonthlyIncome','spouseAge','spouseMonthlyIncome','hourlyWage'];
-    numberIds.forEach(k=>{ if($(k)) state[k]=parseLooseNumber($(k).value); });
-    if($('spouseEnabled')) state.spouseEnabled = $('spouseEnabled').checked;
-    save();
-    render();
-  }
-
-  function syncForm(){
-    const active = document.activeElement;
-    Object.keys(defaults).forEach(k=>{
-      const el = $(k);
-      if(!el) return;
-      if(typeof defaults[k] === 'boolean'){
-        el.checked = !!state[k];
-      } else {
-        // Do not overwrite the field the agent is currently typing in.
-        // That was forcing one-digit-at-a-time number entry because render() reset the input/caret.
-        if(el === active && /^(INPUT|TEXTAREA)$/i.test(el.tagName)) return;
-        el.value = state[k];
-      }
-    });
-    if($('spouseGroup')) $('spouseGroup').classList.toggle('hidden', !state.spouseEnabled);
-  }
-
-  function a71Monthly(){
-    const persons=[];
-    if(state.mainA71) persons.push({senior:isSenior(state.mainAge)});
-    if(state.spouseEnabled && state.spouseA71) persons.push({senior:isSenior(state.spouseAge)});
-    if(!persons.length) return 0;
-    if(persons.length===1) return persons[0].senior ? A71.senior : A71.adult;
-    if(persons.every(p=>!p.senior)) return A71.adultCouple;
-    if(persons.every(p=>p.senior)) return A71.seniorCouple;
-    return persons.reduce((sum,p)=>sum+(p.senior?A71.senior:A71.adult),0);
-  }
-
-  function renderMoneyStack(amount, label='Total Payout'){
-    return `<div class="rowAmountStack"><div class="rowAmount">${money(amount)}</div><div class="moneySubline">${label}</div></div>`;
-  }
-
-  function renderSicknessAmount(p){
-    const funeral = Math.max(0, Number(p.funeral)||0);
-    const months = Math.max(0, Number(p.months)||0);
-    const income = incomeAmount(p);
-    const total = funeral + income;
-    if(state.sicknessMode === 'combined' || months <= 0 || income <= 0){
-      return `<div class="rowAmountGroup">${renderMoneyStack(total, 'Total Sickness Payout')}</div>`;
-    }
-    return `<div class="rowAmountGroup">${renderMoneyStack(funeral, 'Funeral Benefit')}<div class="monthBig"><b>${months}</b><span>Months</span></div></div>`;
-  }
-
-  function benefitRow(type, kicker, title, small, amount){
-    return `<div class="benefitRow ${type}"><div><div class="rowKicker">${kicker}</div><div class="rowDesc">${title}${small?`<small>${small}</small>`:''}</div></div><div class="rowAmount">${money(amount)}</div></div>`;
-  }
-
-  function personCard(label, p, key){
-    const income = incomeAmount(p);
-    const total = baseAmount(p);
-    const regularAdb = Math.max(0, Number(p.adb)||0);
-    const showAccident = total > 0 && (regularAdb > 0 || p.a71);
-    const workAccidentTotal = accidentDeathAmount(p);
-    const carDeathTotal = carAccidentDeathAmount(p);
-    const monthlyPremium = personMonthly(key, p);
-    const weekly = weeklyPremium(monthlyPremium);
-    let rows = '';
-    const sicknessSmall = `${money(p.funeral)} Funeral Benefit${income>0?` + ${p.months} months income protection (${money(income)})`:''}`;
-    const showCarAccident = total > 0 && p.a71;
-    const showWorkAccident = total > 0 && (regularAdb > 0 || p.a71);
-
-    if(showCarAccident) rows += `<div class="totalRow carDeath"><div><div class="rowKicker">If death in car accident</div><div class="rowDesc">Death in Car Accident<small>Funeral benefit + income protection${regularAdb>0?` + ${money(regularAdb)} regular ADB`:''}${p.a71?` + ${money(A71.car)} A71 car accident benefit`:''}.</small></div></div><div class="rowAmount">${money(carDeathTotal)}</div></div>`;
-    if(showWorkAccident) rows += `<div class="totalRow"><div><div class="rowKicker">If death at workplace</div><div class="rowDesc">Death at Work Place<small>Funeral benefit + income protection${regularAdb>0?` + ${money(regularAdb)} regular ADB`:''}${p.a71?` + ${money(A71.accident)} A71 base ADB`:''}. No car accident extra included.</small></div></div><div class="rowAmount">${money(workAccidentTotal)}</div></div>`;
-    if(total>0) rows += `<div class="totalRow"><div><div class="rowKicker">If death from sickness</div><div class="rowDesc">Death From Sickness<small>${state.sicknessMode==='combined' ? `Total payout from sickness${income>0?` including income protection`:''}` : `${money(p.funeral)} funeral benefit${income>0?` + ${p.months} months income protection (${money(income)})`:''}`}</small></div></div>${renderSicknessAmount(p)}</div>`;
-    if(!rows) rows = `<div class="empty">No active benefits selected.</div>`;
-
-    const a71 = p.a71 ? `<div class="a71Box"><div class="a71Title"><span>Get Hurt, Get Paid Program</span><span>${isSenior(p.age)?'Senior':'Adult'} rate</span></div><div class="a71Grid"><div class="a71Item"><b>${money(A71.er)}</b><span>ER / urgent care visit</span></div><div class="a71Item"><b>${money(A71.hospital)}</b><span>Hospital night</span></div><div class="a71Item"><b>${money(A71.icu)}</b><span>ICU night, up to 2 weeks</span></div></div></div>` : '';
-
-    const chips = [];
-    if(p.funeral>0) chips.push(`<span class="chip">Funeral Benefit: ${money(p.funeral)}</span>`);
-    if(income>0) chips.push(`<span class="chip">Income Protection: ${p.months} months</span>`);
-    if(regularAdb>0) chips.push(`<span class="chip">Regular ADB: ${money(regularAdb)}</span>`);
-    if(p.a71) chips.push(`<span class="chip">Get Hurt, Get Paid Included</span>`);
-
-    const subTitle = p.occupation ? `${p.occupation} plan` : 'Car accident · workplace · sickness payout';
-    return `<section class="personCard"><div class="personHead"><div><h2 class="personTitle">${label}</h2><div class="subTitle">${subTitle}</div></div>${p.a71?'<span class="locked">Program Included</span>':''}</div><div class="personMoney"><div class="weeklyMini"><b>Weekly</b><span>${money2(weekly)}</span></div><div class="monthlyMini"><b>Total Monthly</b><span>${money2(monthlyPremium)}</span></div></div><div class="rows">${rows}</div>${a71}<div class="chips">${chips.join('')}</div></section>`;
-  }
-
-  function optKey(num, prefix, field){
-    return 'opt' + num + (prefix === 'spouse' ? 'Spouse' : 'Main') + field;
-  }
-
-  function optionPersonData(num, prefix){
-    const label = prefix === 'spouse' ? (state.spouseName || 'Spouse') : (state.mainName || 'Main');
-    const age = state[prefix+'Age'];
-    const sex = state[prefix+'Sex'];
-    const tobacco = state[prefix+'Tobacco'];
-    const monthlyIncome = state[prefix+'MonthlyIncome'];
-    const funeral = Math.max(0, Number(state[optKey(num,prefix,'Funeral')])||0);
-    const term = Math.max(0, Number(state[optKey(num,prefix,'Term')])||0);
-    const adb = Math.max(0, Number(state[optKey(num,prefix,'ADB')])||0);
-    const a71 = !!state[optKey(num,prefix,'A71')];
-    const occupation = state[prefix+'Occupation'] || '';
-    return {label, age, sex, tobacco, occupation, monthlyIncome, funeral, term, months:monthsFromTerm(term, monthlyIncome), adb, a71};
-  }
-
-  function optionActivePeople(num){
-    const arr = [{prefix:'main', key:'main', p:optionPersonData(num,'main')}];
-    if(state.spouseEnabled) arr.push({prefix:'spouse', key:'spouse', p:optionPersonData(num,'spouse')});
-    return arr;
-  }
-
-  function optionA71PremiumFor(num, prefix){
-    const active = optionActivePeople(num).filter(x=>x.p.a71).map(x=>({key:x.prefix, senior:isSenior(x.p.age), age:x.p.age}));
-    const who = active.find(p=>p.key===prefix);
-    if(!who) return 0;
-    if(active.length===1) return a71IndividualPremium(who.age);
-    if(active.length===2){
-      const seniors = active.filter(p=>p.senior).length;
-      if(seniors===2) return 60.50/2;
-      if(seniors===0) return 22.75/2;
-      return a71IndividualPremium(who.age);
-    }
-    return a71IndividualPremium(who.age);
-  }
-
-  function optionPersonMonthly(num, prefix){
-    const p = optionPersonData(num, prefix);
-    return funeralMonthly(p) + incomeMonthly(p) + regularAdbMonthly(p) + optionA71PremiumFor(num, prefix);
-  }
-
-  function optionMonthlyTotal(num){
-    let total = optionPersonMonthly(num,'main');
-    if(state.spouseEnabled) total += optionPersonMonthly(num,'spouse');
-    return total;
-  }
-
-  function manualOptionNumber(num, prefix, field, value, shouldRender=false){
-    const k = optKey(num, prefix, field);
-    state[k] = parseLooseNumber(value);
-    save();
-    if(shouldRender) render();
-  }
-
-  function manualOptionToggle(num, prefix, field, checked){
-    const k = optKey(num, prefix, field);
-    state[k] = !!checked;
-    save();
-    render();
-  }
-
-  function applyOption(num){
-    ['main','spouse'].forEach(prefix=>{
-      if(prefix==='spouse' && !state.spouseEnabled) return;
-      state[prefix+'Funeral'] = Math.max(0, Number(state[optKey(num,prefix,'Funeral')])||0);
-      state[prefix+'Term'] = Math.max(0, Number(state[optKey(num,prefix,'Term')])||0);
-      state[prefix+'ADB'] = Math.max(0, Number(state[optKey(num,prefix,'ADB')])||0);
-      state[prefix+'A71'] = !!state[optKey(num,prefix,'A71')];
-      state[prefix+'Months'] = monthsFromTerm(state[prefix+'Term'], state[prefix+'MonthlyIncome']);
-    });
-    state.hourMode = String(num);
-    save();
-    render();
-  }
+  function sspKey(tier,prefix,field){ return 'ssp'+tier[0].toUpperCase()+tier.slice(1)+(prefix==='spouse'?'Spouse':'Main')+field; }
+  function sspPersonData(tier,prefix){ const loss=Math.max(0,Number(state[sspKey(tier,prefix,'Loss')])||0), pension=Math.max(0,Number(state[sspKey(tier,prefix,'Pension')])||0), months=Math.max(0,Number(state[sspKey(tier,prefix,'Months')])||0), rawCremation=Math.max(0,Number(state[sspKey(tier,prefix,'Cremation')])||0), cremation=state.sspCremationEnabled ? rawCremation : 0; const replacement=loss*months, pensionReplacement=pension*months, totalIncomeReplacement=replacement+pensionReplacement; const enteredAge=Number(state[prefix+'Age'])||0, rateAge=enteredAge; return {key:prefix,label:prefix==='spouse'?'Spouse':'Main',age:rateAge,enteredAge,sex:state[prefix+'Sex'],tobacco:state[prefix+'Tobacco'],occupation:state[prefix+'Occupation']||'',hasPension:personHasPension(prefix),monthlyIncome:loss+pension,loss,pension,months,rawCremation,cremation,replacement,pensionReplacement,totalIncomeReplacement,funeral:cremation+totalIncomeReplacement,a71:!!state[sspKey(tier,prefix,'A71')]}; }
+  function sspActivePeople(tier){ const arr=[sspPersonData(tier,'main')]; if(state.spouseEnabled) arr.push(sspPersonData(tier,'spouse')); return arr; }
+  function sspPremiumMap(tier){ return a71Premiums(sspActivePeople(tier).map(p=>({key:p.key,age:p.age,a71:p.a71}))); }
+  function sspPersonMonthly(tier,prefix){ const people=sspActivePeople(tier), premiums=sspPremiumMap(tier); const p=people.find(x=>x.key===prefix); return p ? funeralMonthly(p) + (premiums.get(prefix)||0) : 0; }
+  function sspMonthlyTotal(tier){ return sspActivePeople(tier).reduce((sum,p)=>sum+sspPersonMonthly(tier,p.key),0); }
+  function sspTotalProtection(tier){ return sspActivePeople(tier).reduce((sum,p)=>sum+p.funeral+(p.a71?A71.car:0),0); }
+  window.manualSspNumber = function(tier,prefix,field,value,shouldRender){ state[sspKey(tier,prefix,field)] = parseLooseNumber(value); if(shouldRender){ save(); renderAll(); } };
+  window.manualSspToggle = function(tier,prefix,field,checked){ state[sspKey(tier,prefix,field)] = !!checked; save(); renderAll(); };
+  window.applySspTier = function(tier){ state.pitchMode='ssp'; state.selectedTier=tier; forceSspSeniorGradedDefaults(); save(); renderAll(); toast((TIER_META[tier]||{}).label+' applied'); };
 
   function optionManualHtml(num){
-    const weeklyTarget = (Number(state.hourlyWage)||0) * Number(num||1);
-    const monthlyBudget = hourMonthlyBudget(num);
-    const monthly = optionMonthlyTotal(num);
-    const over = monthlyBudget > 0 && monthly > monthlyBudget;
-    const people = optionActivePeople(num).map(x=>{
-      const p = x.p;
-      const prefix = x.prefix;
-      const months = monthsFromTerm(p.term, p.monthlyIncome);
-      const pm = optionPersonMonthly(num, prefix);
-      return `<div class="optionPerson">
-        <div class="optionPersonName">${prefix==='spouse'?'Spouse':'Main'} — ${money2(pm)}/mo</div>
-        <div class="optionManualGrid">
-          <div class="manualField"><label>WL / Funeral</label><input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" min="0" step="100" value="${Math.round(p.funeral)}" oninput="manualOptionNumber(${num},'${prefix}','Funeral',this.value,false)" onblur="manualOptionNumber(${num},'${prefix}','Funeral',this.value,true)" onkeydown="if(event.key==='Enter'){this.blur();}"></div>
-          <div class="manualField"><label>10RC / Income</label><input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" min="0" step="100" value="${Math.round(p.term)}" oninput="manualOptionNumber(${num},'${prefix}','Term',this.value,false)" onblur="manualOptionNumber(${num},'${prefix}','Term',this.value,true)" onkeydown="if(event.key==='Enter'){this.blur();}"></div>
-          <div class="manualField"><label>Regular ADB</label><input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" min="0" step="100" value="${Math.round(p.adb)}" oninput="manualOptionNumber(${num},'${prefix}','ADB',this.value,false)" onblur="manualOptionNumber(${num},'${prefix}','ADB',this.value,true)" onkeydown="if(event.key==='Enter'){this.blur();}"></div>
-          <label class="manualCheck"><input type="checkbox" ${p.a71?'checked':''} onchange="manualOptionToggle(${num},'${prefix}','A71',this.checked)"> A71?</label>
+    const monthly=optionMonthlyTotal(num); const people=optionActivePeople(num).map(x=>{ const p=x; const prefix=x.key; const pm=optionPersonMonthly(num,prefix); return `<div class="optionBox">
+      <div class="optionName"><b>${prefix==='spouse'?'Spouse':'Main'} — Option ${num}</b><span>${money2(pm)}/mo</span></div>
+      <div class="manualGrid">
+        <div class="field"><label>WL / Funeral</label><input type="text" inputmode="numeric" value="${Math.round(p.funeral)}" oninput="manualOptionNumber(${num},'${prefix}','Funeral',this.value,false)" onblur="manualOptionNumber(${num},'${prefix}','Funeral',this.value,true)" onkeydown="if(event.key==='Enter')this.blur()"></div>
+        <div class="field"><label>10RC / Income</label><input type="text" inputmode="numeric" value="${Math.round(p.term)}" oninput="manualOptionNumber(${num},'${prefix}','Term',this.value,false)" onblur="manualOptionNumber(${num},'${prefix}','Term',this.value,true)" onkeydown="if(event.key==='Enter')this.blur()"></div>
+        <div class="field"><label>Regular ADB</label><input type="text" inputmode="numeric" value="${Math.round(p.adb)}" oninput="manualOptionNumber(${num},'${prefix}','ADB',this.value,false)" onblur="manualOptionNumber(${num},'${prefix}','ADB',this.value,true)" onkeydown="if(event.key==='Enter')this.blur()"></div>
+        <label class="check"><input type="checkbox" ${p.a71?'checked':''} onchange="manualOptionToggle(${num},'${prefix}','A71',this.checked)"> A71?</label>
+      </div>
+      <div class="manualLine"><b>10RC:</b> ${money(p.term)}${p.monthlyIncome>0?` = ${p.months} months of income`:''} · <b>Premium:</b> ${money2(pm)} / month</div>
+    </div>`; }).join('');
+    return `<div class="optionBox" style="margin-bottom:12px"><div class="optionName"><b>Option ${num} Household</b><span>${money2(monthly)}/mo</span></div></div>${people}`;
+  }
+  function renderRegularControls(){ $('regularOptionMount').innerHTML = `<div style="display:grid;gap:14px">${optionManualHtml(1)}${optionManualHtml(2)}</div>`; $('useOption1Top').classList.toggle('active', state.pitchMode==='regular' && Number(state.selectedOption)===1); $('useOption2Top').classList.toggle('active', state.pitchMode==='regular' && Number(state.selectedOption)===2); }
+  function sspTierHtml(tier){
+    const meta=TIER_META[tier]; const totalMonthly=sspMonthlyTotal(tier); const cremationOn=!!state.sspCremationEnabled;
+    const people=sspActivePeople(tier).map(p=>{
+      const prefix=p.key; const pm=sspPersonMonthly(tier,prefix); const rawCremation=Math.max(0,Number(state[sspKey(tier,prefix,'Cremation')])||0);
+      const conceptParts=[];
+      if(cremationOn) conceptParts.push(`${money(p.cremation)} cremation`);
+      conceptParts.push(`${money(p.loss)} × ${p.months} months SSI`);
+      if(p.pension>0) conceptParts.push(`${money(p.pension)} × ${p.months} months pension = ${money(p.pensionReplacement)}`);
+      return `<div class="personBlock">
+      <div class="personHead"><span>${prefix==='spouse'?'Spouse dies':'Main dies'}</span><span>${money2(pm)}/mo</span></div>
+      <div class="personBody">
+        <div class="manualGrid">
+          ${cremationOn ? `<div class="field"><label>Cremation WL</label><input type="text" inputmode="numeric" value="${Math.round(rawCremation)}" oninput="manualSspNumber('${tier}','${prefix}','Cremation',this.value,false)" onblur="manualSspNumber('${tier}','${prefix}','Cremation',this.value,true)" onkeydown="if(event.key==='Enter')this.blur()"></div>` : ''}
+          <div class="field"><label>SSI loss / mo</label><input type="text" inputmode="numeric" value="${Math.round(p.loss)}" oninput="manualSspNumber('${tier}','${prefix}','Loss',this.value,false)" onblur="manualSspNumber('${tier}','${prefix}','Loss',this.value,true)" onkeydown="if(event.key==='Enter')this.blur()"></div>
+          <div class="field"><label>Pension loss / mo</label><input type="text" inputmode="numeric" value="${Math.round(p.pension)}" readonly title="Auto-calculated as 25% of the pension monthly input in Family Basics"></div>
+          <div class="field"><label>Pension protect</label><input type="text" inputmode="numeric" value="${Math.round(p.pensionReplacement)}" readonly title="Pension loss multiplied by selected months"></div>
+          <div class="field"><label>Months</label><input type="text" inputmode="numeric" value="${Math.round(p.months)}" oninput="manualSspNumber('${tier}','${prefix}','Months',this.value,false)" onblur="manualSspNumber('${tier}','${prefix}','Months',this.value,true)" onkeydown="if(event.key==='Enter')this.blur()"></div>
+          <label class="check"><input type="checkbox" ${p.a71?'checked':''} onchange="manualSspToggle('${tier}','${prefix}','A71',this.checked)"> A71?</label>
         </div>
-        <div class="manualLine"><b>10RC:</b> ${money(p.term)}${p.monthlyIncome>0?` = ${months.toFixed(1)} months of income`:''} · <b>Premium:</b> ${money2(pm)} / month</div>
-      </div>`;
-    }).join('');
-    return `<div class="optionTotals">
-      <div class="optionPill"><b>Weekly Target</b><span>${money2(weeklyTarget)}</span></div>
-      <div class="optionPill"><b>Monthly Budget</b><span>${money2(monthlyBudget)}</span></div>
-      <div class="optionPill"><b>Built Monthly</b><span style="color:${over?'#a7392f':'#0b2b49'}">${money2(monthly)}</span></div>
-    </div>${people}<div class="simpleHint">Every coverage box is manual. Type the full amount, then press Enter or click outside the box to recalculate.</div>`;
+        <div class="manualLine"><b>Concept:</b> ${conceptParts.join(' + ')} = <b>${money(p.funeral)}</b>. ${p.hasPension ? 'Pension loss auto-calculates as 25% of the pension monthly input in Family Basics.' : 'Pension excluded unless Pension? is checked in Family Basics.'} Rate uses the exact entered age; 60+ auto-uses senior graded WL. ${isSenior(p.age)?'A71 senior rate: $30.25/mo.':'A71 adult/couple rate used if selected.'}</div>
+      </div>
+    </div>`; }).join('');
+    return `<div class="tierBox ${meta.css}">
+      <div class="tierName"><b>${meta.label}</b><span>${meta.months} month preset · selected values still editable</span></div>
+      ${people}
+      <div class="tierTotals"><div class="pill"><b>Monthly</b><span>${money2(totalMonthly)}</span></div><div class="pill"><b>${cremationOn?'WL Amount':'Income WL'}</b><span>${money(sspActivePeople(tier).reduce((s,p)=>s+p.funeral,0))}</span></div><div class="pill"><b>Concept</b><span>${sspActivePeople(tier).some(p=>p.pension>0)?'SSI + Pension':'SSI Only'}</span></div></div>
+      <div style="padding:0 12px 12px"><button class="bigBtn" style="width:100%" type="button" onclick="applySspTier('${tier}')">Use ${meta.label}</button></div>
+    </div>`;
   }
+  function renderSspControls(){ $('sspTierMount').innerHTML = ['bronze','silver','gold'].map(sspTierHtml).join(''); ['Bronze','Silver','Gold'].forEach(name=>{ const id='use'+name+'Top'; if($(id)) $(id).classList.toggle('active', state.pitchMode==='ssp' && state.selectedTier===name.toLowerCase()); }); }
 
-  function render(){
-    syncForm();
-    const main = {label:state.mainName||'Main', age:state.mainAge, sex:state.mainSex, tobacco:state.mainTobacco, occupation:state.mainOccupation||'', funeral:state.mainFuneral, term:state.mainTerm, adb:state.mainADB, monthlyIncome:state.mainMonthlyIncome, months:monthsFromTerm(state.mainTerm, state.mainMonthlyIncome), a71:state.mainA71};
-    const spouse = {label:state.spouseName||'Spouse', age:state.spouseAge, sex:state.spouseSex, tobacco:state.spouseTobacco, occupation:state.spouseOccupation||'', funeral:state.spouseFuneral, term:state.spouseTerm, adb:state.spouseADB, monthlyIncome:state.spouseMonthlyIncome, months:monthsFromTerm(state.spouseTerm, state.spouseMonthlyIncome), a71:state.spouseA71};
-    const cards = [personCard(main.label, main, 'main')];
-    if(state.spouseEnabled) cards.push(personCard(spouse.label, spouse, 'spouse'));
-    $('people').innerHTML = cards.join('');
-    const packageOcc = ((state.mainOccupation || '') || (state.spouseOccupation || '')).trim();
-    if($('packageTitle')) $('packageTitle').textContent = `${packageOcc || 'Base'} package`;
-    setLogo(state.selectedLogo || DEFAULT_LOGO_URL);
-    const totalBase = baseAmount(main) + (state.spouseEnabled ? baseAmount(spouse) : 0);
-    const totalMonthly = personMonthly('main', main) + (state.spouseEnabled ? personMonthly('spouse', spouse) : 0);
-    const weekly = weeklyPremium(totalMonthly);
-    const householdMonthly = Math.max(0, Number(state.mainMonthlyIncome)||0) + (state.spouseEnabled ? Math.max(0, Number(state.spouseMonthlyIncome)||0) : 0);
-    $('heroLine').textContent = `Our reports show people who make ${money(householdMonthly)} set aside ${money(householdMonthly*0.04)} every month for their family.`;
-    if($('mainADBRate')) $('mainADBRate').textContent = adbRateText(main);
-    if($('spouseADBRate')) $('spouseADBRate').textContent = adbRateText(spouse);
-    const selectedAssocLogo = cleanText(state.selectedLogo || '');
-    const assocLogoMarkup = selectedAssocLogo ? `<div class="assocLogoMini"><img src="${escapeAttr(selectedAssocLogo)}" alt="Association logo"></div>` : '';
-    const topNumbersClass = selectedAssocLogo ? 'topNumbers hasAssocLogo' : 'topNumbers';
-    $('monthlyBox').innerHTML = `<div class="${topNumbersClass}">${assocLogoMarkup}<div class="weeklyBlock"><span class="label">Weekly</span><span class="amount">${money2(weekly)}</span></div><div class="monthlyBlock"><span class="label">Total Monthly</span><span class="amount">${money2(totalMonthly)}</span></div></div><div class="budgetLine">Option ${state.hourMode} selected · ${money2(hourBudget())}/wk target</div>`;
-    $('monthlyBox').classList.toggle('hasAssocLogoBox', !!selectedAssocLogo);
-    if($('optionOneManual')) $('optionOneManual').innerHTML = optionManualHtml(1);
-    if($('optionTwoManual')) $('optionTwoManual').innerHTML = optionManualHtml(2);
-    $('hour1').classList.toggle('active', String(state.hourMode)==='1');
-    $('hour2').classList.toggle('active', String(state.hourMode)==='2');
+  function readForm(){
+    const oldMainIncome = Number(state.mainMonthlyIncome)||0;
+    const oldSpouseIncome = Number(state.spouseMonthlyIncome)||0;
+    const oldMainPension = Number(state.mainPensionMonthly)||0;
+    const oldSpousePension = Number(state.spousePensionMonthly)||0;
+    const oldMainHasPension = !!state.mainHasPension;
+    const oldSpouseHasPension = !!state.spouseHasPension;
+    const oldSpouseEnabled = !!state.spouseEnabled;
+    ['pitchMode','selectedTier','theme','sicknessMode','mainSex','mainTobacco','spouseSex','spouseTobacco','mainOccupation','spouseOccupation','selectedUnion','selectedLogo'].forEach(k=>{ const el=$(k); if(el) state[k]=el.value; });
+    ['mainAge','mainMonthlyIncome','mainPensionMonthly','spouseAge','spouseMonthlyIncome','spousePensionMonthly'].forEach(k=>{ const el=$(k); if(el) state[k]=parseLooseNumber(el.value); });
+    if($('spouseEnabled')) state.spouseEnabled=$('spouseEnabled').checked;
+    if($('mainHasPension')) state.mainHasPension=$('mainHasPension').checked;
+    if($('spouseHasPension')) state.spouseHasPension=$('spouseHasPension').checked;
+    if($('sspCremationEnabled')) state.sspCremationEnabled=$('sspCremationEnabled').checked;
+    if(Number(state.mainMonthlyIncome)!==oldMainIncome || Number(state.spouseMonthlyIncome)!==oldSpouseIncome || state.spouseEnabled!==oldSpouseEnabled) syncSspLossFromSsi();
+    if(Number(state.mainPensionMonthly)!==oldMainPension || Number(state.spousePensionMonthly)!==oldSpousePension || state.mainHasPension!==oldMainHasPension || state.spouseHasPension!==oldSpouseHasPension || state.spouseEnabled!==oldSpouseEnabled) syncSspPensionFromMonthly();
+    save(); renderAll();
   }
-
-  function adbRateText(p){
-    const amount = Math.max(0, Number(p.adb)||0);
-    if(amount <= 0) return 'Regular ADB off.';
-    const rate = regularAdbRate(p.age);
-    if(rate == null) return 'Regular ADB rate not available for this age in the loaded rate book.';
-    return `Regular ADB rate book: ${money2(regularAdbMonthly(p))}/mo for ${money(amount)}.`;
-  }
-
-
-
-  function syncPriceToggle(){
-    const hidden = document.body.classList.contains('hidePrices');
-    const btn = $('priceToggle');
-    if(btn) btn.textContent = hidden ? 'Show Prices' : 'Hide Prices';
-    const box = $('monthlyBox');
-    if(box) box.classList.toggle('hasAssocLogoBox', !!box.querySelector('.assocLogoMini img'));
-  }
-  function togglePrices(){
-    document.body.classList.toggle('hidePrices');
-    syncPriceToggle();
-  }
-
-  function openDrawer(){ $('drawer').classList.add('open'); $('shade').classList.add('open'); $('drawer').setAttribute('aria-hidden','false'); }
-  function closeDrawer(){ $('drawer').classList.remove('open'); $('shade').classList.remove('open'); $('drawer').setAttribute('aria-hidden','true'); }
-
-  ['mainAge','mainMonthlyIncome','mainOccupation','spouseAge','spouseMonthlyIncome','spouseOccupation','hourlyWage'].forEach(id=>{
-    const el = $(id);
-    if(!el) return;
-    el.addEventListener('change', readForm);
-    el.addEventListener('keydown', e=>{ if(e.key === 'Enter') el.blur(); });
-  });
-  ['mainSex','mainTobacco','spouseSex','spouseTobacco','spouseEnabled','sicknessMode'].forEach(id=>{ if($(id)) $(id).addEventListener('change', readForm); });
-  if($('selectedUnion')) $('selectedUnion').addEventListener('change', handleUnionChange);
-  if($('selectedLogo')) $('selectedLogo').addEventListener('change', handleLogoChange);
-  if($('priceToggle')) $('priceToggle').addEventListener('click', togglePrices);
-  $('openSettings').addEventListener('click', openDrawer);
-  $('closeSettings').addEventListener('click', closeDrawer);
-  $('shade').addEventListener('click', closeDrawer);
-  $('presoBtn').addEventListener('click', closeDrawer);
-  if($('applyOption1Btn')) $('applyOption1Btn').addEventListener('click',()=>{ applyOption(1); });
-  if($('applyOption2Btn')) $('applyOption2Btn').addEventListener('click',()=>{ applyOption(2); });
-  $('resetBtn').addEventListener('click',()=>{ state={...defaults}; save(); render(); });
-  $('hour1').addEventListener('click',()=>{ applyOption(1); });
-  $('hour2').addEventListener('click',()=>{ applyOption(2); });
-  document.addEventListener('keydown',e=>{
-    if(e.key==='Escape') closeDrawer();
-    if(e.ctrlKey && e.shiftKey && e.key.toLowerCase()==='s'){
-      e.preventDefault();
-      $('drawer').classList.contains('open') ? closeDrawer() : openDrawer();
+  function syncForm(){
+    const active=document.activeElement;
+    Object.keys(defaults).forEach(k=>{ const el=$(k); if(!el) return; if(typeof defaults[k] === 'boolean') el.checked=!!state[k]; else { if(el===active && /^(INPUT|TEXTAREA)$/i.test(el.tagName)) return; el.value=state[k]; } });
+    setLogo(state.selectedLogo||DEFAULT_LOGO_URL); updateUnionStatus();
+    if($('spouseGroup')) $('spouseGroup').classList.toggle('hidden', !state.spouseEnabled);
+    if($('mainPensionFamilyWrap')) $('mainPensionFamilyWrap').classList.toggle('hidden', state.pitchMode!=='ssp');
+    if($('spousePensionFamilyWrap')) $('spousePensionFamilyWrap').classList.toggle('hidden', state.pitchMode!=='ssp' || !state.spouseEnabled);
+    if($('mainPensionMonthlyWrap')) $('mainPensionMonthlyWrap').classList.toggle('hidden', state.pitchMode!=='ssp' || !state.mainHasPension);
+    if($('spousePensionMonthlyWrap')) $('spousePensionMonthlyWrap').classList.toggle('hidden', state.pitchMode!=='ssp' || !state.spouseEnabled || !state.spouseHasPension);
+    if($('regularModeBtn')) $('regularModeBtn').classList.toggle('active', state.pitchMode==='regular');
+    if($('sspModeBtn')) $('sspModeBtn').classList.toggle('active', state.pitchMode==='ssp');
+    if($('regularControls')) $('regularControls').classList.toggle('hidden', state.pitchMode!=='regular');
+    if($('sspControls')) $('sspControls').classList.toggle('hidden', state.pitchMode!=='ssp');
+    if($('modeBadge')) $('modeBadge').textContent = state.pitchMode==='ssp' ? 'SSP Mode' : 'Regular Pitch';
+    if($('modeHint')) $('modeHint').innerHTML = state.pitchMode==='ssp'
+      ? '<b>SSP:</b> Bronze = 3 months, Silver = 6 months, Gold = 9 months. Defaults use the survivor SSI rule: the household keeps the greater check, so the missing SSI is the smaller check. Each person has their own Pension? checkbox in Family Basics; checked pensions auto-calculate a 25% pension loss row and use the same selected months. Cremation can be turned on/off and months stay editable. No senior toggle: SSP can be used at the exact entered ages, and 60+ automatically prices on senior graded WL. A71 defaults off and uses $30.25/mo at 60+ if turned on.'
+      : '<b>Regular:</b> Option 1 and Option 2 stay manual just like the original pitch. WL, 10RC/income, regular ADB, and A71 can all be changed.';
+    if($('sspPensionHint')){
+      const parts=[];
+      if(state.mainHasPension){ const full=pensionFullMonthly('main'), loss=pensionMonthlyLoss('main'), months=Number(state.sspBronzeMainMonths)||3; parts.push(`Main pension ${money(full)}/mo × 25% = <b>${money(loss)}/mo</b> loss; Bronze protects ${months} months = <b>${money(loss*months)}</b>.`); }
+      if(state.spouseEnabled && state.spouseHasPension){ const full=pensionFullMonthly('spouse'), loss=pensionMonthlyLoss('spouse'), months=Number(state.sspBronzeSpouseMonths)||3; parts.push(`Spouse pension ${money(full)}/mo × 25% = <b>${money(loss)}/mo</b> loss; Bronze protects ${months} months = <b>${money(loss*months)}</b>.`); }
+      $('sspPensionHint').innerHTML = parts.length
+        ? `<b>Pension protection math:</b> ${parts.join(' ')}`
+        : '<b>Pension protection math:</b> No pension selected. Check Pension? in Family Basics for the person who has one, then enter the monthly pension amount.';
     }
-  });
-  render();
-  syncPriceToggle();
-  loadAssociations();
+    if($('sspSurvivorHint')){
+      const main=Math.max(0,Number(state.mainMonthlyIncome)||0), spouse=Math.max(0,Number(state.spouseMonthlyIncome)||0), kept=Math.max(main,spouse), lost=state.spouseEnabled?Math.max(0,main+spouse-kept):main;
+      $('sspSurvivorHint').innerHTML = state.spouseEnabled
+        ? `<b>SSI survivor rule:</b> Main ${money(main)} + Spouse ${money(spouse)}. Survivor keeps the greater check (${money(kept)}), so the default missing SSI is <b>${money(lost)}/mo</b> in either death scenario. You can still override any tier manually.`
+        : `<b>SSI default:</b> No spouse is active, so SSP defaults to the main SSI loss of <b>${money(lost)}/mo</b>.`;
+    }
+    if($('togglePricesBtn')) $('togglePricesBtn').textContent = state.pricesHidden ? 'Show Prices' : 'Hide Prices';
+  }
+
+  function selectedLogoMarkup(){ const logo=cleanText(state.selectedLogo || DEFAULT_LOGO_URL); return `<div class="presLogo"><img src="${escapeAttr(logo)}" alt="Logo"></div>`; }
+  function topNumbers(monthly,label){ const weekly=monthly/4; return `<div><div class="topNumbers"><div class="weeklyBlock"><span class="label">Weekly</span><span class="amount">${money2(weekly)}</span></div><div class="monthlyBlock"><span class="label">Total Monthly</span><span class="amount">${money2(monthly)}</span></div></div><div class="budgetLine">${escapeHtml(label)}</div></div>`; }
+  function regularPresentationMarkup(){
+    const people=regularActivePeople(); const premiums=regularA71PremiumMap(); const totalMonthly=people.reduce((s,p)=>s+regularPersonMonthly(p,premiums),0); const householdMonthly=people.reduce((s,p)=>s+Math.max(0,Number(p.monthlyIncome)||0),0); const packageOcc=((state.mainOccupation||'')||(state.spouseOccupation||'')).trim();
+    const controls = `<div class="presControls"><button class="${state.selectedOption==1?'active':''}" onclick="opener.applyRegularOption(1)">Option 1</button><button class="${state.selectedOption==2?'active':''}" onclick="opener.applyRegularOption(2)">Option 2</button><button onclick="document.body.classList.toggle('hidePrices')">Hide Prices</button></div>`;
+    return `<div class="presWrap"><div class="presTopbar"><div class="presBrand">${selectedLogoMarkup()}<div class="presBrandText"><b>Funeral Benefit Plan</b><span>Simple family protection overview</span></div></div><div class="presBadge">Presentation Ready</div></div>
+      <section class="hero"><div class="heroInner"><div><div class="eyebrow">Benefit Overview</div><h1>${escapeHtml(packageOcc || 'Base')} package</h1><p>Our reports show families who make ${money(householdMonthly)} set aside around ${money(householdMonthly*0.04)} every month for the people at home.</p>${controls}</div>${topNumbers(totalMonthly, 'Option '+state.selectedOption+' selected')}</div></section>
+      <main class="people">${people.map(p=>regularPersonCard(p,premiums)).join('')}</main></div>`;
+  }
+  function renderMoneyStack(amount, label='Total Payout'){ return `<div class="rowAmountStack"><div class="rowAmount">${money(amount)}</div><div class="moneySubline">${escapeHtml(label)}</div></div>`; }
+  function renderSicknessAmount(p){
+    const funeral=Math.max(0,Number(p.funeral)||0), months=Math.max(0,Number(p.months)||0), income=incomeAmount(p), total=funeral+income;
+    if(state.sicknessMode === 'combined' || months <= 0 || income <= 0) return `<div class="rowAmountGroup">${renderMoneyStack(total, 'Total Sickness Payout')}</div>`;
+    return `<div class="rowAmountGroup">${renderMoneyStack(funeral, 'Funeral Benefit')}<div class="monthBig"><b>${months}</b><span>Months</span></div></div>`;
+  }
+  function regularPersonCard(p,premiums){
+    const income=incomeAmount(p), total=Math.max(0,Number(p.funeral)||0)+income, regularAdb=Math.max(0,Number(p.adb)||0), pm=regularPersonMonthly(p,premiums), weekly=pm/4; let rows='';
+    if(total>0 && p.a71) rows += `<div class="totalRow carDeath"><div><div class="rowKicker">If death in car accident</div><div class="rowDesc">Death in Car Accident<small>Funeral benefit + income protection${regularAdb>0?` + ${money(regularAdb)} regular ADB`:''}${p.a71?` + ${money(A71.car)} A71 car accident benefit`:''}.</small></div></div><div class="rowAmount">${money(carAccidentDeathAmount(p))}</div></div>`;
+    if(total>0 && (regularAdb>0 || p.a71)) rows += `<div class="totalRow"><div><div class="rowKicker">If death at workplace</div><div class="rowDesc">Death at Work Place<small>Funeral benefit + income protection${regularAdb>0?` + ${money(regularAdb)} regular ADB`:''}${p.a71?` + ${money(A71.accident)} A71 base ADB`:''}. No car accident extra included.</small></div></div><div class="rowAmount">${money(accidentDeathAmount(p))}</div></div>`;
+    if(total>0) rows += `<div class="totalRow"><div><div class="rowKicker">If death from sickness</div><div class="rowDesc">Death From Sickness<small>${state.sicknessMode==='combined' ? `Total payout from sickness${income>0?` including income protection`:''}` : `${money(p.funeral)} funeral benefit${income>0?` + ${p.months} months income protection (${money(income)})`:''}`}</small></div></div>${renderSicknessAmount(p)}</div>`;
+    if(!rows) rows='<div class="benefitRow"><div class="rowDesc">No active benefits selected.</div></div>';
+    return personCardShell(p, pm, weekly, rows, regularChips(p), p.a71, p.occupation ? `${escapeHtml(p.occupation)} plan` : 'Car accident · workplace · sickness payout');
+  }
+  function regularChips(p){ const chips=[]; if(p.funeral>0) chips.push(`<span class="chip">Funeral Benefit: ${money(p.funeral)}</span>`); if(p.term>0) chips.push(`<span class="chip">Income Protection: ${p.months} months</span>`); if(p.adb>0) chips.push(`<span class="chip">Regular ADB: ${money(p.adb)}</span>`); if(p.a71) chips.push(`<span class="chip">Get Hurt, Get Paid Included</span>`); return chips.join(''); }
+  function a71Markup(p){ return p.a71 ? `<div class="a71Box"><div class="a71Title"><span>Get Hurt, Get Paid Program</span><span>${isSenior(p.age)?'Senior $30.25/mo':'Adult'} rate</span></div><div class="a71Grid"><div class="a71Item"><b>${money(A71.er)}</b><span>ER / urgent care visit</span></div><div class="a71Item"><b>${money(A71.hospital)}</b><span>Hospital night</span></div><div class="a71Item"><b>${money(A71.icu)}</b><span>ICU night, up to 2 weeks</span></div></div></div>` : ''; }
+  function personCardShell(p, pm, weekly, rows, chips, hasA71, subtitle){ return `<section class="personCardPres"><div class="personHeadPres"><div><h2 class="personTitlePres">${escapeHtml(p.label)}</h2><div class="subTitlePres">${subtitle}</div></div>${hasA71?'<span class="locked">Program Included</span>':''}</div><div class="personMoney"><div class="weeklyMini"><b>Weekly</b><span>${money2(weekly)}</span></div><div class="monthlyMini"><b>Total Monthly</b><span>${money2(pm)}</span></div></div><div class="rows">${rows}</div>${a71Markup(p)}<div class="chips">${chips}</div></section>`; }
+  function sspPresentationMarkup(){
+    const tier=state.selectedTier || 'bronze', meta=TIER_META[tier]; const people=sspActivePeople(tier); const totalMonthly=sspMonthlyTotal(tier); const cremationOn=!!state.sspCremationEnabled;
+    const hasAnyPension = people.some(p=>p.pension>0);
+    const conceptLabel = hasAnyPension ? 'SSI + pension' : 'SSI only';
+    const tierStrip = `<div class="tierStrip">${['bronze','silver','gold'].map(k=>`<div class="tierStripCard ${k} ${k===tier?'active':''}" onclick="opener.applySspTier('${k}')"><b>${TIER_META[k].label}</b><span>${state[sspKey(k,'main','Months')]} months ${conceptLabel}</span></div>`).join('')}</div>`;
+    const conceptLine = cremationOn ? `Simple concept: protect cremation first, then replace the missing SSI income${hasAnyPension?' and pension loss':''} for the selected number of months.` : `Simple concept: replace the missing SSI check${hasAnyPension?' and pension loss':''} for the selected number of months.`;
+    const topLine = cremationOn ? `${meta.label} · cremation first · ${conceptLabel} concept` : `${meta.label} · ${conceptLabel} concept only`;
+    return `<div class="presWrap"><div class="presTopbar"><div class="presBrand">${selectedLogoMarkup()}<div class="presBrandText"><b>Senior Security Plan</b><span>Bronze · Silver · Gold ${conceptLabel} income replacement</span></div></div><div class="presBadge">${meta.label} Selected</div></div>
+      <section class="hero"><div class="heroInner"><div><div class="eyebrow">SSP Benefit Overview</div><h1>${meta.label}: ${people[0].months} month plan</h1><p>${conceptLine}</p>${tierStrip}<div class="presControls"><button onclick="document.body.classList.toggle('hidePrices')">Hide Prices</button></div></div>${topNumbers(totalMonthly, topLine)}</div></section>
+      <main class="people">${people.map(p=>sspPersonCard(tier,p)).join('')}</main></div>`;
+  }
+  function sspPersonCard(tier,p){ const pm=sspPersonMonthly(tier,p.key), weekly=pm/4; let rows=''; const who=p.key==='main'?'main':'spouse'; const tierCss=(TIER_META[tier]||{}).css||tier; const cremationOn=!!state.sspCremationEnabled;
+    if(cremationOn && p.cremation>0) rows += `<div class="benefitRow funeral sspConceptRow ${tierCss}"><div><div class="rowKicker">Cremation protection</div><div class="conceptTitle">Cremation</div><span class="conceptSub">First priority: final-expense money available when the family needs it.</span></div><div class="conceptAmount"><span>${money(p.cremation)}</span><small>WL amount</small></div></div>`;
+    rows += `<div class="benefitRow income sspConceptRow ${tierCss}"><div><div class="rowKicker">If ${who} dies</div><div class="conceptTitle">${p.months} Months</div><span class="conceptSub">SSI income replacement based on the missing monthly check. Survivor keeps the greater SSI benefit.</span></div><div class="conceptAmount"><span>${money(p.loss)}/mo</span><small>SSI loss</small></div></div>`;
+    if(p.pension>0) rows += `<div class="benefitRow pension sspConceptRow ${tierCss}"><div><div class="rowKicker">Pension protection</div><div class="conceptTitle">PENSION</div><span class="conceptSub">Monthly pension loss protected for the same selected number of months.</span></div><div class="conceptAmount"><span>${money(p.pension)}/mo</span><small>Pension loss</small></div></div>`;
+    if(p.a71) rows += `<div class="totalRow carDeath"><div><div class="rowKicker">Optional A71</div><div class="rowDesc">Get Hurt, Get Paid<small>${isSenior(p.age)?'Senior A71: $30.25/mo per 60+ person.':'A71 adult/couple rate used.'}</small></div></div><div class="rowAmount">Included</div></div>`;
+    const chips=`<span class="chip">${TIER_META[tier].label}</span><span class="chip">${p.months} months ${p.pension>0?'SSI + pension':'SSI'}</span>${cremationOn?`<span class="chip">Cremation: ${money(p.cremation)}</span>`:''}${p.pension>0?`<span class="chip">Pension: ${money(p.pension)}/mo</span>`:''}<span class="chip sspChipTiny">WL amount: ${money(p.funeral)}</span>${p.a71?'<span class="chip">A71 Included</span>':''}`;
+    return personCardShell(p, pm, weekly, rows, chips, p.a71, `${TIER_META[tier].label} SSP · ${p.pension>0?'SSI + pension':'SSI'} concept overview`);
+  }
+  function presentationMarkup(){ return state.pitchMode==='ssp' ? sspPresentationMarkup() : regularPresentationMarkup(); }
+  function renderPreview(){ const mount=$('previewMount'); if(mount) mount.innerHTML = presentationMarkup(); }
+  function presentationDocument(){ const vars=themeVars(state.theme); const varCss=Object.keys(vars).map(k=>`--${k}:${vars[k]};`).join(''); const styles=[...document.querySelectorAll('style')].map(s=>s.textContent).join('\n'); return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Presentation</title><style>:root{${varCss}}</style><style>${styles}</style></head><body class="${state.pricesHidden?'hidePrices':''}" style="margin:0">${presentationMarkup()}</body></html>`; }
+  function openPresentation(){ presentationWindow = window.open('', 'agentPresentationPopout', 'width=1360,height=900,menubar=no,toolbar=no,location=no,status=no'); if(!presentationWindow){ alert('Popout was blocked. Allow popups for this page, then click Start Presentation again.'); return; } updatePresentationWindow(true); presentationWindow.focus(); }
+  function updatePresentationWindow(force){ if(!presentationWindow || presentationWindow.closed) return; presentationWindow.document.open(); presentationWindow.document.write(presentationDocument()); presentationWindow.document.close(); if(force) presentationWindow.focus(); }
+  function printPopout(){ if(!presentationWindow || presentationWindow.closed) openPresentation(); setTimeout(()=>{ if(presentationWindow && !presentationWindow.closed) presentationWindow.print(); },150); }
+
+  function renderAll(updatePopout=true){ applyTheme(); syncForm(); if(state.pitchMode==='regular') renderRegularControls(); else renderSspControls(); renderPreview(); if(updatePopout) updatePresentationWindow(false); }
+
+  function initEvents(){
+    ['mainAge','mainMonthlyIncome','mainPensionMonthly','mainOccupation','spouseAge','spouseMonthlyIncome','spousePensionMonthly','spouseOccupation'].forEach(id=>{ const el=$(id); if(!el) return; el.addEventListener('change',readForm); el.addEventListener('input',()=>{ if(id==='mainPensionMonthly' || id==='spousePensionMonthly' || id==='mainMonthlyIncome' || id==='spouseMonthlyIncome') readForm(); }); el.addEventListener('keydown',e=>{ if(e.key==='Enter') el.blur(); }); });
+    ['mainSex','mainTobacco','spouseSex','spouseTobacco','spouseEnabled','mainHasPension','spouseHasPension','sspCremationEnabled','theme','sicknessMode'].forEach(id=>{ if($(id)) $(id).addEventListener('change',readForm); });
+    if($('selectedUnion')) $('selectedUnion').addEventListener('change',handleUnionChange);
+    if($('selectedLogo')) $('selectedLogo').addEventListener('change',handleLogoChange);
+    $('regularModeBtn').addEventListener('click',()=>{ state.pitchMode='regular'; save(); renderAll(); });
+    $('sspModeBtn').addEventListener('click',()=>{ state.pitchMode='ssp'; forceSspSeniorGradedDefaults(); save(); renderAll(); });
+    $('useOption1Top').addEventListener('click',()=>applyRegularOption(1)); $('useOption2Top').addEventListener('click',()=>applyRegularOption(2));
+    $('useBronzeTop').addEventListener('click',()=>applySspTier('bronze')); $('useSilverTop').addEventListener('click',()=>applySspTier('silver')); $('useGoldTop').addEventListener('click',()=>applySspTier('gold'));
+    $('startPresentationBtn').addEventListener('click',openPresentation); $('refreshPopoutBtn').addEventListener('click',()=>{ if(!presentationWindow || presentationWindow.closed) openPresentation(); else updatePresentationWindow(true); });
+    $('printPopoutBtn').addEventListener('click',printPopout);
+    $('togglePricesBtn').addEventListener('click',()=>{ state.pricesHidden=!state.pricesHidden; save(); renderAll(); });
+    $('saveBtn').addEventListener('click',()=>{ save(); renderAll(); toast('Saved + refreshed'); });
+    $('resetBtn').addEventListener('click',()=>{ state={...defaults}; save(); renderAll(); toast('Reset sample'); });
+    document.addEventListener('keydown',e=>{ if(e.ctrlKey && e.shiftKey && e.key.toLowerCase()==='p'){ e.preventDefault(); openPresentation(); } });
+  }
+
+  initEvents(); renderAll(false); loadAssociations();
 </script>
 </body>
 </html>
