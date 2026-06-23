@@ -1,0 +1,2916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Life Insurance Dictionary + Test Trainer</title>
+  <meta name="theme-color" content="#0f172a" />
+  <style>
+    :root {
+      --bg: #020617;
+      --bg2: #0f172a;
+      --panel: rgba(15, 23, 42, 0.86);
+      --panel2: rgba(2, 6, 23, 0.92);
+      --card: rgba(15, 23, 42, 0.78);
+      --line: rgba(148, 163, 184, 0.20);
+      --line2: rgba(56, 189, 248, 0.35);
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --muted2: #64748b;
+      --accent: #38bdf8;
+      --accent2: #22c55e;
+      --warn: #f59e0b;
+      --bad: #fb7185;
+      --good: #4ade80;
+      --shadow: 0 18px 50px rgba(0,0,0,.45);
+      --radius: 22px;
+      --pill: 999px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(56,189,248,.18), transparent 30%),
+        radial-gradient(circle at 90% 10%, rgba(34,197,94,.10), transparent 30%),
+        radial-gradient(circle at 60% 95%, rgba(99,102,241,.12), transparent 34%),
+        linear-gradient(180deg, #0f172a 0%, #020617 55%, #000 100%);
+      padding: 24px;
+    }
+
+    button, input, select { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+
+    .app { max-width: 1240px; margin: 0 auto; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      margin: -24px -24px 22px;
+      padding: 14px 24px;
+      background: rgba(2, 6, 23, .72);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .topbar-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .brand-mark {
+      width: 38px; height: 38px; border-radius: 14px;
+      display: grid; place-items: center;
+      background: linear-gradient(135deg, rgba(56,189,248,.25), rgba(34,197,94,.16));
+      border: 1px solid var(--line2);
+      box-shadow: 0 0 28px rgba(56,189,248,.15);
+    }
+    .brand-title { font-weight: 900; letter-spacing: -.04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .brand-sub { color: var(--muted); font-size: 12px; margin-top: 1px; }
+
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .tab-btn, .soft-btn, .primary-btn, .danger-btn {
+      border: 1px solid var(--line);
+      border-radius: var(--pill);
+      color: var(--text);
+      background: rgba(15,23,42,.7);
+      padding: 10px 14px;
+      cursor: pointer;
+      font-weight: 750;
+      font-size: 13px;
+      transition: transform .08s ease, border-color .16s ease, background .16s ease, opacity .16s ease;
+    }
+    .tab-btn:hover, .soft-btn:hover, .primary-btn:hover, .danger-btn:hover { transform: translateY(-1px); border-color: var(--line2); }
+    .tab-btn.active { background: rgba(56,189,248,.16); border-color: rgba(56,189,248,.55); color: #e0f2fe; }
+    .primary-btn { background: linear-gradient(135deg, rgba(56,189,248,.95), rgba(34,197,94,.82)); border: 0; color: #00111d; box-shadow: 0 12px 28px rgba(56,189,248,.18); }
+    .danger-btn { background: rgba(251,113,133,.13); border-color: rgba(251,113,133,.35); }
+    .soft-btn:disabled, .primary-btn:disabled, .danger-btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.25fr .75fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+    .hero-card, .panel {
+      background: linear-gradient(180deg, rgba(15,23,42,.92), rgba(2,6,23,.84));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .hero-card { padding: 24px; overflow: hidden; position: relative; }
+    .hero-card::after {
+      content:"";
+      position:absolute; inset:auto -80px -120px auto;
+      width: 280px; height: 280px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(56,189,248,.22), transparent 62%);
+      pointer-events:none;
+    }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      color: var(--accent); font-weight: 850; font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
+      border: 1px solid rgba(56,189,248,.28);
+      background: rgba(56,189,248,.08);
+      border-radius: var(--pill);
+      padding: 6px 10px;
+      margin-bottom: 14px;
+    }
+    .pulse { width: 7px; height: 7px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 18px var(--accent); }
+    h1 { margin: 0; font-size: clamp(30px, 4.8vw, 58px); line-height: .95; letter-spacing: -.07em; }
+    .subtitle { margin: 12px 0 0; color: var(--muted); line-height: 1.65; max-width: 760px; }
+    .hero-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+
+    .stats { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; padding: 18px; }
+    .stat { padding: 16px; border-radius: 18px; background: rgba(2,6,23,.65); border: 1px solid var(--line); }
+    .stat-num { font-size: 28px; font-weight: 950; letter-spacing: -.04em; }
+    .stat-label { color: var(--muted); font-size: 12px; margin-top: 3px; }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1.4fr .7fr .7fr auto;
+      gap: 10px;
+      margin: 18px 0;
+    }
+    .field {
+      background: rgba(2,6,23,.65);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      color: var(--text);
+      padding: 12px 14px;
+      outline: none;
+      width: 100%;
+    }
+    .field:focus { border-color: var(--line2); box-shadow: 0 0 0 4px rgba(56,189,248,.08); }
+    select.field option { background: #020617; color: var(--text); }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .dictionary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .term-card {
+      background: radial-gradient(circle at top left, rgba(56,189,248,.08), transparent 45%), rgba(15,23,42,.75);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      min-height: 188px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 12px 30px rgba(0,0,0,.25);
+    }
+    .term-card:hover { border-color: rgba(56,189,248,.5); transform: translateY(-2px); transition: .12s ease; }
+    .cat { color: var(--accent); font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .13em; margin-bottom: 8px; }
+    .term-title { margin: 0 0 8px; font-size: 17px; letter-spacing: -.02em; line-height: 1.2; }
+    .def { color: var(--muted); font-size: 13px; line-height: 1.48; margin: 0 0 12px; }
+    .aliases { margin-top: auto; display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip { color: #cbd5e1; background: rgba(148,163,184,.1); border: 1px solid rgba(148,163,184,.18); border-radius: var(--pill); padding: 4px 8px; font-size: 11px; }
+    .empty { text-align:center; color: var(--muted); padding: 40px; border: 1px dashed var(--line); border-radius: var(--radius); }
+
+    .quiz-layout { display: grid; grid-template-columns: 360px 1fr; gap: 16px; align-items: start; }
+    .panel { padding: 18px; }
+    .panel h2, .panel h3 { margin: 0 0 10px; letter-spacing: -.03em; }
+    .panel p { color: var(--muted); line-height: 1.55; margin: 0 0 14px; }
+    .form-row { display: grid; gap: 8px; margin: 12px 0; }
+    label { font-size: 12px; color: #cbd5e1; font-weight: 850; }
+    .mini { color: var(--muted2); font-size: 12px; line-height: 1.4; }
+
+    .quiz-card { min-height: 520px; }
+    .progress-wrap { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 14px; }
+    .progress-text { font-size: 13px; color: var(--muted); font-weight: 800; }
+    .bar { height: 10px; flex: 1; border-radius: var(--pill); background: rgba(148,163,184,.12); overflow: hidden; border: 1px solid var(--line); }
+    .bar > div { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width .2s ease; }
+    .question-box {
+      padding: 18px;
+      border-radius: 18px;
+      background: rgba(2,6,23,.55);
+      border: 1px solid var(--line);
+      margin-bottom: 14px;
+    }
+    .question-label { color: var(--accent); font-weight: 900; font-size: 12px; text-transform: uppercase; letter-spacing: .12em; margin-bottom: 8px; }
+    .question { font-size: clamp(22px, 3vw, 34px); line-height: 1.12; letter-spacing: -.05em; font-weight: 950; margin: 0; }
+    .options { display: grid; gap: 10px; }
+    .option {
+      width: 100%;
+      text-align: left;
+      padding: 14px 14px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(15,23,42,.72);
+      color: var(--text);
+      cursor: pointer;
+      line-height: 1.45;
+      transition: border-color .12s ease, background .12s ease, transform .08s ease;
+    }
+    .option:hover { border-color: rgba(56,189,248,.45); transform: translateY(-1px); }
+    .option.correct { border-color: rgba(74,222,128,.75); background: rgba(34,197,94,.16); }
+    .option.wrong { border-color: rgba(251,113,133,.75); background: rgba(251,113,133,.13); }
+    .option.locked { cursor: default; transform:none; }
+    .feedback {
+      display: none;
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(2,6,23,.6);
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .feedback.show { display: block; }
+    .feedback strong { color: var(--text); }
+    .quiz-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+
+    .results { display: none; }
+    .results.show { display: block; }
+    .score-big { font-size: clamp(42px, 7vw, 78px); font-weight: 1000; letter-spacing: -.08em; margin: 0; }
+    .missed-list { display: grid; gap: 10px; margin-top: 14px; max-height: 360px; overflow: auto; padding-right: 4px; }
+    .missed-item { padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: rgba(2,6,23,.45); }
+    .missed-item b { display:block; margin-bottom: 4px; }
+    .missed-item span { color: var(--muted); font-size: 13px; line-height: 1.4; }
+
+    .study-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .flashcard {
+      min-height: 320px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 28px;
+      border-radius: var(--radius);
+      background: radial-gradient(circle at center top, rgba(56,189,248,.13), transparent 45%), rgba(15,23,42,.82);
+      border: 1px solid var(--line);
+      cursor: pointer;
+      user-select: none;
+    }
+    .flashcard .front { font-size: clamp(28px, 5vw, 54px); font-weight: 1000; letter-spacing: -.07em; line-height: 1; }
+    .flashcard .back { display:none; color: #dbeafe; font-size: clamp(18px, 2.5vw, 26px); line-height: 1.35; }
+    .flashcard.flipped .front { display:none; }
+    .flashcard.flipped .back { display:block; }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 980px) {
+      body { padding: 16px; }
+      .topbar { margin: -16px -16px 18px; padding: 12px 16px; }
+      .topbar-inner { align-items: stretch; flex-direction: column; }
+      .tabs { justify-content: stretch; }
+      .tab-btn { flex: 1; }
+      .hero { grid-template-columns: 1fr; }
+      .toolbar { grid-template-columns: 1fr; }
+      .dictionary-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .quiz-layout, .study-grid { grid-template-columns: 1fr; }
+      .quiz-card { min-height: auto; }
+    }
+    @media (max-width: 620px) {
+      .dictionary-grid { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: 1fr 1fr; padding: 14px; }
+      .brand-title { white-space: normal; }
+      .hero-card, .panel { border-radius: 18px; padding: 16px; }
+      .topbar { position: static; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-mark">📚</div>
+        <div>
+          <div class="brand-title">Life Insurance Dictionary + Test Trainer</div>
+          <div class="brand-sub">Standalone • no login • no external files</div>
+        </div>
+      </div>
+      <nav class="tabs" aria-label="App tabs">
+        <button class="tab-btn active" data-tab="dictionary">Dictionary</button>
+        <button class="tab-btn" data-tab="quiz">Test</button>
+        <button class="tab-btn" data-tab="study">Flashcards</button>
+      </nav>
+    </div>
+  </div>
+
+  <main class="app">
+    <section class="hero">
+      <div class="hero-card">
+        <div class="eyebrow"><span class="pulse"></span> Speed-learn the exam vocabulary</div>
+        <h1>Search terms, then test yourself until the misses are gone.</h1>
+        <p class="subtitle">Use the dictionary for fast lookup, the multiple-choice test to define terms, and the missed-only retest button to drill only what you got wrong.</p>
+        <div class="hero-actions">
+          <button class="primary-btn" id="jumpQuizBtn">Start a Test</button>
+          <button class="soft-btn" id="randomTermBtn">Random Term</button>
+          <button class="soft-btn" id="clearSavedMissedBtn">Clear Saved Missed</button>
+        </div>
+      </div>
+      <div class="hero-card stats">
+        <div class="stat"><div class="stat-num" id="totalTerms">0</div><div class="stat-label">terms loaded</div></div>
+        <div class="stat"><div class="stat-num" id="visibleTerms">0</div><div class="stat-label">visible now</div></div>
+        <div class="stat"><div class="stat-num" id="categoryCount">0</div><div class="stat-label">categories</div></div>
+        <div class="stat"><div class="stat-num" id="savedMissedCount">0</div><div class="stat-label">saved missed</div></div>
+      </div>
+    </section>
+
+    <section id="dictionary" class="section active">
+      <div class="toolbar">
+        <input class="field" id="searchInput" type="search" placeholder="Search term, category, definition, or keyword..." autocomplete="off" />
+        <select class="field" id="categoryFilter"><option value="all">All categories</option></select>
+        <select class="field" id="sortMode">
+          <option value="az">Sort A → Z</option>
+          <option value="category">Sort by category</option>
+          <option value="short">Shortest definitions first</option>
+          <option value="long">Longest definitions first</option>
+        </select>
+        <button class="soft-btn" id="quizVisibleBtn">Test Visible</button>
+      </div>
+      <div id="dictionaryGrid" class="dictionary-grid"></div>
+      <div id="noTerms" class="empty hidden">No matching terms. Try a shorter keyword.</div>
+    </section>
+
+    <section id="quiz" class="section">
+      <div class="quiz-layout">
+        <aside class="panel">
+          <h2>Test Setup</h2>
+          <p>Pick how many questions you want. The question shows a term; choose the correct definition.</p>
+          <div class="form-row">
+            <label for="questionCount">Number of questions</label>
+            <input class="field" id="questionCount" type="number" min="1" value="25" />
+            <div class="mini" id="questionCountHint">Choose 1 to all loaded terms.</div>
+          </div>
+          <div class="form-row">
+            <label for="quizSource">Question source</label>
+            <select class="field" id="quizSource">
+              <option value="all">All terms</option>
+              <option value="visible">Current dictionary search/filter</option>
+              <option value="savedMissed">Saved missed terms</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="quizMode">Question style</label>
+            <select class="field" id="quizMode">
+              <option value="termToDefinition">Term → definition</option>
+              <option value="definitionToTerm">Definition → term</option>
+              <option value="mixed">Mixed</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="difficulty">Distractor difficulty</label>
+            <select class="field" id="difficulty">
+              <option value="smart">Smart: same category first</option>
+              <option value="random">Random</option>
+            </select>
+          </div>
+          <button class="primary-btn" id="startQuizBtn" style="width:100%; margin-top:10px;">Start Test</button>
+          <button class="soft-btn" id="startSavedMissedBtn" style="width:100%; margin-top:10px;">Test Saved Missed</button>
+          <p class="mini" style="margin-top:12px;">Tip: miss a question once, then immediately retest only incorrect terms after the final score.</p>
+        </aside>
+
+        <section class="panel quiz-card" id="quizCard">
+          <div id="quizIdle">
+            <h2>Ready when you are.</h2>
+            <p>Start a test from all terms, only the visible dictionary terms, or saved missed terms. After the score screen, hit <b>Retest incorrect now</b> to drill the exact misses.</p>
+          </div>
+
+          <div id="quizActive" class="hidden">
+            <div class="progress-wrap">
+              <div class="progress-text" id="progressText">Question 1 / 25</div>
+              <div class="bar"><div id="progressBar"></div></div>
+              <div class="progress-text" id="liveScore">0 right</div>
+            </div>
+            <div class="question-box">
+              <div class="question-label" id="questionLabel">Choose the definition</div>
+              <h2 class="question" id="questionText"></h2>
+            </div>
+            <div class="options" id="options"></div>
+            <div class="feedback" id="feedback"></div>
+            <div class="quiz-actions">
+              <button class="primary-btn hidden" id="nextBtn">Next</button>
+              <button class="danger-btn" id="endQuizBtn">End Test</button>
+            </div>
+          </div>
+
+          <div id="quizResults" class="results">
+            <p class="score-big" id="scoreBig">0 / 0</p>
+            <p id="scoreSummary"></p>
+            <div class="quiz-actions">
+              <button class="primary-btn" id="retestWrongBtn">Retest incorrect now</button>
+              <button class="soft-btn" id="newTestBtn">New Test</button>
+              <button class="soft-btn" id="reviewMissedBtn">Show missed list</button>
+            </div>
+            <div id="missedList" class="missed-list hidden"></div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section id="study" class="section">
+      <div class="study-grid">
+        <div>
+          <div class="toolbar" style="grid-template-columns:1fr auto; margin-top:0;">
+            <select class="field" id="flashCategory"><option value="all">All categories</option></select>
+            <button class="soft-btn" id="nextFlashBtn">Next Card</button>
+          </div>
+          <div class="flashcard" id="flashcard" tabindex="0" role="button" aria-label="Flashcard: tap to flip">
+            <div class="front" id="flashFront">Tap next card</div>
+            <div class="back" id="flashBack"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Fast study method</h2>
+          <p>Do not read the whole dictionary front-to-back. Search weak categories, test 20–40 questions, then retest missed until zero wrong.</p>
+          <div class="missed-list" id="savedMissedPanel"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const TERMS = [
+  {
+    "term": "1035 Exchange",
+    "category": "Tax Code",
+    "definition": "A tax-free exchange of one life insurance or annuity contract for another similar contract.",
+    "aliases": []
+  },
+  {
+    "term": "401(k) Plan",
+    "category": "Qualified Retirement Plan",
+    "definition": "An employer-sponsored defined contribution retirement plan allowing employees to defer salary into a tax-advantaged account.",
+    "aliases": []
+  },
+  {
+    "term": "403(b) Plan",
+    "category": "Qualified Retirement Plan",
+    "definition": "A retirement plan for certain public school, nonprofit, and tax-exempt organization employees.",
+    "aliases": []
+  },
+  {
+    "term": "457 Plan",
+    "category": "Retirement Plan",
+    "definition": "A deferred compensation plan often offered by government and certain nonprofit employers.",
+    "aliases": []
+  },
+  {
+    "term": "Absolute Assignment",
+    "category": "Policy Rights",
+    "definition": "A permanent transfer of all ownership rights of a life insurance policy to another person or entity.",
+    "aliases": []
+  },
+  {
+    "term": "Accelerated Death Benefit",
+    "category": "Benefit / Rider",
+    "definition": "Allows an insured to access part of the death benefit while still alive if diagnosed with a terminal or qualifying illness.",
+    "aliases": [
+      "living benefit",
+      "terminal illness",
+      "ADB rider"
+    ]
+  },
+  {
+    "term": "Accident and Health Insurance",
+    "category": "Health Insurance",
+    "definition": "Insurance designed to cover losses caused by accidental injury, sickness, disability, medical expense, or related health events.",
+    "aliases": [
+      "A&H",
+      "health insurance",
+      "sickness and accident"
+    ]
+  },
+  {
+    "term": "Accidental Death and Dismemberment (AD&D)",
+    "category": "Health / Accident Benefit",
+    "definition": "Coverage that pays a benefit for accidental death, loss of limbs, loss of sight, or other listed accidental losses.",
+    "aliases": []
+  },
+  {
+    "term": "Accidental Death Benefit (ADB)",
+    "category": "Rider",
+    "definition": "A rider that pays an additional amount if the insured's death results from an accident, as defined in the policy.",
+    "aliases": [
+      "double indemnity",
+      "accident rider"
+    ]
+  },
+  {
+    "term": "Accumulation Period",
+    "category": "Annuity Phase",
+    "definition": "The period before annuity payments begin, when premiums and interest are building value inside the annuity.",
+    "aliases": []
+  },
+  {
+    "term": "Accumulation Unit",
+    "category": "Variable Annuity",
+    "definition": "A unit used to measure a variable annuity owner’s interest during the accumulation period. Its value changes with separate account performance.",
+    "aliases": []
+  },
+  {
+    "term": "Actual Cash Value",
+    "category": "Property / Claims Concept",
+    "definition": "The value of property at the time of loss, usually replacement cost minus depreciation. Useful contrast: life insurance pays a stated death benefit, not ACV.",
+    "aliases": []
+  },
+  {
+    "term": "Actuarial",
+    "category": "Pricing / Math",
+    "definition": "Relating to the statistical and mathematical methods insurers use to calculate risk, premiums, and reserves.",
+    "aliases": []
+  },
+  {
+    "term": "Actuary",
+    "category": "Insurance Company Role",
+    "definition": "A professional who uses statistics and probability to calculate premiums, reserves, mortality assumptions, and insurer financial risk.",
+    "aliases": []
+  },
+  {
+    "term": "Adhesion",
+    "category": "Contract Law",
+    "definition": "A contract written entirely by one party (the insurer). Ambiguities are interpreted in favor of the insured.",
+    "aliases": []
+  },
+  {
+    "term": "Adjustable Life Insurance",
+    "category": "Policy Type",
+    "definition": "A flexible life policy that lets the policyowner change the premium, face amount, or protection period, usually subject to insurer rules and insurability.",
+    "aliases": []
+  },
+  {
+    "term": "Administrative Services Only (ASO)",
+    "category": "Group Health Plan",
+    "definition": "An arrangement where an insurer or third-party administrator handles claims and paperwork for a self-funded employer plan without insuring the risk.",
+    "aliases": []
+  },
+  {
+    "term": "Admitted Insurer",
+    "category": "Insurer Authorization",
+    "definition": "An insurer authorized by the state insurance department to transact insurance in that state. Also called an authorized insurer.",
+    "aliases": []
+  },
+  {
+    "term": "Adult Day Care",
+    "category": "Long-Term Care",
+    "definition": "A long-term care service that provides supervised care, social activities, and sometimes health services during the day outside the home.",
+    "aliases": []
+  },
+  {
+    "term": "Adverse Selection",
+    "category": "Underwriting Concept",
+    "definition": "The tendency of individuals with higher-than-average risk to seek insurance more often than those with lower risk, potentially leading to insurer losses. Underwriting controls adverse selection.",
+    "aliases": []
+  },
+  {
+    "term": "Adversity",
+    "category": "General Term",
+    "definition": "A condition of hardship, difficulty, or misfortune. Not an insurance exam term but used to describe challenging circumstances affecting individuals or families.",
+    "aliases": []
+  },
+  {
+    "term": "Age Change",
+    "category": "Underwriting / Rating",
+    "definition": "The point at which an insurer treats an applicant as the next higher age for premium calculation, often based on nearest birthday or last birthday rules.",
+    "aliases": []
+  },
+  {
+    "term": "Agent",
+    "category": "Insurance Role",
+    "definition": "A licensed producer who generally represents the insurer and has authority to sell, solicit, or negotiate insurance.",
+    "aliases": []
+  },
+  {
+    "term": "Aleatory",
+    "category": "Contract Law",
+    "definition": "A contract where the exchange of value is unequal; the insurer may pay far more in claims than the insured paid in premiums.",
+    "aliases": []
+  },
+  {
+    "term": "Aleatory Contract",
+    "category": "Contract Law",
+    "definition": "A contract in which the exchange of value is unequal. The insured may pay relatively small premiums while the insurer may pay out a much larger benefit, depending on uncertain events.",
+    "aliases": []
+  },
+  {
+    "term": "Alien Insurer",
+    "category": "Insurer Domicile",
+    "definition": "An insurer formed under the laws of another country, even if it is authorized to do business in the state.",
+    "aliases": []
+  },
+  {
+    "term": "Ambiguity",
+    "category": "Contract Interpretation",
+    "definition": "A situation where wording in an insurance contract can be interpreted in more than one way. Under the doctrine of adhesion, any ambiguity is interpreted in favor of the insured, not the insurer.",
+    "aliases": []
+  },
+  {
+    "term": "Annual Renewable Term",
+    "category": "Term Life",
+    "definition": "A one-year term life policy that may be renewed each year without proof of insurability, with premiums usually increasing annually.",
+    "aliases": []
+  },
+  {
+    "term": "Annuitant",
+    "category": "Annuity Parties",
+    "definition": "The person whose life expectancy is used to determine annuity payments. The annuitant may or may not be the owner.",
+    "aliases": []
+  },
+  {
+    "term": "Annuitization",
+    "category": "Annuity Phase",
+    "definition": "The process of converting an annuity’s accumulated value into a stream of income payments.",
+    "aliases": []
+  },
+  {
+    "term": "Annuity",
+    "category": "Insurance Product",
+    "definition": "A contract between an individual and an insurer designed to accumulate funds and then distribute income, often used to provide retirement income.",
+    "aliases": []
+  },
+  {
+    "term": "Annuity Beneficiary",
+    "category": "Annuity Parties",
+    "definition": "The person or entity that receives any remaining annuity value or death benefit after the owner or annuitant dies, depending on contract terms.",
+    "aliases": []
+  },
+  {
+    "term": "Annuity Certain",
+    "category": "Annuity Payout Option",
+    "definition": "An annuity payout that guarantees payments for a fixed period, whether or not the annuitant is alive.",
+    "aliases": []
+  },
+  {
+    "term": "Annuity Unit",
+    "category": "Variable Annuity",
+    "definition": "A unit used to determine the amount of each variable annuity payment after annuitization. Unit values fluctuate with separate account performance.",
+    "aliases": []
+  },
+  {
+    "term": "Apparent Authority",
+    "category": "Agency Law",
+    "definition": "Authority the public reasonably believes an agent has because of the insurer’s actions, even if it was not expressly granted.",
+    "aliases": []
+  },
+  {
+    "term": "Applicant",
+    "category": "Application Parties",
+    "definition": "The person or entity applying for an insurance policy. The applicant may be the insured, owner, or both.",
+    "aliases": []
+  },
+  {
+    "term": "Application",
+    "category": "Underwriting",
+    "definition": "The form completed by the applicant that gives the insurer information used to underwrite and issue the policy.",
+    "aliases": []
+  },
+  {
+    "term": "Appointment",
+    "category": "Producer Licensing",
+    "definition": "The authorization from an insurer allowing a producer to act on that insurer’s behalf.",
+    "aliases": []
+  },
+  {
+    "term": "APS (Attending Physician Statement)",
+    "category": "Underwriting",
+    "definition": "A medical report requested from the applicant's doctor to clarify or verify health information.",
+    "aliases": []
+  },
+  {
+    "term": "Assignment",
+    "category": "Policy Rights",
+    "definition": "The transfer of policy ownership rights from one person or entity to another. It may be absolute or collateral.",
+    "aliases": []
+  },
+  {
+    "term": "Authorized Insurer",
+    "category": "Insurer Authorization",
+    "definition": "An insurer that has received a certificate of authority from the state to transact insurance there. Also called admitted.",
+    "aliases": []
+  },
+  {
+    "term": "Automatic Premium Loan (APL)",
+    "category": "Policy Loan Provision",
+    "definition": "A provision that automatically uses available cash value to pay overdue premiums and prevent lapse.",
+    "aliases": []
+  },
+  {
+    "term": "Backdating",
+    "category": "Application / Premium",
+    "definition": "Making a policy effective on an earlier date, usually to save age and get a lower premium, subject to state limits.",
+    "aliases": []
+  },
+  {
+    "term": "Basic Medical Expense Policy",
+    "category": "Health Insurance",
+    "definition": "A health policy that pays specific benefits for basic hospital, surgical, and physician expenses, often with lower limits than major medical.",
+    "aliases": []
+  },
+  {
+    "term": "Beneficiary",
+    "category": "Parties",
+    "definition": "The person or entity designated to receive the death benefit when the insured dies.",
+    "aliases": []
+  },
+  {
+    "term": "Benefit Period",
+    "category": "Health / Disability",
+    "definition": "The length of time policy benefits are payable after a covered loss begins, such as two years, five years, to age 65, or lifetime.",
+    "aliases": []
+  },
+  {
+    "term": "Binding Receipt",
+    "category": "Underwriting / Receipt",
+    "definition": "A receipt that provides temporary coverage immediately at application, even before underwriting is complete, subject to company rules.",
+    "aliases": []
+  },
+  {
+    "term": "Blackout Period",
+    "category": "Social Security / Planning",
+    "definition": "A period when a surviving spouse may not qualify for Social Security survivor benefits after dependent children are no longer eligible and before the spouse reaches eligibility age.",
+    "aliases": []
+  },
+  {
+    "term": "Boycott, Coercion, and Intimidation",
+    "category": "Unfair Trade Practice",
+    "definition": "Illegal practices that use pressure, threats, or coordinated refusal to force someone to buy, sell, or avoid insurance.",
+    "aliases": []
+  },
+  {
+    "term": "Brand-Name Drug",
+    "category": "Health Insurance",
+    "definition": "A prescription drug sold under a trade name. Health plans often charge higher cost sharing for brand drugs than generic drugs.",
+    "aliases": []
+  },
+  {
+    "term": "Broker",
+    "category": "Producer Type",
+    "definition": "An insurance producer who legally represents the insured, not the insurer, in placing insurance.",
+    "aliases": []
+  },
+  {
+    "term": "Buyer’s Guide",
+    "category": "Disclosure",
+    "definition": "A consumer disclosure document explaining basic life insurance or annuity concepts so buyers can compare products before purchase.",
+    "aliases": []
+  },
+  {
+    "term": "Cancelable Policy",
+    "category": "Health Policy Renewability",
+    "definition": "A health policy the insurer may terminate at any time by giving proper notice, usually with premium refund for unused coverage.",
+    "aliases": []
+  },
+  {
+    "term": "Capitation",
+    "category": "Managed Care",
+    "definition": "A payment system where a provider is paid a fixed amount per patient, regardless of how many services the patient uses.",
+    "aliases": []
+  },
+  {
+    "term": "Cash Dividend Option",
+    "category": "Dividend Option",
+    "definition": "A dividend option where the insurer pays the policyowner the dividend directly in cash.",
+    "aliases": []
+  },
+  {
+    "term": "Cash Surrender Value",
+    "category": "Policy Value",
+    "definition": "The amount the policyowner receives if the policy is voluntarily terminated and surrendered back to the insurer.",
+    "aliases": []
+  },
+  {
+    "term": "Cash Value",
+    "category": "Policy Value",
+    "definition": "The savings component inside permanent life policies that grows tax-deferred and can be accessed through loans or surrender.",
+    "aliases": [
+      "savings component",
+      "permanent insurance value"
+    ]
+  },
+  {
+    "term": "Certificate of Authority",
+    "category": "Insurer Authorization",
+    "definition": "The state-issued license that allows an insurance company to transact insurance in that state.",
+    "aliases": []
+  },
+  {
+    "term": "Certificate of Insurance",
+    "category": "Group Insurance",
+    "definition": "The document given to a group insured person describing their coverage under the master policy.",
+    "aliases": []
+  },
+  {
+    "term": "Children’s Term Rider",
+    "category": "Rider",
+    "definition": "A rider that provides term life coverage on the insured’s children, often convertible to permanent coverage later.",
+    "aliases": []
+  },
+  {
+    "term": "Claim",
+    "category": "Claims",
+    "definition": "A formal request for payment under an insurance policy after a covered loss occurs.",
+    "aliases": []
+  },
+  {
+    "term": "Class Designation",
+    "category": "Beneficiaries",
+    "definition": "Naming beneficiaries as a group, such as children of the insured, rather than naming each person individually.",
+    "aliases": []
+  },
+  {
+    "term": "Closed Panel HMO",
+    "category": "Managed Care",
+    "definition": "An HMO model where members generally must use a limited network of employed or contracted providers.",
+    "aliases": []
+  },
+  {
+    "term": "COBRA",
+    "category": "Federal Health Law",
+    "definition": "A federal law that allows eligible employees and dependents to continue group health coverage for a limited time after certain qualifying events.",
+    "aliases": []
+  },
+  {
+    "term": "Coinsurance",
+    "category": "Health Cost Sharing",
+    "definition": "The percentage split of covered medical expenses between the insurer and insured after the deductible is met, such as 80/20.",
+    "aliases": []
+  },
+  {
+    "term": "Collateral Assignment",
+    "category": "Policy Rights",
+    "definition": "A temporary transfer of some policy rights to a lender as security for a loan.",
+    "aliases": []
+  },
+  {
+    "term": "Commissioner / Director / Superintendent",
+    "category": "Insurance Regulation",
+    "definition": "The head of a state insurance department responsible for enforcing insurance laws, licensing, company oversight, and market conduct.",
+    "aliases": []
+  },
+  {
+    "term": "Common Disaster Clause",
+    "category": "Beneficiary Clause",
+    "definition": "A provision that states how proceeds are paid if the insured and primary beneficiary die in the same accident or within a short time of each other.",
+    "aliases": []
+  },
+  {
+    "term": "Comprehensive Major Medical",
+    "category": "Health Insurance",
+    "definition": "A health policy combining basic medical coverage and major medical protection into one plan with deductibles, coinsurance, and broad benefits.",
+    "aliases": []
+  },
+  {
+    "term": "Concealment",
+    "category": "Legal / Underwriting",
+    "definition": "Withholding a material fact that would affect the insurer’s underwriting decision.",
+    "aliases": []
+  },
+  {
+    "term": "Conditional Contract",
+    "category": "Contract Law",
+    "definition": "A contract where the insurer's obligation to pay a benefit is dependent on certain conditions being met, such as timely premium payment and proof of loss.",
+    "aliases": []
+  },
+  {
+    "term": "Conditional Receipt",
+    "category": "Underwriting / Receipt",
+    "definition": "A receipt stating that coverage is effective only if the applicant is later found to meet the insurer's underwriting requirements.",
+    "aliases": []
+  },
+  {
+    "term": "Conditional Renewal",
+    "category": "Health Policy Renewability",
+    "definition": "A renewability provision allowing the insurer to refuse renewal only under stated conditions listed in the policy.",
+    "aliases": []
+  },
+  {
+    "term": "Consideration",
+    "category": "Contract Element",
+    "definition": "The value each party gives: the insured's premium and truthful application, and the insurer's promise to pay according to the policy.",
+    "aliases": []
+  },
+  {
+    "term": "Contestability Period",
+    "category": "Policy Clause",
+    "definition": "A period, usually two years, during which the insurer can rescind coverage or deny a claim due to material misrepresentation.",
+    "aliases": [
+      "two year contestable",
+      "material misrepresentation"
+    ]
+  },
+  {
+    "term": "Contingent Beneficiary",
+    "category": "Beneficiaries",
+    "definition": "The backup beneficiary who receives proceeds if the primary beneficiary dies before the insured or cannot receive the benefit.",
+    "aliases": []
+  },
+  {
+    "term": "Contributory Life Plans",
+    "category": "Group Insurance",
+    "definition": "Group life insurance plans in which employees pay all or part of the premium, typically requiring a higher participation rate to be issued.",
+    "aliases": []
+  },
+  {
+    "term": "Controlled Business",
+    "category": "Producer Regulation",
+    "definition": "Insurance written primarily on the producer, the producer’s family, employer, or business associates, which may be restricted by state law.",
+    "aliases": []
+  },
+  {
+    "term": "Conversion Privilege",
+    "category": "Policy Feature",
+    "definition": "The right to convert coverage, often term or group life, to an individual permanent policy without proof of insurability.",
+    "aliases": []
+  },
+  {
+    "term": "Convertibility",
+    "category": "Policy Feature",
+    "definition": "Allows a term policy to be converted into permanent insurance without proof of insurability.",
+    "aliases": []
+  },
+  {
+    "term": "Copayment",
+    "category": "Health Cost Sharing",
+    "definition": "A fixed dollar amount the insured pays for a covered service, such as a doctor visit or prescription.",
+    "aliases": []
+  },
+  {
+    "term": "Corridor",
+    "category": "Universal Life / Tax",
+    "definition": "The gap required between a life policy’s cash value and death benefit so the policy remains life insurance for tax purposes.",
+    "aliases": []
+  },
+  {
+    "term": "Cost of Insurance (COI)",
+    "category": "Universal Life Charges",
+    "definition": "The monthly mortality charge deducted from a universal life policy to pay for the pure insurance protection.",
+    "aliases": []
+  },
+  {
+    "term": "Credit Life Insurance",
+    "category": "Policy Type",
+    "definition": "Life insurance designed to pay off a specific debt if the debtor dies. The creditor is usually the beneficiary.",
+    "aliases": []
+  },
+  {
+    "term": "Critical Illness Policy",
+    "category": "Limited Health Policy",
+    "definition": "A policy that pays a lump sum or specified benefit when the insured is diagnosed with a covered serious illness such as cancer, heart attack, or stroke.",
+    "aliases": []
+  },
+  {
+    "term": "Custodial Care",
+    "category": "Long-Term Care",
+    "definition": "Care that helps with activities of daily living and personal needs but does not require skilled medical training.",
+    "aliases": []
+  },
+  {
+    "term": "Death Benefit",
+    "category": "Core Benefit",
+    "definition": "The amount paid to the beneficiary when the insured dies while the policy is in force.",
+    "aliases": []
+  },
+  {
+    "term": "Decreasing Term Insurance",
+    "category": "Term Life",
+    "definition": "Term life insurance with a death benefit that decreases over time, often used to cover a shrinking debt like a mortgage.",
+    "aliases": []
+  },
+  {
+    "term": "Deductible",
+    "category": "Health Cost Sharing",
+    "definition": "The amount the insured must pay for covered expenses before the insurer begins paying benefits.",
+    "aliases": []
+  },
+  {
+    "term": "Defamation",
+    "category": "Unfair Trade Practice",
+    "definition": "Making false or malicious statements intended to harm the reputation of an insurer or producer.",
+    "aliases": []
+  },
+  {
+    "term": "Deferred Annuity",
+    "category": "Annuity Type",
+    "definition": "An annuity that accumulates value during an accumulation period and begins payments at a later date during the distribution period.",
+    "aliases": []
+  },
+  {
+    "term": "Deferred Compensation Plan",
+    "category": "Business / Retirement Plan",
+    "definition": "An arrangement where an employee or executive delays receipt of income until a future date, often retirement.",
+    "aliases": []
+  },
+  {
+    "term": "Defined Benefit Plan",
+    "category": "Qualified Retirement Plan",
+    "definition": "A retirement plan promising a specified benefit at retirement, usually based on salary and years of service.",
+    "aliases": []
+  },
+  {
+    "term": "Defined Contribution Plan",
+    "category": "Qualified Retirement Plan",
+    "definition": "A retirement plan where contributions are defined, but the final benefit depends on account performance. Examples include 401(k) plans.",
+    "aliases": []
+  },
+  {
+    "term": "Dental Indemnity Plan",
+    "category": "Dental Insurance",
+    "definition": "A dental plan that reimburses covered dental expenses, often allowing the insured to choose any dentist.",
+    "aliases": []
+  },
+  {
+    "term": "Dependent",
+    "category": "Health Insurance Parties",
+    "definition": "A person, such as a spouse or child, eligible for coverage under another person’s insurance plan.",
+    "aliases": []
+  },
+  {
+    "term": "Disability Income Insurance",
+    "category": "Disability Insurance",
+    "definition": "Insurance that replaces part of the insured’s income when sickness or injury prevents the insured from working.",
+    "aliases": []
+  },
+  {
+    "term": "Distribution Period",
+    "category": "Annuity Phase",
+    "definition": "The payout or annuitization phase of an annuity when the accumulated value is paid out to the annuitant as income.",
+    "aliases": []
+  },
+  {
+    "term": "Dividends",
+    "category": "Participating Policy",
+    "definition": "Refunds of excess premium on participating policies. Not guaranteed and not considered taxable income when treated as a return of premium.",
+    "aliases": []
+  },
+  {
+    "term": "Domestic Insurer",
+    "category": "Insurer Domicile",
+    "definition": "An insurer formed under the laws of the state where it is doing business.",
+    "aliases": []
+  },
+  {
+    "term": "Dread Disease Policy",
+    "category": "Limited Health Policy",
+    "definition": "A limited health policy that covers a specific disease or group of diseases, such as cancer-only coverage.",
+    "aliases": []
+  },
+  {
+    "term": "Elimination Period",
+    "category": "Disability / LTC",
+    "definition": "A waiting period after a covered disability or long-term care need begins before benefits become payable.",
+    "aliases": []
+  },
+  {
+    "term": "Emergency Room Benefit",
+    "category": "Health Benefit",
+    "definition": "A benefit that pays for covered emergency room treatment, often subject to copays, deductibles, or medical necessity rules.",
+    "aliases": []
+  },
+  {
+    "term": "Endowment",
+    "category": "Policy Type",
+    "definition": "A policy designed to pay the face amount either at the insured's death or at the end of a specified period or age.",
+    "aliases": []
+  },
+  {
+    "term": "Entire Contract Clause",
+    "category": "Policy Clause",
+    "definition": "A clause stating that the policy and attached application make up the entire insurance contract.",
+    "aliases": []
+  },
+  {
+    "term": "Equity Indexed Annuity",
+    "category": "Annuity Type",
+    "definition": "A fixed annuity that credits interest based partly on a market index while usually guaranteeing a minimum value.",
+    "aliases": []
+  },
+  {
+    "term": "ERISA",
+    "category": "Federal Retirement Law",
+    "definition": "A federal law that sets standards for many employer-sponsored retirement and welfare benefit plans.",
+    "aliases": []
+  },
+  {
+    "term": "Essential Health Benefits",
+    "category": "Health Insurance Law",
+    "definition": "Core categories of health benefits required in many individual and small group health plans under federal law.",
+    "aliases": []
+  },
+  {
+    "term": "Evidence of Insurability",
+    "category": "Underwriting",
+    "definition": "Information, such as medical history and exams, used by underwriters to assess the risk of an applicant.",
+    "aliases": []
+  },
+  {
+    "term": "Exclusion Ratio",
+    "category": "Taxation",
+    "definition": "The formula used to determine how much of each annuity payment is taxable versus tax-free return of principal.",
+    "aliases": []
+  },
+  {
+    "term": "Exclusions",
+    "category": "Policy Limitation",
+    "definition": "Specific conditions, losses, or circumstances the policy does not cover.",
+    "aliases": []
+  },
+  {
+    "term": "Exclusive Provider Organization (EPO)",
+    "category": "Managed Care",
+    "definition": "A managed care plan that generally covers services only from network providers, except emergencies.",
+    "aliases": []
+  },
+  {
+    "term": "Expense Loading",
+    "category": "Premium / Pricing",
+    "definition": "The part of the gross premium added to cover insurer operating expenses, commissions, taxes, and profit margin.",
+    "aliases": []
+  },
+  {
+    "term": "Express Authority",
+    "category": "Agency Law",
+    "definition": "Authority specifically granted to an agent by the insurer in the agency contract or appointment.",
+    "aliases": []
+  },
+  {
+    "term": "Extended Term Insurance",
+    "category": "Nonforfeiture Option",
+    "definition": "Uses the cash value to buy a term policy of the same face amount for as long as the cash value allows.",
+    "aliases": []
+  },
+  {
+    "term": "Face Amount",
+    "category": "Life Policy Value",
+    "definition": "The amount of insurance stated on the policy, usually the death benefit before adjustments for loans, riders, or options.",
+    "aliases": []
+  },
+  {
+    "term": "Facility of Payment Clause",
+    "category": "Policy Clause",
+    "definition": "A provision allowing the insurer to pay a small death benefit to someone who appears equitably entitled, such as a relative who paid final expenses.",
+    "aliases": []
+  },
+  {
+    "term": "Fair Credit Reporting Act (FCRA)",
+    "category": "Federal Regulation",
+    "definition": "A federal law that regulates how insurers and other entities collect and use consumer credit and investigative reports. It requires disclosure, written authorization for investigative reports, and the right for consumers to know and correct information.",
+    "aliases": []
+  },
+  {
+    "term": "Fiduciary Responsibility",
+    "category": "Producer Ethics",
+    "definition": "The duty to handle premiums and client funds with trust, care, and separation from personal funds.",
+    "aliases": []
+  },
+  {
+    "term": "Fixed Amount Settlement Option",
+    "category": "Settlement Option",
+    "definition": "A settlement option where the insurer pays a fixed dollar amount at regular intervals until the proceeds and interest are exhausted.",
+    "aliases": []
+  },
+  {
+    "term": "Fixed Annuity",
+    "category": "Annuity Type",
+    "definition": "An annuity with guaranteed interest rates and fixed payments; the insurer bears the investment risk.",
+    "aliases": []
+  },
+  {
+    "term": "Fixed Period Settlement Option",
+    "category": "Settlement Option",
+    "definition": "A settlement option where proceeds are paid over a chosen period, with each payment amount determined by the fund and interest.",
+    "aliases": []
+  },
+  {
+    "term": "Flexible Premium",
+    "category": "Premium Structure",
+    "definition": "A premium structure allowing the policyowner to vary payment amounts or timing, subject to minimums needed to keep the policy active.",
+    "aliases": []
+  },
+  {
+    "term": "Flexible Premium Deferred Annuity (FPDA)",
+    "category": "Annuity Type",
+    "definition": "A deferred annuity funded by flexible premium payments over time.",
+    "aliases": []
+  },
+  {
+    "term": "Foreign Insurer",
+    "category": "Insurer Domicile",
+    "definition": "An insurer formed under the laws of another state within the United States.",
+    "aliases": []
+  },
+  {
+    "term": "Formulary",
+    "category": "Prescription Drug Plan",
+    "definition": "A list of prescription drugs covered by a health plan, often divided into cost tiers.",
+    "aliases": []
+  },
+  {
+    "term": "Fraternal Benefit Society",
+    "category": "Insurer Type",
+    "definition": "A membership-based organization that provides insurance benefits to its members. Fraternals operate on a nonprofit basis, are often tied to a lodge or religious/ethnic group, and issue certificates instead of traditional policies.",
+    "aliases": []
+  },
+  {
+    "term": "Fraud",
+    "category": "Legal / Misconduct",
+    "definition": "Intentional misrepresentation or concealment of a material fact. It can void a policy even after the contestability period.",
+    "aliases": []
+  },
+  {
+    "term": "Free Examination Period",
+    "category": "Policy Right",
+    "definition": "Another name for the free-look period, when the policyowner may return the policy for a refund.",
+    "aliases": []
+  },
+  {
+    "term": "Free Look",
+    "category": "Consumer Protection",
+    "definition": "A mandatory period, usually 10–30 days, where the client can cancel the policy for a full refund.",
+    "aliases": []
+  },
+  {
+    "term": "Free-Look Period",
+    "category": "Policy Right",
+    "definition": "A required period, typically 10–30 days, during which the policyowner may cancel the policy for a full refund.",
+    "aliases": [
+      "right to examine",
+      "free examination"
+    ]
+  },
+  {
+    "term": "Fully Insured Group Plan",
+    "category": "Group Health Plan",
+    "definition": "A group plan where the employer pays premiums to an insurer, and the insurer assumes the claim risk.",
+    "aliases": []
+  },
+  {
+    "term": "Gatekeeper",
+    "category": "Managed Care",
+    "definition": "A primary care physician or plan process that controls access to specialists and certain services.",
+    "aliases": []
+  },
+  {
+    "term": "Generic Drug",
+    "category": "Prescription Drug Plan",
+    "definition": "A drug with the same active ingredient as a brand-name drug, usually available at lower cost.",
+    "aliases": []
+  },
+  {
+    "term": "Grace Period",
+    "category": "Policy Clause",
+    "definition": "A time period, usually 30 or 31 days, after a premium due date during which coverage continues even if the premium has not yet been paid.",
+    "aliases": [
+      "late premium",
+      "31 days"
+    ]
+  },
+  {
+    "term": "Grace Period Provision",
+    "category": "Policy Clause",
+    "definition": "A provision giving the insured extra time after a premium due date to pay before the policy lapses.",
+    "aliases": []
+  },
+  {
+    "term": "Graded Death Benefit",
+    "category": "Life Policy Feature",
+    "definition": "A death benefit structure where full benefits are not payable immediately for non-accidental death, often used in final expense or guaranteed issue products.",
+    "aliases": []
+  },
+  {
+    "term": "Graded Premium Whole Life",
+    "category": "Policy Type",
+    "definition": "Whole life insurance with premiums that start lower and increase over a set period before becoming level.",
+    "aliases": []
+  },
+  {
+    "term": "Gross Premium",
+    "category": "Premium",
+    "definition": "The total premium charged, including the cost of mortality, expenses, and other loading factors.",
+    "aliases": []
+  },
+  {
+    "term": "Group Disability Insurance",
+    "category": "Group Insurance",
+    "definition": "Disability income coverage issued to a group, often through an employer, covering eligible members under a master policy.",
+    "aliases": []
+  },
+  {
+    "term": "Group Life Insurance",
+    "category": "Group Insurance",
+    "definition": "Life insurance covering multiple people under one master policy, often employer-sponsored, with certificates issued to insured members.",
+    "aliases": []
+  },
+  {
+    "term": "Guarantee",
+    "category": "Contract Feature",
+    "definition": "A promise written into the policy ensuring that certain values or benefits—such as premium, cash value growth, or death benefit—will not change regardless of market conditions.",
+    "aliases": []
+  },
+  {
+    "term": "Guaranteed Insurability Rider",
+    "category": "Rider",
+    "definition": "A rider allowing the insured to buy additional insurance at specified times without proving insurability.",
+    "aliases": []
+  },
+  {
+    "term": "Guaranteed Renewable Policy",
+    "category": "Health Policy Renewability",
+    "definition": "A health policy the insurer must renew as long as premiums are paid, but the insurer may increase premiums by class.",
+    "aliases": []
+  },
+  {
+    "term": "Hazard",
+    "category": "Risk Concept",
+    "definition": "A condition that increases the likelihood or severity of a loss, such as poor health, dangerous occupation, or risky habits.",
+    "aliases": []
+  },
+  {
+    "term": "Health Maintenance Organization (HMO)",
+    "category": "Managed Care",
+    "definition": "A managed care organization that provides or arranges health services through a network, usually emphasizing primary care and referrals.",
+    "aliases": []
+  },
+  {
+    "term": "Health Reimbursement Arrangement (HRA)",
+    "category": "Health Spending Account",
+    "definition": "An employer-funded arrangement that reimburses employees for qualified medical expenses under plan rules.",
+    "aliases": []
+  },
+  {
+    "term": "Health Savings Account (HSA)",
+    "category": "Health Spending Account",
+    "definition": "A tax-advantaged account paired with a qualified high-deductible health plan, used to pay qualified medical expenses.",
+    "aliases": []
+  },
+  {
+    "term": "High-Deductible Health Plan (HDHP)",
+    "category": "Health Plan Type",
+    "definition": "A health plan with higher deductibles that may allow HSA eligibility if it meets federal requirements.",
+    "aliases": []
+  },
+  {
+    "term": "HIPAA",
+    "category": "Federal Health Law",
+    "definition": "A federal law dealing with health insurance portability, privacy, protected health information, and administrative standards.",
+    "aliases": []
+  },
+  {
+    "term": "Home Health Care",
+    "category": "Long-Term Care",
+    "definition": "Skilled or supportive health services provided in the insured’s home.",
+    "aliases": []
+  },
+  {
+    "term": "Hospital Expense Insurance",
+    "category": "Health Insurance",
+    "definition": "Basic medical coverage that pays for hospital room, board, and related inpatient expenses.",
+    "aliases": []
+  },
+  {
+    "term": "Hospital Indemnity Policy",
+    "category": "Limited Health Policy",
+    "definition": "A policy that pays a stated amount per day, week, or month while the insured is hospitalized, regardless of actual medical bills.",
+    "aliases": []
+  },
+  {
+    "term": "Human Life Value",
+    "category": "Needs Analysis",
+    "definition": "A method of estimating insurance needs based on the economic value a person provides over their working lifetime.",
+    "aliases": []
+  },
+  {
+    "term": "Illegal Inducement",
+    "category": "Illegal Practice",
+    "definition": "Offering or providing anything of value not stated in the insurance contract to persuade someone to purchase, lapse, or replace an insurance policy. Illegal inducements are prohibited under insurance law.",
+    "aliases": []
+  },
+  {
+    "term": "Illustration",
+    "category": "Policy Disclosure",
+    "definition": "A presentation or projection of how a policy may perform in the future. Contains both guaranteed and non-guaranteed elements.",
+    "aliases": []
+  },
+  {
+    "term": "Immediate Annuity",
+    "category": "Annuity Type",
+    "definition": "An annuity that begins paying income shortly after a lump-sum premium is paid, typically within one year.",
+    "aliases": []
+  },
+  {
+    "term": "Implied Authority",
+    "category": "Agency Law",
+    "definition": "Authority an agent reasonably needs to carry out express duties, even if not specifically written.",
+    "aliases": []
+  },
+  {
+    "term": "Incontestability Clause",
+    "category": "Policy Clause",
+    "definition": "A clause stating that after a set period (usually two years), the insurer cannot void the policy for misrepresentations, except in cases of fraud.",
+    "aliases": [
+      "cannot void after two years",
+      "contestability limit"
+    ]
+  },
+  {
+    "term": "Increased Cost of Living Rider",
+    "category": "Disability Rider",
+    "definition": "A rider that increases disability income benefits to help offset inflation, often tied to a cost-of-living index.",
+    "aliases": []
+  },
+  {
+    "term": "Increasing Term Insurance",
+    "category": "Term Life",
+    "definition": "Term insurance where the death benefit increases over time, often used as a rider or inflation protection.",
+    "aliases": []
+  },
+  {
+    "term": "Indemnity Plan",
+    "category": "Health Plan Type",
+    "definition": "A plan that reimburses covered losses according to policy terms and may allow broad provider choice.",
+    "aliases": []
+  },
+  {
+    "term": "Indexed Annuity",
+    "category": "Annuity Type",
+    "definition": "An annuity where returns are tied to a market index such as the S&P 500, offering limited upside with principal protection.",
+    "aliases": []
+  },
+  {
+    "term": "Individual Retirement Account (IRA)",
+    "category": "Retirement Plan",
+    "definition": "A personal retirement account with tax advantages, subject to contribution, distribution, and penalty rules.",
+    "aliases": []
+  },
+  {
+    "term": "Inflation Protection Rider",
+    "category": "LTC / Disability Rider",
+    "definition": "A rider that increases benefits over time to help keep pace with rising costs.",
+    "aliases": []
+  },
+  {
+    "term": "Insolvent",
+    "category": "Financial Condition",
+    "definition": "A situation where an insurer's liabilities are greater than its assets, so it cannot meet its financial obligations as they come due.",
+    "aliases": []
+  },
+  {
+    "term": "Insurable Interest",
+    "category": "Legal Requirement",
+    "definition": "A financial or emotional relationship where the policyowner would suffer a loss from the insured's death. Must exist at policy issue.",
+    "aliases": []
+  },
+  {
+    "term": "Insured",
+    "category": "Parties",
+    "definition": "The person whose life, health, or risk is covered by the policy.",
+    "aliases": []
+  },
+  {
+    "term": "Insuring Clause",
+    "category": "Policy Clause",
+    "definition": "The clause stating the insurer’s basic promise to pay benefits for covered losses under the policy.",
+    "aliases": []
+  },
+  {
+    "term": "Interest-Only Option",
+    "category": "Settlement Option",
+    "definition": "The insurer holds the death benefit and pays the beneficiary interest earned on the fund.",
+    "aliases": []
+  },
+  {
+    "term": "Intermediate Care",
+    "category": "Long-Term Care",
+    "definition": "Care that requires occasional skilled nursing or rehabilitation services but not continuous 24-hour skilled care.",
+    "aliases": []
+  },
+  {
+    "term": "Investment Risk",
+    "category": "Risk Concept",
+    "definition": "The risk that investment performance will be lower than expected or result in a loss. In insurance, investment risk is assumed by the policyowner in variable products and by the insurer in fixed products.",
+    "aliases": []
+  },
+  {
+    "term": "Irrevocable Beneficiary",
+    "category": "Beneficiaries",
+    "definition": "A beneficiary designation that cannot be changed without the beneficiary’s consent.",
+    "aliases": []
+  },
+  {
+    "term": "Joint and Survivor Annuity",
+    "category": "Annuity Payout Option",
+    "definition": "An annuity payout option that pays income to two people and continues payments to the survivor after one dies.",
+    "aliases": []
+  },
+  {
+    "term": "Joint Life Annuity",
+    "category": "Annuity Payout Option",
+    "definition": "An annuity payout that covers two lives but usually stops when the first annuitant dies, unless survivor benefits are included.",
+    "aliases": []
+  },
+  {
+    "term": "Juvenile Life Insurance",
+    "category": "Policy Type",
+    "definition": "Life insurance written on a child, usually owned by a parent or guardian, often with future insurability options.",
+    "aliases": []
+  },
+  {
+    "term": "Keogh Plan",
+    "category": "Qualified Retirement Plan",
+    "definition": "A qualified retirement plan for self-employed individuals and unincorporated businesses.",
+    "aliases": []
+  },
+  {
+    "term": "Key Employee Disability Insurance",
+    "category": "Business Insurance",
+    "definition": "Disability coverage purchased by a business to protect against financial loss if a key employee becomes disabled.",
+    "aliases": []
+  },
+  {
+    "term": "Key Person Insurance",
+    "category": "Business Insurance",
+    "definition": "Life insurance purchased by a business on the life of a key employee or owner. The business is the owner, premium payer, and beneficiary, and uses the death benefit to cover financial losses caused by that person's death.",
+    "aliases": []
+  },
+  {
+    "term": "Lapse",
+    "category": "Policy Status",
+    "definition": "Termination of coverage due to nonpayment of premium beyond the grace period.",
+    "aliases": []
+  },
+  {
+    "term": "Lapsed Policy",
+    "category": "Policy Status",
+    "definition": "A policy terminated because required premium was not paid before the end of the grace period and no nonforfeiture or loan option kept it active.",
+    "aliases": []
+  },
+  {
+    "term": "Legal Purpose",
+    "category": "Contract Element",
+    "definition": "A required contract element meaning the insurance contract must be formed for a lawful purpose, such as protecting against financial loss.",
+    "aliases": []
+  },
+  {
+    "term": "Level Coverage",
+    "category": "Benefit Structure",
+    "definition": "A death benefit that stays the same (level) for the entire coverage period instead of increasing or decreasing over time.",
+    "aliases": []
+  },
+  {
+    "term": "Level Premium",
+    "category": "Premium Structure",
+    "definition": "A premium that remains the same throughout the premium-paying period of the policy.",
+    "aliases": []
+  },
+  {
+    "term": "Level Term Insurance",
+    "category": "Term Life",
+    "definition": "Term insurance with a death benefit that stays the same during the policy term.",
+    "aliases": []
+  },
+  {
+    "term": "Liability",
+    "category": "Legal / Risk Concept",
+    "definition": "A legal responsibility for damages or loss caused to another person. In insurance, liability refers to the obligation to pay for harm or injury the insured legally caused.",
+    "aliases": []
+  },
+  {
+    "term": "Life Income Settlement Option",
+    "category": "Settlement Option",
+    "definition": "A settlement option paying income for the beneficiary’s lifetime. Payments stop at death unless a guarantee is added.",
+    "aliases": []
+  },
+  {
+    "term": "Life with Period Certain",
+    "category": "Annuity / Settlement Option",
+    "definition": "A payout option that pays for life but guarantees payments for a minimum period. If death occurs early, payments continue to a beneficiary for the remaining period.",
+    "aliases": []
+  },
+  {
+    "term": "Limited Pay Whole Life",
+    "category": "Policy Type",
+    "definition": "Whole life insurance where premiums are paid for a limited number of years or until a stated age, while coverage continues for life.",
+    "aliases": []
+  },
+  {
+    "term": "Limited Policy",
+    "category": "Health Insurance",
+    "definition": "A health policy that covers only specific losses, diseases, or circumstances, not broad medical expenses.",
+    "aliases": []
+  },
+  {
+    "term": "Living Benefits",
+    "category": "Life Policy Feature",
+    "definition": "Benefits available while the insured is alive, such as cash value access, accelerated death benefits, or long-term care riders.",
+    "aliases": []
+  },
+  {
+    "term": "Loan Provision",
+    "category": "Policy Feature",
+    "definition": "A provision allowing the policyowner to borrow against the policy's cash value, usually with interest.",
+    "aliases": []
+  },
+  {
+    "term": "Long-Term Care Insurance",
+    "category": "Long-Term Care",
+    "definition": "Insurance designed to pay for care services needed because of chronic illness, cognitive impairment, or inability to perform activities of daily living.",
+    "aliases": []
+  },
+  {
+    "term": "Long-Term Disability (LTD)",
+    "category": "Disability Insurance",
+    "definition": "Disability income coverage with longer benefit periods, often beginning after short-term disability benefits or a longer elimination period.",
+    "aliases": []
+  },
+  {
+    "term": "Loss Factor",
+    "category": "Risk / Rating Concept",
+    "definition": "A numerical adjustment applied to premium calculations based on an insured's past loss experience. Higher loss history increases the loss factor and results in higher premiums.",
+    "aliases": []
+  },
+  {
+    "term": "Lump Sum Option",
+    "category": "Settlement Option",
+    "definition": "Payment of policy proceeds all at once instead of through installments or income payments.",
+    "aliases": []
+  },
+  {
+    "term": "Major Medical Insurance",
+    "category": "Health Insurance",
+    "definition": "Health insurance designed to cover large medical expenses, usually with deductibles, coinsurance, and broad covered services.",
+    "aliases": []
+  },
+  {
+    "term": "Managed Care",
+    "category": "Health Insurance",
+    "definition": "A system that controls health care cost and quality through provider networks, utilization review, referrals, and negotiated rates.",
+    "aliases": []
+  },
+  {
+    "term": "Market Value Adjustment (MVA)",
+    "category": "Annuity Feature",
+    "definition": "An adjustment that may increase or decrease annuity surrender value based on interest rate changes.",
+    "aliases": []
+  },
+  {
+    "term": "Master Policy",
+    "category": "Group Insurance",
+    "definition": "The policy issued to the group sponsor, such as an employer, under which eligible members receive coverage certificates.",
+    "aliases": []
+  },
+  {
+    "term": "Material Misrepresentation",
+    "category": "Underwriting / Legal",
+    "definition": "A false statement that would influence an insurer's decision to accept or rate a risk. May lead to rescission of the policy.",
+    "aliases": []
+  },
+  {
+    "term": "McCarran-Ferguson Act",
+    "category": "Insurance Regulation",
+    "definition": "A federal law stating that insurance regulation is left to the states, and that federal law applies only when it specifically relates to insurance.",
+    "aliases": []
+  },
+  {
+    "term": "Medicaid",
+    "category": "Government Health Program",
+    "definition": "A joint federal and state program providing health coverage for eligible low-income individuals and certain other qualifying groups.",
+    "aliases": []
+  },
+  {
+    "term": "Medical Expense Insurance",
+    "category": "Health Insurance",
+    "definition": "Insurance that pays benefits for covered medical costs such as hospital, doctor, surgery, and prescription expenses.",
+    "aliases": []
+  },
+  {
+    "term": "Medical Necessity",
+    "category": "Health Claims",
+    "definition": "A standard requiring that a service be appropriate, needed, and consistent with accepted medical practice to be covered.",
+    "aliases": []
+  },
+  {
+    "term": "Medicare Part A",
+    "category": "Medicare",
+    "definition": "The part of Medicare that helps cover inpatient hospital care, skilled nursing facility care, hospice, and some home health care.",
+    "aliases": []
+  },
+  {
+    "term": "Medicare Part B",
+    "category": "Medicare",
+    "definition": "The part of Medicare that helps cover physician services, outpatient care, preventive services, and medically necessary supplies.",
+    "aliases": []
+  },
+  {
+    "term": "Medicare Part C",
+    "category": "Medicare",
+    "definition": "Medicare Advantage, where private approved plans provide Medicare benefits and may include extra benefits or drug coverage.",
+    "aliases": []
+  },
+  {
+    "term": "Medicare Part D",
+    "category": "Medicare",
+    "definition": "The part of Medicare that provides prescription drug coverage through private plans.",
+    "aliases": []
+  },
+  {
+    "term": "Medicare Supplement (Medigap)",
+    "category": "Medicare Supplement",
+    "definition": "Private insurance designed to help pay certain out-of-pocket costs not covered by Original Medicare, such as deductibles or coinsurance.",
+    "aliases": []
+  },
+  {
+    "term": "MIB (Medical Information Bureau)",
+    "category": "Underwriting",
+    "definition": "A cooperative data service used by insurers to check for inconsistencies or red flags in applicants' medical histories.",
+    "aliases": []
+  },
+  {
+    "term": "Misstatement of Age or Sex Clause",
+    "category": "Policy Clause",
+    "definition": "A clause allowing the insurer to adjust benefits to what the premium would have purchased at the correct age or sex if misstated.",
+    "aliases": []
+  },
+  {
+    "term": "Modified Endowment Contract (MEC)",
+    "category": "Tax Classification",
+    "definition": "A life insurance policy that fails the IRS seven-pay test, causing loans and withdrawals to be taxed as income first and potentially subject to a 10% penalty if taken before age 59½. The death benefit remains income-tax free.",
+    "aliases": [
+      "seven pay test",
+      "tax first withdrawals",
+      "59 and a half"
+    ]
+  },
+  {
+    "term": "Modified Whole Life",
+    "category": "Policy Type",
+    "definition": "Whole life insurance with lower initial premiums for a set period, then higher premiums thereafter, while coverage remains permanent.",
+    "aliases": []
+  },
+  {
+    "term": "Moral Hazard",
+    "category": "Risk Concept",
+    "definition": "A risk created by a person's habits, character, lifestyle, or dishonest tendencies.",
+    "aliases": []
+  },
+  {
+    "term": "Morale Hazard",
+    "category": "Risk Concept",
+    "definition": "A risk created by carelessness or irresponsibility, such as failing to maintain healthy habits.",
+    "aliases": []
+  },
+  {
+    "term": "Mortality Charge",
+    "category": "Premium / Pricing",
+    "definition": "The cost charged for the death protection portion of a life insurance policy based on age, underwriting class, and amount at risk.",
+    "aliases": []
+  },
+  {
+    "term": "Mortality Table",
+    "category": "Pricing / Math",
+    "definition": "A statistical table showing the probability of death at different ages, used in life insurance and annuity pricing.",
+    "aliases": []
+  },
+  {
+    "term": "Multiple Employer Trust (MET)",
+    "category": "Group Insurance",
+    "definition": "A trust arrangement allowing small employers to obtain group insurance benefits through a shared trust.",
+    "aliases": []
+  },
+  {
+    "term": "Multiple Employer Welfare Arrangement (MEWA)",
+    "category": "Group Insurance",
+    "definition": "An arrangement providing welfare benefits, such as health coverage, to employees of two or more unrelated employers.",
+    "aliases": []
+  },
+  {
+    "term": "Mutual Insurer",
+    "category": "Insurer Type",
+    "definition": "An insurance company owned by its policyowners, often associated with participating policies and potential dividends.",
+    "aliases": []
+  },
+  {
+    "term": "NAIC",
+    "category": "Insurance Regulation",
+    "definition": "The National Association of Insurance Commissioners, an organization that helps states coordinate insurance regulation and model laws.",
+    "aliases": []
+  },
+  {
+    "term": "Needs Analysis",
+    "category": "Financial Planning",
+    "definition": "A method to determine how much insurance a client requires by evaluating debts, income needs, and financial goals.",
+    "aliases": []
+  },
+  {
+    "term": "Net Premium",
+    "category": "Premium",
+    "definition": "The portion of the premium that covers the cost of mortality only, without expenses or other charges.",
+    "aliases": []
+  },
+  {
+    "term": "Nonadmitted Insurer",
+    "category": "Insurer Authorization",
+    "definition": "An insurer not authorized to transact insurance in a particular state. Also called unauthorized, unless operating through legal surplus lines rules.",
+    "aliases": []
+  },
+  {
+    "term": "Noncancelable Policy",
+    "category": "Health Policy Renewability",
+    "definition": "A health policy the insurer cannot cancel, change benefits, or increase premiums as long as premiums are paid, usually until a stated age.",
+    "aliases": []
+  },
+  {
+    "term": "Noncontributory Group Plan",
+    "category": "Group Insurance",
+    "definition": "A group plan where the employer pays the full premium, usually requiring 100% eligible employee participation.",
+    "aliases": []
+  },
+  {
+    "term": "Nonforfeiture Options",
+    "category": "Policy Rights",
+    "definition": "Required options in permanent policies that allow the policyowner to use the cash value if premium payments stop: cash surrender, reduced paid-up, or extended term.",
+    "aliases": [
+      "cash surrender",
+      "reduced paid up",
+      "extended term"
+    ]
+  },
+  {
+    "term": "Nonmedical Application",
+    "category": "Underwriting",
+    "definition": "An application process that does not require a medical exam, though health questions and other underwriting may still apply.",
+    "aliases": []
+  },
+  {
+    "term": "Occupational Disability",
+    "category": "Disability Insurance",
+    "definition": "A disability caused by or occurring in the course of employment, typically handled by workers’ compensation rather than nonoccupational disability coverage.",
+    "aliases": []
+  },
+  {
+    "term": "Open Enrollment",
+    "category": "Health Insurance",
+    "definition": "A period when eligible individuals may enroll in coverage without normal evidence of insurability or outside-event restrictions.",
+    "aliases": []
+  },
+  {
+    "term": "Ordinary Life Insurance",
+    "category": "Policy Type",
+    "definition": "Individual life insurance, commonly permanent whole life, as opposed to industrial or group insurance.",
+    "aliases": []
+  },
+  {
+    "term": "Out-of-Pocket Maximum",
+    "category": "Health Cost Sharing",
+    "definition": "The most the insured pays for covered services in a plan year before the plan pays 100% of covered costs for the rest of the year.",
+    "aliases": []
+  },
+  {
+    "term": "Own Occupation Disability",
+    "category": "Disability Definition",
+    "definition": "A disability definition that considers the insured disabled if unable to perform the duties of their own occupation.",
+    "aliases": []
+  },
+  {
+    "term": "Owner (Policyowner)",
+    "category": "Parties",
+    "definition": "The person or entity with legal rights to the policy, including naming beneficiaries and accessing cash value.",
+    "aliases": []
+  },
+  {
+    "term": "Paid-Up Additions",
+    "category": "Dividend Option",
+    "definition": "A dividend option using dividends to buy small amounts of additional paid-up permanent insurance.",
+    "aliases": []
+  },
+  {
+    "term": "Paid-Up Insurance",
+    "category": "Policy Status",
+    "definition": "Insurance that remains in force with no further premiums required.",
+    "aliases": []
+  },
+  {
+    "term": "Partial Disability",
+    "category": "Disability Insurance",
+    "definition": "A disability that prevents the insured from performing some, but not all, job duties or causes reduced earnings.",
+    "aliases": []
+  },
+  {
+    "term": "Participating Policy",
+    "category": "Policy Type",
+    "definition": "A policy issued by a mutual insurer that may pay dividends to policyowners.",
+    "aliases": []
+  },
+  {
+    "term": "Participating Provider",
+    "category": "Managed Care",
+    "definition": "A provider who contracts with a health plan to deliver services at agreed rates and terms.",
+    "aliases": []
+  },
+  {
+    "term": "Payor Benefit Rider",
+    "category": "Rider",
+    "definition": "A rider on a juvenile policy that waives premiums if the adult premium payer dies or becomes disabled before the child reaches a stated age.",
+    "aliases": []
+  },
+  {
+    "term": "Per Capita",
+    "category": "Beneficiary Distribution",
+    "definition": "A distribution method where surviving beneficiaries in the same class share proceeds equally.",
+    "aliases": []
+  },
+  {
+    "term": "Per Stirpes",
+    "category": "Beneficiary Distribution",
+    "definition": "A distribution method where a deceased beneficiary’s share passes to that beneficiary’s descendants.",
+    "aliases": []
+  },
+  {
+    "term": "Peril",
+    "category": "Risk Concept",
+    "definition": "The specific cause of a loss. In life insurance, the primary peril is death; in health insurance, it includes sickness or injury.",
+    "aliases": []
+  },
+  {
+    "term": "Period Certain Option",
+    "category": "Annuity / Settlement Option",
+    "definition": "A payout option guaranteeing payments for a set period, regardless of whether the annuitant lives or dies during that period.",
+    "aliases": []
+  },
+  {
+    "term": "Persistency",
+    "category": "Insurance Business",
+    "definition": "The tendency of policies to stay in force rather than lapse or surrender.",
+    "aliases": []
+  },
+  {
+    "term": "Point-of-Service (POS) Plan",
+    "category": "Managed Care",
+    "definition": "A managed care plan combining HMO and PPO features, often requiring a primary care physician but allowing some out-of-network care.",
+    "aliases": []
+  },
+  {
+    "term": "Policy Loan",
+    "category": "Policy Feature",
+    "definition": "A loan made by the insurer to the policyowner using the policy's cash value as collateral. Unpaid loans reduce the death benefit.",
+    "aliases": []
+  },
+  {
+    "term": "Policy Summary",
+    "category": "Disclosure",
+    "definition": "A document summarizing key policy details such as benefits, premiums, cash values, and surrender values.",
+    "aliases": []
+  },
+  {
+    "term": "Portability",
+    "category": "Group Benefits",
+    "definition": "The ability to continue or convert coverage after leaving a group, often by paying premiums directly.",
+    "aliases": []
+  },
+  {
+    "term": "Preauthorization",
+    "category": "Managed Care",
+    "definition": "Advance approval from the plan before certain services are covered.",
+    "aliases": []
+  },
+  {
+    "term": "Preexisting Condition",
+    "category": "Health Insurance",
+    "definition": "A health condition that existed before a policy’s effective date. Modern rules limit how many plans can restrict coverage for these conditions.",
+    "aliases": []
+  },
+  {
+    "term": "Preferred Provider Organization (PPO)",
+    "category": "Managed Care",
+    "definition": "A managed care plan that uses a network of preferred providers and usually pays higher benefits in-network than out-of-network.",
+    "aliases": []
+  },
+  {
+    "term": "Preferred Risk",
+    "category": "Underwriting Class",
+    "definition": "An applicant with better-than-average risk characteristics who may qualify for lower premiums.",
+    "aliases": []
+  },
+  {
+    "term": "Premium",
+    "category": "Payment",
+    "definition": "The periodic payment required to keep an insurance policy in force.",
+    "aliases": []
+  },
+  {
+    "term": "Premium Mode",
+    "category": "Premium Structure",
+    "definition": "The frequency of premium payment, such as monthly, quarterly, semiannual, or annual.",
+    "aliases": []
+  },
+  {
+    "term": "Presumptive Disability",
+    "category": "Disability Insurance",
+    "definition": "A disability definition where certain severe losses, such as loss of sight or limbs, are automatically treated as total disability.",
+    "aliases": []
+  },
+  {
+    "term": "Primary Beneficiary",
+    "category": "Beneficiaries",
+    "definition": "The first person or entity in line to receive the death benefit when the insured dies.",
+    "aliases": []
+  },
+  {
+    "term": "Primary Care Physician (PCP)",
+    "category": "Managed Care",
+    "definition": "A doctor who serves as the insured’s main provider and may coordinate care or referrals in managed care plans.",
+    "aliases": []
+  },
+  {
+    "term": "Principal",
+    "category": "Agency Law",
+    "definition": "The party in an agency relationship who authorizes another (the agent) to act on their behalf. In insurance, the insurer is the principal, responsible for the actions and representations of its appointed producers.",
+    "aliases": []
+  },
+  {
+    "term": "Principle of Indemnity",
+    "category": "Insurance Principle",
+    "definition": "The principle stating that insurance is designed to restore the insured to the same financial position they were in before a loss, without profit.",
+    "aliases": []
+  },
+  {
+    "term": "Probationary Period",
+    "category": "Health Insurance",
+    "definition": "A waiting period after a policy starts before coverage applies to certain sicknesses or conditions.",
+    "aliases": []
+  },
+  {
+    "term": "Producer",
+    "category": "Insurance Role",
+    "definition": "A licensed individual authorized to sell, solicit, or negotiate insurance on behalf of an insurer. The term includes both agents and brokers.",
+    "aliases": []
+  },
+  {
+    "term": "Provider Network",
+    "category": "Managed Care",
+    "definition": "The group of doctors, hospitals, pharmacies, and other providers contracted with a health plan.",
+    "aliases": []
+  },
+  {
+    "term": "Pure Risk",
+    "category": "Risk Concept",
+    "definition": "A type of risk that involves only the possibility of loss, with no opportunity for financial gain. Pure risks are the only risks that are insurable.",
+    "aliases": []
+  },
+  {
+    "term": "Qualified Plan",
+    "category": "Retirement Plan",
+    "definition": "A retirement plan meeting tax law requirements for favorable tax treatment, such as deductible employer contributions and tax-deferred growth.",
+    "aliases": []
+  },
+  {
+    "term": "Rebating",
+    "category": "Illegal Practice",
+    "definition": "Offering or giving any premium reduction, gift, or valuable consideration not specified in the insurance contract as an inducement to purchase insurance.",
+    "aliases": [
+      "illegal gift",
+      "premium rebate"
+    ]
+  },
+  {
+    "term": "Recurrent Disability",
+    "category": "Disability Insurance",
+    "definition": "A disability that returns from the same or related cause after the insured has recovered, often treated as the same claim if it recurs within a stated time.",
+    "aliases": []
+  },
+  {
+    "term": "Reduced Paid-Up Insurance",
+    "category": "Nonforfeiture Option",
+    "definition": "Uses the cash value to purchase a smaller, fully paid-up permanent policy with no future premiums.",
+    "aliases": []
+  },
+  {
+    "term": "Referral",
+    "category": "Managed Care",
+    "definition": "Authorization from a primary care physician or plan allowing the insured to see a specialist or receive certain services.",
+    "aliases": []
+  },
+  {
+    "term": "Refund Annuity",
+    "category": "Annuity Payout Option",
+    "definition": "A life income annuity that guarantees at least a return of the original principal; if the annuitant dies early, any remaining amount is paid to a beneficiary in a lump sum or installments.",
+    "aliases": []
+  },
+  {
+    "term": "Reimbursement Plan",
+    "category": "Health / Benefit Plan",
+    "definition": "A plan that reimburses insureds for covered medical expenses after they have paid providers, rather than paying providers directly.",
+    "aliases": []
+  },
+  {
+    "term": "Reinstatement",
+    "category": "Policy Restoration",
+    "definition": "The process of restoring a lapsed policy, typically requiring back premiums, interest, and proof of insurability.",
+    "aliases": []
+  },
+  {
+    "term": "Reinsurance",
+    "category": "Insurance Company Risk",
+    "definition": "Insurance purchased by an insurer to transfer part of its risk to another insurer.",
+    "aliases": []
+  },
+  {
+    "term": "Renewability",
+    "category": "Policy Feature",
+    "definition": "The ability to renew a term policy without proving insurability.",
+    "aliases": []
+  },
+  {
+    "term": "Renewable Term",
+    "category": "Term Life",
+    "definition": "Term life insurance that can be renewed at the end of the term without new proof of insurability, usually at a higher premium.",
+    "aliases": []
+  },
+  {
+    "term": "Replacement",
+    "category": "Regulated Practice",
+    "definition": "The act of buying new insurance that results in the existing policy being lapsed, surrendered, or reduced. Heavily regulated to protect consumers.",
+    "aliases": [
+      "lapse existing policy",
+      "surrender existing policy"
+    ]
+  },
+  {
+    "term": "Replacement Regulations",
+    "category": "Regulated Practice",
+    "definition": "Rules requiring specific disclosures and comparison forms when a client is replacing existing life insurance or annuities.",
+    "aliases": []
+  },
+  {
+    "term": "Representation",
+    "category": "Legal",
+    "definition": "A statement believed to be true to the best of the applicant's knowledge; most insurance applications rely on representations.",
+    "aliases": []
+  },
+  {
+    "term": "Residual Disability",
+    "category": "Disability Insurance",
+    "definition": "A disability that allows the insured to work but with reduced income; benefits are often proportional to the income loss.",
+    "aliases": []
+  },
+  {
+    "term": "Respite Care",
+    "category": "Long-Term Care",
+    "definition": "Temporary care that gives a family caregiver a break from caregiving duties.",
+    "aliases": []
+  },
+  {
+    "term": "Return of Premium Rider",
+    "category": "Rider",
+    "definition": "A rider or policy feature that returns some or all premiums paid if the insured outlives the term or meets specified conditions.",
+    "aliases": []
+  },
+  {
+    "term": "Revocable Beneficiary",
+    "category": "Beneficiaries",
+    "definition": "A beneficiary designation the policyowner may change without the beneficiary’s consent.",
+    "aliases": []
+  },
+  {
+    "term": "Rider",
+    "category": "Policy Add-On",
+    "definition": "An optional feature added to a policy that changes or adds coverage, often for an additional premium.",
+    "aliases": []
+  },
+  {
+    "term": "Risk",
+    "category": "Risk Concept",
+    "definition": "The possibility of financial loss. In insurance, risk refers to the uncertainty regarding whether a loss will occur and how severe it may be.",
+    "aliases": []
+  },
+  {
+    "term": "Risk Avoidance",
+    "category": "Risk Management",
+    "definition": "Eliminating exposure to a risk entirely by not engaging in the activity that creates the risk.",
+    "aliases": []
+  },
+  {
+    "term": "Risk Classification",
+    "category": "Underwriting",
+    "definition": "The method insurers use to group applicants by health and lifestyle factors: preferred, standard, substandard.",
+    "aliases": []
+  },
+  {
+    "term": "Risk Reduction",
+    "category": "Risk Management",
+    "definition": "Actions taken to lessen the likelihood or severity of a loss, such as installing smoke detectors or improving safety practices.",
+    "aliases": []
+  },
+  {
+    "term": "Risk Retention",
+    "category": "Risk Management",
+    "definition": "The decision to accept the risk of loss and pay for it out of pocket rather than transferring it to an insurer.",
+    "aliases": []
+  },
+  {
+    "term": "Risk Transfer",
+    "category": "Risk Management",
+    "definition": "Shifting the financial burden of a potential loss from one party to another, most commonly through insurance.",
+    "aliases": []
+  },
+  {
+    "term": "Roth IRA",
+    "category": "Retirement Plan",
+    "definition": "A retirement account funded with after-tax contributions, with qualified distributions generally tax-free.",
+    "aliases": []
+  },
+  {
+    "term": "Self-Funded Plan",
+    "category": "Group Health Plan",
+    "definition": "A plan where the employer pays claims from its own funds instead of transferring claim risk to an insurer.",
+    "aliases": []
+  },
+  {
+    "term": "Separate Account",
+    "category": "Variable Product",
+    "definition": "An investment account used for variable life or variable annuity products, separate from the insurer’s general account.",
+    "aliases": []
+  },
+  {
+    "term": "Settlement Options",
+    "category": "Benefit Payment",
+    "definition": "Choices for how the death benefit is paid: lump sum, interest only, fixed period, fixed amount, or life income.",
+    "aliases": [
+      "death benefit payout",
+      "fixed amount",
+      "fixed period",
+      "life income"
+    ]
+  },
+  {
+    "term": "Short-Term Disability (STD)",
+    "category": "Disability Insurance",
+    "definition": "Disability coverage with a short benefit period, often designed to replace income for weeks or months after sickness or injury.",
+    "aliases": []
+  },
+  {
+    "term": "Sickness",
+    "category": "Health Insurance",
+    "definition": "Illness or disease covered under a health policy, subject to definitions, exclusions, and waiting periods.",
+    "aliases": []
+  },
+  {
+    "term": "Single Premium Deferred Annuity (SPDA)",
+    "category": "Annuity Type",
+    "definition": "A deferred annuity purchased with one lump-sum premium.",
+    "aliases": []
+  },
+  {
+    "term": "Single Premium Immediate Annuity (SPIA)",
+    "category": "Annuity Type",
+    "definition": "An immediate annuity purchased with one lump sum that starts income payments shortly after purchase.",
+    "aliases": []
+  },
+  {
+    "term": "Single Premium Whole Life",
+    "category": "Policy Type",
+    "definition": "Whole life insurance paid up with one lump-sum premium at issue.",
+    "aliases": []
+  },
+  {
+    "term": "Skilled Nursing Care",
+    "category": "Long-Term Care",
+    "definition": "Care requiring licensed medical professionals and continuous or frequent skilled services.",
+    "aliases": []
+  },
+  {
+    "term": "Small Employer Group",
+    "category": "Group Health Insurance",
+    "definition": "A group health market category for smaller employers, subject to specific participation and underwriting rules that vary by law.",
+    "aliases": []
+  },
+  {
+    "term": "Social Security Disability Income (SSDI)",
+    "category": "Government Disability Program",
+    "definition": "A federal program providing disability benefits to eligible workers who meet Social Security work credit and disability requirements.",
+    "aliases": []
+  },
+  {
+    "term": "Social Security Supplement Rider",
+    "category": "Disability Rider",
+    "definition": "A disability rider that pays additional benefits while the insured waits for or is denied Social Security disability benefits, according to policy terms.",
+    "aliases": []
+  },
+  {
+    "term": "Specimen Policy",
+    "category": "Disclosure / Training",
+    "definition": "A sample policy form used for review or training, not an issued contract for a specific insured.",
+    "aliases": []
+  },
+  {
+    "term": "Speculative Risk",
+    "category": "Risk Concept",
+    "definition": "A type of risk that involves the possibility of loss, no loss, or financial gain. Because it includes the chance of gain, speculative risks are not insurable.",
+    "aliases": []
+  },
+  {
+    "term": "Spendthrift Clause",
+    "category": "Policy Protection",
+    "definition": "A provision that protects the policy's proceeds from the beneficiary's creditors by preventing the beneficiary from assigning or pledging the death benefit before it is paid.",
+    "aliases": []
+  },
+  {
+    "term": "Spouse Term Rider",
+    "category": "Rider",
+    "definition": "A rider that adds term life coverage on the insured’s spouse to the main policy.",
+    "aliases": []
+  },
+  {
+    "term": "Standard Risk",
+    "category": "Underwriting Class",
+    "definition": "An average risk category where the insured fits normal underwriting standards and receives standard rates.",
+    "aliases": []
+  },
+  {
+    "term": "Stock Insurer",
+    "category": "Insurer Type",
+    "definition": "An insurance company owned by stockholders. Profits may be paid to stockholders as dividends.",
+    "aliases": []
+  },
+  {
+    "term": "STOLI (Stranger-Originated Life Insurance)",
+    "category": "Illegal Practice",
+    "definition": "An illegal arrangement where a third party with no insurable interest initiates a life insurance policy for profit.",
+    "aliases": []
+  },
+  {
+    "term": "Straight Life Annuity",
+    "category": "Annuity Payout Option",
+    "definition": "An annuity payout option that pays income for the annuitant’s life only, with no payments after death. It usually provides the highest periodic payment.",
+    "aliases": []
+  },
+  {
+    "term": "Subrogation",
+    "category": "Legal / Claims Concept",
+    "definition": "The legal right of an insurer to seek reimbursement from a third party who caused a loss after the insurer has paid the claim to the insured.",
+    "aliases": []
+  },
+  {
+    "term": "Substandard Risk",
+    "category": "Underwriting Class",
+    "definition": "A higher-than-average risk that may be insured with higher premiums or special conditions.",
+    "aliases": []
+  },
+  {
+    "term": "Suicide Clause",
+    "category": "Policy Clause",
+    "definition": "A clause limiting or excluding death benefits if the insured dies by suicide within a stated period after policy issue.",
+    "aliases": []
+  },
+  {
+    "term": "Suitability",
+    "category": "Regulation",
+    "definition": "The requirement that a producer must ensure a product is appropriate for the client's financial situation and objectives.",
+    "aliases": []
+  },
+  {
+    "term": "Supplemental Security Income (SSI)",
+    "category": "Government Benefit",
+    "definition": "A federal income program for eligible aged, blind, or disabled individuals with limited income and resources.",
+    "aliases": []
+  },
+  {
+    "term": "Surplus Lines Insurance",
+    "category": "Insurance Market",
+    "definition": "Insurance placed with eligible nonadmitted insurers when coverage is not available through admitted insurers, subject to special rules.",
+    "aliases": []
+  },
+  {
+    "term": "Surrender Charge",
+    "category": "Policy / Annuity Charge",
+    "definition": "A charge deducted when a policyowner withdraws or surrenders value during a specified period.",
+    "aliases": []
+  },
+  {
+    "term": "Survivorship Life Insurance",
+    "category": "Policy Type",
+    "definition": "Life insurance covering two people that pays the death benefit after the second insured dies. Also called second-to-die life.",
+    "aliases": []
+  },
+  {
+    "term": "Tax-Deferred Growth",
+    "category": "Taxation",
+    "definition": "Growth not taxed while it remains inside the policy or annuity; taxes may apply when money is withdrawn or distributed.",
+    "aliases": []
+  },
+  {
+    "term": "Term Life Insurance",
+    "category": "Policy Type",
+    "definition": "Life insurance that provides pure death-benefit protection for a specified period with no cash value.",
+    "aliases": [
+      "temporary insurance",
+      "pure death protection",
+      "no cash value"
+    ]
+  },
+  {
+    "term": "Tertiary Beneficiary",
+    "category": "Beneficiaries",
+    "definition": "A third-level beneficiary who receives proceeds if both primary and contingent beneficiaries cannot receive them.",
+    "aliases": []
+  },
+  {
+    "term": "Third-Party Administrator (TPA)",
+    "category": "Health Plan Administration",
+    "definition": "A company that processes claims and administers benefits for an insurer or self-funded plan.",
+    "aliases": []
+  },
+  {
+    "term": "Total Disability",
+    "category": "Disability Insurance",
+    "definition": "A disability that meets the policy’s definition for full disability benefits, such as inability to perform own occupation or any occupation.",
+    "aliases": []
+  },
+  {
+    "term": "Traditional IRA",
+    "category": "Retirement Plan",
+    "definition": "A retirement account that may allow deductible contributions and tax-deferred growth, with distributions generally taxable.",
+    "aliases": []
+  },
+  {
+    "term": "Twisting",
+    "category": "Illegal Practice",
+    "definition": "The unethical or illegal act of inducing a policyowner to replace a policy through misrepresentation or incomplete comparison.",
+    "aliases": [
+      "illegal replacement",
+      "misrepresentation replacement"
+    ]
+  },
+  {
+    "term": "Unauthorized Insurer",
+    "category": "Insurer Authorization",
+    "definition": "An insurer that does not have authority to transact insurance in the state.",
+    "aliases": []
+  },
+  {
+    "term": "Underwriter",
+    "category": "Insurance Company Role",
+    "definition": "The person or department that evaluates applications and decides whether to accept, reject, or rate a risk.",
+    "aliases": []
+  },
+  {
+    "term": "Underwriting",
+    "category": "Process",
+    "definition": "The process by which an insurer evaluates an applicant's risk to decide whether to issue coverage and at what premium.",
+    "aliases": []
+  },
+  {
+    "term": "Unearned Premium",
+    "category": "Premium",
+    "definition": "The portion of the premium that has been paid but not yet used to provide coverage for a future period.",
+    "aliases": []
+  },
+  {
+    "term": "Unilateral Contract",
+    "category": "Contract Law",
+    "definition": "Only one party—the insurer—makes a legally enforceable promise, which is to pay a claim in exchange for premium.",
+    "aliases": []
+  },
+  {
+    "term": "Urgent Care Benefit",
+    "category": "Health Benefit",
+    "definition": "A benefit for immediate but non-emergency medical treatment, often with lower cost sharing than emergency room care.",
+    "aliases": []
+  },
+  {
+    "term": "Usual, Customary, and Reasonable (UCR)",
+    "category": "Health Claims",
+    "definition": "A standard used to determine whether a medical charge is typical for a service in a geographic area.",
+    "aliases": []
+  },
+  {
+    "term": "Utilization Review",
+    "category": "Managed Care",
+    "definition": "A process health plans use to evaluate the medical necessity, appropriateness, and efficiency of health care services.",
+    "aliases": []
+  },
+  {
+    "term": "Utmost Good Faith",
+    "category": "Contract Principle",
+    "definition": "The legal requirement that both insurer and applicant act honestly and disclose all material facts.",
+    "aliases": []
+  },
+  {
+    "term": "Variable Annuity",
+    "category": "Annuity Type",
+    "definition": "An annuity whose value and payments vary based on separate account investment performance. The owner bears investment risk.",
+    "aliases": []
+  },
+  {
+    "term": "Variable Life Insurance",
+    "category": "Policy Type",
+    "definition": "A type of permanent life insurance with a cash value invested in separate accounts, where values can go up or down. Requires both a life and securities license.",
+    "aliases": []
+  },
+  {
+    "term": "Variable Universal Life",
+    "category": "Policy Type",
+    "definition": "Flexible premium permanent life insurance with separate account investment options and variable cash value and death benefit.",
+    "aliases": []
+  },
+  {
+    "term": "Vesting",
+    "category": "Retirement Plan",
+    "definition": "The employee’s ownership right in employer contributions to a qualified retirement plan.",
+    "aliases": []
+  },
+  {
+    "term": "Viatication",
+    "category": "Policy Transaction",
+    "definition": "Selling a life insurance policy to a third party for cash when the insured is terminally ill.",
+    "aliases": []
+  },
+  {
+    "term": "Voidable Contract",
+    "category": "Contract Law",
+    "definition": "A valid contract that can be legally voided by one party due to reasons such as misrepresentation, concealment, or lack of capacity. If not voided, it remains enforceable.",
+    "aliases": []
+  },
+  {
+    "term": "Waiting Period",
+    "category": "Health / Disability",
+    "definition": "A period that must pass before coverage or benefits begin. In disability and LTC, this is often called an elimination period.",
+    "aliases": []
+  },
+  {
+    "term": "Waiver of Monthly Deduction",
+    "category": "Universal Life Rider",
+    "definition": "A rider that waives monthly deductions in a universal life policy if the insured becomes disabled as defined in the policy.",
+    "aliases": []
+  },
+  {
+    "term": "Waiver of Premium",
+    "category": "Rider",
+    "definition": "A rider that waives future premiums if the insured becomes disabled as defined in the policy.",
+    "aliases": []
+  },
+  {
+    "term": "Warranty",
+    "category": "Legal",
+    "definition": "A statement guaranteed to be true; in insurance, material misstatements can void coverage.",
+    "aliases": []
+  },
+  {
+    "term": "Whole Life Insurance",
+    "category": "Policy Type",
+    "definition": "A form of permanent life insurance with guaranteed death benefit, fixed premiums, and guaranteed cash value accumulation.",
+    "aliases": [
+      "permanent insurance",
+      "fixed premium",
+      "guaranteed cash value"
+    ]
+  },
+  {
+    "term": "Workers’ Compensation",
+    "category": "Social / Employer Insurance",
+    "definition": "A system that provides benefits for work-related injuries or illnesses, regardless of fault, and generally replaces lawsuits against the employer.",
+    "aliases": []
+  },
+  {
+    "term": "Yearly Renewable Term (YRT)",
+    "category": "Policy Structure",
+    "definition": "A one-year term policy that can be renewed each year, typically with premiums that increase as the insured gets older.",
+    "aliases": []
+  }
+];
+
+    const $ = (id) => document.getElementById(id);
+    const storeKey = "life_dictionary_saved_missed_v2";
+    let memoryMissedIds = [];
+
+    let filteredTerms = [...TERMS];
+    let quiz = null;
+    let currentFlash = null;
+
+    function normalize(text) {
+      return String(text || "").toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "");
+    }
+
+    function shuffle(array) {
+      const a = [...array];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function sample(array, count) { return shuffle(array).slice(0, Math.min(count, array.length)); }
+    function uniqCategories() { return [...new Set(TERMS.map(t => t.category))].sort((a,b) => a.localeCompare(b)); }
+
+    function getSavedMissedIds() {
+      try { return JSON.parse(localStorage.getItem(storeKey) || "[]"); } catch { return []; }
+    }
+    function setSavedMissedIds(ids) {
+      localStorage.setItem(storeKey, JSON.stringify([...new Set(ids)]));
+      updateStats(); renderSavedMissedPanel();
+    }
+    function termId(t) { return normalize(t.term).replace(/[^a-z0-9]+/g, "-"); }
+    function termsByIds(ids) {
+      const wanted = new Set(ids);
+      return TERMS.filter(t => wanted.has(termId(t)));
+    }
+    function addSavedMissed(termList) { setSavedMissedIds([...getSavedMissedIds(), ...termList.map(termId)]); }
+
+    function fillCategorySelects() {
+      const categories = uniqCategories();
+      for (const id of ["categoryFilter", "flashCategory"]) {
+        const select = $(id);
+        const current = select.value || "all";
+        select.innerHTML = '<option value="all">All categories</option>' + categories.map(c => `<option value="${escapeAttr(c)}">${escapeHTML(c)}</option>`).join("");
+        select.value = current;
+      }
+    }
+
+    function escapeHTML(text) {
+      return String(text).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+    }
+    function escapeAttr(text) { return escapeHTML(text); }
+
+    function sortTerms(list) {
+      const mode = $("sortMode").value;
+      const a = [...list];
+      if (mode === "category") a.sort((x,y) => (x.category + x.term).localeCompare(y.category + y.term));
+      else if (mode === "short") a.sort((x,y) => x.definition.length - y.definition.length);
+      else if (mode === "long") a.sort((x,y) => y.definition.length - x.definition.length);
+      else a.sort((x,y) => x.term.localeCompare(y.term));
+      return a;
+    }
+
+    function applyFilters() {
+      const q = normalize($("searchInput").value.trim());
+      const cat = $("categoryFilter").value;
+      filteredTerms = sortTerms(TERMS.filter(t => {
+        const blob = normalize([t.term, t.category, t.definition, ...(t.aliases || [])].join(" "));
+        const catOk = cat === "all" || t.category === cat;
+        const qOk = !q || blob.includes(q);
+        return catOk && qOk;
+      }));
+      renderDictionary();
+      updateStats();
+    }
+
+    function renderDictionary() {
+      const grid = $("dictionaryGrid");
+      const noTerms = $("noTerms");
+      if (!filteredTerms.length) {
+        grid.innerHTML = "";
+        noTerms.classList.remove("hidden");
+        return;
+      }
+      noTerms.classList.add("hidden");
+      grid.innerHTML = filteredTerms.map(t => `
+        <article class="term-card">
+          <div class="cat">${escapeHTML(t.category)}</div>
+          <h2 class="term-title">${escapeHTML(t.term)}</h2>
+          <p class="def">${escapeHTML(t.definition)}</p>
+          <div class="aliases">
+            ${(t.aliases || []).slice(0,4).map(a => `<span class="chip">${escapeHTML(a)}</span>`).join("")}
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function updateStats() {
+      $("totalTerms").textContent = TERMS.length;
+      $("visibleTerms").textContent = filteredTerms.length;
+      $("categoryCount").textContent = uniqCategories().length;
+      $("savedMissedCount").textContent = getSavedMissedIds().length;
+      $("questionCount").max = TERMS.length;
+      $("questionCountHint").textContent = `Choose 1 to ${TERMS.length} loaded terms. Visible right now: ${filteredTerms.length}.`;
+    }
+
+    function setTab(name) {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+      document.querySelectorAll(".section").forEach(s => s.classList.toggle("active", s.id === name));
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function buildChoices(correct, mode, difficulty) {
+      let pool = TERMS.filter(t => termId(t) !== termId(correct));
+      if (difficulty === "smart") {
+        const same = pool.filter(t => t.category === correct.category);
+        const rest = pool.filter(t => t.category !== correct.category);
+        pool = same.length >= 3 ? same : [...same, ...shuffle(rest)];
+      }
+      const wrong = sample(pool, 3);
+      const options = shuffle([correct, ...wrong]);
+      return options.map(t => ({
+        id: termId(t),
+        label: mode === "definitionToTerm" ? t.term : t.definition,
+        term: t
+      }));
+    }
+
+    function startQuiz(source = null, forcedTerms = null) {
+      let sourceMode = source || $("quizSource").value;
+      let pool;
+      if (forcedTerms) pool = forcedTerms;
+      else if (sourceMode === "visible") pool = filteredTerms;
+      else if (sourceMode === "savedMissed") pool = termsByIds(getSavedMissedIds());
+      else pool = TERMS;
+
+      if (!pool.length) {
+        alert("No terms available for that source. Use all terms or miss some questions first.");
+        return;
+      }
+      let requested = parseInt($("questionCount").value, 10);
+      if (!Number.isFinite(requested) || requested < 1) requested = Math.min(25, pool.length);
+      requested = Math.min(requested, pool.length);
+      $("questionCount").value = requested;
+
+      quiz = {
+        terms: sample(pool, requested),
+        index: 0,
+        correct: 0,
+        missed: [],
+        answers: [],
+        locked: false,
+        modeSetting: $("quizMode").value,
+        difficulty: $("difficulty").value
+      };
+      $("quizIdle").classList.add("hidden");
+      $("quizResults").classList.remove("show");
+      $("quizActive").classList.remove("hidden");
+      setTab("quiz");
+      renderQuestion();
+    }
+
+    function currentQuestionMode() {
+      if (quiz.modeSetting === "mixed") return Math.random() < .5 ? "termToDefinition" : "definitionToTerm";
+      return quiz.modeSetting;
+    }
+
+    function renderQuestion() {
+      quiz.locked = false;
+      const t = quiz.terms[quiz.index];
+      const mode = currentQuestionMode();
+      quiz.currentMode = mode;
+      const isDefToTerm = mode === "definitionToTerm";
+      $("progressText").textContent = `Question ${quiz.index + 1} / ${quiz.terms.length}`;
+      $("progressBar").style.width = `${(quiz.index / quiz.terms.length) * 100}%`;
+      $("liveScore").textContent = `${quiz.correct} right`;
+      $("questionLabel").textContent = isDefToTerm ? "Choose the term" : "Choose the definition";
+      $("questionText").textContent = isDefToTerm ? t.definition : t.term;
+      $("feedback").className = "feedback";
+      $("feedback").innerHTML = "";
+      $("nextBtn").classList.add("hidden");
+      const options = buildChoices(t, mode, quiz.difficulty);
+      $("options").innerHTML = options.map((opt, idx) => `
+        <button class="option" data-id="${escapeAttr(opt.id)}">
+          <b>${String.fromCharCode(65 + idx)}.</b> ${escapeHTML(opt.label)}
+        </button>
+      `).join("");
+      document.querySelectorAll(".option").forEach(btn => btn.addEventListener("click", () => chooseAnswer(btn)));
+    }
+
+    function chooseAnswer(btn) {
+      if (!quiz || quiz.locked) return;
+      quiz.locked = true;
+      const t = quiz.terms[quiz.index];
+      const correctId = termId(t);
+      const pickedId = btn.dataset.id;
+      const wasCorrect = pickedId === correctId;
+      document.querySelectorAll(".option").forEach(o => {
+        o.classList.add("locked");
+        if (o.dataset.id === correctId) o.classList.add("correct");
+        else if (o === btn) o.classList.add("wrong");
+      });
+      if (wasCorrect) quiz.correct++;
+      else quiz.missed.push(t);
+      quiz.answers.push({ term: t.term, correct: wasCorrect });
+      const feedback = $("feedback");
+      feedback.className = "feedback show";
+      feedback.innerHTML = wasCorrect
+        ? `<strong>Correct.</strong> ${escapeHTML(t.term)}: ${escapeHTML(t.definition)}`
+        : `<strong>Missed.</strong> ${escapeHTML(t.term)} means: ${escapeHTML(t.definition)}`;
+      $("liveScore").textContent = `${quiz.correct} right`;
+      $("nextBtn").textContent = quiz.index === quiz.terms.length - 1 ? "Finish" : "Next";
+      $("nextBtn").classList.remove("hidden");
+    }
+
+    function nextQuestion() {
+      if (!quiz) return;
+      if (quiz.index >= quiz.terms.length - 1) return finishQuiz();
+      quiz.index++;
+      renderQuestion();
+    }
+
+    function finishQuiz() {
+      if (!quiz) return;
+      $("quizActive").classList.add("hidden");
+      $("quizResults").classList.add("show");
+      $("progressBar").style.width = "100%";
+      const total = quiz.terms.length;
+      const wrong = quiz.missed.length;
+      const pct = Math.round((quiz.correct / total) * 100);
+      $("scoreBig").textContent = `${quiz.correct} / ${total}`;
+      $("scoreSummary").innerHTML = `Score: <b>${pct}%</b>. Missed: <b>${wrong}</b>. ${wrong ? "Retest the incorrect terms right now before they fade." : "Clean run. Nice."}`;
+      $("retestWrongBtn").disabled = wrong === 0;
+      $("reviewMissedBtn").disabled = wrong === 0;
+      addSavedMissed(quiz.missed);
+      renderMissedList();
+    }
+
+    function renderMissedList() {
+      const box = $("missedList");
+      if (!quiz || !quiz.missed.length) { box.innerHTML = ""; return; }
+      box.innerHTML = quiz.missed.map(t => `
+        <div class="missed-item"><b>${escapeHTML(t.term)}</b><span>${escapeHTML(t.definition)}</span></div>
+      `).join("");
+    }
+
+    function renderSavedMissedPanel() {
+      const panel = $("savedMissedPanel");
+      const missed = termsByIds(getSavedMissedIds());
+      if (!missed.length) {
+        panel.innerHTML = '<div class="missed-item"><b>No saved missed terms yet.</b><span>Miss questions in a test and they will appear here automatically.</span></div>';
+        return;
+      }
+      panel.innerHTML = `<div class="missed-item"><b>${missed.length} saved missed terms</b><span>Use Test → Test Saved Missed to drill them.</span></div>` +
+        missed.slice(0, 24).map(t => `<div class="missed-item"><b>${escapeHTML(t.term)}</b><span>${escapeHTML(t.definition)}</span></div>`).join("");
+    }
+
+    function retestWrongNow() {
+      if (!quiz || !quiz.missed.length) return;
+      const wrong = [...quiz.missed];
+      $("questionCount").value = wrong.length;
+      startQuiz("forced", wrong);
+    }
+
+    function newTestReset() {
+      $("quizIdle").classList.remove("hidden");
+      $("quizActive").classList.add("hidden");
+      $("quizResults").classList.remove("show");
+      quiz = null;
+    }
+
+    function chooseRandomTerm() {
+      const pool = filteredTerms.length ? filteredTerms : TERMS;
+      const t = pool[Math.floor(Math.random() * pool.length)];
+      setTab("dictionary");
+      $("searchInput").value = t.term;
+      $("categoryFilter").value = "all";
+      applyFilters();
+    }
+
+    function nextFlash() {
+      const cat = $("flashCategory").value;
+      const pool = cat === "all" ? TERMS : TERMS.filter(t => t.category === cat);
+      currentFlash = pool[Math.floor(Math.random() * pool.length)];
+      $("flashcard").classList.remove("flipped");
+      $("flashFront").textContent = currentFlash.term;
+      $("flashBack").innerHTML = `<div style="color:var(--accent);font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.13em;margin-bottom:12px;">${escapeHTML(currentFlash.category)}</div>${escapeHTML(currentFlash.definition)}`;
+    }
+
+    function flipFlash() {
+      if (!currentFlash) nextFlash();
+      $("flashcard").classList.toggle("flipped");
+    }
+
+    function bindEvents() {
+      document.querySelectorAll(".tab-btn").forEach(btn => btn.addEventListener("click", () => setTab(btn.dataset.tab)));
+      $("searchInput").addEventListener("input", applyFilters);
+      $("categoryFilter").addEventListener("change", applyFilters);
+      $("sortMode").addEventListener("change", applyFilters);
+      $("quizVisibleBtn").addEventListener("click", () => { $("quizSource").value = "visible"; $("questionCount").value = Math.min(25, filteredTerms.length || TERMS.length); startQuiz("visible"); });
+      $("jumpQuizBtn").addEventListener("click", () => setTab("quiz"));
+      $("randomTermBtn").addEventListener("click", chooseRandomTerm);
+      $("clearSavedMissedBtn").addEventListener("click", () => { if (confirm("Clear all saved missed terms?")) setSavedMissedIds([]); });
+      $("startQuizBtn").addEventListener("click", () => startQuiz());
+      $("startSavedMissedBtn").addEventListener("click", () => { $("quizSource").value = "savedMissed"; const n = getSavedMissedIds().length; if (n) $("questionCount").value = n; startQuiz("savedMissed"); });
+      $("nextBtn").addEventListener("click", nextQuestion);
+      $("endQuizBtn").addEventListener("click", finishQuiz);
+      $("retestWrongBtn").addEventListener("click", retestWrongNow);
+      $("newTestBtn").addEventListener("click", newTestReset);
+      $("reviewMissedBtn").addEventListener("click", () => { renderMissedList(); $("missedList").classList.toggle("hidden"); });
+      $("nextFlashBtn").addEventListener("click", nextFlash);
+      $("flashCategory").addEventListener("change", nextFlash);
+      $("flashcard").addEventListener("click", flipFlash);
+      $("flashcard").addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flipFlash(); } });
+      document.addEventListener("keydown", e => {
+        if (!quiz || $("quizActive").classList.contains("hidden")) return;
+        if (e.key === "Enter" && !$("nextBtn").classList.contains("hidden")) nextQuestion();
+        const idx = "1234abcdABCD".indexOf(e.key);
+        if (idx >= 0) {
+          const optionIndex = idx % 4;
+          const btn = document.querySelectorAll(".option")[optionIndex];
+          if (btn) chooseAnswer(btn);
+        }
+      });
+    }
+
+    function init() {
+      fillCategorySelects();
+      bindEvents();
+      applyFilters();
+      renderSavedMissedPanel();
+      nextFlash();
+    }
+
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
+</body>
+</html>
