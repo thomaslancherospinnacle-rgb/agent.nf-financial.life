@@ -118,6 +118,44 @@
     padding:4px 12px;border-radius:20px}
   .tier-foot{text-align:center;font-size:13px;color:var(--muted);letter-spacing:.3px}
 
+  /* ---------------- stat slides (funeral trend / income) ---------------- */
+  .stat-slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;
+    gap:clamp(16px,3vh,30px);padding:clamp(24px,4vw,60px)}
+  .stat-note{text-align:center;font-size:12px;color:var(--muted);line-height:1.5;max-width:70ch;margin:0 auto}
+  /* funeral bar chart */
+  .fx-chart{display:flex;align-items:stretch;justify-content:center;gap:clamp(14px,3.4vw,44px);
+    height:clamp(250px,44vh,440px);padding:0 10px}
+  .fx-col{display:flex;flex-direction:column;align-items:center;flex:0 0 auto;width:clamp(58px,9vw,110px)}
+  .fx-amt{font-family:var(--serif);font-size:clamp(14px,1.8vw,22px);color:var(--navy);font-weight:700;margin-bottom:8px;white-space:nowrap}
+  .fx-track{flex:1;width:100%;display:flex;align-items:flex-end}
+  .fx-bar{width:100%;background:linear-gradient(180deg,var(--navy-2),var(--navy));border-radius:10px 10px 0 0;
+    box-shadow:0 2px 8px rgba(15,41,66,.18);transition:height .4s}
+  .fx-bar.red{background:linear-gradient(180deg,#e0324c,var(--red))}
+  .fx-bar.proj{background:repeating-linear-gradient(45deg,rgba(200,16,46,.85) 0 12px,rgba(200,16,46,.5) 12px 24px);
+    border:2px dashed var(--red);box-shadow:none}
+  .fx-yr{margin-top:10px;font-size:14px;font-weight:700;color:var(--muted);text-align:center;line-height:1.2}
+  .fx-yr small{display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--red);font-weight:700}
+  /* actual↔projected cutoff divider */
+  .fx-div{display:flex;flex-direction:column;align-items:center;flex:0 0 auto;width:clamp(40px,6vw,80px)}
+  .fx-div-amt{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-weight:700;margin-bottom:8px}
+  .fx-div-track{flex:1;position:relative;width:100%}
+  .fx-div-line{position:absolute;left:50%;top:0;bottom:0;border-left:2px dashed var(--muted)}
+  .fx-div-lab{margin-top:10px;font-size:10px;color:var(--muted);text-align:center;line-height:1.2}
+  /* income stats */
+  .inc-hero{display:flex;align-items:center;gap:clamp(20px,4vw,44px);justify-content:center;max-width:60ch;margin:0 auto}
+  .inc-ring{width:clamp(120px,16vw,190px);aspect-ratio:1;border-radius:50%;flex:0 0 auto;
+    display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(200,16,46,.16)}
+  .inc-ring-in{width:72%;aspect-ratio:1;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center}
+  .inc-ring-in span{font-family:var(--serif);font-size:clamp(30px,4.4vw,52px);color:var(--red);font-weight:800}
+  .inc-hero-txt{font-size:clamp(17px,2.2vw,26px);line-height:1.35;color:var(--navy)}
+  .inc-hero-txt b{color:var(--red)}
+  .inc-cards{display:flex;gap:clamp(14px,2.4vw,26px);justify-content:center;max-width:70ch;margin:0 auto}
+  .inc-card{flex:1;max-width:340px;background:#fff;border:1px solid var(--line);border-left:5px solid var(--navy);
+    border-radius:12px;padding:clamp(14px,2vh,20px);box-shadow:0 2px 10px rgba(15,41,66,.07);display:flex;gap:14px;align-items:flex-start}
+  .inc-big{font-family:var(--serif);font-size:clamp(30px,4vw,46px);color:var(--navy);font-weight:800;line-height:1;flex:0 0 auto}
+  .inc-txt{font-size:14px;line-height:1.45;color:var(--ink)}
+  .inc-txt b{color:var(--navy)}
+
   /* ---------------- CONTROL (script on top) ---------------- */
   #control{height:100%;display:flex;flex-direction:column;background:var(--slate);color:var(--slate-text)}
   #control .script{flex:1 1 auto;overflow:auto;padding:16px 18px 22px;line-height:1.6;font-size:16px;order:0}
@@ -166,11 +204,11 @@ const BASE_SLIDES = [
   {id:'letter',    file:'letter',    title:'Mandatory Read-Off Letter',      eyebrow:'',                        visual:'letter'},
   {id:'needs',     file:'needs',     title:'Needs Analysis',                 eyebrow:'Qualifying',              visual:'brand'},
   {id:'hourpower', file:'hourpower', title:'The Hour Power Principle',       eyebrow:'The Concept',             visual:'brand'},
-  {id:'fex',       file:'fex',       title:'The Cost of a Funeral Today',    eyebrow:'Final Expense',           visual:'brand'},
+  {id:'fex',       file:'fex',       title:'The Cost of a Funeral Today',    eyebrow:'Final Expense',           visual:'fexchart'},
   {id:'foc',       file:'foc',       title:'Freedom of Choice',              eyebrow:'',                        visual:'pdf2',  pdf:['foc.pdf','foc2.pdf']},
 ];
 const TAIL_HC = [
-  {id:'income',    file:'income',    title:'Income Protection',              eyebrow:'Protecting the Paycheck', visual:'brand'},
+  {id:'income',    file:'income',    title:'Income Protection',              eyebrow:'Protecting the Paycheck', visual:'incomestats'},
   {id:'college',   file:'college',   title:'College Fund Benefit',           eyebrow:'The Kids',                visual:'brand'},
   {id:'ghgp',      file:'ghgp',      title:'Get Hurt, Get Paid',             eyebrow:'Living Benefits',         visual:'brand'},
   {id:'close',     file:'close',     title:'The Close',                      eyebrow:'1 Hour vs 2 Hour',        visual:'brand'},
@@ -592,6 +630,10 @@ function renderPresent(){
     stage=ssGapGraphic();
   }else if(s.visual==='gsb'){
     stage=gsbGraphic(s.tier||null);
+  }else if(s.visual==='fexchart'){
+    stage=fexGraphic();
+  }else if(s.visual==='incomestats'){
+    stage=incomeGraphic();
   }
   root.innerHTML=`<div id="present"><div class="topbar">${logoBox}
     <div class="brandmark"><div class="b1">American Income Life</div><div class="b2">Union Benefits</div></div></div>
@@ -661,6 +703,45 @@ function gsbGraphic(tier){
     <div class="sen-head"><span class="eyebrow">Good · Better · Best</span><h2>Gold · Silver · Bronze</h2></div>
     <div class="tier-row">${cards}</div>
     <div class="tier-foot">Guaranteed · permanent · builds cash value · locked in for life</div>
+  </div>`;
+}
+
+/* ---------------- Stat graphics (funeral trend / income loss) ---------------- */
+function fexGraphic(){
+  const MAX=22000;
+  const h=v=>Math.max(9,(v/MAX)*100);
+  const col=(amt,yr,cls,tag)=>`<div class="fx-col">
+      <div class="fx-amt">${fmtMoney(amt)}</div>
+      <div class="fx-track"><div class="fx-bar ${cls||''}" style="height:${h(amt)}%"></div></div>
+      <div class="fx-yr">${escHtml(yr)}${tag?`<small>${escHtml(tag)}</small>`:''}</div>
+    </div>`;
+  return `<div class="stat-slide">
+    <div class="sen-head"><span class="eyebrow">Final Expense</span><h2>The Rising Cost of a Funeral</h2></div>
+    <div class="fx-chart">
+      ${col(983,'1971')}
+      ${col(5020,'1998')}
+      ${col(8300,'2023')}
+      ${col(15000,'Today','red')}
+      <div class="fx-div"><div class="fx-div-amt">cutoff</div><div class="fx-div-track"><div class="fx-div-line"></div></div><div class="fx-div-lab">actual ↔ projected</div></div>
+      ${col(21000,'2036','red proj','projected')}
+    </div>
+    <div class="stat-note">NFDA median, funeral with viewing &amp; burial (1971–2023). &ldquo;Today&rdquo; &amp; 2036 are all-in — they add cemetery, vault &amp; marker, which the NFDA median excludes. 2036 projected at ~3.5%/yr; the dashed line is the cutoff between actual figures and the projection.</div>
+  </div>`;
+}
+function incomeGraphic(){
+  return `<div class="stat-slide">
+    <div class="sen-head"><span class="eyebrow">Income Protection</span><h2>When the Paycheck Stops</h2></div>
+    <div class="inc-hero">
+      <div class="inc-ring" style="background:conic-gradient(var(--red) 0 94%, #e6ebf1 94% 100%)">
+        <div class="inc-ring-in"><span>94%</span></div>
+      </div>
+      <div class="inc-hero-txt">of mortgage defaults happen after a household <b>loses income</b> — job loss, illness, divorce, or the <b>death of an earner</b>.</div>
+    </div>
+    <div class="inc-cards">
+      <div class="inc-card"><div class="inc-big">47%</div><div class="inc-txt">of families would struggle to cover living expenses within <b>6 months</b> of losing their primary earner — more than <b>1 in 5</b> within a single month.</div></div>
+      <div class="inc-card"><div class="inc-big">20%</div><div class="inc-txt">of policyholders bought coverage to <b>pay off the mortgage</b> — the biggest bill, and the least protected.</div></div>
+    </div>
+    <div class="stat-note">Sources: Urban Institute / Ganong &amp; Noel, mortgage-default research; LIMRA 2025 Insurance Barometer.</div>
   </div>`;
 }
 
