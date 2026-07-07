@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>NF Financial — Game Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* =========================================================
+     CONFIG — the only numbers you (Thomas) normally touch.
+     Avg sale = $80/mo = $960 ALP, commission = 50% = $480/sale.
+     The funnel ratios below multiply to your calls-per-sale.
+     3 x 3 x 30 = 270. Want ~360? set appointmentsPerShow: 4
+     (=360) or callsPerAppointment: 40. It's all here.
+     ========================================================= */
+  /* (JS CONFIG lives in the script block near the bottom) */
+
+  :root{
+    --bg:#0B1220;
+    --surface:#131C2E;
+    --surface-2:#0F1728;
+    --line:#22304A;
+    --line-soft:#1A2440;
+    --text:#EAF0F7;
+    --muted:#8FA3BF;
+    --go:#34D399;         /* emerald — action / calls */
+    --go-dim:#1C6B54;
+    --money:#FBBF24;      /* amber — income, the payoff */
+    --danger:#F87171;
+    --radius:14px;
+    --shadow:0 18px 50px -20px rgba(0,0,0,.7);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:
+      radial-gradient(1100px 620px at 80% -10%, rgba(52,211,153,.08), transparent 60%),
+      radial-gradient(900px 520px at -5% 110%, rgba(251,191,36,.06), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    font-size:16px;line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    padding:32px 18px 64px;
+  }
+  .wrap{max-width:680px;margin:0 auto}
+
+  /* ---- Header ---- */
+  .eyebrow{
+    font-family:'Inter';font-size:12px;font-weight:600;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--go);margin:0 0 10px;
+  }
+  h1{
+    font-family:'Sora';font-weight:700;font-size:34px;line-height:1.05;
+    letter-spacing:-.02em;margin:0 0 8px;
+  }
+  .sub{color:var(--muted);margin:0 0 28px;max-width:52ch}
+
+  /* ---- Card ---- */
+  .card{
+    background:linear-gradient(180deg,var(--surface),var(--surface-2));
+    border:1px solid var(--line-soft);
+    border-radius:var(--radius);
+    padding:22px;margin-bottom:18px;box-shadow:var(--shadow);
+  }
+  .card-label{
+    font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);margin:0 0 16px;
+  }
+
+  label.field{display:block;margin-bottom:16px}
+  label.field:last-child{margin-bottom:0}
+  .field-name{display:block;font-size:13px;font-weight:600;color:var(--text);margin-bottom:7px}
+  .field-hint{font-weight:400;color:var(--muted);font-size:12px}
+
+  select,input[type=number],input[type=date],input[type=text],textarea{
+    width:100%;background:var(--bg);color:var(--text);
+    border:1px solid var(--line);border-radius:10px;
+    padding:12px 14px;font:inherit;font-size:16px;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  select:focus,input:focus,textarea:focus{
+    outline:none;border-color:var(--go);
+    box-shadow:0 0 0 3px rgba(52,211,153,.18);
+  }
+  textarea{resize:vertical;min-height:64px}
+
+  .input-money{position:relative}
+  .input-money input{padding-left:30px;font-family:'Sora';font-weight:600}
+  .input-money::before{
+    content:"$";position:absolute;left:14px;top:50%;transform:translateY(-50%);
+    color:var(--money);font-weight:600;font-family:'Sora';
+  }
+
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:520px){.row2{grid-template-columns:1fr}}
+
+  /* segmented period toggle */
+  .seg{display:inline-flex;background:var(--bg);border:1px solid var(--line);
+    border-radius:10px;padding:3px;gap:3px}
+  .seg button{
+    all:unset;cursor:pointer;padding:9px 16px;border-radius:7px;
+    font-size:14px;font-weight:600;color:var(--muted);transition:.15s;
+  }
+  .seg button[aria-pressed=true]{background:var(--go);color:#052015}
+
+  /* ---- Funnel (the signature) ---- */
+  .funnel-card{padding-bottom:8px}
+  .funnel{display:flex;flex-direction:column;gap:9px;margin-top:4px}
+  .step{
+    display:grid;grid-template-columns:118px 1fr auto;align-items:center;gap:14px;
+  }
+  .step .name{font-size:13px;color:var(--muted);font-weight:500}
+  .track{height:34px;background:var(--bg);border-radius:8px;overflow:hidden;
+    border:1px solid var(--line-soft)}
+  .bar{height:100%;width:0;border-radius:8px 6px 6px 8px;
+    background:linear-gradient(90deg,var(--go-dim),var(--go));
+    transition:width .55s cubic-bezier(.22,1,.36,1)}
+  .step .val{font-family:'Sora';font-weight:700;font-size:18px;min-width:64px;
+    text-align:right;font-variant-numeric:tabular-nums}
+  .step .val small{display:block;font-family:'Inter';font-weight:400;font-size:10px;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+
+  .step.income .track{border-color:rgba(251,191,36,.35)}
+  .step.income .bar{background:linear-gradient(90deg,#7a5a12,var(--money))}
+  .step.income .val{color:var(--money)}
+
+  .arrow-note{font-size:12px;color:var(--muted);text-align:center;margin:14px 0 2px}
+  .arrow-note b{color:var(--text);font-weight:600}
+
+  /* company-averages callout */
+  .callout{
+    display:flex;gap:11px;align-items:flex-start;
+    background:rgba(52,211,153,.07);
+    border:1px solid rgba(52,211,153,.28);
+    border-left:3px solid var(--go);
+    border-radius:10px;padding:12px 14px;margin:2px 0 18px;
+  }
+  .callout .mark{color:var(--go);font-weight:700;font-family:'Sora';flex:none;line-height:1.35}
+  .callout p{margin:0;font-size:13px;line-height:1.45;color:var(--text)}
+  .callout .lead{
+    display:block;font-size:11px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--go);margin-bottom:3px;
+  }
+  .callout em{color:var(--muted);font-style:normal}
+
+  /* ---- Daily targets ---- */
+  .targets{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:6px}
+  @media (max-width:520px){.targets{grid-template-columns:1fr;gap:10px}}
+  .tile{background:var(--bg);border:1px solid var(--line-soft);border-radius:12px;
+    padding:16px 14px;text-align:center}
+  .tile .big{font-family:'Sora';font-weight:700;font-size:30px;line-height:1;
+    color:var(--go);font-variant-numeric:tabular-nums}
+  .tile.hours .big{color:var(--text)}
+  .tile .cap{font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);margin-top:8px}
+
+  /* ---- Assumptions (collapsible) ---- */
+  details.assump{margin-top:4px;border-top:1px solid var(--line-soft);padding-top:14px}
+  details.assump summary{cursor:pointer;font-size:12px;font-weight:600;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--muted);list-style:none}
+  details.assump summary::-webkit-details-marker{display:none}
+  details.assump summary::before{content:"▸ ";color:var(--go)}
+  details.assump[open] summary::before{content:"▾ "}
+  .assump-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+  @media (max-width:520px){.assump-grid{grid-template-columns:1fr}}
+  .assump-grid label{font-size:12px;color:var(--muted)}
+  .assump-grid input{margin-top:5px;padding:9px 11px;font-size:14px}
+
+  /* ---- Agreement + submit ---- */
+  .agree{display:flex;gap:12px;align-items:flex-start;
+    background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px}
+  .agree input{margin-top:3px;width:18px;height:18px;accent-color:var(--go);flex:none}
+  .agree span{font-size:14px;color:var(--text)}
+  .agree b{color:var(--go)}
+
+  .commit{
+    all:unset;display:block;width:100%;text-align:center;cursor:pointer;
+    margin-top:16px;padding:15px;border-radius:11px;
+    background:var(--go);color:#052015;font-weight:700;font-size:16px;
+    font-family:'Sora';letter-spacing:.01em;transition:.15s;
+  }
+  .commit:hover{filter:brightness(1.06)}
+  .commit:disabled{background:var(--line);color:var(--muted);cursor:not-allowed}
+
+  .status{margin-top:14px;font-size:14px;text-align:center;min-height:20px}
+  .status.err{color:var(--danger)}
+  .status.ok{color:var(--go)}
+
+  .done{text-align:center;padding:14px 0}
+  .done .check{font-size:44px}
+  .done h2{font-family:'Sora';margin:8px 0 4px}
+  .done p{color:var(--muted);margin:0}
+
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="eyebrow">NF Financial · Game Plan</p>
+  <h1>Turn your income goal into a daily plan.</h1>
+  <p class="sub">Pick your name, set what you want to make, and see exactly what it takes — calls, presentations, hours per day. Then commit to it.</p>
+
+  <!-- WHO + GOAL -->
+  <div class="card">
+    <p class="card-label">Your goal</p>
+
+    <label class="field">
+      <span class="field-name">Your name</span>
+      <input id="recruit" type="text" placeholder="First and last name" autocomplete="name">
+    </label>
+
+    <div class="row2">
+      <label class="field">
+        <span class="field-name">How much do you want to make?</span>
+        <span class="input-money"><input id="income" type="number" min="0" step="50" placeholder="0" inputmode="numeric"></span>
+      </label>
+      <label class="field">
+        <span class="field-name">Per…</span>
+        <div class="seg" id="periodSeg" role="group" aria-label="Pay period">
+          <button type="button" data-period="week" aria-pressed="true">Week</button>
+          <button type="button" data-period="month" aria-pressed="false">Month</button>
+        </div>
+      </label>
+    </div>
+
+    <label class="field">
+      <span class="field-name">Days you'll work each week <span class="field-hint">— sets your daily target</span></span>
+      <input id="days" type="number" min="1" max="7" step="1" value="5" inputmode="numeric">
+    </label>
+  </div>
+
+  <!-- FUNNEL -->
+  <div class="card funnel-card">
+    <p class="card-label">What it takes <span id="periodTag" style="color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0"></span></p>
+
+    <div class="callout">
+      <span class="mark">↳</span>
+      <p>
+        <span class="lead">Company average numbers</span>
+        These are the company's average results <em>if you follow the system and collect your referrals.</em> Work the system, and the math works for you.
+      </p>
+    </div>
+
+    <div class="funnel">
+      <div class="step">
+        <span class="name">Phone calls</span>
+        <span class="track"><span class="bar" id="bar-calls"></span></span>
+        <span class="val" id="v-calls">—</span>
+      </div>
+      <div class="step">
+        <span class="name">Appointments</span>
+        <span class="track"><span class="bar" id="bar-appts"></span></span>
+        <span class="val" id="v-appts">—</span>
+      </div>
+      <div class="step">
+        <span class="name">Presentations</span>
+        <span class="track"><span class="bar" id="bar-pres"></span></span>
+        <span class="val" id="v-pres">—</span>
+      </div>
+      <div class="step">
+        <span class="name">Sales</span>
+        <span class="track"><span class="bar" id="bar-sales"></span></span>
+        <span class="val" id="v-sales">—</span>
+      </div>
+      <div class="step income">
+        <span class="name">Income</span>
+        <span class="track"><span class="bar" id="bar-income"></span></span>
+        <span class="val" id="v-income">—</span>
+      </div>
+    </div>
+
+    <p class="arrow-note">Roughly <b id="cps">—</b> calls to make one sale · about <b id="tot-hours">—</b> hours total</p>
+
+    <div class="targets">
+      <div class="tile"><div class="big" id="t-calls">—</div><div class="cap">Calls / day</div></div>
+      <div class="tile hours"><div class="big" id="t-hours">—</div><div class="cap">Hours / day</div></div>
+      <div class="tile"><div class="big" id="t-appts">—</div><div class="cap">Appts / week</div></div>
+    </div>
+
+    <details class="assump">
+      <summary>Adjust assumptions</summary>
+      <div class="assump-grid">
+        <label>Avg sale — ALP ($)<input id="a-alp" type="number" min="1" step="10"></label>
+        <label>Commission (% of ALP)<input id="a-rate" type="number" min="1" max="100" step="1"></label>
+        <label>Calls to book 1 appointment<input id="a-cpa" type="number" min="1" step="1"></label>
+        <label>Appointments per 1 that shows<input id="a-aps" type="number" min="1" step="1"></label>
+        <label>Presentations per 1 sale<input id="a-pps" type="number" min="1" step="1"></label>
+        <label>Calls per hour<input id="a-cph" type="number" min="1" step="1"></label>
+        <label>Hours per presentation<input id="a-hpp" type="number" min="0" step=".25"></label>
+        <label>Hours per sale (with close)<input id="a-hps" type="number" min="0" step=".25"></label>
+      </div>
+    </details>
+  </div>
+
+  <!-- COMMIT -->
+  <div class="card" id="commitCard">
+    <p class="card-label">Lock it in</p>
+    <label class="field">
+      <span class="field-name">Start date <span class="field-hint">— optional</span></span>
+      <input id="startDate" type="date">
+    </label>
+    <label class="field">
+      <span class="field-name">Anything you want on record? <span class="field-hint">— optional</span></span>
+      <textarea id="notes" placeholder="e.g. I'll block 9–11am for calls Mon–Fri."></textarea>
+    </label>
+    <label class="agree">
+      <input type="checkbox" id="agree">
+      <span>I've seen the numbers and I <b>agree to this plan</b>. Hold me accountable to it.</span>
+    </label>
+    <button class="commit" id="commit" disabled>Commit to my plan</button>
+    <div class="status" id="status"></div>
+  </div>
+
+</div>
+
+<script>
+  /* =========================================================
+     CONFIG — set your real averages here.
+     ========================================================= */
+  var CONFIG = {
+    avgAlpPerSale: 960,         // ← avg sale = $80/mo = $960 annualized (ALP)
+    commissionRate: 0.50,       // ← you earn 50% of ALP  ->  $480 commission per sale
+    callsPerAppointment: 30,    // calls to book one appointment
+    appointmentsPerShow: 3,     // appointments booked to get one presentation to SHOW
+    presentationsPerSale: 3,    // presentations shown to CLOSE one sale
+    callsPerHour: 30,           // dials per hour
+    hoursPerPresentation: 1,    // a presentation that does NOT close
+    hoursPerSale: 1.5,          // a presentation that DOES close (with paperwork)
+    weeksPerMonth: 4.33
+  };
+  // 3 x 3 x 30 = 270 calls per sale. Your rule of thumb was ~350-360:
+  // set appointmentsPerShow to 4 (->360) or callsPerAppointment to 40 to match.
+
+  var $ = function(id){ return document.getElementById(id); };
+  var period = 'week';
+  var last = null; // last computed plan, for submit
+
+  /* ---- seed the assumption inputs from CONFIG ---- */
+  function seedAssumptions(){
+    $('a-alp').value = CONFIG.avgAlpPerSale;
+    $('a-rate').value = Math.round(CONFIG.commissionRate * 100);
+    $('a-cpa').value = CONFIG.callsPerAppointment;
+    $('a-aps').value = CONFIG.appointmentsPerShow;
+    $('a-pps').value = CONFIG.presentationsPerSale;
+    $('a-cph').value = CONFIG.callsPerHour;
+    $('a-hpp').value = CONFIG.hoursPerPresentation;
+    $('a-hps').value = CONFIG.hoursPerSale;
+  }
+  function readAssumptions(){
+    var num = function(id, dflt){ var v = parseFloat($(id).value); return (isFinite(v) && v > 0) ? v : dflt; };
+    var alp  = num('a-alp', CONFIG.avgAlpPerSale);
+    var rate = num('a-rate', CONFIG.commissionRate * 100) / 100;
+    return {
+      dps: alp * rate,   // commission dollars per sale
+      cpa: num('a-cpa', CONFIG.callsPerAppointment),
+      aps: num('a-aps', CONFIG.appointmentsPerShow),
+      pps: num('a-pps', CONFIG.presentationsPerSale),
+      cph: num('a-cph', CONFIG.callsPerHour),
+      hpp: parseFloat($('a-hpp').value) >= 0 ? parseFloat($('a-hpp').value) : CONFIG.hoursPerPresentation,
+      hps: parseFloat($('a-hps').value) >= 0 ? parseFloat($('a-hps').value) : CONFIG.hoursPerSale
+    };
+  }
+
+  /* ---- the math ---- */
+  function compute(){
+    var income = parseFloat($('income').value) || 0;
+    var daysPerWeek = Math.min(7, Math.max(1, parseInt($('days').value, 10) || 5));
+    var a = readAssumptions();
+
+    var periodDays = period === 'month' ? daysPerWeek * CONFIG.weeksPerMonth : daysPerWeek;
+
+    var salesRaw = income / a.dps;
+    var presRaw  = salesRaw * a.pps;
+    var apptsRaw = presRaw * a.aps;
+    var callsRaw = apptsRaw * a.cpa;
+
+    var callHours = callsRaw / a.cph;
+    var nonClosingPres = Math.max(presRaw - salesRaw, 0);
+    var totalHours = callHours + (nonClosingPres * a.hpp) + (salesRaw * a.hps);
+
+    var callsPerDay = periodDays ? callsRaw / periodDays : 0;
+    var hoursPerDay = periodDays ? totalHours / periodDays : 0;
+    var apptsPerWeek = period === 'month' ? apptsRaw / CONFIG.weeksPerMonth : apptsRaw;
+
+    return {
+      income: income,
+      period: period,
+      daysPerWeek: daysPerWeek,
+      periodDays: periodDays,
+      sales: salesRaw, presentations: presRaw, appointments: apptsRaw, calls: callsRaw,
+      totalHours: totalHours, callsPerDay: callsPerDay, hoursPerDay: hoursPerDay,
+      apptsPerWeek: apptsPerWeek,
+      dollarsPerSale: a.dps,
+      callsPerSale: a.pps * a.aps * a.cpa
+    };
+  }
+
+  var up = function(n){ return Math.max(0, Math.ceil(n - 1e-9)); }; // round up, tolerate float noise
+  var fmt = function(n){ return up(n).toLocaleString('en-US'); };
+  var money = function(n){ return '$' + Math.round(n).toLocaleString('en-US'); };
+
+  function render(){
+    var p = compute();
+    last = p;
+    var has = p.income > 0;
+
+    $('periodTag').textContent = has ? '· per ' + p.period : '';
+
+    if(!has){
+      ['v-calls','v-appts','v-pres','v-sales','v-income','t-calls','t-hours','t-appts','cps','tot-hours'].forEach(function(id){ $(id).textContent='—'; });
+      ['bar-calls','bar-appts','bar-pres','bar-sales','bar-income'].forEach(function(id){ $(id).style.width='0'; });
+      updateCommitState();
+      return;
+    }
+
+    $('v-calls').textContent = fmt(p.calls);
+    $('v-appts').textContent = fmt(p.appointments);
+    $('v-pres').textContent  = fmt(p.presentations);
+    $('v-sales').textContent = fmt(p.sales);
+    $('v-income').textContent = money(p.income);
+
+    // bars scale to calls (the widest step); min width so small steps stay legible
+    var max = Math.max(p.calls, 1);
+    var w = function(v){ return Math.max(6, Math.min(100, v / max * 100)); };
+    $('bar-calls').style.width  = w(p.calls) + '%';
+    $('bar-appts').style.width  = w(p.appointments) + '%';
+    $('bar-pres').style.width   = w(p.presentations) + '%';
+    $('bar-sales').style.width  = w(p.sales) + '%';
+    $('bar-income').style.width = '100%';
+
+    $('t-calls').textContent = fmt(p.callsPerDay);
+    $('t-hours').textContent = p.hoursPerDay.toFixed(1);
+    $('t-appts').textContent = fmt(p.apptsPerWeek);
+
+    $('cps').textContent = fmt(p.callsPerSale);
+    $('tot-hours').textContent = Math.round(p.totalHours).toLocaleString('en-US');
+
+    updateCommitState();
+  }
+
+  function updateCommitState(){
+    var ready = last && last.income > 0 && $('recruit').value.trim() && $('agree').checked;
+    $('commit').disabled = !ready;
+  }
+
+  /* ---- submit ---- */
+  function submit(){
+    if($('commit').disabled) return;
+    var btn = $('commit'); btn.disabled = true; btn.textContent = 'Saving…';
+    var s = $('status'); s.className = 'status'; s.textContent = '';
+
+    var payload = {
+      recruit: $('recruit').value.trim(),
+      incomeGoal: last.income,
+      period: last.period,
+      daysPerWeek: last.daysPerWeek,
+      sales: up(last.sales),
+      presentations: up(last.presentations),
+      appointments: up(last.appointments),
+      calls: up(last.calls),
+      callsPerDay: up(last.callsPerDay),
+      totalHours: Math.round(last.totalHours * 10) / 10,
+      hoursPerDay: Math.round(last.hoursPerDay * 10) / 10,
+      dollarsPerSale: last.dollarsPerSale,
+      callsPerSale: up(last.callsPerSale),
+      agreed: $('agree').checked,
+      startDate: $('startDate').value,
+      notes: $('notes').value
+    };
+
+    google.script.run
+      .withSuccessHandler(function(){
+        $('commitCard').innerHTML =
+          '<div class="done"><div class="check">✅</div>' +
+          '<h2>You\'re committed.</h2>' +
+          '<p>' + payload.recruit + ' — ' + fmt(last.callsPerDay) + ' calls a day. Logged. Now go make them.</p></div>';
+      })
+      .withFailureHandler(function(err){
+        btn.disabled = false; btn.textContent = 'Commit to my plan';
+        s.className = 'status err';
+        s.textContent = (err && err.message) ? err.message : 'Something went wrong. Try again.';
+      })
+      .submitPlan(payload);
+  }
+
+  /* ---- wiring ---- */
+  document.addEventListener('DOMContentLoaded', function(){
+    seedAssumptions();
+    render();
+
+    ['income','days'].forEach(function(id){ $(id).addEventListener('input', render); });
+    ['a-alp','a-rate','a-cpa','a-aps','a-pps','a-cph','a-hpp','a-hps'].forEach(function(id){ $(id).addEventListener('input', render); });
+    $('recruit').addEventListener('input', updateCommitState);
+    $('agree').addEventListener('change', updateCommitState);
+
+    Array.prototype.forEach.call(document.querySelectorAll('#periodSeg button'), function(b){
+      b.addEventListener('click', function(){
+        period = b.getAttribute('data-period');
+        Array.prototype.forEach.call(document.querySelectorAll('#periodSeg button'), function(x){
+          x.setAttribute('aria-pressed', x === b ? 'true' : 'false');
+        });
+        render();
+      });
+    });
+
+    $('commit').addEventListener('click', submit);
+  });
+</script>
+</body>
+</html>
