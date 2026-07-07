@@ -335,6 +335,9 @@
   // 3 x 3 x 30 = 270 calls per sale. Your rule of thumb was ~350-360:
   // set appointmentsPerShow to 4 (->360) or callsPerAppointment to 40 to match.
 
+  // Your deployed Apps Script web app /exec URL (where submissions are sent).
+  var WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbytL1pZZu_86zgA3hPp9UrKxL78Kz8wPkbPGmt3MkCsbv6x9GA5ul9-uZA7QQwGam0u/exec';
+
   var $ = function(id){ return document.getElementById(id); };
   var period = 'week';
   var last = null; // last computed plan, for submit
@@ -472,19 +475,24 @@
       notes: $('notes').value
     };
 
-    google.script.run
-      .withSuccessHandler(function(){
-        $('commitCard').innerHTML =
-          '<div class="done"><div class="check">✅</div>' +
-          '<h2>You\'re committed.</h2>' +
-          '<p>' + payload.recruit + ' — ' + fmt(last.callsPerDay) + ' calls a day. Logged. Now go make them.</p></div>';
-      })
-      .withFailureHandler(function(err){
-        btn.disabled = false; btn.textContent = 'Commit to my plan';
-        s.className = 'status err';
-        s.textContent = (err && err.message) ? err.message : 'Something went wrong. Try again.';
-      })
-      .submitPlan(payload);
+    fetch(WEB_APP_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    })
+    .then(function(){
+      $('commitCard').innerHTML =
+        '<div class="done"><div class="check">✅</div>' +
+        '<h2>You\'re committed.</h2>' +
+        '<p>' + payload.recruit + ' — ' + fmt(last.callsPerDay) + ' calls a day. Logged. Now go make them.</p></div>';
+    })
+    .catch(function(err){
+      btn.disabled = false; btn.textContent = 'Commit to my plan';
+      s.className = 'status err';
+      s.textContent = 'Could not save. Check your connection and try again.';
+      console.error(err);
+    });
   }
 
   /* ---- wiring ---- */
