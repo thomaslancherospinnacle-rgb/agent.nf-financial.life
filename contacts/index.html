@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lead Contact Builder</title>
+<style>
+  :root {
+    --bg:#0f1115; --panel:#171a21; --panel2:#1e222b; --text:#f4f6f8;
+    --muted:#9ea7b3; --accent:#5da9ff; --good:#45d483; --bad:#ff6b6b;
+    --border:#2c3240;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:Inter,Segoe UI,Arial,sans-serif; background:var(--bg); color:var(--text); }
+  .wrap { max-width:1180px; margin:0 auto; padding:28px 18px 50px; }
+  h1 { margin:0 0 8px; font-size:30px; }
+  .subtitle { color:var(--muted); margin-bottom:24px; line-height:1.5; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:18px; }
+  .card h2 { font-size:17px; margin:0 0 14px; }
+  label { display:block; font-size:13px; color:var(--muted); margin-bottom:6px; }
+  input[type="text"], select, textarea {
+    width:100%; background:var(--panel2); border:1px solid var(--border); color:var(--text);
+    border-radius:9px; padding:10px 11px; outline:none;
+  }
+  input[type="file"] {
+    width:100%; padding:18px; background:var(--panel2); border:1px dashed #485265;
+    border-radius:10px; color:var(--muted);
+  }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; }
+  .checks { display:grid; grid-template-columns:1fr 1fr; gap:8px 14px; margin-top:12px; }
+  .check { display:flex; align-items:center; gap:8px; font-size:14px; color:#d8dde5; }
+  .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+  button {
+    border:0; border-radius:9px; padding:11px 15px; font-weight:700; cursor:pointer;
+    background:var(--accent); color:#07101b;
+  }
+  button.secondary { background:#2a303c; color:var(--text); border:1px solid var(--border); }
+  button.good { background:var(--good); color:#052013; }
+  button:disabled { opacity:.45; cursor:not-allowed; }
+  .status { margin-top:12px; min-height:22px; color:var(--muted); font-size:14px; }
+  .stats { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+  .stat { background:var(--panel2); border:1px solid var(--border); padding:10px 12px; border-radius:10px; min-width:120px; }
+  .stat b { display:block; font-size:20px; }
+  .stat span { color:var(--muted); font-size:12px; }
+  .table-wrap { overflow:auto; max-height:420px; border:1px solid var(--border); border-radius:10px; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th, td { padding:9px 10px; border-bottom:1px solid var(--border); text-align:left; white-space:nowrap; }
+  th { position:sticky; top:0; background:#232833; z-index:1; }
+  td.notes { max-width:330px; white-space:normal; color:#cbd2dc; }
+  .pill { display:inline-block; padding:3px 7px; border-radius:999px; font-size:11px; background:#25354a; color:#9dcbff; }
+  .help { font-size:12px; color:var(--muted); margin-top:8px; line-height:1.5; }
+  .full { grid-column:1 / -1; }
+  @media(max-width:800px){ .grid,.row{grid-template-columns:1fr;} .checks{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Lead Contact Builder</h1>
+  <div class="subtitle">
+    Import a lead CSV, preview the contacts, then export one VCF file that can be imported into
+    iPhone, Android, Google Contacts, Outlook, or most CRMs.
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <h2>1. Load leads</h2>
+      <input id="fileInput" type="file" accept=".csv,text/csv">
+      <div class="row">
+        <div>
+          <label for="sourceTag">Contact name suffix/prefix tag</label>
+          <input id="sourceTag" type="text" value="AIL Plus July" placeholder="Example: AIL Plus July">
+        </div>
+        <div>
+          <label for="tagPosition">Tag position</label>
+          <select id="tagPosition">
+            <option value="suffix">After name</option>
+            <option value="prefix">Before name</option>
+            <option value="none">Do not add tag</option>
+          </select>
+        </div>
+      </div>
+      <div class="checks">
+        <label class="check"><input id="includeAllNotes" type="checkbox" checked> Put extra fields in Notes</label>
+        <label class="check"><input id="includeLeadId" type="checkbox" checked> Include Lead ID</label>
+        <label class="check"><input id="skipNoPhone" type="checkbox"> Skip leads without phone</label>
+        <label class="check"><input id="dedupe" type="checkbox" checked> Remove duplicate phone numbers</label>
+        <label class="check"><input id="preferCell" type="checkbox" checked> Prefer Cell over Phone</label>
+        <label class="check"><input id="includePageLink" type="checkbox" checked> Include page link</label>
+      </div>
+      <div class="actions">
+        <button id="buildBtn" disabled>Build preview</button>
+        <button id="sampleBtn" class="secondary">Load sample format</button>
+      </div>
+      <div id="status" class="status">Choose your CSV file.</div>
+    </section>
+
+    <section class="card">
+      <h2>2. Export</h2>
+      <div class="stats">
+        <div class="stat"><b id="leadCount">0</b><span>CSV rows</span></div>
+        <div class="stat"><b id="contactCount">0</b><span>contacts ready</span></div>
+        <div class="stat"><b id="duplicateCount">0</b><span>duplicates removed</span></div>
+        <div class="stat"><b id="missingPhoneCount">0</b><span>missing phone</span></div>
+      </div>
+      <div class="actions">
+        <button id="vcfBtn" class="good" disabled>Download contacts.vcf</button>
+        <button id="csvBtn" class="secondary" disabled>Download cleaned CSV</button>
+      </div>
+      <div class="help">
+        Import the VCF into Google Contacts or open it on your phone. All selected lead information
+        is stored in each contact’s Notes field. This tool runs locally in your browser; the CSV is
+        not uploaded anywhere.
+      </div>
+    </section>
+
+    <section class="card full">
+      <h2>Contact preview</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Contact name</th><th>Phone</th><th>Email</th><th>Organization</th><th>Notes preview</th></tr></thead>
+          <tbody id="previewBody"><tr><td colspan="6" style="color:#9ea7b3">No contacts built yet.</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+let rawRows = [];
+let contacts = [];
+
+const $ = id => document.getElementById(id);
+
+function parseCSV(text) {
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i], next = text[i + 1];
+    if (inQuotes) {
+      if (c === '"' && next === '"') { field += '"'; i++; }
+      else if (c === '"') inQuotes = false;
+      else field += c;
+    } else {
+      if (c === '"') inQuotes = true;
+      else if (c === ',') { row.push(field); field = ''; }
+      else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+      else if (c !== '\r') field += c;
+    }
+  }
+  if (field.length || row.length) { row.push(field); rows.push(row); }
+  if (!rows.length) return [];
+  const headers = rows[0].map(h => h.trim());
+  return rows.slice(1)
+    .filter(r => r.some(v => String(v || '').trim() !== ''))
+    .map(r => Object.fromEntries(headers.map((h, i) => [h, (r[i] ?? '').trim()])));
+}
+
+function val(row, ...keys) {
+  for (const key of keys) {
+    const found = Object.keys(row).find(k => k.toLowerCase() === key.toLowerCase());
+    if (found && String(row[found] ?? '').trim()) return String(row[found]).trim();
+  }
+  return '';
+}
+
+function normalizePhone(phone) {
+  let p = String(phone || '').trim();
+  if (!p) return '';
+  const hasPlus = p.startsWith('+');
+  let digits = p.replace(/\D/g, '');
+  if (!digits) return '';
+  if (digits.length === 10) digits = '1' + digits;
+  return (hasPlus ? '+' : '+') + digits;
+}
+
+function displayPhone(phone) {
+  const d = String(phone || '').replace(/\D/g,'');
+  if (d.length === 11 && d[0] === '1') return `+1 (${d.slice(1,4)}) ${d.slice(4,7)}-${d.slice(7)}`;
+  return phone;
+}
+
+function splitName(full) {
+  const parts = String(full || '').trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return {first:'Lead', last:''};
+  if (parts.length === 1) return {first:parts[0], last:''};
+  return {first:parts.slice(0,-1).join(' '), last:parts[parts.length-1]};
+}
+
+function escapeVCard(s) {
+  return String(s || '')
+    .replace(/\\/g, '\\\\')
+    .replace(/\r?\n/g, '\\n')
+    .replace(/;/g, '\\;')
+    .replace(/,/g, '\\,');
+}
+
+function foldLine(line) {
+  const limit = 72;
+  if (line.length <= limit) return line;
+  let out = '';
+  while (line.length > limit) {
+    out += line.slice(0, limit) + '\r\n ';
+    line = line.slice(limit);
+  }
+  return out + line;
+}
+
+function makeNotes(row) {
+  const include = $('includeAllNotes').checked;
+  const excluded = new Set(['Name','Phone','Cell','Email','Address','City','State','Organization']);
+  const preferredOrder = [
+    'Notes','Lead ID','DOB','Group','Referred By','Relationship','Spouse',
+    'Occupation','Children','Language','Page Link','Image Link','Drive Image','Scraped At'
+  ];
+  const lines = [];
+
+  if (!include) {
+    const existing = val(row, 'Notes');
+    if (existing) lines.push(existing);
+    return lines.join('\n');
+  }
+
+  const ordered = [];
+  preferredOrder.forEach(k => {
+    const actual = Object.keys(row).find(x => x.toLowerCase() === k.toLowerCase());
+    if (actual) ordered.push(actual);
+  });
+  Object.keys(row).forEach(k => {
+    if (!ordered.includes(k) && !excluded.has(k)) ordered.push(k);
+  });
+
+  for (const key of ordered) {
+    const value = String(row[key] ?? '').trim();
+    if (!value) continue;
+    if (key.toLowerCase() === 'lead id' && !$('includeLeadId').checked) continue;
+    if (key.toLowerCase() === 'page link' && !$('includePageLink').checked) continue;
+    lines.push(`${key}: ${value}`);
+  }
+  return lines.join('\n');
+}
+
+function buildContacts() {
+  const tag = $('sourceTag').value.trim();
+  const tagPos = $('tagPosition').value;
+  const seen = new Set();
+  let dupes = 0, missing = 0;
+  const built = [];
+
+  rawRows.forEach((row, idx) => {
+    const baseName = val(row, 'Name') || `Lead ${idx + 1}`;
+    const phoneRaw = $('preferCell').checked ? (val(row,'Cell') || val(row,'Phone')) : (val(row,'Phone') || val(row,'Cell'));
+    const phone = normalizePhone(phoneRaw);
+    if (!phone) missing++;
+    if ($('skipNoPhone').checked && !phone) return;
+    if ($('dedupe').checked && phone && seen.has(phone)) { dupes++; return; }
+    if (phone) seen.add(phone);
+
+    let displayName = baseName;
+    if (tag && tagPos === 'prefix') displayName = `${tag} - ${baseName}`;
+    if (tag && tagPos === 'suffix') displayName = `${baseName} - ${tag}`;
+
+    const name = splitName(displayName);
+    built.push({
+      displayName,
+      firstName:name.first,
+      lastName:name.last,
+      phone,
+      email:val(row,'Email'),
+      organization:val(row,'Organization','Group'),
+      address:val(row,'Address'),
+      city:val(row,'City'),
+      state:val(row,'State'),
+      dob:val(row,'DOB'),
+      notes:makeNotes(row),
+      sourceRow:row
+    });
+  });
+
+  contacts = built;
+  $('contactCount').textContent = built.length;
+  $('duplicateCount').textContent = dupes;
+  $('missingPhoneCount').textContent = missing;
+  $('vcfBtn').disabled = !built.length;
+  $('csvBtn').disabled = !built.length;
+  renderPreview();
+  $('status').textContent = `Built ${built.length} contacts from ${rawRows.length} rows.`;
+}
+
+function renderPreview() {
+  const body = $('previewBody');
+  body.innerHTML = '';
+  contacts.slice(0, 200).forEach((c, i) => {
+    const tr = document.createElement('tr');
+    const preview = c.notes.length > 240 ? c.notes.slice(0,240) + '…' : c.notes;
+    tr.innerHTML = `<td>${i+1}</td>
+      <td>${htmlEscape(c.displayName)}</td>
+      <td>${htmlEscape(displayPhone(c.phone))}</td>
+      <td>${htmlEscape(c.email)}</td>
+      <td>${htmlEscape(c.organization)}</td>
+      <td class="notes">${htmlEscape(preview).replace(/\n/g,'<br>')}</td>`;
+    body.appendChild(tr);
+  });
+  if (!contacts.length) body.innerHTML = '<tr><td colspan="6" style="color:#9ea7b3">No contacts matched the current settings.</td></tr>';
+}
+
+function htmlEscape(s) {
+  return String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
+}
+
+function makeVCF() {
+  const cards = contacts.map(c => {
+    const lines = [
+      'BEGIN:VCARD',
+      'VERSION:3.0',
+      `N:${escapeVCard(c.lastName)};${escapeVCard(c.firstName)};;;`,
+      `FN:${escapeVCard(c.displayName)}`
+    ];
+    if (c.phone) lines.push(`TEL;TYPE=CELL:${escapeVCard(c.phone)}`);
+    if (c.email) lines.push(`EMAIL;TYPE=INTERNET:${escapeVCard(c.email)}`);
+    if (c.organization) lines.push(`ORG:${escapeVCard(c.organization)}`);
+    if (c.address || c.city || c.state) lines.push(`ADR;TYPE=HOME:;;${escapeVCard(c.address)};${escapeVCard(c.city)};${escapeVCard(c.state)};;`);
+    if (c.dob) {
+      const m = c.dob.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+      if (m) {
+        let year = m[3]; if (year.length === 2) year = Number(year) > 30 ? '19'+year : '20'+year;
+        lines.push(`BDAY:${year}-${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}`);
+      }
+    }
+    if (c.notes) lines.push(`NOTE:${escapeVCard(c.notes)}`);
+    lines.push('END:VCARD');
+    return lines.map(foldLine).join('\r\n');
+  });
+  return cards.join('\r\n');
+}
+
+function makeCleanCSV() {
+  const headers = ['Contact Name','Phone','Email','Organization','Address','City','State','DOB','Notes'];
+  const q = v => '"' + String(v ?? '').replace(/"/g,'""') + '"';
+  return [headers.map(q).join(',')].concat(contacts.map(c => [
+    c.displayName,c.phone,c.email,c.organization,c.address,c.city,c.state,c.dob,c.notes
+  ].map(q).join(','))).join('\r\n');
+}
+
+function download(content, filename, mime) {
+  const blob = new Blob([content], {type:mime});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  URL.revokeObjectURL(a.href);
+  a.remove();
+}
+
+$('fileInput').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const text = await file.text();
+    rawRows = parseCSV(text);
+    $('leadCount').textContent = rawRows.length;
+    $('buildBtn').disabled = !rawRows.length;
+    $('status').textContent = rawRows.length ? `Loaded ${rawRows.length} rows. Click Build preview.` : 'No data rows found.';
+    if (rawRows.length) buildContacts();
+  } catch (err) {
+    $('status').textContent = `Could not read CSV: ${err.message}`;
+  }
+});
+
+$('buildBtn').addEventListener('click', buildContacts);
+['sourceTag','tagPosition','includeAllNotes','includeLeadId','skipNoPhone','dedupe','preferCell','includePageLink']
+  .forEach(id => $(id).addEventListener('change', () => { if (rawRows.length) buildContacts(); }));
+
+$('vcfBtn').addEventListener('click', () => download(makeVCF(), 'lead_contacts.vcf', 'text/vcard;charset=utf-8'));
+$('csvBtn').addEventListener('click', () => download(makeCleanCSV(), 'lead_contacts_cleaned.csv', 'text/csv;charset=utf-8'));
+
+$('sampleBtn').addEventListener('click', () => {
+  const sample = 'Lead ID,Name,Phone,Address,City,State,DOB,Group,Email,Notes,Referred By,Organization,Relationship,Spouse,Occupation,Cell,Children,Language,Page Link\n1001,Jane Doe,3055550123,123 Main St,Miami,FL,01/15/1985,Sample Group,jane@example.com,Follow up Tuesday,John Smith,Local 100,Friend,Sam Doe,Teacher,3055550123,2,English,https://example.com';
+  download(sample, 'sample_leads.csv', 'text/csv;charset=utf-8');
+});
+</script>
+</body>
+</html>
