@@ -456,13 +456,18 @@ let UNIONS = [];
 function findUnion(g){ return UNIONS.find(u=>u.group===g); }
 function pick(obj, keys){ for(const k of keys){ if(obj[k]!=null && String(obj[k]).trim()!=='') return String(obj[k]).trim(); } return ''; }
 function mapRows(rows){
+  const seen={};
   return (Array.isArray(rows)?rows:[]).map(row=>({
-    group:   pick(row,['GROUP','Group','group']),
+    group:   pick(row,['GROUP','Group','group']) || pick(row,['DISPLAY NAME','Display Name','DisplayName','display']),
     display: pick(row,['DISPLAY NAME','Display Name','DisplayName','display']) || pick(row,['GROUP','Group']),
     aliases: pick(row,['ALIASES','Aliases','aliases']),
     logo:    pick(row,['LOGO LINK','Logo Link','LOGO','logo','LogoLink']),
     letter:  pick(row,['LETTER LINK','Letter Link','LETTER','letter','LetterLink']),
-  })).filter(u=>u.group||u.display).sort((a,b)=>(a.display||'').localeCompare(b.display||''));
+  })).filter(u=>{
+    if(!u.group) return false;                 // no usable key -> would collide with the "Select a union…" placeholder
+    if(seen[u.group]) return false;            // dedupe
+    seen[u.group]=1; return true;
+  }).sort((a,b)=>(a.display||'').localeCompare(b.display||''));
 }
 function parseCSV(text){
   const rows=[]; let row=[],f='',i=0,q=false;
@@ -517,7 +522,7 @@ function renderLauncher(){
         <label>Union / Association</label>
         <select id="union">
           <option value="">${UNIONS.length?'Select a union…':'Load the database first…'}</option>
-          ${UNIONS.map(u=>`<option value="${escAttr(u.group)}" ${u.group===STATE.union?'selected':''}>${escHtml(u.display||u.group)}</option>`).join('')}
+          ${UNIONS.map(u=>`<option value="${escAttr(u.group)}">${escHtml(u.display||u.group)}</option>`).join('')}
         </select>
       </div>
       <div class="row">
@@ -559,7 +564,10 @@ function renderLauncher(){
   });
   const mseg=document.getElementById('modeSeg');
   if(mseg) mseg.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>commit({scriptMode:b.dataset.m})));
-  $('union').addEventListener('change', e=>{ const u=findUnion(e.target.value);
+  const usel=$('union');
+  if(STATE.union && findUnion(STATE.union)) usel.value=STATE.union;
+  else { usel.value=''; if(STATE.union && UNIONS.length) commit({union:'', logoUrl:'', letterUrl:''}, true); }
+  usel.addEventListener('change', e=>{ const u=findUnion(e.target.value);
     commit({union:e.target.value, logoUrl:u?u.logo:'', letterUrl:u?u.letter:''}); });
   $('mainName').addEventListener('input', e=>commit({mainName:e.target.value}, true));
   $('spouseName').addEventListener('input', e=>commit({spouseName:e.target.value}, true));
