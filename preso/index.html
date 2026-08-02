@@ -10,7 +10,7 @@
     --paper:#f4f6f9; --line:#dde3ea; --muted:#5b6b7d;
     --slate:#10151c; --slate-2:#19212c; --slate-line:#2a3542;
     --slate-text:#e7edf3; --slate-muted:#8ea0b3; --cue:#ffcf6b;
-    --gold:#c9a227; --silver:#9aa5b1; --bronze:#b3703a;
+    --neon:#00ffa3; --neon-dim:#0b3a2c; --neon-line:#127a5c;
     --serif:Georgia,'Times New Roman',serif;
     --sans:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
   }
@@ -74,51 +74,10 @@
   .placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);gap:10px;text-align:center;padding:40px;background:var(--paper)}
   .placeholder .big{font-family:var(--serif);font-size:26px;color:var(--navy)}
 
-  /* ---------------- Senior graphics ---------------- */
-  .sen-slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;
-    gap:clamp(14px,2.4vh,26px);padding:clamp(24px,4vw,56px)}
+  /* ---------------- stat slides (funeral trend / income / mortgage) ---------------- */
   .sen-head{text-align:center;margin-bottom:4px}
   .sen-head .eyebrow{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--red);font-weight:700}
   .sen-head h2{font-family:var(--serif);font-size:clamp(28px,4vw,48px);color:var(--navy);margin:6px 0 0}
-  /* gap bars */
-  .gap-block{display:grid;grid-template-columns:150px 1fr 130px;align-items:center;gap:16px}
-  .gap-lab{font-size:14px;font-weight:700;color:var(--muted);text-align:right}
-  .gap-bar{display:flex;height:clamp(46px,7vh,64px);border-radius:12px;overflow:hidden;
-    box-shadow:0 2px 8px rgba(15,41,66,.15)}
-  .gap-bar .seg{display:flex;flex-direction:column;align-items:center;justify-content:center;
-    color:#fff;font-size:13px;font-weight:600;min-width:0;padding:0 8px;line-height:1.15;text-align:center}
-  .gap-bar .seg b{font-size:clamp(15px,1.9vw,20px);font-weight:800}
-  .seg.segA{background:var(--navy)}
-  .seg.segB{background:var(--navy-2)}
-  .seg.segKept{background:#2f7d4f}
-  .seg.segLost{background:var(--red);background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.14) 0 10px,transparent 10px 20px)}
-  .gap-tot{font-family:var(--serif);font-size:clamp(22px,2.6vw,30px);color:var(--navy);font-weight:700}
-  .gap-tot span{font-size:14px;color:var(--muted);font-family:var(--sans)}
-  .gap-arrow{text-align:center;font-size:14px;color:var(--red);font-weight:700;letter-spacing:.3px}
-  .gap-callout{margin:2px auto 0;text-align:center;background:#fff;border:2px solid var(--red);
-    border-radius:16px;padding:clamp(12px,2vh,20px) 34px;box-shadow:0 4px 16px rgba(200,16,46,.14)}
-  .gap-callout .gc-lab{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700}
-  .gap-callout .gc-big{font-family:var(--serif);font-size:clamp(34px,5vw,60px);color:var(--red);line-height:1;margin:6px 0 4px}
-  .gap-callout .gc-big span{font-size:clamp(16px,1.8vw,22px);color:var(--muted);font-family:var(--sans)}
-  .gap-callout .gc-year{font-size:clamp(15px,1.8vw,20px);color:var(--navy);font-weight:700}
-  /* tier board */
-  .tier-row{display:flex;gap:clamp(12px,2vw,22px);justify-content:center;align-items:stretch}
-  .tier{flex:1;max-width:300px;background:#fff;border:1px solid var(--line);border-top:6px solid var(--hue);
-    border-radius:14px;padding:clamp(14px,2vh,22px);box-shadow:0 2px 10px rgba(15,41,66,.08);
-    display:flex;flex-direction:column;align-items:center;gap:8px;transition:transform .15s;position:relative}
-  .tier.on{transform:scale(1.05);box-shadow:0 8px 26px rgba(15,41,66,.2);border-color:var(--hue)}
-  .tier.dim{opacity:.5}
-  .tier.ring{box-shadow:0 0 0 3px var(--silver),0 8px 26px rgba(15,41,66,.18)}
-  .tier-name{font-family:var(--serif);font-size:clamp(20px,2.4vw,28px);color:var(--navy)}
-  .tier-mo{text-align:center;line-height:1}
-  .tier-mo b{font-size:clamp(38px,5vw,64px);color:var(--hue);font-weight:800;display:block}
-  .tier-mo span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
-  .tier-line{font-size:13px;color:var(--ink);text-align:center}
-  .tier-badge{margin-top:6px;background:var(--hue);color:#fff;font-size:12px;font-weight:700;
-    padding:4px 12px;border-radius:20px}
-  .tier-foot{text-align:center;font-size:13px;color:var(--muted);letter-spacing:.3px}
-
-  /* ---------------- stat slides (funeral trend / income) ---------------- */
   .stat-slide{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;
     gap:clamp(16px,3vh,30px);padding:clamp(24px,4vw,60px)}
   .stat-note{text-align:center;font-size:12px;color:var(--muted);line-height:1.5;max-width:70ch;margin:0 auto}
@@ -135,7 +94,6 @@
     border:2px dashed var(--red);box-shadow:none}
   .fx-yr{margin-top:10px;font-size:14px;font-weight:700;color:var(--muted);text-align:center;line-height:1.2}
   .fx-yr small{display:block;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--red);font-weight:700}
-  /* actual↔projected cutoff divider */
   .fx-div{display:flex;flex-direction:column;align-items:center;flex:0 0 auto;width:clamp(40px,6vw,80px)}
   .fx-div-amt{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-weight:700;margin-bottom:8px}
   .fx-div-track{flex:1;position:relative;width:100%}
@@ -155,9 +113,21 @@
   .inc-big{font-family:var(--serif);font-size:clamp(30px,4vw,46px);color:var(--navy);font-weight:800;line-height:1;flex:0 0 auto}
   .inc-txt{font-size:14px;line-height:1.45;color:var(--ink)}
   .inc-txt b{color:var(--navy)}
+  /* mortgage */
+  .mtg-row{display:flex;gap:clamp(16px,3vw,34px);justify-content:center;align-items:stretch;max-width:78ch;margin:0 auto}
+  .mtg-card{flex:1;max-width:360px;background:#fff;border:1px solid var(--line);border-radius:14px;
+    padding:clamp(16px,2.4vh,26px);box-shadow:0 2px 12px rgba(15,41,66,.08);text-align:center;
+    border-top:6px solid var(--navy);display:flex;flex-direction:column;gap:10px}
+  .mtg-card.bad{border-top-color:var(--red)}
+  .mtg-lab{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .mtg-head{font-family:var(--serif);font-size:clamp(20px,2.6vw,30px);color:var(--navy);line-height:1.15}
+  .mtg-card.bad .mtg-head{color:var(--red)}
+  .mtg-sub{font-size:14px;color:var(--ink);line-height:1.45}
+  .mtg-vs{display:flex;align-items:center;justify-content:center;font-size:12px;letter-spacing:2px;
+    text-transform:uppercase;color:var(--muted);font-weight:700;flex:0 0 auto;padding:0 4px}
 
   /* ---------------- CONTROL (script on top) ---------------- */
-  #control{height:100%;display:flex;flex-direction:column;background:var(--slate);color:var(--slate-text)}
+  #control{height:100%;display:flex;flex-direction:column;background:var(--slate);color:var(--slate-text);position:relative}
   #control .script{flex:1 1 auto;overflow:auto;padding:16px 18px 22px;line-height:1.6;font-size:16px;order:0}
   #control .script .cue{color:var(--cue);font-style:italic}
   #control .script p{margin:0 0 13px;white-space:pre-wrap}
@@ -176,67 +146,189 @@
   #control .calc{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
   #control .chip{background:#22303f;border:1px solid var(--slate-line);border-radius:8px;padding:7px 10px;font-size:12px;color:var(--slate-text)}
   #control .chip b{color:var(--cue)}
-  /* segmented mode selectors */
-  .seg{display:flex;gap:6px;background:#eef2f6;border:1px solid var(--line);border-radius:10px;padding:4px}
-  .seg button{flex:1;appearance:none;border:none;background:transparent;color:var(--muted);font-weight:700;font-size:13px;padding:9px 8px;border-radius:7px;cursor:pointer;font-family:var(--sans)}
-  .seg button.on{background:var(--navy);color:#fff}
-  .segc{display:flex;gap:6px;margin:0 0 10px;background:#0d1218;border:1px solid var(--slate-line);border-radius:9px;padding:4px}
-  .segc button{flex:1;appearance:none;border:none;background:transparent;color:var(--slate-muted);font-weight:700;font-size:12px;padding:8px 6px;border-radius:6px;cursor:pointer;font-family:var(--sans)}
-  .segc button.on{background:var(--red);color:#fff}
+
+  /* ---------------- OBJECTIONS ---------------- */
+  #control .objbar{flex:0 0 auto;display:flex;gap:6px;padding:8px 10px;background:#0d1218;
+    border-top:1px solid var(--slate-line);align-items:stretch}
+  .objpill{flex:1;min-width:0;appearance:none;cursor:pointer;font-family:var(--sans);
+    background:#14251f;color:var(--neon);border:1px solid var(--neon-line);border-radius:8px;
+    padding:8px 8px 7px;font-size:11.5px;font-weight:700;line-height:1.25;text-align:left;
+    display:flex;flex-direction:column;gap:3px;transition:background .12s,box-shadow .12s}
+  .objpill:hover{background:#1a3129}
+  .objpill.on{background:var(--neon);color:#04180f;border-color:var(--neon);
+    box-shadow:0 0 14px rgba(0,255,163,.45)}
+  .objpill .k{font-size:9px;letter-spacing:1.5px;opacity:.75;font-weight:800}
+  .objpill .t{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .objpill.uni{flex:0 0 74px;background:#241c2e;color:#d9a6ff;border-color:#6b3f8f}
+  .objpill.uni:hover{background:#2f2440}
+  .objpill.uni.on{background:#d9a6ff;color:#1d0d29;border-color:#d9a6ff;box-shadow:0 0 14px rgba(217,166,255,.45)}
+
+  #objdrawer{position:absolute;left:0;right:0;bottom:0;z-index:20;
+    background:linear-gradient(180deg,#0a1a14,#08130f);
+    border-top:2px solid var(--neon);box-shadow:0 -14px 40px rgba(0,0,0,.6);
+    transform:translateY(101%);transition:transform .18s cubic-bezier(.2,.8,.3,1);
+    max-height:72%;display:flex;flex-direction:column}
+  #objdrawer.open{transform:translateY(0)}
+  #objdrawer .odhead{flex:0 0 auto;display:flex;align-items:flex-start;gap:10px;
+    padding:12px 14px 10px;border-bottom:1px solid var(--neon-line)}
+  #objdrawer .odlab{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;
+    color:var(--neon);opacity:.7;font-weight:800;margin-bottom:4px}
+  #objdrawer .odtrig{font-family:var(--serif);font-size:19px;line-height:1.2;color:var(--neon);
+    text-shadow:0 0 18px rgba(0,255,163,.35)}
+  #objdrawer .odx{flex:0 0 auto;appearance:none;border:1px solid var(--neon-line);background:#12251d;
+    color:var(--neon);border-radius:7px;width:30px;height:30px;font-size:15px;cursor:pointer;font-weight:700}
+  #objdrawer .odx:hover{background:#1a3129}
+  #objdrawer .odbody{flex:1 1 auto;overflow:auto;padding:14px 16px 18px;
+    font-size:16.5px;line-height:1.55;color:#c9ffe8}
+  #objdrawer .odbody p{margin:0 0 12px;white-space:pre-wrap}
+  #objdrawer .odbody .cue{color:var(--cue);font-style:italic}
+  #objdrawer .odbody em.todo{color:#6f8f82;font-style:italic}
+  #objdrawer .odtabs{flex:0 0 auto;display:flex;gap:6px;padding:8px 12px 12px}
+  #objdrawer .odtab{flex:1;appearance:none;cursor:pointer;font-family:var(--sans);font-size:11px;
+    font-weight:700;padding:7px 6px;border-radius:7px;border:1px solid var(--neon-line);
+    background:#12251d;color:var(--neon);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #objdrawer .odtab.on{background:var(--neon);color:#04180f}
+
+  /* ---------------- LOGO-ONLY SLIDE ---------------- */
+  .logo-slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:6vh 6vw;background:var(--paper)}
+  .logo-slide img{max-width:62%;max-height:70%;object-fit:contain}
+  .logo-slide .no-logo{color:var(--muted);font-family:var(--serif);font-size:26px}
+
+  /* ---------------- PITCH SHEET (presentation) ---------------- */
+  :root{--ps-navy:#071f38;--ps-blue:#123d66;--ps-gold:#c49a45;--ps-gold2:#f1dfad;--ps-green:#0f6d46;--ps-line:#e4ebf2}
+  .ps-slide{position:absolute;inset:0;overflow:auto;padding:20px 24px 30px;background:var(--paper)}
+  .ps-top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
+  .ps-topL{display:flex;align-items:center;gap:14px}
+  .ps-logo{background:#fff;border:1px solid var(--ps-line);border-radius:14px;padding:8px 12px}
+  .ps-logo img{display:block;height:42px;width:auto;max-width:170px;object-fit:contain}
+  .ps-ttl b{display:block;font-size:14px;letter-spacing:.13em;text-transform:uppercase;color:var(--ps-navy)}
+  .ps-ttl span{display:block;margin-top:2px;color:var(--muted);font-size:12px;font-weight:800;letter-spacing:.04em}
+  .ps-badge{border:1px solid rgba(196,154,69,.5);background:rgba(196,154,69,.13);color:#76571e;border-radius:999px;
+    padding:8px 14px;font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+  .ps-people{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:18px;align-items:start}
+  .ps-card{background:#fff;border:1px solid var(--ps-line);border-radius:22px;overflow:hidden;box-shadow:0 14px 40px rgba(7,31,56,.09)}
+  .ps-head{padding:16px 20px 13px;border-bottom:1px solid var(--ps-line);background:linear-gradient(180deg,#fff,#f9fbfd);
+    display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .ps-head h3{margin:0;font-family:var(--serif);font-size:22px;letter-spacing:.09em;text-transform:uppercase;color:var(--ps-navy)}
+  .ps-head .ps-sub{margin-top:3px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.1em;font-weight:900}
+  .ps-price{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:14px 18px 0}
+  .ps-price>div{border:1px solid var(--ps-line);border-radius:14px;background:#f9fbfd;padding:10px;text-align:center}
+  .ps-price b{display:block;font-size:9.5px;color:#6f8194;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px}
+  .ps-price .pw span{font-size:29px;font-weight:900;letter-spacing:-.05em;color:var(--ps-green);line-height:.9}
+  .ps-price .pm span{font-size:21px;font-weight:900;letter-spacing:-.04em;color:var(--ps-navy);line-height:1}
+  .ps-rows{padding:16px 18px;display:grid;gap:11px}
+  .ps-row{border:1px solid var(--ps-line);border-radius:16px;padding:13px 16px;background:#fff;
+    display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center}
+  .ps-row.funeral{border-color:rgba(196,154,69,.5);background:linear-gradient(180deg,#fff,#fffaf0)}
+  .ps-row.income{border-color:#c9e3d4;background:linear-gradient(180deg,#fff,#f3fbf6)}
+  .ps-row.college{border-color:#cfe0f2;background:linear-gradient(180deg,#fff,#f5f9ff)}
+  .ps-row.mortgage{border-color:#d8d3e8;background:linear-gradient(180deg,#fff,#f8f6ff)}
+  .ps-row.ghgp{border-color:#cde6d6;background:linear-gradient(180deg,#f5fbf7,#fff);grid-template-columns:1fr}
+  .ps-kick{font-size:10px;color:var(--muted);text-transform:uppercase;font-weight:900;letter-spacing:.13em;margin-bottom:4px}
+  .ps-desc{font-size:16px;font-weight:900;color:#172c43;line-height:1.2;text-transform:uppercase;letter-spacing:-.01em}
+  .ps-desc small{display:block;margin-top:5px;font-size:11px;color:var(--muted);font-weight:800;line-height:1.35;text-transform:none;letter-spacing:0}
+  .ps-amt{font-size:clamp(26px,3vw,40px);font-weight:900;letter-spacing:-.05em;color:var(--ps-navy);white-space:nowrap;text-align:right;line-height:.95}
+  .ps-amt em{display:block;font-style:normal;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:900;margin-top:5px}
+  .ps-a71tag{display:inline-block;margin-top:6px;background:rgba(196,154,69,.16);border:1px solid rgba(196,154,69,.5);
+    color:#76571e;border-radius:999px;padding:4px 9px;font-size:10px;font-weight:900;letter-spacing:.07em;text-transform:uppercase}
+  .ps-ghead{display:flex;justify-content:space-between;gap:10px;align-items:center;color:var(--ps-green);
+    font-size:11.5px;text-transform:uppercase;letter-spacing:.13em;font-weight:900;margin-bottom:10px}
+  .ps-ggrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .ps-gitem{background:#fff;border:1px solid var(--ps-line);border-radius:13px;padding:10px;text-align:center}
+  .ps-gitem b{display:block;font-size:19px;color:var(--ps-navy);letter-spacing:-.04em;margin-bottom:3px}
+  .ps-gitem span{display:block;color:var(--muted);font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.07em;line-height:1.25}
+  .ps-acc{margin-top:9px;border:1px solid rgba(196,154,69,.55);border-radius:13px;
+    background:linear-gradient(135deg,var(--ps-navy),var(--ps-blue));color:#fff;padding:11px 14px;
+    display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .ps-acc .l{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;font-weight:900;color:var(--ps-gold2)}
+  .ps-acc .l small{display:block;text-transform:none;letter-spacing:0;font-size:10px;color:#c8d5e0;margin-top:3px;font-weight:800}
+  .ps-acc .v{font-size:26px;font-weight:900;letter-spacing:-.05em;white-space:nowrap}
+  .ps-empty{padding:34px 20px;text-align:center;color:var(--muted);font-size:13px;font-weight:800}
+  .ps-foot{margin-top:14px;text-align:center;font-size:10.5px;color:var(--muted);line-height:1.5}
+
+  /* ---------------- BUILDER (control) ---------------- */
+  #control .bwrap{flex:1 1 auto;overflow:auto;padding:12px 14px 20px}
+  .bsec{border:1px solid var(--slate-line);border-radius:12px;background:#161f2a;padding:11px 12px;margin-bottom:10px}
+  .bsec>h4{margin:0 0 9px;font-size:10.5px;letter-spacing:1.6px;text-transform:uppercase;color:var(--slate-muted);font-weight:800}
+  .bgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .bgrid.g3{grid-template-columns:1fr 1fr 1fr}
+  .bgrid label,.bfield label{display:block;font-size:10px;color:var(--slate-muted);margin-bottom:4px;font-weight:700}
+  .bsec input,.bsec select{background:#26313f;color:var(--slate-text);border:1px solid var(--slate-line);
+    border-radius:7px;padding:8px 9px;font-size:13px;width:100%}
+  .bsec input:focus,.bsec select:focus{outline:none;border-color:var(--red);box-shadow:0 0 0 3px rgba(200,16,46,.2)}
+  .btoggle{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;cursor:pointer;color:var(--slate-text)}
+  .btoggle input{width:16px;height:16px;accent-color:var(--neon);flex:0 0 auto;cursor:pointer}
+  .bopts{display:flex;gap:6px;margin-bottom:10px}
+  .bopts button{flex:1;appearance:none;cursor:pointer;font-family:var(--sans);font-weight:800;font-size:12px;
+    padding:9px 6px;border-radius:8px;border:1px solid var(--slate-line);background:#26313f;color:var(--slate-muted)}
+  .bopts button.on{background:var(--red);color:#fff;border-color:var(--red)}
+  .bwho{display:flex;gap:6px;margin-bottom:10px}
+  .bwho button{flex:1;appearance:none;cursor:pointer;font-family:var(--sans);font-weight:800;font-size:12px;
+    padding:8px 6px;border-radius:8px;border:1px solid var(--slate-line);background:#1d2836;color:var(--slate-muted)}
+  .bwho button.on{background:#26313f;color:var(--slate-text);border-color:#41546b}
+  .ben{border:1px solid var(--slate-line);border-radius:11px;background:#131b24;margin-bottom:8px;overflow:hidden}
+  .ben>.bhead{display:flex;align-items:center;gap:9px;padding:10px 11px;cursor:pointer}
+  .ben>.bhead .bname{flex:1;font-size:13px;font-weight:800}
+  .ben.on{border-color:var(--neon-line);background:#111d18}
+  .ben.on>.bhead .bname{color:var(--neon)}
+  .ben .bbody{padding:0 11px 11px;display:grid;gap:8px}
+  .bnote{font-size:10.5px;color:var(--slate-muted);line-height:1.4}
+  .bnote.warn{color:#ffb4a2}
+  .bcalc{font-size:11.5px;color:var(--cue);font-weight:800}
+  .bswitch{display:flex;gap:6px}
+  .bswitch button{flex:1;appearance:none;cursor:pointer;font-family:var(--sans);font-weight:800;font-size:11.5px;
+    padding:7px 6px;border-radius:7px;border:1px solid var(--slate-line);background:#26313f;color:var(--slate-muted)}
+  .bswitch button.on{background:var(--cue);color:#2a1e00;border-color:var(--cue)}
+  .btot{display:flex;gap:7px;margin-top:2px}
+  .btot .c{flex:1;background:#22303f;border:1px solid var(--slate-line);border-radius:9px;padding:8px;text-align:center}
+  .btot .c b{display:block;font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:var(--slate-muted);margin-bottom:3px}
+  .btot .c span{font-size:17px;font-weight:900;color:var(--cue)}
+  .modeseg{display:flex;gap:6px;padding:8px 10px;background:#0d1218;border-top:1px solid var(--slate-line)}
+  .modeseg button{flex:1;appearance:none;cursor:pointer;font-family:var(--sans);font-weight:800;font-size:12px;
+    padding:8px;border-radius:7px;border:1px solid var(--slate-line);background:#1d2836;color:var(--slate-muted)}
+  .modeseg button.on{background:var(--navy-2);color:#fff;border-color:var(--navy-2)}
+
   ::-webkit-scrollbar{width:10px}::-webkit-scrollbar-thumb{background:#33414f;border-radius:6px}::-webkit-scrollbar-track{background:transparent}
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script>
-/* ============ slide order (exact) ============ */
-/* ============ slides: shared base + per-mode tails ============ */
-// Everything through FOC is identical across modes. After FOC, HC/REF continue one way, Senior another.
-const BASE_SLIDES = [
-  {id:'intro',     file:'intro',     title:'Introduction',                     eyebrow:'Getting Started',        visual:'brand'},
-  {id:'company',   file:'company',   title:'American Income Life',             eyebrow:'Our Company',            visual:'brand'},
-  {id:'add',       file:'ADD',       title:'Accidental Death & Dismemberment',eyebrow:'',                        visual:'pdf',   pdf:['add.pdf']},
-  {id:'csk',       file:'CSK',       title:'Child Safe Kit',                  eyebrow:'',                        visual:'pdf',   pdf:['csk.pdf']},
-  {id:'will',      file:'will',      title:'Will Kit',                        eyebrow:'',                        visual:'pdf',   pdf:['will.pdf']},
-  {id:'faminfo',   file:'Faminfo',   title:'Family Information Guide',        eyebrow:'',                        visual:'pdf',   pdf:['faminfo.pdf']},
-  {id:'ailplus',   file:'ailplus',   title:'AIL Plus Savings',               eyebrow:'',                        visual:'pdf',   pdf:['ailplus.pdf']},
-  {id:'refs',      file:'refs',      title:'Blanket of Protection',          eyebrow:'Referrals',               visual:'brand'},
-  {id:'letter',    file:'letter',    title:'Mandatory Read-Off Letter',      eyebrow:'',                        visual:'letter'},
-  {id:'needs',     file:'needs',     title:'Needs Analysis',                 eyebrow:'Qualifying',              visual:'brand'},
-  {id:'hourpower', file:'hourpower', title:'The Hour Power Principle',       eyebrow:'The Concept',             visual:'brand'},
-  {id:'fex',       file:'fex',       title:'The Cost of a Funeral Today',    eyebrow:'Final Expense',           visual:'fexchart'},
-  {id:'foc',       file:'foc',       title:'Freedom of Choice',              eyebrow:'',                        visual:'pdf2',  pdf:['foc.pdf','foc2.pdf']},
-];
-const TAIL_HC = [
-  {id:'income',    file:'income',    title:'Income Protection',              eyebrow:'Protecting the Paycheck', visual:'incomestats'},
-  {id:'college',   file:'college',   title:'College Fund Benefit',           eyebrow:'The Kids',                visual:'brand'},
-  {id:'ghgp',      file:'ghgp',      title:'Get Hurt, Get Paid',             eyebrow:'Living Benefits',         visual:'brand'},
-  {id:'close',     file:'close',     title:'The Close',                      eyebrow:'1 Hour vs 2 Hour',        visual:'brand'},
-];
-// Senior-specific tail (hardcoded script + custom graphic). Ends on the SS gap;
-// the Gold/Silver/Bronze close is handled on Thomas's external pitch sheet.
-const TAIL_SEN = [
-  {id:'ssgap',    file:'ssgap',    title:'Social Security Protection', eyebrow:'The Survivor Gap',   visual:'ssgap'},
-];
-function slidesFor(mode){ return (mode==='SEN') ? BASE_SLIDES.concat(TAIL_SEN) : BASE_SLIDES.concat(TAIL_HC); }
-function activeSlides(){ return slidesFor(STATE.scriptMode||'HC'); }
-const ALL_SLIDES = BASE_SLIDES.concat(TAIL_HC, TAIL_SEN);
-function slideFile(id){ const s=ALL_SLIDES.find(x=>x.id===id); return s?s.file:id; }
+/* ==========================================================================
+   ONE script, ONE slide order. No modes.
+   Each slide: id, title, eyebrow, visual (+pdf), script, objections[3].
+   ========================================================================== */
+const SLIDES = [
+  {id:'intro', title:'Introduction', eyebrow:'Getting Started', visual:'brand',
+   script:`Have you ever met with someone like me about your benefits or happen to hear about us at a union meeting? Ok, do you remember that little card we talked about on the phone, that you filled out? Perfect… well, you're probably going to get that every couple of years from now on, as long as you are still in the union or are retired from the union. The reason is because we know the union does the best job it can of providing you with benefits, but we both know they can't give you everything you need with the amount of money they have to work with. That's exactly why they give you a chance to work with us, and today's your lucky day… You get to work with me.`,
+   objections:[
+     {t:'I already have coverage through the union', r:``},
+     {t:`I don't remember filling out any card`, r:``},
+     {t:'How long is this going to take?', r:``},
+   ]},
 
-/* ============ built-in Hard Card scripts (offline fallback) ============ */
-const SCRIPTS_HC = {
-intro:`Have you ever met with someone like me about your benefits or happen to hear about us at a union meeting? Ok, do you remember that little card we talked about on the phone, that you filled out? Perfect… well, you're probably going to get that every couple of years from now on, as long as you are still in the union or are retired from the union. The reason is because we know the union does the best job it can of providing you with benefits, but we both know they can't give you everything you need with the amount of money they have to work with. That's exactly why they give you a chance to work with us, and today's your lucky day… You get to work with me.`,
+  {id:'company', title:'American Income Life', eyebrow:'Our Company', visual:'brand',
+   script:`The name of our company is American Income and we have been serving unions for over 70 years and work with over 40,000 different unions, including all the big ones like the UAW, Teamsters, Police, Fire Fighters, Veterans, and yours. The reason we work with all these unions is because we are a 100% wall-to-wall union benefit company. In fact, I'm a union member just like you. My union is the OPEIU Local 277, and we are the largest unionized benefit company in the country.
 
-company:`The name of our company is American Income and we have been serving unions for over 70 years and work with over 40,000 different unions, including all the big ones like the UAW, Teamsters, Police, Fire Fighters, Veterans, and yours. The reason we work with all these unions is because we are a 100% wall-to-wall union benefit company. In fact, I'm a union member just like you. My union is the OPEIU Local 277, and we are the largest unionized benefit company in the country.
+My job is simple but extremely important. I'm going to walk you through setting up your pre-paid benefits and answer all your questions, but more importantly, we are going to go through the permanent plans that you may qualify for. These benefits are designed to pick up where your work program left off and fill in your gaps. So, as we go through this, if you say to yourself, "Yeah, that makes sense, I see why they did this," GREAT, I'll set that up for you today. If not, NO BIG DEAL. The union guys have ALL liked it because it's SO much more affordable than what they get from non-union companies, and you'll see it's a far better variety of benefits. That's why EVERYONE enrolls… All they need is a yes or no, and that decision needs to be made today because we have several hundred of you guys to do this with, and we have to see you ONE- FAMILY- AT- A- TIME. Is that fair?`,
+   objections:[
+     {t:'Never heard of American Income — are you legit?', r:``},
+     {t:`So you're just an insurance salesman?`, r:``},
+     {t:'Why does it have to be decided today?', r:``},
+   ]},
 
-My job is simple but extremely important. I'm going to walk you through setting up your pre-paid benefits and answer all your questions, but more importantly, we are going to go through the permanent plans that you may qualify for. These benefits are designed to pick up where your work program left off and fill in your gaps. So, as we go through this, if you say to yourself, "Yeah, that makes sense, I see why they did this," GREAT, I'll set that up for you today. If not, NO BIG DEAL. Understand this isn't a big sales pitch. The union guys have ALL liked it because it's SO much cheaper than what they get from non-union companies, and you'll see it's a far better variety of benefits. That's why EVERYONE enrolls… All they need is a yes or no, and that decision needs to be made today because we have several hundred of you guys to do this with, and we have to see you ONE- FAMILY- AT- A- TIME. Is that fair?`,
+  {id:'add', title:'Accidental Death & Dismemberment', eyebrow:'', visual:'pdf', pdf:['add.pdf'],
+   script:`The first thing you're getting is the Accidental Death and Dismemberment benefit. This will pay $4,000 to (beneficiary) if you were to die in any accident. It is also dismemberment, so it will also pay you half of the amount if you were to lose one hand, one foot, or sight in one eye and the full amount for the combination of any two. NO one is getting rich off of this, but it is non-contributory, which it means you DON'T pay for it, and we both know every little bit helps, right?!?!?!
 
-add:`The first thing you're getting is the Accidental Death and Dismemberment benefit. This will pay $4,000 to (beneficiary) if you were to die in any accident. It is also dismemberment, so it will also pay you half of the amount if you were to lose one hand, one foot, or sight in one eye and the full amount for the combination of any two. NO one is getting rich off of this, but it is non-contributory, which it means you DON'T pay for it, and we both know every little bit helps, right!!!
+Now just in case you were to pass away in a common accident, we need to take down two emergency contacts for each of you. These should be people you associate with regularly and are typically between the ages of 18 and 60 years old. Who's first? (name, relationship, city, phone)`,
+   objections:[
+     {t:'Why do you need my emergency contacts?', r:``},
+     {t:`$4,000 isn't much — what's the catch?`, r:``},
+     {t:`I'd rather not give out other people's info`, r:``},
+   ]},
 
-Now just in case you were to pass away in a common accident, we need to take down two emergency contacts for each of you. These should be people you associate with regularly and are typically between the ages of 18 and 60 years old. Who's first (name, relationship, city, phone)`,
-
-csk:`How many kids go missing a year (PAUSE LET THEM FEEL) Its 305,000 in the U.S in 2025, that 1 child every minute. How long does it take to start a search (PAUSE LET THEM GUESS)
-on average it can take 1 to 6 hours on average, every hour the search radius increases by 50 miles, from just the mall, grocery store, playground, after 1 hour it becomes almost 8 THOUSAND square miles. We have close relationships with First-Responders, Police, Firefighters, & Teachers and we've been trying to find ways to keep kids safer and this is what they have come up with. (show the Child Safe Kit slide)
+  {id:'csk', title:'Child Safe Kit', eyebrow:'', visual:'pdf', pdf:['csk.pdf'],
+   script:`The next benefit is outstanding. I'm sure you would agree that protecting kids is the most important thing we can do, right? We have close relationships with First-Responders, Police, Firefighters, & Teachers and we've been trying to find ways to keep kids safer and this is what they have come up with. (show the Child Safe Kit slide)
 
 When I email you, there will be a QR code. Once you have the app downloaded and your account set up, you will be prompted to scan or upload the QR code. Once the QR code is uploaded you will put all your kid's information into the app. It's the same information that's on this printable kit. Important information, such as section
 Section 1 is for personal information: name nickname, height, weight, allergies, medication... all of that.
@@ -248,20 +340,32 @@ Then on the next page, you'll add a current picture, along with the age and date
 
 Most parents have had a moment where they turn around and their kid isn't right there. Either they ran into the next aisle at the grocery store or down the beach... some parents feel like they never take their eyes off their kids in public, but things happen, and they happen fast. In fact, just over the past couple years, our Child Safe Kits have been accredited for helping to find two children abducted in the US. One child in Chicago, that was later found but taken by a crazed relative. The other in Houston, who was found at the border where her abductors were trying to leave the country.
 
-Im sure you can see how important this is for every family with children to have. (go down deep emotional low tone sad)
+(Share a personal story)
 
-We made a commitment to the American Federation of teachers, and the police unions, that we would get these out to every family with kids, we cant do that without your help.
+I'm sure you can see how every family with kids needs this right?
 
-Who do you know who loves their kids. (not a question)
+Now we've made a commitment to the American Federation of Teachers and the police unions that we would get these out to every family with kids and we can't do that without your help…
 
-("EVERYONE"): Yea exactly lets get this to those families, whose the parent you know whos got the most kids.`,
+Who do you know, that loves their kids`,
+   objections:[
+     {t:`I don't have kids`, r:``},
+     {t:`I don't want to give you my friends' names`, r:``},
+     {t:'Is my kids info going into a database?', r:``},
+   ]},
 
-will:`How does probate work. (wait for response)
+  {id:'will', title:'Will Kit', eyebrow:'', visual:'pdf', pdf:['will.pdf'],
+   script:`How does probate work. (wait for response)
 Probate is basically the court deciding who gets your stuff, making sure debts are paid, and giving permission before your family can access or distribute your assets. It can take months, and in some cases over a year. During that time, accounts can be frozen, bills still have to be paid, and your loved ones are dealing with paperwork and legal costs while they're grieving.
 
 One of the MOST important benefits we have for our members is a Will Kit. This is something that EVERYONE needs, especially if you have minor children, but people have not had the time or money to set this up. Rather than spending a couple thousand dollars meeting with an attorney to set up a Will, we are providing you one of our professionally organized Will Kits at absolutely no-cost. Everything you need to protect your assets, and your family, is listed in the Will Kit. Now do you either use a regular brick and mortar bank, credit union, or online bank? You can get this notarized at the bank/credit union. Once you have this completely filled out, you will want to make a copy for a couple of people that are the closest to you. We all know how difficult it is to lose a loved one, so this needs to be done ASAP to protect your family`,
+   objections:[
+     {t:'I already have a will', r:``},
+     {t:'Is this actually legally valid?', r:``},
+     {t:`I don't have enough assets to need one`, r:``},
+   ]},
 
-faminfo:`Now the will is for the court, if you dont mind me asking, have you ever had to handle or manage a funeral. (DOWN TONE SAD)
+  {id:'faminfo', title:'Family Information Guide', eyebrow:'', visual:'pdf', pdf:['faminfo.pdf'],
+   script:`Now the will is for the court, if you dont mind me asking, have you ever had to handle or manage a funeral. (DOWN TONE SAD)
 IF YES: Im sorry to hear that, it goes without saying theres alot you have to figure out or
 IF NO: ok, now im sure youve seen someone else handle a funeral right? im sorry to hear that, who was it? it goes without saying theres alot you have to figure out or
 
@@ -282,12 +386,22 @@ Yea no worries well help you out with that but thats for later, this next part t
 
 when something happens to you you want to make sure they have access to you bank accounts to use the funds for final expenses and close the accounts.
 now this is where you fill in final requests, for example, are you getting buried or cremated (not a question demand for it)`,
+   objections:[
+     {t:`I'd rather not share my financial details`, r:``},
+     {t:'My spouse handles all of this', r:``},
+     {t:`I don't want to think about dying`, r:``},
+   ]},
 
-ailplus:`The next benefit helps EVERYONE save money. Have you been saving $100 every month like all the other union/association members? It's called the AIL PLUS program and it's designed to help with health-related costs. This doesn't affect any medical coverages you already have in any way. It saves so much money, up to 85%, on so many areas like glasses, dental, lab testing, and even vet bills and pet prescriptions, because barely anyone has health insurance on the pets (chuckle) When is the last time youve had a dental visit? this will help you save there, any medications? this will save you money every month.
+  {id:'ailplus', title:'AIL Plus Savings', eyebrow:'', visual:'pdf', pdf:['ailplus.pdf'],
+   script:`The next benefit helps EVERYONE save money. It's called the AIL PLUS program and it's designed to help with health-related costs. This doesn't affect any medical coverages you already have in any way. It saves so much money, up to 85%, on so many areas like glasses, dental, lab testing, and even vet bills and pet prescriptions. You'll get a separate email to set up the app for the program in the next few days. Just take some time and go through it to determine what's best for you and you family.`,
+   objections:[
+     {t:'Does this replace my health insurance?', r:``},
+     {t:'Is there a fee for this?', r:``},
+     {t:`I don't use apps`, r:``},
+   ]},
 
-We are going to set this up on this call so you can start saving money right away.`,
-
-refs:`All right, (Member), this next part, you're going to absolutely love this. This is the union blanket of protection benefit, Everyone has been super excited. For years, members would always ask us how to get these benefits out to protect the rest of their family. We always had to tell them, no, can't do it. Right? These are exclusive benefits. They are private to union dues-paying members. But since so many people were asking for it, they finally did it.
+  {id:'refs', title:'Blanket of Protection', eyebrow:'Referrals', visual:'brand',
+   script:`All right, (Member), this next part, you're going to absolutely love this. This is the union blanket of protection benefits, Everyone has been super excited. For years, members would always ask us how to get these benefits out to protect the rest of their family. We always had to tell them, no, can't do it. Right? These are exclusive benefits. They are private to union dues-paying members. But since so many people were asking for it, they finally did it.
 So initially, it was a spouse, then it was the kids, and then it was the family, but it's 2026, (Member). Family doesn't always mean blood. You could have a best friend out there that you consider closer than a brother or a sister.
 So they said, okay, the 10 people you care about the most are going to be covered underneath this blanket of protection.
 So here's how it works. Let's say something were to happen to your (Brother/Sister/Friend/Family Member). They pass away in a car accident tomorrow. Right? A $2,000 policy, just like the one I set up for you here today, is going to pay out to them just because they named their beneficiary. So maybe it goes to their spouse or their kids.
@@ -295,15 +409,40 @@ Now, keep in mind, this is at no cost to you or to them. It is already included 
 So if we don't use your full $20,000, the rest is just going to go to waste.
 So, of course, we're going to get the first 2 set up for your beneficiaries that are closest to you. But you have $16000 left in this that we need to use.
 So who's next?`,
+   objections:[
+     {t:`I'm not comfortable giving out names and numbers`, r:``},
+     {t:'Are you going to call all these people?', r:``},
+     {t:'I need to ask them first', r:``},
+   ]},
 
-letter:`Now these next benefits are by far the most important and most popular with the members, but before I go over them, I'm going to go over this mandatory read-off letter. Here it is (show computer screen). It basically says that my job is to show you the benefits, explain how they work, answer any questions you have, and get you enrolled. These benefits are permanent for life, unlike most of the group benefits, where 31 days after you quit, leave or retire, what happens? (Wait for a response) Right… They're gone! The program will greatly enhance your current protection, but more importantly, it is permanent and portable. Even if you quit, leave or retire… they go with you ALWAYS! Does that make sense?`,
+  {id:'letter', title:'Mandatory Read-Off Letter', eyebrow:'', visual:'letter',
+   script:`Now these next benefits are by far the most important and most popular with the members, but before I go over them, I'm going to read (and read it all) this mandatory read-off letter. Here it is (show computer screen). It basically says that my job is to show you the benefits, explain how they work, answer any questions you have, and get you enrolled. These benefits are permanent for life, unlike most of the group benefits, where 31 days after you quit, leave or retire, what happens? (Wait for a response) Right… They're gone! The program will greatly enhance your current protection, but more importantly, it is permanent and portable. Even if you quit, leave or retire… they go with you ALWAYS! Does that make sense?`,
+   objections:[
+     {t:`So this part isn't free?`, r:``},
+     {t:'I thought this was all union-provided', r:``},
+     {t:`I'm not interested in buying anything`, r:``},
+   ]},
 
-needs:`The reason we go over these benefits with individual families, rather than meet with everyone at the same time, is simple… every family has different needs/wants with their benefits, depending on where they're at in life. For example, earlier today i had an 18 year old who just start with the union, living with his parents, and after you ive got a member whos 30 with 2 kids, very different positions in life, So, because of that, they have created a personalized needs analysis survey, which is designed to tailor fit these benefits exclusively to your family. (Begin to fill out family information).
-Now like I mentioned earlier, these are the benefits you have to qualify for and there are three stipulations to qualify: First, you must be a union member in good standing, retired from the union, or referred by a member which you are, or we wouldn't be meeting; Second, you have to qualify, which is BY FAR the hardest part. Out of 20-30 families i get to talk to a day, only 3 or 4 get to see these benefits. And third, as I told you, you're GOING (chuckle) to know if this makes sense for you or it doesn't. But whatever decision you make, it needs to be made today. I CANNOT circle back because we meet each family one at a time to be able to tailor these programs specifically to your family. Fair enough? So, now I am going to ask some preliminary medical questions to see if it's even possible that you might qualify. (Go through health questions)`,
+  {id:'needs', title:'Needs Analysis', eyebrow:'Qualifying', visual:'brand',
+   script:`The reason we go over these benefits with individual families, rather than meet with everyone at the same time, is simple… every family has different needs/wants with their benefits, depending on where they're at in life. (give examples: last guy was 18 living at home with parents, next member is 64 and retired) So, because of that, they have created a personalized needs analysis survey, which is designed to tailor fit these benefits exclusively to your family. (Begin to fill out family information).
 
-hourpower:`How many hours are you working a week? Have you heard of the hour power principle before? It's the old union term that states you always need to set aside one hour of your wages, per week, to protect your family and their future. I see a lot of families and I don't know if you are like most of them, but most people waste half their money on things they don't even need. People are not setting aside even close to enough for their family and for their own future. So, what union members do is set aside just one hour of their wages each week for their families. EVERYONE can agree that just one hour never changes your lifestyle, right? Exactly! Because when you work just one less hour a week, your not going bankrupt are you? You are just going to spend it on something you don't even need. So, from this point forward, if you qualify, 39 hours a week you can spend on whatever you want… and just one hour will go towards your permanent benefits to protect your family's future. Does that make sense? Most members in your union/Association do more 2 or 3, but as long as you're doing at least one hour you will be okay. That makes sense, right? Perfect!`,
+Now like I mentioned earlier, these are the benefits you have to qualify for and there are three stipulations to qualify: First, you must be a union member in good standing, retired from the union, or referred by a union member which you are, or we wouldn't be meeting; Second, you have to qualify, which is BY FAR the hardest part. It's all based on your age, health, habits, and personal situation. And third, as I told you, you're going to know if this makes sense for you or it doesn't. But whatever decision you make, it needs to be made today. I cannot circle back because we meet each family one at a time to be able to tailor these programs specifically to your family. Fair enough? So, now I am going to ask some preliminary medical questions to see if it's even possible that you might qualify. (Go through health questions)`,
+   objections:[
+     {t:'Why do you need my medical history?', r:``},
+     {t:`I have health issues — I won't qualify`, r:``},
+     {t:`Can't you just email me the info?`, r:``},
+   ]},
 
-fex:`IF TAKEN CARE OF FUNERAL: now obviously youve managed a funeral, if you dont mind me asking, how did you take care of it?
+  {id:'hourpower', title:'The Hour Power Principle', eyebrow:'The Concept', visual:'brand',
+   script:`How many hours are you working a week? Have you heard of the hour power principle before? It's the old union term that states you always need to set aside one hour of your wages, per week, to protect your family and their future. I see a lot of families and I don't know if you are like most of them, but most people waste half their money on things they don't even need. People are not setting aside even close to enough for their family and for their own future. So, what union members do is set aside just one hour of their wages each week for their permanent benefit package. EVERYONE can agree that just one hour never changes your lifestyle, right? Exactly! Because when you work just one less hour a week, you don't know the difference in your pay, do you? You are just going to spend it on something you don't even need. So, from this point forward, if you qualify, 39 hours a week you can spend on whatever you want… and just one hour will go towards your permanent benefits to protect your family's future. Does that make sense? Most members want to do more, but as long as you're doing at least one hour you will be okay. That makes sense, right? Perfect!`,
+   objections:[
+     {t:`Money's tight — I can't spare anything`, r:``},
+     {t:'My hours change week to week', r:``},
+     {t:'So how much is this actually going to cost me?', r:``},
+   ]},
+
+  {id:'fex', title:'The Cost of a Funeral Today', eyebrow:'Final Expense', visual:'fexchart',
+   script:`IF TAKEN CARE OF FUNERAL: now obviously youve managed a funeral, if you dont mind me asking, how did you take care of it?
 
 IF SOMEONE ELSE TOOK CARE OF FUNERAL: now obviously you've seen someone manage a funeral, if you don't mind me asking, how did they take care of it?
 
@@ -317,86 +456,110 @@ One of the things that most people don't realize is that life insurance typicall
 
 Years ago, before covid insurance companies had to pay on the policy within 24 days. but when the big public life insurance companies saw all those people where gonna die, well what do big companies do in the united states? (answer yourself), the throw some money at the government
 
-so now, they have up to 6 months, in some cases, to hang onto your insurance money! Guess who earns money the interest off the money while they hold it in their account? Of course, they are. That's why the insurance money takes so long to arrive! Youve been seeing those GoFundMe's ALOT more right?! Thats why you see so many people getting burdened with funeral costs.`,
+so now, they have up to 6 months, in some cases, to hang onto your insurance money! Guess who earns the interest off the money while they hold it in their accounts? Of course, they are. That's why the insurance money takes so long to arrive! You've been seeing those GoFundMe's ALOT more right?! Thats why you see so many people getting burdened with funeral costs.`,
+   objections:[
+     {t:'I already have a burial policy', r:``},
+     {t:'My kids will handle it', r:``},
+     {t:`I'm being cremated, it's cheap`, r:``},
+   ]},
 
-foc:`So, this IS different, this is what they call the Freedom of Choice funeral benefit. What this does is, if you die, and it doesn't matter when or how you die, you could die tomorrow in an auto accident, have a heart attack in ten years, or die of cancer at age 80... it doesn't matter. But, when it does happen, your funeral is covered! The way this works is… you would take this certificate to ANY funeral home, cemetery, or crematorium in the United States. In fact, funeral directors love this because they know it is union backed and they don't have to worry about it being paid. You have to get everything taken care of - flowers, casket, service, grave site – let's say the whole thing ends up totaling $15,000. You take the certificate, turn it over, write in $15,000 here (show them on the FOC), sign it here, hand it to the funeral director and the total costs of the funeral are completely taken care of. You DO NOT have to pay a dime out of pocket, as long as you can keep the total under however much we set this up.
-Now, once we set this up say we set it up for $30,000, remember $30,000 its a real important number. The funeral director will call the 800 number on the front (highlight it) to verify the plan is in effect, and then, he will ask the one question that all funeral directors ask, "how much money does Jane have to work with?" If we told them and (BENEFICIARY) had $30,000 to work with, what do you think they would try to charge you? That's right, $30,000. So, we never reveal to them how much you have to work with. If you can get the costs for everything for, shoot, we dont care $5000, then we pay them the $5,000 and we cut you a check for the difference of $25000. This is the cleanest, easiest, most compassionate way to take care of what is going to happen to all us. Have you ever heard of a pre-arranged funeral? They are a great concept because everything is paid for prior to a death so the family doesn't have to deal with it. This is the same concept except even better because you're not limited to one geographical area and it's much less expensive. Tie Down - Now, Mary and Jim I'm sure you can see how absolutely critical it would be to have this in place for your family when you die right?
-Now, you die tomorrow, what part about the freedom of choice, is so important to your family, (and the kids if kids)`,
+  {id:'foc', title:'Freedom of Choice', eyebrow:'', visual:'pdf2', pdf:['foc.pdf','foc2.pdf'],
+   script:`So, this IS different, this is what they call that's why THEY call the Freedom of Choice funeral benefit in. What this does is, if you die, and it doesn't matter when or how you die, you could die tomorrow in an auto accident, have a heart attack in ten years, or die of cancer at age 80... it doesn't matter. But, when it does happen, your funeral is covered! The way this works is… you would take this certificate to ANY funeral home, cemetery, or crematorium in the United States. In fact, funeral directors love this because they know it is union backed and they don't have to worry about it being paid. You have to get everything taken care of- flowers, casket, service, grave site – let's say the whole thing ends up totaling $15,000. You take the certificate, turn it over, write in $15,000 here (show them on the FOC), sign it here, hand it to the funeral director and the total costs of the funeral are completely taken care of. You DO NOT have to pay a dime out of pocket, as long as you can keep the total under however much we set this up r
 
-income:`The next concern, of course, deals with Income Protection. Now Mary, if Jim were to get hurt and be off from work for three months, with no paycheck coming in, how would that effect the family? Exactly, I'm sure it would be tough, but you would get by. Now, if Jim is killed on the way home from work tomorrow, his ability to earn an income stops forever. What is the first thing you are going to miss? Well hopefully him, however very quickly thereafter it will be his paycheck. That is exactly why the unions saw this as such a concern. So, what this program is designed to do, is when Jim dies, his income of (client's monthly income) per month will continue to come into the household each and every month, tax free/probate free, for the next five years or 60 months. This will allow you time to grieve and to adjust to losing Jim's income. Tie Down - Jim, if you had the choice of protecting your income for your family, or NOT protecting your income for your family, which would you choose? Exactly. That's what everyone says.
-Now mary, jim dies tomorrow, what about his income coming in each and every month, is so important for you and the kids?`,
+Now, once we set this up say we set it up for $30,000, remember $30,000 its a real important number.
 
-college:`I am sure it goes without saying that we all want our kids to have better opportunities than we did, right? Well, that's exactly what this next benefit is designed to protect. If anything were to happen to you, say in an accident, there will be up to $100,000 for each child to pay for college, trade school, or even start a business. The point is there, you may not be around anymore, but you are still there helping support their dreams. Tie Down - Doesn't it make sense to have this in place to protect our kid's future? Exactly!`,
+As you can see theses no designated Dollar amount for this certificate because if there was a 30k stamp on there,
 
-ghgp:`Now what is the scariest moment youve ever had at work. (if not ask for a story just something that would hurt them severely)
-ok now go ahead grab a pen and paper they need to make sure you fully understand how this works, now you work around rusty metal, when you get cut on it, your gonna want a tetanus shot, so write this down, ER slash UC, now this stands for ER slash urgent care, when you get hurt and need to get taken care of at an Er or an urgent care this pays you $250, write that next to ER slash UC, this pays within that next week, this replaces your income when you leave early and pays for the treatment, now under that write down Hospital night, 500, now lets say you actually got hurt that one time (story they told). how long do you think you'd be in the hospital for? if your in the hospital for (time), what does that do to your paycheck? and we already know we cant rely on workers comp because what happens to it when your wearing the wrong gloves, shoes, or you did anything the wrong way... exactly, so that's exactly what the unions saw as such a big concern, what this does is it replaces your income, her income, and helps cover your deductibles. so when your in the hospital for (time) this pays you THREE THOUSAND FIVE HUNDRED PER WEEK. Now under that write down ICU 1000, now you know they let 16 year olds drive these days, they drive like this, (HOLD UP YOUR PHONE TO YOUR FACE) (CHUCKLE), now you could be the safest driver, IT DOES NOT MATTER, so what this does is when a distracted driver swerves into your lane, that's GOING to put you into the ICU, this pays you ONE THOUSAND DOLLARS PER NIGHT IN THE ICU, for 2 weeks, after that it CONTINUES with the $500 for the rest of the nights for the rest of the year. If your in the hospital for an entire year, this pays at least ONE HUNDRED EIGHTY TWO THOUSAND DOLLARS.`,
+The funeral director will call the 800 number on the front (highlight it) to verify the plan is in effect, and then, he will ask the one question that all funeral directors ask, "how much money does Jane have to work with?" If we told them and (BENEFICIARY) had $30,000 to work with, what do you think they would try to charge you? That's right, $30,000. So, we never reveal to them how much you have to work with. If you can get the costs for everything for, shoot, we dont care $5000, then we pay them the $5,000 and we cut you a check for the difference of $25000. This is the cleanest, easiest, most compassionate way to take care of what is going to happen to all us. Have you ever heard of a pre-arranged funeral? They are a great concept because everything is paid for prior to a death so the family doesn't have to deal with it. This is the same concept except even better because you're not limited to one geographical area and it's much less expensive.
 
-close:`So, the best part is they set your benefits up like a payroll deduction, but just once a month through your own checking account. That's important because when you change jobs or retire, you don't have to worry about losing your benefits because they are under your control and not your employers. Pretty cool, huh?
+Tie Down- Now, Mary and Jim I'm sure you can see how absolutely critical it would be to have this in place for your family when you die right?
 
-Now im showing you guys the 1 hour and 2 hour options the system has generated, now setting aside 1 hour of your weekly wages to protect the family, takes care of the funeral within the first 2 days of passing, meaning your family will NEVER worry about it, 1 hour also replaces your income for (# of months) months, each and every month tax AND probate free. and lets be honest jim, if you where to die before 65, what would it be from... an accident right? now thats exactly why when you where to die before 65 from an accident, this takes care of college for your children, (x) for each child. (GHGP) This comes with the full get hurt get paid program, the 250 er urgent care, 500 hospital night, 1000 icu night. Now the 2 hour option its the same thing just more, this takes care of the funeral and inflation protection, this takes care of the income for (# months) months. more than the 1 hour, and sets aside more than enough for the kids college fund. the 2 hour will take care of family for the rest of your life. Now most families that i talk to set up the 2 hour option, they never listen to me, i always tell them to go for the 1 hour option because its always better to proactively upgrade, rather than reactively downgrade because it never made sense in the first place, your going to be happy with either one but its important that you have the protection there the DAY you need it, now i have to take a quick phone call, ill be right back. you two talk over that real quick. (STAND UP OUT OF FRAME AND LISTEN TO FIGURE OUT THEIR CONCERNS WAIT 1:30)
-Alright guys what questions do you have for me.
-(THEY ALWAYS PICK THE 1 HOUR)`,
-};
+Now, (Member), why is this so important to you, you die tomorrow, this pays out in 3 days to (wife)/and the kids`,
+   objections:[
+     {t:`What if the funeral home won't accept it?`, r:``},
+     {t:'What if I die in the first two years?', r:``},
+     {t:'Can the rates go up later?', r:``},
+   ]},
 
-/* ============ Senior scripts (hardcoded — picks up after FOC) ============ */
-const SCRIPTS_SEN = {
-ssgap:`Jim, you are earning $(Jims income) a month in Social Security, and Mary, you're earning $(Marys income) a month in Social Security. Altogether, you guys are earning $(combined income) a month, right?
-By federal law, only the surviving spouse can keep one of the greater two Social Securities. The spouse who survives will lose the lesser amount. So if Jim's Social Security is $(Jims income), and Mary's Social Security is $(Marys income), together you're bringing in $(combined income) a month in Social Security.
-So if Mary passes away, Jim keeps his $(Jims income) and loses her $(Marys income). Now, what if Jim passes away? Mary gets his $(Jims income), but she still loses her $(Marys income). So no matter what, the couple is losing $(lost monthly income) a month. Times that by 12, and that's $(lost annual income) a year.
-Mary, in all honesty, are you prepared to take a $(lost annual income)-a-year hit after Jim is gone? Jim, are you prepared to lose $(lost annual income) a year?
-So the good news is we have a program that will replace this Social Security for you. It'll absorb the financial shock, and we can absorb it for three months, six months, or one full year.`,
+  {id:'income', title:'Income Protection', eyebrow:'Protecting the Paycheck', visual:'incomestats',
+   script:`The next concern, of course, deals with Income Protection. Now Mary, if Jim were to get hurt and be off from work for three months, with no paycheck coming in, how would that effect the family? Exactly, I'm sure it would be tough, but you would get by. Now, if Jim is killed on the way home from work tomorrow, his ability to earn an income stops forever. What is the first thing you are going to miss? Well hopefully him, however very quickly thereafter it will be his paycheck. That is exactly why the unions saw this as such a concern. So, what this program is designed to do, is when Jim dies, his income of (client's monthly income) per month will continue to come into the household each and every month, tax free/probate free, for the next five years or 60 months. This will allow you time to grieve and to adjust to losing Jim's income.
 
-gsb:`Mary and Jim, what we have here is Gold, Silver, Bronze - good, better, best. Mind you, everything on here is guaranteed, permanent, builds cash value, and is locked in for the rest of your life, okay?
-Every single one of these programs right here comes with 100% Freedom of Choice. So this is how you know that you'll get the money within less than two days - 24 to 48 hours, tops. On top of that, each provides a necessary financial shock absorber, which will make sure you're continuously earning Social Security while you're figuring out your lifestyle, right?`,
+Tie Down- Jim, if you had the choice of protecting your income for your family, or NOT protecting your income for your family, which would you choose? Exactly. That's what everyone says.`,
+   objections:[
+     {t:`My spouse works, we'd be fine`, r:``},
+     {t:'Social Security survivor benefits cover this', r:``},
+     {t:'Why only 5 years?', r:``},
+   ]},
 
-gold:`Now, this is the Gold one. This is the one that a lot of members typically look into, but you guys don't need this. Basically, this is like the best thing that you could possibly get, okay?
-It's Freedom of Choice, and it's going to give you 12 months of full-on protection. That means every calendar month, you won't have to worry about any changes in your financial lifestyle because you will still continuously get that $(combined income) a month.
-So you will get a check in the mail every single month for $(lost monthly income). That's $(lost annual income) right there. That program is going for $(Gold monthly price) a month. You can afford it, but I would not recommend it just because it's super hard to qualify for, okay?`,
+  {id:'mortgage', title:'Mortgage Protection', eyebrow:'The Biggest Liability', visual:'mortgage',
+   script:`This next concern deals with your mortgage. What would you say is your biggest asset? (Let them answer) But in reality, who actually owns the home? Right, the bank, which actually make the house your biggest liability! Mary, do you know what would happen to the house if Joe died and you can't make the mortgage payments? (Let her answer) Exactly… we don't want to see that happen to your family. That is why this benefit is is designed to pay off the home. This way they get to keep the home free and clear and avoid losing the home you all built all those years of memories in. Makes sense?
 
-silver:`Now, most people, they go with this one, okay? Guys, do me a favor: put three big circles around the Silver. (circle the Silver option)
-This is the one that people normally do because you get the best out of the Gold and you get the best out of the Bronze. It's going to be $(Silver coverage amount) of graded coverage, locked in for life again, whole life coverage, with 100% Freedom of Choice.
-You will get this money within 24 to 48 hours. On top of that, you have the six months of protection. Not 12 months, but six months - more than enough time for you to figure things out, okay? A lot of people want to do the Silver because, again, you get the best of both worlds.`,
+Tie Down- Mary, wouldn't it give you peace of mind to know that your mortgage would be taken care of if Joe dies?`,
+   objections:[
+     {t:`I rent, I don't own`, r:``},
+     {t:'The mortgage is almost paid off', r:``},
+     {t:'I already have mortgage protection through the lender', r:``},
+   ]},
 
-bronze:`What I personally recommend is that you guys don't bite off more than you can chew, and you start off small with the Bronze, because you can slowly upgrade rather than reactively downgrade, okay?
-The Bronze is going to be $(Bronze coverage amount) of coverage. This is going to give you three months. That's just enough time. This is just three months. That's just enough time. That's more than enough time. This will absolutely secure you for the rest of the year, okay?
-This is going to give you enough time to figure things out. This is going to give you more than enough time to figure things out. You really don't have to worry about figuring things out because you'll be fine.`,
+  {id:'college', title:'College Fund Benefit', eyebrow:'The Kids', visual:'brand',
+   script:`I am sure it goes without saying that we all want our kids to have better opportunities than we did, right? Well, that's exactly what this next benefit is designed to protect. If anything were to happen to you, say in an accident, there will be up to $100,000 for each child to pay for college, trade school, or even start a business. The point is there, you may not be around anymore, but you are still there helping support their dreams.
 
-emoclose:`Jim, you already know what Mary is going to go through after losing you. You don't want to see her go through what losing your income looks like. That's a whole other story, okay? But you don't want to know that story, do you?
-Because I'm in this business, man. I've seen the ugly, and I've seen the terrifying ugly, and I've seen the chaotic ugly. And then at some point, it becomes a suicide ugly, where people figure out that there's no reason for them living because they didn't prepare for this kind of stuff. And you know what's crazier? We never see it coming. It just happens.
-Now, on the bright side of that, we always think that we're secured enough, and we're terrified to dump more money into anything. But at the end of the day, money can't buy happiness. It can't bring you back. Mary would be happy to have you back.
-The money that you have is just a tool to make sure that she doesn't struggle. She's already going to emotionally struggle. Is there any point in her financially struggling? No. So what is the point about being financially responsible with your money when you're going to lose it anyways, and it's going to go to her? Does that make sense?
-That's why you need to financially see that this is one of the things you need to do to establish that as a tool for her not to struggle. Does that kind of make sense? Do you have any questions, Mary? Go ahead and look over and take your pick. (hand them the pitch sheet)`,
-};
+Tie Down- Doesn't it make sense to have this in place to protect our kid's future? Exactly!
 
-/* ============ script sets / folder loading ============ */
-const MODES = {
-  HC:  {suffix:'HC',  label:'Hard Card', folder:'scriptsHC'},
-  REF: {suffix:'REF', label:'Referral',  folder:'scriptsREF'},
-  SEN: {suffix:'SEN', label:'Senior',    folder:'scriptsSEN'},
-};
-const LOADED = { HC:{}, REF:{}, SEN:{} };   // fetched folder scripts, per mode
-// Pull each slide's script for a mode from scripts{SUFFIX}/{file}{SUFFIX}.txt (same-origin, CORS-clean).
-async function loadScriptsFor(mode){
-  const m = MODES[mode] || MODES.HC;
-  const pairs = await Promise.all(slidesFor(mode).map(async s=>{
-    const url = `${m.folder}/${s.file}${m.suffix}.txt`;
-    try{ const r=await fetch(url,{cache:'no-store'}); if(!r.ok) throw 0; const t=await r.text(); return [s.id, t]; }
-    catch(e){ return [s.id, null]; }   // fails on plain file:// — that's expected
-  }));
-  const map={}; pairs.forEach(([id,t])=>{ if(t!=null && t.trim()!=='') map[id]=t; });
-  LOADED[mode]=map; return map;
-}
-// Resolve a script. Senior tail is hardcoded; senior shared slides reuse HC; HC/REF use folder→HC.
-function getScript(mode, id){
-  if(mode==='SEN'){
-    if(SCRIPTS_SEN[id]!=null) return SCRIPTS_SEN[id];
-    return SCRIPTS_HC[id] || '';        // intro..foc identical to standard
-  }
-  const folder = LOADED[mode] && LOADED[mode][id];
-  if(folder!=null) return folder;
-  if(mode==='HC') return SCRIPTS_HC[id] || '';
-  return null;                          // REF folder not yet loaded
-}
+CHILD RIDER — Oh, I almost forgot, this program also includes a child rider, and what this does is cover all your kids, under 18, for a $10,000 Freedom of Choice until they are 21. They also have the option to increase to $50,000 as well… no questions asked!!!`,
+   objections:[
+     {t:'My kids are grown', r:``},
+     {t:'We already have a 529', r:``},
+     {t:`My kids aren't going to college`, r:``},
+   ]},
+
+  {id:'ghgp', title:'Get Hurt, Get Paid', eyebrow:'Living Benefits', visual:'brand',
+   script:`Now what is the scariest moment you've ever had at work. (if not ask for a story just something that would hurt them severely)
+
+ok now go ahead grab a pen and paper they need to make sure you fully understand how this works, now you work around rusty metal, when you get cut on it, your gonna want a tetanus shot, so write this down, ER slash UC, now this stands or ER slash urgent care, when you get hurt and need to get taken care of at an Er or an urgent care this pays you $250, write that next to ER slash UC, this pays within that next week, this replaces your income when you leave early and pays for the treatment, now under that write down Hospital night, 500, now lets say you actually got hurt that one time (story they told). how long do you think you'd be in the hospital for? if your in the hospital for (time), what does that do to your paycheck? and we already know we cant rely on workers comp because what happens to it when your wearing the wrong gloves, shoes, or you did anything the wrong way... exactly, so that's exactly what the unions saw as such a big concern, what this doe is it replaces your income, her income, and helps cover your deductibles. So when your in the hospital for (time) this pays you THREE THOUSAND FIVE HUNDRED PER WEEK. Now under that write down ICU 1000, now you know they let 16 year olds drive these days, they drive like this, (HOLD UP YOUR PHONE TO YOUR FACE) (CHUCKLE), now you could be the safest driver, IT DOES NOT MATTER, so what this does is when a distracted driver swerves into your lane, that's GOING to put you into the ICU, this pays you ONE THOUSAND DOLLARS PER NIGHT IN THE ICU, for 2 weeks, after that it CONTINUES with the $500 for the rest of the nights for the rest of the year. If your in the hospital for an entire year, this pays at least ONE HUNDRED EIGHTY TWO THOUSAND DOLLARS.`,
+   objections:[
+     {t:'I have short-term disability through work', r:``},
+     {t:`I have a desk job, I don't get hurt`, r:``},
+     {t:'Does this cover sickness too, or only accidents?', r:``},
+   ]},
+
+  {id:'close', title:'The Close', eyebrow:'1 Hour vs 2 Hour', visual:'logo',
+   script:`So, the best part is they set your benefits up like a payroll deduction, but just once a month through your own checking account. That's important because when you change jobs or retire, you don't have to worry about losing your benefits because they are under your control and not your employers. Pretty cool, huh?
+
+Now im showing you guys the 1 hour and 2 hour options the system has generated, now setting aside 1 hour of your weekly wages to protect the family, takes care of the funeral withing the first 2 days of passing, meaning your family will NEVER worry about it, 1 hour also replaces your income for (# of months)months, each and every month tax AND probate free. and lets be honest jim, if you where to die before 65, what would it be from... and accident right? now thats exactly why when you where to die before 65 from an accident, this takes care of college for your children, (x) for each child. (GHGP) This comes with the full get hurt get paid program, the 250 er urgent care, 500 hospital night, 1000 icu night. Now the 2 hour option its the same thing just more, this takes care of the funeral and inflation protection, this takes care of the income for (# months) months. more than the 1 hour, and sets aside more than enough for the kids college fund. the 2 hour will take care of family for the rest of your life. Now most families that i talk to set up the 2 hour option, they never listen to me, i always tell them to go for the 1 hour option because its always better to proactively upgrade, rather than reactively downgrade because it never made sense in the first place, your going to be happy with either one but its important that you have the protection there the DAY you need it, Which one makes the most sense for you guys the one hour or 2 hour`,
+   objections:[
+     {t:'I need to think about it / talk to my spouse', r:``},
+     {t:`I can't afford it right now`, r:``},
+     {t:`I'm not giving out my checking account info`, r:``},
+   ]},
+
+  {id:'pitchsheet', title:'Pitch Sheet', eyebrow:'Build the Options', visual:'pitchsheet',
+   script:`(Build the options on the control panel — the member is looking at the union logo until you switch this slide on.)
+
+Now (Member), let me show you exactly what this looks like for your family. (bring up the sheet)
+
+Everything on this page is what WE just talked about — the funeral, your income, the kids, the house. Nothing on here is new, it's just your numbers now instead of examples.
+
+(walk each row top to bottom, pause on the amount)
+
+Which one of these makes the most sense for you guys?`,
+   objections:[
+     {t:`Can I get a copy of this to look at?`, r:``},
+     {t:`Why is option 2 so much more?`, r:``},
+     {t:`Can we drop one of these to get the price down?`, r:``},
+   ]},
+];
+
+/* Universal objections — reachable on every slide (key: U or 4) */
+const UNIVERSAL = [
+  {t:`I need to think about it`, r:``},
+  {t:`I need to talk to my spouse first`, r:``},
+  {t:`I can't afford anything right now`, r:``},
+  {t:`Send me the info and I'll look at it`, r:``},
+  {t:`I already have life insurance`, r:``},
+];
+
+function slideById(id){ return SLIDES.find(s=>s.id===id); }
 
 /* ============ Drive helpers ============ */
 function driveId(url){ if(!url) return null;
@@ -415,15 +578,79 @@ function letterEmbed(url){ if(!url) return null; const id=driveId(url);
 /* ============ shared state via localStorage (works under file://) ============ */
 const HARDCODED_API_URL = "https://script.google.com/macros/s/AKfycbwcST34raI84xtn2PV5oGr4D3SKDQBlWXRreCBSSX6AgypMdpXvkNF1QJQnEpzCwELg/exec";
 const LS_KEY = 'ail_pres_shared';
-const DEFAULT_STATE = { apiUrl:'', mainName:'', spouseName:'', income:'', ssMain:'', ssSpouse:'', union:'', logoUrl:'', letterUrl:'', slideIndex:0, scriptMode:'HC', _v:0 };
+/* ---- pitch sheet defaults ---- */
+function blankCov(){
+  return {
+    fun:{on:false, amt:0},
+    inc:{on:false, months:0},
+    col:{on:false, amt:0, a71:false},          // college is always ADB-funded
+    mtg:{on:false, amt:0, basis:'10rc', a71:false},
+    ghgp:{on:false}
+  };
+}
+// Every family starts from the same standard build; the agent edits from here.
+function cov(o){ const c=blankCov(); return Object.assign(c, o, {
+  fun:Object.assign(c.fun,o.fun), inc:Object.assign(c.inc,o.inc),
+  col:Object.assign(c.col,o.col), mtg:Object.assign(c.mtg,o.mtg),
+  ghgp:Object.assign(c.ghgp,o.ghgp) }); }
+function defaultCov(){
+  return {
+    // Option 1 — main carries the program, the $100k rides on college
+    '1main':   cov({ fun:{on:true,amt:10000}, inc:{on:true,months:3},
+                     col:{on:true,amt:50000,a71:true}, ghgp:{on:true} }),
+    // Option 1 — spouse keeps it to funeral + income
+    '1spouse': cov({ fun:{on:true,amt:10000}, inc:{on:true,months:3} }),
+    // Option 2 — everything doubled
+    '2main':   cov({ fun:{on:true,amt:20000}, inc:{on:true,months:6},
+                     col:{on:true,amt:100000,a71:true}, ghgp:{on:true} }),
+    // Option 2 — spouse picks up the program, so its $100k shows as the college benefit
+    '2spouse': cov({ fun:{on:true,amt:20000}, inc:{on:true,months:6},
+                     col:{on:true,amt:0,a71:true}, ghgp:{on:true} })
+  };
+}
+function blankPS(){
+  return {
+    spouseEnabled:false,
+    option:1,
+    showPrices:false,                           // prices hidden by default
+    who:'main',                                 // which person the builder is editing
+    main:{age:'', sex:'M', tobacco:'NTU', income:''},
+    spouse:{age:'', sex:'F', tobacco:'NTU', income:''},
+    cov:defaultCov()
+  };
+}
+const DEFAULT_STATE = { apiUrl:'', mainName:'', spouseName:'', income:'', union:'', logoUrl:'', letterUrl:'', slideIndex:0, ps:blankPS(), _v:0 };
 let STATE = Object.assign({}, DEFAULT_STATE);
 let localVersion = -1;
 
-function readShared(){ try{ const raw=localStorage.getItem(LS_KEY); if(raw) return JSON.parse(raw); }catch(e){} return null; }
+function readShared(){ try{ const raw=localStorage.getItem(LS_KEY); if(raw) return hydrate(JSON.parse(raw)); }catch(e){} return null; }
+// fill in any pitch-sheet keys a previously-saved state predates
+function hydrate(s){
+  if(!s) return s;
+  const d=blankPS();
+  const ps=Object.assign({}, d, s.ps||{});
+  ps.main=Object.assign({}, d.main, ps.main||{});
+  ps.spouse=Object.assign({}, d.spouse, ps.spouse||{});
+  ps.cov=Object.assign({}, d.cov, ps.cov||{});
+  Object.keys(d.cov).forEach(k=>{
+    const b=d.cov[k], c=ps.cov[k]||{};
+    ps.cov[k]={ fun:Object.assign({},b.fun,c.fun), inc:Object.assign({},b.inc,c.inc),
+                col:Object.assign({},b.col,c.col), mtg:Object.assign({},b.mtg,c.mtg),
+                ghgp:Object.assign({},b.ghgp,c.ghgp) };
+  });
+  s.ps=ps; return s;
+}
+// deep-ish commit for the nested ps object (shallow Object.assign would clobber it)
+function psCommit(fn, silent){
+  const cur = readShared() || Object.assign({}, DEFAULT_STATE, {ps:blankPS()});
+  const ps = JSON.parse(JSON.stringify(cur.ps || blankPS()));
+  fn(ps);
+  commit({ps}, silent);
+}
 function commit(patch, silent){
   const cur = readShared() || Object.assign({}, DEFAULT_STATE);      // re-read so we don't clobber other fields
   const next = Object.assign({}, cur, patch);
-  const maxI = slidesFor(next.scriptMode||'HC').length - 1;          // mode may change the slide count
+  const maxI = SLIDES.length - 1;
   if(next.slideIndex > maxI) next.slideIndex = maxI;
   if(next.slideIndex < 0) next.slideIndex = 0;
   next._v = (cur._v||0) + 1;
@@ -464,8 +691,8 @@ function mapRows(rows){
     logo:    pick(row,['LOGO LINK','Logo Link','LOGO','logo','LogoLink']),
     letter:  pick(row,['LETTER LINK','Letter Link','LETTER','letter','LetterLink']),
   })).filter(u=>{
-    if(!u.group) return false;                 // no usable key -> would collide with the "Select a union…" placeholder
-    if(seen[u.group]) return false;            // dedupe
+    if(!u.group) return false;
+    if(seen[u.group]) return false;
     seen[u.group]=1; return true;
   }).sort((a,b)=>(a.display||'').localeCompare(b.display||''));
 }
@@ -495,7 +722,7 @@ function renderLauncher(){
       <div class="field">
         <label>Google Apps Script /exec URL</label>
         <div class="inline">
-          <div class="field" style="margin:0"><input id="apiUrl" type="text" placeholder="https://script.google.com/macros/s/AKfycb.../exec" value="${escAttr(STATE.apiUrl)}"></div>
+          <div class="field" style="margin:0"><input id="apiUrl" type="text" placeholder="https://script.google.com/macros/s/AKfycb.../exec" value="${escAttr(STATE.apiUrl||HARDCODED_API_URL)}"></div>
           <button class="btn btn-primary" id="loadBtn" style="white-space:nowrap">Load unions</button>
         </div>
         <div class="status" id="apiStatus"></div>
@@ -511,13 +738,6 @@ function renderLauncher(){
 
     <div class="card">
       <h2>This Family</h2>
-      <div class="field">
-        <label>Script set</label>
-        <div class="seg" id="modeSeg">
-          ${Object.keys(MODES).map(k=>`<button data-m="${k}" class="${k===(STATE.scriptMode||'HC')?'on':''}">${escHtml(MODES[k].label)}</button>`).join('')}
-        </div>
-        <div class="hint" style="margin-top:6px">Same slides, different talk track. Hard Card is built in; Referral &amp; Senior load from <code class="k">scriptsREF/</code> and <code class="k">scriptsSEN/</code> when hosted.</div>
-      </div>
       <div class="field">
         <label>Union / Association</label>
         <select id="union">
@@ -542,11 +762,12 @@ function renderLauncher(){
         <button class="btn btn-primary" id="launchControl">Open control panel</button>
       </div>
       <button class="btn btn-ghost btn-wide" id="launchBoth" style="margin-top:12px">Open both</button>
-      <div class="hint">The <b>presentation</b> window is the clean tab you screen-share. The <b>control panel</b> is your private tab — script up top (under your camera), controls at the bottom. Keyboard: ← / → or Space moves between slides.</div>
+      <button class="btn btn-ghost btn-wide" id="resetAll" style="margin-top:8px">Start a new family (clear everything)</button>
+      <div class="hint">The <b>presentation</b> window is the clean tab you screen-share. The <b>control panel</b> is your private tab — script up top (under your camera), controls and objections at the bottom. Keyboard: ← / → or Space moves between slides; <b>1 2 3</b> fire this slide's objections, <b>U</b> the universal set, <b>Esc</b> closes.</div>
     </div>
 
     <div class="note">
-      <b>Run in Chrome or Edge.</b> The three windows sync through local storage, which those browsers share across the file. Keep the PDFs in the <b>same folder</b> as this file:
+      <b>Run in Chrome or Edge.</b> The windows sync through local storage, which those browsers share across the file. Keep the PDFs in the <b>same folder</b> as this file:
       <code class="k">add.pdf</code> <code class="k">csk.pdf</code> <code class="k">will.pdf</code>
       <code class="k">faminfo.pdf</code> <code class="k">ailplus.pdf</code> <code class="k">foc.pdf</code> <code class="k">foc2.pdf</code>.
       If a pop-out is blocked, allow pop-ups for this page.
@@ -562,8 +783,6 @@ function renderLauncher(){
       UNIONS=mapRows(rows); setStatus('apiStatus',`Parsed ${UNIONS.length} union(s) from pasted data.`,'ok'); render();
     }catch(err){ setStatus('apiStatus','Could not parse that. Make sure it is the JSON array or the CSV. '+(err&&err.message?('('+err.message+')'):''),'err'); }
   });
-  const mseg=document.getElementById('modeSeg');
-  if(mseg) mseg.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>commit({scriptMode:b.dataset.m})));
   const usel=$('union');
   if(STATE.union && findUnion(STATE.union)) usel.value=STATE.union;
   else { usel.value=''; if(STATE.union && UNIONS.length) commit({union:'', logoUrl:'', letterUrl:''}, true); }
@@ -574,6 +793,12 @@ function renderLauncher(){
   $('launchPresent').addEventListener('click', ()=>openWin('present'));
   $('launchControl').addEventListener('click', ()=>openWin('control'));
   $('launchBoth').addEventListener('click', ()=>{ openWin('present'); setTimeout(()=>openWin('control'),150); });
+  $('resetAll').addEventListener('click', ()=>{
+    STATE=freshState(STATE);
+    try{ localStorage.setItem(LS_KEY, JSON.stringify(STATE)); }catch(e){}
+    localVersion=STATE._v; render();
+    setStatus('apiStatus','Cleared — ready for the next family.','ok');
+  });
 }
 
 function openWin(mode){
@@ -585,7 +810,7 @@ function openWin(mode){
 function setStatus(id,msg,kind){ const el=document.getElementById(id); if(!el) return; el.textContent=msg; el.className='status '+(kind||''); }
 
 async function loadUnions(){
-  const url=(document.getElementById('apiUrl').value||'').trim();
+  const url=(document.getElementById('apiUrl').value||'').trim() || HARDCODED_API_URL;
   if(!url){ setStatus('apiStatus','Paste your /exec URL first.','err'); return; }
   commit({apiUrl:url}, true); setStatus('apiStatus','Loading…','');
   try{
@@ -600,16 +825,96 @@ async function loadUnions(){
   }
 }
 
+/* ============================================================
+   RATE ENGINE — ratebooks lifted verbatim from the pitch sheet.
+   Life products (WL funeral / 10RC term) price off sex + tobacco.
+   ADB and A71 price off age only.
+   ============================================================ */
+const RATEBOOKS = {"wl":[{"Age":0,"Male_NTU_per_$":0.0004075,"Male_TU_per_$":0,"Female_NTU_per_$":0.0003675,"Female_TU_per_$":0},{"Age":1,"Male_NTU_per_$":0.0004275,"Male_TU_per_$":0,"Female_NTU_per_$":0.0003825,"Female_TU_per_$":0},{"Age":2,"Male_NTU_per_$":0.0004466666667,"Male_TU_per_$":0,"Female_NTU_per_$":0.0004,"Female_TU_per_$":0},{"Age":3,"Male_NTU_per_$":0.0004675,"Male_TU_per_$":0,"Female_NTU_per_$":0.00042,"Female_TU_per_$":0},{"Age":4,"Male_NTU_per_$":0.0004875,"Male_TU_per_$":0,"Female_NTU_per_$":0.0004391666667,"Female_TU_per_$":0},{"Age":5,"Male_NTU_per_$":0.0005125,"Male_TU_per_$":0,"Female_NTU_per_$":0.0004608333333,"Female_TU_per_$":0},{"Age":6,"Male_NTU_per_$":0.0005375,"Male_TU_per_$":0,"Female_NTU_per_$":0.0004808333333,"Female_TU_per_$":0},{"Age":7,"Male_NTU_per_$":0.0005625,"Male_TU_per_$":0,"Female_NTU_per_$":0.0005041666667,"Female_TU_per_$":0},{"Age":8,"Male_NTU_per_$":0.00059,"Male_TU_per_$":0,"Female_NTU_per_$":0.0005283333333,"Female_TU_per_$":0},{"Age":9,"Male_NTU_per_$":0.0006183333333,"Male_TU_per_$":0,"Female_NTU_per_$":0.0005533333333,"Female_TU_per_$":0},{"Age":10,"Male_NTU_per_$":0.0006483333333,"Male_TU_per_$":0,"Female_NTU_per_$":0.0005833333333,"Female_TU_per_$":0},{"Age":11,"Male_NTU_per_$":0.0006808333333,"Male_TU_per_$":0,"Female_NTU_per_$":0.0006116666667,"Female_TU_per_$":0},{"Age":12,"Male_NTU_per_$":0.0007166666667,"Male_TU_per_$":0,"Female_NTU_per_$":0.0006466666667,"Female_TU_per_$":0},{"Age":13,"Male_NTU_per_$":0.0007541666667,"Male_TU_per_$":0,"Female_NTU_per_$":0.0006808333333,"Female_TU_per_$":0},{"Age":14,"Male_NTU_per_$":0.000795,"Male_TU_per_$":0,"Female_NTU_per_$":0.0007191666667,"Female_TU_per_$":0},{"Age":15,"Male_NTU_per_$":0.0008383333333,"Male_TU_per_$":0,"Female_NTU_per_$":0.00076,"Female_TU_per_$":0},{"Age":16,"Male_NTU_per_$":0.0008825,"Male_TU_per_$":0,"Female_NTU_per_$":0.0008025,"Female_TU_per_$":0},{"Age":17,"Male_NTU_per_$":0.0009141666667,"Male_TU_per_$":0,"Female_NTU_per_$":0.0008275,"Female_TU_per_$":0},{"Age":18,"Male_NTU_per_$":0.0008508333333,"Male_TU_per_$":0.0010675,"Female_NTU_per_$":0.0007666666667,"Female_TU_per_$":0.0009616666667},{"Age":19,"Male_NTU_per_$":0.0008808333333,"Male_TU_per_$":0.001083333333,"Female_NTU_per_$":0.0007958333333,"Female_TU_per_$":0.0009966666667},{"Age":20,"Male_NTU_per_$":0.0009125,"Male_TU_per_$":0.001145833333,"Female_NTU_per_$":0.0008258333333,"Female_TU_per_$":0.001034166667},{"Age":21,"Male_NTU_per_$":0.000945,"Male_TU_per_$":0.001190833333,"Female_NTU_per_$":0.0008575,"Female_TU_per_$":0.001071666667},{"Age":22,"Male_NTU_per_$":0.0009825,"Male_TU_per_$":0.001235,"Female_NTU_per_$":0.0008891666667,"Female_TU_per_$":0.0011125},{"Age":23,"Male_NTU_per_$":0.001020833333,"Male_TU_per_$":0.001285833333,"Female_NTU_per_$":0.000925,"Female_TU_per_$":0.001156666667},{"Age":24,"Male_NTU_per_$":0.001060833333,"Male_TU_per_$":0.001339166667,"Female_NTU_per_$":0.0009641666667,"Female_TU_per_$":0.001205833333},{"Age":25,"Male_NTU_per_$":0.001108333333,"Male_TU_per_$":0.0013975,"Female_NTU_per_$":0.001006666667,"Female_TU_per_$":0.001259166667},{"Age":26,"Male_NTU_per_$":0.0011625,"Male_TU_per_$":0.001463333333,"Female_NTU_per_$":0.001054166667,"Female_TU_per_$":0.001319166667},{"Age":27,"Male_NTU_per_$":0.001220833333,"Male_TU_per_$":0.001535833333,"Female_NTU_per_$":0.001106666667,"Female_TU_per_$":0.0013825},{"Age":28,"Male_NTU_per_$":0.001281666667,"Male_TU_per_$":0.001610833333,"Female_NTU_per_$":0.0011625,"Female_TU_per_$":0.001451666667},{"Age":29,"Male_NTU_per_$":0.001346666667,"Male_TU_per_$":0.001691666667,"Female_NTU_per_$":0.001221666667,"Female_TU_per_$":0.001524166667},{"Age":30,"Male_NTU_per_$":0.0014175,"Male_TU_per_$":0.00178,"Female_NTU_per_$":0.0012825,"Female_TU_per_$":0.0016025},{"Age":31,"Male_NTU_per_$":0.001495,"Male_TU_per_$":0.001873333333,"Female_NTU_per_$":0.001345,"Female_TU_per_$":0.001688333333},{"Age":32,"Male_NTU_per_$":0.001575833333,"Male_TU_per_$":0.0019725,"Female_NTU_per_$":0.001409166667,"Female_TU_per_$":0.001778333333},{"Age":33,"Male_NTU_per_$":0.0016625,"Male_TU_per_$":0.00208,"Female_NTU_per_$":0.001475833333,"Female_TU_per_$":0.001871666667},{"Age":34,"Male_NTU_per_$":0.001754166667,"Male_TU_per_$":0.002191666667,"Female_NTU_per_$":0.0015425,"Female_TU_per_$":0.001973333333},{"Age":35,"Male_NTU_per_$":0.001849166667,"Male_TU_per_$":0.0023125,"Female_NTU_per_$":0.001610833333,"Female_TU_per_$":0.002076666667},{"Age":36,"Male_NTU_per_$":0.001940833333,"Male_TU_per_$":0.002445833333,"Female_NTU_per_$":0.001679166667,"Female_TU_per_$":0.002180833333},{"Age":37,"Male_NTU_per_$":0.002039166667,"Male_TU_per_$":0.002585833333,"Female_NTU_per_$":0.001749166667,"Female_TU_per_$":0.002291666667},{"Age":38,"Male_NTU_per_$":0.002144166667,"Male_TU_per_$":0.002735,"Female_NTU_per_$":0.001821666667,"Female_TU_per_$":0.002406666667},{"Age":39,"Male_NTU_per_$":0.002253333333,"Male_TU_per_$":0.002891666667,"Female_NTU_per_$":0.001894166667,"Female_TU_per_$":0.002529166667},{"Age":40,"Male_NTU_per_$":0.002369166667,"Male_TU_per_$":0.0030575,"Female_NTU_per_$":0.001966666667,"Female_TU_per_$":0.0026575},{"Age":41,"Male_NTU_per_$":0.002490833333,"Male_TU_per_$":0.003235,"Female_NTU_per_$":0.002039166667,"Female_TU_per_$":0.002790833333},{"Age":42,"Male_NTU_per_$":0.00262,"Male_TU_per_$":0.003424166667,"Female_NTU_per_$":0.0021125,"Female_TU_per_$":0.0029325},{"Age":43,"Male_NTU_per_$":0.002753333333,"Male_TU_per_$":0.0036225,"Female_NTU_per_$":0.002190833333,"Female_TU_per_$":0.003084166667},{"Age":44,"Male_NTU_per_$":0.002895,"Male_TU_per_$":0.003834166667,"Female_NTU_per_$":0.0022825,"Female_TU_per_$":0.003241666667},{"Age":45,"Male_NTU_per_$":0.003050833333,"Male_TU_per_$":0.00405,"Female_NTU_per_$":0.0023925,"Female_TU_per_$":0.003401666667},{"Age":46,"Male_NTU_per_$":0.003214166667,"Male_TU_per_$":0.004269166667,"Female_NTU_per_$":0.002526666667,"Female_TU_per_$":0.003564166667},{"Age":47,"Male_NTU_per_$":0.00339,"Male_TU_per_$":0.004500833333,"Female_NTU_per_$":0.002680833333,"Female_TU_per_$":0.003733333333},{"Age":48,"Male_NTU_per_$":0.003575,"Male_TU_per_$":0.004746666667,"Female_NTU_per_$":0.00285,"Female_TU_per_$":0.003914166667},{"Age":49,"Male_NTU_per_$":0.003771666667,"Male_TU_per_$":0.00501,"Female_NTU_per_$":0.003030833333,"Female_TU_per_$":0.004103333333},{"Age":50,"Male_NTU_per_$":0.003981666667,"Male_TU_per_$":0.005285833333,"Female_NTU_per_$":0.003225,"Female_TU_per_$":0.004300833333},{"Age":51,"Male_NTU_per_$":0.004205,"Male_TU_per_$":0.005584166667,"Female_NTU_per_$":0.003428333333,"Female_TU_per_$":0.0045125},{"Age":52,"Male_NTU_per_$":0.00444,"Male_TU_per_$":0.0058975,"Female_NTU_per_$":0.003638333333,"Female_TU_per_$":0.0047325},{"Age":53,"Male_NTU_per_$":0.004690833333,"Male_TU_per_$":0.006228333333,"Female_NTU_per_$":0.003856666667,"Female_TU_per_$":0.0049675},{"Age":54,"Male_NTU_per_$":0.004956666667,"Male_TU_per_$":0.0065675,"Female_NTU_per_$":0.004084166667,"Female_TU_per_$":0.0052125},{"Age":55,"Male_NTU_per_$":0.005228333333,"Male_TU_per_$":0.006918333333,"Female_NTU_per_$":0.004316666667,"Female_TU_per_$":0.0054675},{"Age":56,"Male_NTU_per_$":0.005510833333,"Male_TU_per_$":0.0072775,"Female_NTU_per_$":0.004555833333,"Female_TU_per_$":0.0057375},{"Age":57,"Male_NTU_per_$":0.005806666667,"Male_TU_per_$":0.007646666667,"Female_NTU_per_$":0.004801666667,"Female_TU_per_$":0.0060175},{"Age":58,"Male_NTU_per_$":0.006123333333,"Male_TU_per_$":0.008035,"Female_NTU_per_$":0.005053333333,"Female_TU_per_$":0.006318333333},{"Age":59,"Male_NTU_per_$":0.006459166667,"Male_TU_per_$":0.0084475,"Female_NTU_per_$":0.005309166667,"Female_TU_per_$":0.006633333333}],"pr":[{"Age":0,"Male_NTU_per_$":0.0003483333333,"Male_TU_per_$":"","Female_NTU_per_$":0.0003133333333,"Female_TU_per_$":""},{"Age":1,"Male_NTU_per_$":0.000365,"Male_TU_per_$":"","Female_NTU_per_$":0.0003283333333,"Female_TU_per_$":""},{"Age":2,"Male_NTU_per_$":0.0003808333333,"Male_TU_per_$":"","Female_NTU_per_$":0.0003416666667,"Female_TU_per_$":""},{"Age":3,"Male_NTU_per_$":0.0003991666667,"Male_TU_per_$":"","Female_NTU_per_$":0.0003558333333,"Female_TU_per_$":""},{"Age":4,"Male_NTU_per_$":0.0004175,"Male_TU_per_$":"","Female_NTU_per_$":0.0003733333333,"Female_TU_per_$":""},{"Age":5,"Male_NTU_per_$":0.0004375,"Male_TU_per_$":"","Female_NTU_per_$":0.0003908333333,"Female_TU_per_$":""},{"Age":6,"Male_NTU_per_$":0.0004575,"Male_TU_per_$":"","Female_NTU_per_$":0.00041,"Female_TU_per_$":""},{"Age":7,"Male_NTU_per_$":0.0004791666667,"Male_TU_per_$":"","Female_NTU_per_$":0.00043,"Female_TU_per_$":""},{"Age":8,"Male_NTU_per_$":0.0005016666667,"Male_TU_per_$":"","Female_NTU_per_$":0.0004516666667,"Female_TU_per_$":""},{"Age":9,"Male_NTU_per_$":0.0005266666667,"Male_TU_per_$":"","Female_NTU_per_$":0.0004733333333,"Female_TU_per_$":""},{"Age":10,"Male_NTU_per_$":0.0005533333333,"Male_TU_per_$":"","Female_NTU_per_$":0.0004958333333,"Female_TU_per_$":""},{"Age":11,"Male_NTU_per_$":0.00058,"Male_TU_per_$":"","Female_NTU_per_$":0.0005216666667,"Female_TU_per_$":""},{"Age":12,"Male_NTU_per_$":0.00061,"Male_TU_per_$":"","Female_NTU_per_$":0.0005516666667,"Female_TU_per_$":""},{"Age":13,"Male_NTU_per_$":0.0006433333333,"Male_TU_per_$":"","Female_NTU_per_$":0.00058,"Female_TU_per_$":""},{"Age":14,"Male_NTU_per_$":0.0006775,"Male_TU_per_$":"","Female_NTU_per_$":0.0006125,"Female_TU_per_$":""},{"Age":15,"Male_NTU_per_$":0.0007133333333,"Male_TU_per_$":"","Female_NTU_per_$":0.0006466666667,"Female_TU_per_$":""},{"Age":16,"Male_NTU_per_$":0.0007516666667,"Male_TU_per_$":"","Female_NTU_per_$":0.0006833333333,"Female_TU_per_$":""},{"Age":17,"Male_NTU_per_$":0.0007791666667,"Male_TU_per_$":"","Female_NTU_per_$":0.0007058333333,"Female_TU_per_$":""},{"Age":18,"Male_NTU_per_$":0.0007416666667,"Male_TU_per_$":0.00093,"Female_NTU_per_$":0.0006675,"Female_TU_per_$":0.0008375},{"Age":19,"Male_NTU_per_$":0.0007675,"Male_TU_per_$":0.0009633333333,"Female_NTU_per_$":0.0006933333333,"Female_TU_per_$":0.0008691666667},{"Age":20,"Male_NTU_per_$":0.0007941666667,"Male_TU_per_$":0.0009966666667,"Female_NTU_per_$":0.0007191666667,"Female_TU_per_$":0.0009016666667},{"Age":21,"Male_NTU_per_$":0.000825,"Male_TU_per_$":0.001035833333,"Female_NTU_per_$":0.0007466666667,"Female_TU_per_$":0.0009333333333},{"Age":22,"Male_NTU_per_$":0.0008558333333,"Male_TU_per_$":0.0010775,"Female_NTU_per_$":0.000775,"Female_TU_per_$":0.00097},{"Age":23,"Male_NTU_per_$":0.00089,"Male_TU_per_$":0.001120833333,"Female_NTU_per_$":0.0008058333333,"Female_TU_per_$":0.001008333333},{"Age":24,"Male_NTU_per_$":0.0009258333333,"Male_TU_per_$":0.001165833333,"Female_NTU_per_$":0.0008391666667,"Female_TU_per_$":0.001050833333},{"Age":25,"Male_NTU_per_$":0.0009675,"Male_TU_per_$":0.001218333333,"Female_NTU_per_$":0.0008766666667,"Female_TU_per_$":0.001096666667},{"Age":26,"Male_NTU_per_$":0.001013333333,"Male_TU_per_$":0.001274166667,"Female_NTU_per_$":0.0009175,"Female_TU_per_$":0.0011475},{"Age":27,"Male_NTU_per_$":0.001063333333,"Male_TU_per_$":0.0013375,"Female_NTU_per_$":0.000965,"Female_TU_per_$":0.001204166667},{"Age":28,"Male_NTU_per_$":0.001116666667,"Male_TU_per_$":0.001403333333,"Female_NTU_per_$":0.001013333333,"Female_TU_per_$":0.001265},{"Age":29,"Male_NTU_per_$":0.001173333333,"Male_TU_per_$":0.001473333333,"Female_NTU_per_$":0.001064166667,"Female_TU_per_$":0.0013275},{"Age":30,"Male_NTU_per_$":0.001236666667,"Male_TU_per_$":0.00155,"Female_NTU_per_$":0.001116666667,"Female_TU_per_$":0.001396666667},{"Age":31,"Male_NTU_per_$":0.001304166667,"Male_TU_per_$":0.0016325,"Female_NTU_per_$":0.001170833333,"Female_TU_per_$":0.00147},{"Age":32,"Male_NTU_per_$":0.001371666667,"Male_TU_per_$":0.001719166667,"Female_NTU_per_$":0.0012275,"Female_TU_per_$":0.0015475},{"Age":33,"Male_NTU_per_$":0.001448333333,"Male_TU_per_$":0.0018125,"Female_NTU_per_$":0.001285,"Female_TU_per_$":0.001631666667},{"Age":34,"Male_NTU_per_$":0.001529166667,"Male_TU_per_$":0.00191,"Female_NTU_per_$":0.001343333333,"Female_TU_per_$":0.00172},{"Age":35,"Male_NTU_per_$":0.00161,"Male_TU_per_$":0.002014166667,"Female_NTU_per_$":0.0014025,"Female_TU_per_$":0.0018075},{"Age":36,"Male_NTU_per_$":0.00169,"Male_TU_per_$":0.002131666667,"Female_NTU_per_$":0.0014625,"Female_TU_per_$":0.0019},{"Age":37,"Male_NTU_per_$":0.0017775,"Male_TU_per_$":0.0022525,"Female_NTU_per_$":0.0015225,"Female_TU_per_$":0.001996666667},{"Age":38,"Male_NTU_per_$":0.00187,"Male_TU_per_$":0.002381666667,"Female_NTU_per_$":0.001585,"Female_TU_per_$":0.0020975},{"Age":39,"Male_NTU_per_$":0.001963333333,"Male_TU_per_$":0.002518333333,"Female_NTU_per_$":0.001648333333,"Female_TU_per_$":0.002201666667},{"Age":40,"Male_NTU_per_$":0.002063333333,"Male_TU_per_$":0.002664166667,"Female_NTU_per_$":0.001711666667,"Female_TU_per_$":0.002313333333},{"Age":41,"Male_NTU_per_$":0.002170833333,"Male_TU_per_$":0.002819166667,"Female_NTU_per_$":0.001775,"Female_TU_per_$":0.002431666667},{"Age":42,"Male_NTU_per_$":0.002280833333,"Male_TU_per_$":0.002981666667,"Female_NTU_per_$":0.00184,"Female_TU_per_$":0.002555},{"Age":43,"Male_NTU_per_$":0.0024,"Male_TU_per_$":0.003155833333,"Female_NTU_per_$":0.001909166667,"Female_TU_per_$":0.002685},{"Age":44,"Male_NTU_per_$":0.002523333333,"Male_TU_per_$":0.003340833333,"Female_NTU_per_$":0.001989166667,"Female_TU_per_$":0.002824166667},{"Age":45,"Male_NTU_per_$":0.0026575,"Male_TU_per_$":0.003528333333,"Female_NTU_per_$":0.002083333333,"Female_TU_per_$":0.002963333333},{"Age":46,"Male_NTU_per_$":0.0028,"Male_TU_per_$":0.00372,"Female_NTU_per_$":0.002200833333,"Female_TU_per_$":0.003104166667},{"Age":47,"Male_NTU_per_$":0.002953333333,"Male_TU_per_$":0.003920833333,"Female_NTU_per_$":0.002334166667,"Female_TU_per_$":0.003253333333},{"Age":48,"Male_NTU_per_$":0.003116666667,"Male_TU_per_$":0.004135,"Female_NTU_per_$":0.002483333333,"Female_TU_per_$":0.00341},{"Age":49,"Male_NTU_per_$":0.003285833333,"Male_TU_per_$":0.004364166667,"Female_NTU_per_$":0.002640833333,"Female_TU_per_$":0.003574166667},{"Age":50,"Male_NTU_per_$":0.003468333333,"Male_TU_per_$":0.004605833333,"Female_NTU_per_$":0.002806666667,"Female_TU_per_$":0.003745833333},{"Age":51,"Male_NTU_per_$":0.003661666667,"Male_TU_per_$":0.004864166667,"Female_NTU_per_$":0.002981666667,"Female_TU_per_$":0.003930833333},{"Age":52,"Male_NTU_per_$":0.00387,"Male_TU_per_$":0.005138333333,"Female_NTU_per_$":0.00317,"Female_TU_per_$":0.004125833333},{"Age":53,"Male_NTU_per_$":0.0040875,"Male_TU_per_$":0.005426666667,"Female_NTU_per_$":0.003361666667,"Female_TU_per_$":0.0043275},{"Age":54,"Male_NTU_per_$":0.0043175,"Male_TU_per_$":0.005724166667,"Female_NTU_per_$":0.0035575,"Female_TU_per_$":0.0045425},{"Age":55,"Male_NTU_per_$":0.004554166667,"Male_TU_per_$":0.0060275,"Female_NTU_per_$":0.003759166667,"Female_TU_per_$":0.0047625},{"Age":56,"Male_NTU_per_$":0.004799166667,"Male_TU_per_$":0.0063375,"Female_NTU_per_$":0.003964166667,"Female_TU_per_$":0.005},{"Age":57,"Male_NTU_per_$":0.005058333333,"Male_TU_per_$":0.0066575,"Female_NTU_per_$":0.004174166667,"Female_TU_per_$":0.005243333333},{"Age":58,"Male_NTU_per_$":0.005334166667,"Male_TU_per_$":0.007000833333,"Female_NTU_per_$":0.004393333333,"Female_TU_per_$":0.005504166667},{"Age":59,"Male_NTU_per_$":0.005626666667,"Male_TU_per_$":0.0073575,"Female_NTU_per_$":0.0046225,"Female_TU_per_$":0.0057775}],"ex":[{"Age":0,"Male_NTU_per_$":0.00031,"Male_TU_per_$":"","Female_NTU_per_$":0.0002783333333,"Female_TU_per_$":""},{"Age":1,"Male_NTU_per_$":0.000325,"Male_TU_per_$":"","Female_NTU_per_$":0.0002916666667,"Female_TU_per_$":""},{"Age":2,"Male_NTU_per_$":0.0003383333333,"Male_TU_per_$":"","Female_NTU_per_$":0.0003041666667,"Female_TU_per_$":""},{"Age":3,"Male_NTU_per_$":0.0003541666667,"Male_TU_per_$":"","Female_NTU_per_$":0.0003166666667,"Female_TU_per_$":""},{"Age":4,"Male_NTU_per_$":0.0003716666667,"Male_TU_per_$":"","Female_NTU_per_$":0.0003325,"Female_TU_per_$":""},{"Age":5,"Male_NTU_per_$":0.0003891666667,"Male_TU_per_$":"","Female_NTU_per_$":0.0003491666667,"Female_TU_per_$":""},{"Age":6,"Male_NTU_per_$":0.0004075,"Male_TU_per_$":"","Female_NTU_per_$":0.0003666666667,"Female_TU_per_$":""},{"Age":7,"Male_NTU_per_$":0.0004266666667,"Male_TU_per_$":"","Female_NTU_per_$":0.0003816666667,"Female_TU_per_$":""},{"Age":8,"Male_NTU_per_$":0.0004483333333,"Male_TU_per_$":"","Female_NTU_per_$":0.0004008333333,"Female_TU_per_$":""},{"Age":9,"Male_NTU_per_$":0.0004691666667,"Male_TU_per_$":"","Female_NTU_per_$":0.00042,"Female_TU_per_$":""},{"Age":10,"Male_NTU_per_$":0.0004916666667,"Male_TU_per_$":"","Female_NTU_per_$":0.0004408333333,"Female_TU_per_$":""},{"Age":11,"Male_NTU_per_$":0.0005175,"Male_TU_per_$":"","Female_NTU_per_$":0.000465,"Female_TU_per_$":""},{"Age":12,"Male_NTU_per_$":0.0005425,"Male_TU_per_$":"","Female_NTU_per_$":0.0004908333333,"Female_TU_per_$":""},{"Age":13,"Male_NTU_per_$":0.0005725,"Male_TU_per_$":"","Female_NTU_per_$":0.0005175,"Female_TU_per_$":""},{"Age":14,"Male_NTU_per_$":0.0006016666667,"Male_TU_per_$":"","Female_NTU_per_$":0.000545,"Female_TU_per_$":""},{"Age":15,"Male_NTU_per_$":0.000635,"Male_TU_per_$":"","Female_NTU_per_$":0.000575,"Female_TU_per_$":""},{"Age":16,"Male_NTU_per_$":0.0006683333333,"Male_TU_per_$":"","Female_NTU_per_$":0.0006083333333,"Female_TU_per_$":""},{"Age":17,"Male_NTU_per_$":0.0006933333333,"Male_TU_per_$":"","Female_NTU_per_$":0.0006283333333,"Female_TU_per_$":""},{"Age":18,"Male_NTU_per_$":0.0006441666667,"Male_TU_per_$":0.0008066666667,"Female_NTU_per_$":0.0005791666667,"Female_TU_per_$":0.0007275},{"Age":19,"Male_NTU_per_$":0.0006666666667,"Male_TU_per_$":0.000835,"Female_NTU_per_$":0.0006016666667,"Female_TU_per_$":0.0007541666667},{"Age":20,"Male_NTU_per_$":0.0006916666667,"Male_TU_per_$":0.0008675,"Female_NTU_per_$":0.0006241666667,"Female_TU_per_$":0.0007833333333},{"Age":21,"Male_NTU_per_$":0.0007141666667,"Male_TU_per_$":0.0009,"Female_NTU_per_$":0.0006483333333,"Female_TU_per_$":0.0008108333333},{"Age":22,"Male_NTU_per_$":0.000745,"Male_TU_per_$":0.0009341666667,"Female_NTU_per_$":0.0006725,"Female_TU_per_$":0.0008425},{"Age":23,"Male_NTU_per_$":0.0007725,"Male_TU_per_$":0.0009733333333,"Female_NTU_per_$":0.0007,"Female_TU_per_$":0.0008741666667},{"Age":24,"Male_NTU_per_$":0.0008033333333,"Male_TU_per_$":0.001011666667,"Female_NTU_per_$":0.0007291666667,"Female_TU_per_$":0.0009116666667},{"Age":25,"Male_NTU_per_$":0.0008383333333,"Male_TU_per_$":0.001056666667,"Female_NTU_per_$":0.0007616666667,"Female_TU_per_$":0.0009516666667},{"Age":26,"Male_NTU_per_$":0.0008783333333,"Male_TU_per_$":0.001106666667,"Female_NTU_per_$":0.0007975,"Female_TU_per_$":0.0009966666667},{"Age":27,"Male_NTU_per_$":0.0009216666667,"Male_TU_per_$":0.001161666667,"Female_NTU_per_$":0.0008366666667,"Female_TU_per_$":0.001045},{"Age":28,"Male_NTU_per_$":0.0009691666667,"Male_TU_per_$":0.001218333333,"Female_NTU_per_$":0.0008783333333,"Female_TU_per_$":0.001098333333},{"Age":29,"Male_NTU_per_$":0.00102,"Male_TU_per_$":0.00128,"Female_NTU_per_$":0.0009233333333,"Female_TU_per_$":0.001153333333},{"Age":30,"Male_NTU_per_$":0.001073333333,"Male_TU_per_$":0.001346666667,"Female_NTU_per_$":0.00097,"Female_TU_per_$":0.001211666667},{"Age":31,"Male_NTU_per_$":0.001130833333,"Male_TU_per_$":0.001416666667,"Female_NTU_per_$":0.001016666667,"Female_TU_per_$":0.001275833333},{"Age":32,"Male_NTU_per_$":0.001191666667,"Male_TU_per_$":0.001490833333,"Female_NTU_per_$":0.001065,"Female_TU_per_$":0.001345},{"Age":33,"Male_NTU_per_$":0.001259166667,"Male_TU_per_$":0.001574166667,"Female_NTU_per_$":0.001115833333,"Female_TU_per_$":0.001415833333},{"Age":34,"Male_NTU_per_$":0.001326666667,"Male_TU_per_$":0.0016575,"Female_NTU_per_$":0.001166666667,"Female_TU_per_$":0.001491666667},{"Age":35,"Male_NTU_per_$":0.0013975,"Male_TU_per_$":0.001748333333,"Female_NTU_per_$":0.001218333333,"Female_TU_per_$":0.00157},{"Age":36,"Male_NTU_per_$":0.001468333333,"Male_TU_per_$":0.001851666667,"Female_NTU_per_$":0.001270833333,"Female_TU_per_$":0.001649166667},{"Age":37,"Male_NTU_per_$":0.0015425,"Male_TU_per_$":0.001955,"Female_NTU_per_$":0.001323333333,"Female_TU_per_$":0.0017325},{"Age":38,"Male_NTU_per_$":0.001621666667,"Male_TU_per_$":0.00207,"Female_NTU_per_$":0.0013775,"Female_TU_per_$":0.00182},{"Age":39,"Male_NTU_per_$":0.001704166667,"Male_TU_per_$":0.0021875,"Female_NTU_per_$":0.0014325,"Female_TU_per_$":0.0019125},{"Age":40,"Male_NTU_per_$":0.0017925,"Male_TU_per_$":0.0023125,"Female_NTU_per_$":0.0014875,"Female_TU_per_$":0.002009166667},{"Age":41,"Male_NTU_per_$":0.001884166667,"Male_TU_per_$":0.002448333333,"Female_NTU_per_$":0.0015425,"Female_TU_per_$":0.0021125},{"Age":42,"Male_NTU_per_$":0.001980833333,"Male_TU_per_$":0.00259,"Female_NTU_per_$":0.0015975,"Female_TU_per_$":0.002219166667},{"Age":43,"Male_NTU_per_$":0.002081666667,"Male_TU_per_$":0.00274,"Female_NTU_per_$":0.001656666667,"Female_TU_per_$":0.002330833333},{"Age":44,"Male_NTU_per_$":0.002189166667,"Male_TU_per_$":0.0029,"Female_NTU_per_$":0.001726666667,"Female_TU_per_$":0.002450833333},{"Age":45,"Male_NTU_per_$":0.0023075,"Male_TU_per_$":0.003061666667,"Female_NTU_per_$":0.00181,"Female_TU_per_$":0.002571666667},{"Age":46,"Male_NTU_per_$":0.002430833333,"Male_TU_per_$":0.003230833333,"Female_NTU_per_$":0.001911666667,"Female_TU_per_$":0.002695833333},{"Age":47,"Male_NTU_per_$":0.002565833333,"Male_TU_per_$":0.003404166667,"Female_NTU_per_$":0.0020275,"Female_TU_per_$":0.002824166667},{"Age":48,"Male_NTU_per_$":0.002705,"Male_TU_per_$":0.00359,"Female_NTU_per_$":0.002155833333,"Female_TU_per_$":0.002961666667},{"Age":49,"Male_NTU_per_$":0.002853333333,"Male_TU_per_$":0.003789166667,"Female_NTU_per_$":0.0022925,"Female_TU_per_$":0.0031025},{"Age":50,"Male_NTU_per_$":0.003011666667,"Male_TU_per_$":0.004,"Female_NTU_per_$":0.002438333333,"Female_TU_per_$":0.003254166667},{"Age":51,"Male_NTU_per_$":0.003180833333,"Male_TU_per_$":0.0042225,"Female_NTU_per_$":0.0025925,"Female_TU_per_$":0.0034125},{"Age":52,"Male_NTU_per_$":0.003359166667,"Male_TU_per_$":0.0044575,"Female_NTU_per_$":0.002754166667,"Female_TU_per_$":0.003580833333},{"Age":53,"Male_NTU_per_$":0.0035475,"Male_TU_per_$":0.0047025,"Female_NTU_per_$":0.0029225,"Female_TU_per_$":0.003758333333},{"Age":54,"Male_NTU_per_$":0.00375,"Male_TU_per_$":0.0049575,"Female_NTU_per_$":0.003095,"Female_TU_per_$":0.003943333333},{"Age":55,"Male_NTU_per_$":0.003955833333,"Male_TU_per_$":0.005225,"Female_NTU_per_$":0.0032725,"Female_TU_per_$":0.004135},{"Age":56,"Male_NTU_per_$":0.0041675,"Male_TU_per_$":0.0055,"Female_NTU_per_$":0.0034525,"Female_TU_per_$":0.004339166667},{"Age":57,"Male_NTU_per_$":0.004393333333,"Male_TU_per_$":0.005785833333,"Female_NTU_per_$":0.003636666667,"Female_TU_per_$":0.0045525},{"Age":58,"Male_NTU_per_$":0.004631666667,"Male_TU_per_$":0.0060825,"Female_NTU_per_$":0.003825833333,"Female_TU_per_$":0.004778333333},{"Age":59,"Male_NTU_per_$":0.004885833333,"Male_TU_per_$":0.006390833333,"Female_NTU_per_$":0.004019166667,"Female_TU_per_$":0.0050175}],"sl":[{"Age":18,"Male_NTU_per_$":0.0005491666667,"Male_TU_per_$":0.0007025,"Female_NTU_per_$":0.0004966666667,"Female_TU_per_$":0.0005958333333},{"Age":19,"Male_NTU_per_$":0.0005633333333,"Male_TU_per_$":0.0007175,"Female_NTU_per_$":0.0005116666667,"Female_TU_per_$":0.0006125},{"Age":20,"Male_NTU_per_$":0.0005791666667,"Male_TU_per_$":0.0007358333333,"Female_NTU_per_$":0.0005275,"Female_TU_per_$":0.00063},{"Age":21,"Male_NTU_per_$":0.0006,"Male_TU_per_$":0.0007566666667,"Female_NTU_per_$":0.0005433333333,"Female_TU_per_$":0.00065},{"Age":22,"Male_NTU_per_$":0.0006175,"Male_TU_per_$":0.00078,"Female_NTU_per_$":0.0005608333333,"Female_TU_per_$":0.0006708333333},{"Age":23,"Male_NTU_per_$":0.0006391666667,"Male_TU_per_$":0.0008075,"Female_NTU_per_$":0.0005791666667,"Female_TU_per_$":0.0006925},{"Age":24,"Male_NTU_per_$":0.0006633333333,"Male_TU_per_$":0.0008391666667,"Female_NTU_per_$":0.0005991666667,"Female_TU_per_$":0.0007191666667},{"Age":25,"Male_NTU_per_$":0.00069,"Male_TU_per_$":0.0008758333333,"Female_NTU_per_$":0.0006208333333,"Female_TU_per_$":0.0007475},{"Age":26,"Male_NTU_per_$":0.00072,"Male_TU_per_$":0.0009191666667,"Female_NTU_per_$":0.0006441666667,"Female_TU_per_$":0.00078},{"Age":27,"Male_NTU_per_$":0.0007533333333,"Male_TU_per_$":0.0009683333333,"Female_NTU_per_$":0.00067,"Female_TU_per_$":0.0008175},{"Age":28,"Male_NTU_per_$":0.0007891666667,"Male_TU_per_$":0.001021666667,"Female_NTU_per_$":0.0006975,"Female_TU_per_$":0.0008575},{"Age":29,"Male_NTU_per_$":0.0008283333333,"Male_TU_per_$":0.001079166667,"Female_NTU_per_$":0.000725,"Female_TU_per_$":0.0008983333333},{"Age":30,"Male_NTU_per_$":0.0008691666667,"Male_TU_per_$":0.001138333333,"Female_NTU_per_$":0.0007558333333,"Female_TU_per_$":0.0009433333333},{"Age":31,"Male_NTU_per_$":0.0009041666667,"Male_TU_per_$":0.0012,"Female_NTU_per_$":0.0007891666667,"Female_TU_per_$":0.0009891666667},{"Age":32,"Male_NTU_per_$":0.0009591666667,"Male_TU_per_$":0.001264166667,"Female_NTU_per_$":0.0008258333333,"Female_TU_per_$":0.001036666667},{"Age":33,"Male_NTU_per_$":0.001008333333,"Male_TU_per_$":0.0013325,"Female_NTU_per_$":0.0008625,"Female_TU_per_$":0.001085833333},{"Age":34,"Male_NTU_per_$":0.00106,"Male_TU_per_$":0.001406666667,"Female_NTU_per_$":0.0009008333333,"Female_TU_per_$":0.001139166667},{"Age":35,"Male_NTU_per_$":0.001115833333,"Male_TU_per_$":0.001489166667,"Female_NTU_per_$":0.00094,"Female_TU_per_$":0.001195833333},{"Age":36,"Male_NTU_per_$":0.001174166667,"Male_TU_per_$":0.001580833333,"Female_NTU_per_$":0.00098,"Female_TU_per_$":0.001255833333},{"Age":37,"Male_NTU_per_$":0.001235,"Male_TU_per_$":0.001678333333,"Female_NTU_per_$":0.00102,"Female_TU_per_$":0.001318333333},{"Age":38,"Male_NTU_per_$":0.001300833333,"Male_TU_per_$":0.001784166667,"Female_NTU_per_$":0.001060833333,"Female_TU_per_$":0.001383333333},{"Age":39,"Male_NTU_per_$":0.001371666667,"Male_TU_per_$":0.001895,"Female_NTU_per_$":0.001105833333,"Female_TU_per_$":0.001449166667},{"Age":40,"Male_NTU_per_$":0.001446666667,"Male_TU_per_$":0.0020125,"Female_NTU_per_$":0.0011525,"Female_TU_per_$":0.001524166667},{"Age":41,"Male_NTU_per_$":0.0015275,"Male_TU_per_$":0.0021375,"Female_NTU_per_$":0.0012025,"Female_TU_per_$":0.0016025},{"Age":42,"Male_NTU_per_$":0.001613333333,"Male_TU_per_$":0.0022675,"Female_NTU_per_$":0.001265833333,"Female_TU_per_$":0.001683333333},{"Age":43,"Male_NTU_per_$":0.001704166667,"Male_TU_per_$":0.0024025,"Female_NTU_per_$":0.001333333333,"Female_TU_per_$":0.001769166667},{"Age":44,"Male_NTU_per_$":0.001798333333,"Male_TU_per_$":0.0025425,"Female_NTU_per_$":0.001406666667,"Female_TU_per_$":0.0018575},{"Age":45,"Male_NTU_per_$":0.001893333333,"Male_TU_per_$":0.002683333333,"Female_NTU_per_$":0.00148,"Female_TU_per_$":0.001945833333},{"Age":46,"Male_NTU_per_$":0.001989166667,"Male_TU_per_$":0.002825833333,"Female_NTU_per_$":0.001553333333,"Female_TU_per_$":0.002033333333},{"Age":47,"Male_NTU_per_$":0.002086666667,"Male_TU_per_$":0.002969166667,"Female_NTU_per_$":0.001626666667,"Female_TU_per_$":0.002123333333},{"Age":48,"Male_NTU_per_$":0.002190833333,"Male_TU_per_$":0.003119166667,"Female_NTU_per_$":0.001701666667,"Female_TU_per_$":0.002215833333},{"Age":49,"Male_NTU_per_$":0.002300833333,"Male_TU_per_$":0.003275833333,"Female_NTU_per_$":0.001785833333,"Female_TU_per_$":0.0023175},{"Age":50,"Male_NTU_per_$":0.002420833333,"Male_TU_per_$":0.00344,"Female_NTU_per_$":0.0018825,"Female_TU_per_$":0.002429166667},{"Age":51,"Male_NTU_per_$":0.002546666667,"Male_TU_per_$":0.003613333333,"Female_NTU_per_$":0.0019925,"Female_TU_per_$":0.002554166667},{"Age":52,"Male_NTU_per_$":0.002685,"Male_TU_per_$":0.003795833333,"Female_NTU_per_$":0.002115833333,"Female_TU_per_$":0.00269},{"Age":53,"Male_NTU_per_$":0.002834166667,"Male_TU_per_$":0.00399,"Female_NTU_per_$":0.002250833333,"Female_TU_per_$":0.002838333333},{"Age":54,"Male_NTU_per_$":0.003,"Male_TU_per_$":0.004200833333,"Female_NTU_per_$":0.002391666667,"Female_TU_per_$":0.0029925},{"Age":55,"Male_NTU_per_$":0.003180833333,"Male_TU_per_$":0.004434166667,"Female_NTU_per_$":0.002538333333,"Female_TU_per_$":0.003155833333},{"Age":56,"Male_NTU_per_$":0.0033825,"Male_TU_per_$":0.004690833333,"Female_NTU_per_$":0.0026875,"Female_TU_per_$":0.003321666667},{"Age":57,"Male_NTU_per_$":0.003601666667,"Male_TU_per_$":0.00497,"Female_NTU_per_$":0.0028425,"Female_TU_per_$":0.003496666667},{"Age":58,"Male_NTU_per_$":0.003839166667,"Male_TU_per_$":0.005269166667,"Female_NTU_per_$":0.00301,"Female_TU_per_$":0.003684166667},{"Age":59,"Male_NTU_per_$":0.004093333333,"Male_TU_per_$":0.005585,"Female_NTU_per_$":0.0031925,"Female_TU_per_$":0.003890833333}],"wlsenior":[{"Age":60,"Male_NTU_per_$":0.0069675,"Male_TU_per_$":0.00908,"Female_NTU_per_$":0.005695833333,"Female_TU_per_$":0.007119166667},{"Age":61,"Male_NTU_per_$":0.007356666667,"Male_TU_per_$":0.009551666667,"Female_NTU_per_$":0.005975,"Female_TU_per_$":0.007480833333},{"Age":62,"Male_NTU_per_$":0.00777,"Male_TU_per_$":0.01005166667,"Female_NTU_per_$":0.006271666667,"Female_TU_per_$":0.0078625},{"Age":63,"Male_NTU_per_$":0.008208333333,"Male_TU_per_$":0.01058,"Female_NTU_per_$":0.0065975,"Female_TU_per_$":0.008266666667},{"Age":64,"Male_NTU_per_$":0.008673333333,"Male_TU_per_$":0.01113666667,"Female_NTU_per_$":0.006963333333,"Female_TU_per_$":0.008693333333},{"Age":65,"Male_NTU_per_$":0.009185,"Male_TU_per_$":0.0117275,"Female_NTU_per_$":0.0073775,"Female_TU_per_$":0.0091725},{"Age":66,"Male_NTU_per_$":0.009744166667,"Male_TU_per_$":0.01246916667,"Female_NTU_per_$":0.007874166667,"Female_TU_per_$":0.009715833333},{"Age":67,"Male_NTU_per_$":0.01034333333,"Male_TU_per_$":0.01326,"Female_NTU_per_$":0.008426666667,"Female_TU_per_$":0.01029916667},{"Age":68,"Male_NTU_per_$":0.01098416667,"Male_TU_per_$":0.014105,"Female_NTU_per_$":0.009033333333,"Female_TU_per_$":0.01091916667},{"Age":69,"Male_NTU_per_$":0.01167416667,"Male_TU_per_$":0.01501333333,"Female_NTU_per_$":0.009695,"Female_TU_per_$":0.011585},{"Age":70,"Male_NTU_per_$":0.012415,"Male_TU_per_$":0.01599,"Female_NTU_per_$":0.01041166667,"Female_TU_per_$":0.0123},{"Age":71,"Male_NTU_per_$":0.0133325,"Male_TU_per_$":0.0170375,"Female_NTU_per_$":0.01117416667,"Female_TU_per_$":0.01307},{"Age":72,"Male_NTU_per_$":0.01432083333,"Male_TU_per_$":0.01815583333,"Female_NTU_per_$":0.011995,"Female_TU_per_$":0.01389083333},{"Age":73,"Male_NTU_per_$":0.01537833333,"Male_TU_per_$":0.01934333333,"Female_NTU_per_$":0.01287666667,"Female_TU_per_$":0.01476166667},{"Age":74,"Male_NTU_per_$":0.0165125,"Male_TU_per_$":0.02059833333,"Female_NTU_per_$":0.01382,"Female_TU_per_$":0.0156825},{"Age":75,"Male_NTU_per_$":0.01771666667,"Male_TU_per_$":0.02192083333,"Female_NTU_per_$":0.01483,"Female_TU_per_$":0.0166525},{"Age":76,"Male_NTU_per_$":0.01899416667,"Male_TU_per_$":"","Female_NTU_per_$":0.01592,"Female_TU_per_$":""},{"Age":77,"Male_NTU_per_$":0.02036166667,"Male_TU_per_$":"","Female_NTU_per_$":0.01707583333,"Female_TU_per_$":""},{"Age":78,"Male_NTU_per_$":0.0218275,"Male_TU_per_$":"","Female_NTU_per_$":0.01830166667,"Female_TU_per_$":""},{"Age":79,"Male_NTU_per_$":0.02341,"Male_TU_per_$":"","Female_NTU_per_$":0.01959416667,"Female_TU_per_$":""},{"Age":80,"Male_NTU_per_$":0.02506833333,"Male_TU_per_$":"","Female_NTU_per_$":0.02095666667,"Female_TU_per_$":""}],"adb":[{"Age":5,"Individual":0.00008333333333},{"Age":6,"Individual":0.00008333333333},{"Age":7,"Individual":0.00008333333333},{"Age":8,"Individual":0.00008333333333},{"Age":9,"Individual":0.00008333333333},{"Age":10,"Individual":0.00008333333333},{"Age":11,"Individual":0.00008333333333},{"Age":12,"Individual":0.00008333333333},{"Age":13,"Individual":0.00008333333333},{"Age":14,"Individual":0.00008333333333},{"Age":15,"Individual":0.00008333333333},{"Age":16,"Individual":0.00008333333333},{"Age":17,"Individual":0.00008333333333},{"Age":18,"Individual":0.00008333333333},{"Age":19,"Individual":0.00008333333333},{"Age":20,"Individual":0.00008333333333},{"Age":21,"Individual":0.00008333333333},{"Age":22,"Individual":0.00008333333333},{"Age":23,"Individual":0.00008333333333},{"Age":24,"Individual":0.00008333333333},{"Age":25,"Individual":0.00008333333333},{"Age":26,"Individual":0.00008333333333},{"Age":27,"Individual":0.00008333333333},{"Age":28,"Individual":0.00008333333333},{"Age":29,"Individual":0.00008333333333},{"Age":30,"Individual":0.00008333333333},{"Age":31,"Individual":0.00008333333333},{"Age":32,"Individual":0.00008333333333},{"Age":33,"Individual":0.00008333333333},{"Age":34,"Individual":0.00008333333333},{"Age":35,"Individual":0.00008333333333},{"Age":36,"Individual":0.00008333333333},{"Age":37,"Individual":0.00008333333333},{"Age":38,"Individual":0.00008333333333},{"Age":39,"Individual":0.00008333333333},{"Age":40,"Individual":0.00008333333333},{"Age":41,"Individual":0.00008333333333},{"Age":42,"Individual":0.00008333333333},{"Age":43,"Individual":0.00008333333333},{"Age":44,"Individual":0.00008333333333},{"Age":45,"Individual":0.00008333333333},{"Age":46,"Individual":0.00008333333333},{"Age":47,"Individual":0.00008333333333},{"Age":48,"Individual":0.00008333333333},{"Age":49,"Individual":0.00008333333333},{"Age":50,"Individual":0.0001041666667},{"Age":51,"Individual":0.0001041666667},{"Age":52,"Individual":0.0001041666667},{"Age":53,"Individual":0.0001041666667},{"Age":54,"Individual":0.0001041666667},{"Age":55,"Individual":0.0001041666667},{"Age":56,"Individual":0.0001041666667},{"Age":57,"Individual":0.0001041666667},{"Age":58,"Individual":0.0001041666667},{"Age":59,"Individual":0.0001041666667}],"a71":[{"Age":18,"Individual":10.88},{"Age":19,"Individual":10.88},{"Age":20,"Individual":10.88},{"Age":21,"Individual":10.88},{"Age":22,"Individual":10.88},{"Age":23,"Individual":10.88},{"Age":24,"Individual":10.88},{"Age":25,"Individual":10.88},{"Age":26,"Individual":10.88},{"Age":27,"Individual":10.88},{"Age":28,"Individual":10.88},{"Age":29,"Individual":10.88},{"Age":30,"Individual":10.88},{"Age":31,"Individual":10.88},{"Age":32,"Individual":10.88},{"Age":33,"Individual":10.88},{"Age":34,"Individual":10.88},{"Age":35,"Individual":10.88},{"Age":36,"Individual":10.88},{"Age":37,"Individual":10.88},{"Age":38,"Individual":10.88},{"Age":39,"Individual":10.88},{"Age":40,"Individual":10.88},{"Age":41,"Individual":10.88},{"Age":42,"Individual":10.88},{"Age":43,"Individual":10.88},{"Age":44,"Individual":10.88},{"Age":45,"Individual":10.88},{"Age":46,"Individual":10.88},{"Age":47,"Individual":10.88},{"Age":48,"Individual":10.88},{"Age":49,"Individual":10.88},{"Age":50,"Individual":12.13},{"Age":51,"Individual":12.13},{"Age":52,"Individual":12.13},{"Age":53,"Individual":12.13},{"Age":54,"Individual":12.13},{"Age":55,"Individual":12.13},{"Age":56,"Individual":12.13},{"Age":57,"Individual":12.13},{"Age":58,"Individual":12.13},{"Age":59,"Individual":12.13},{"Age":60,"Individual":15.25},{"Age":61,"Individual":15.25},{"Age":62,"Individual":15.25},{"Age":63,"Individual":15.25},{"Age":64,"Individual":15.25},{"Age":65,"Individual":30.25},{"Age":66,"Individual":30.25},{"Age":67,"Individual":30.25},{"Age":68,"Individual":30.25},{"Age":69,"Individual":30.25},{"Age":70,"Individual":30.25},{"Age":71,"Individual":30.25},{"Age":72,"Individual":30.25},{"Age":73,"Individual":30.25},{"Age":74,"Individual":30.25},{"Age":75,"Individual":30.25},{"Age":76,"Individual":30.25},{"Age":77,"Individual":30.25},{"Age":78,"Individual":30.25},{"Age":79,"Individual":30.25},{"Age":80,"Individual":30.25}],"tenrc":[{"Age":18,"Male_NTU_per_$":0.0003083333333,"Male_TU_per_$":0.0003925,"Female_NTU_per_$":0.000265,"Female_TU_per_$":0.0003641666667},{"Age":19,"Male_NTU_per_$":0.0003091666667,"Male_TU_per_$":0.0003991666667,"Female_NTU_per_$":0.0002666666667,"Female_TU_per_$":0.0003683333333},{"Age":20,"Male_NTU_per_$":0.00031,"Male_TU_per_$":0.0004041666667,"Female_NTU_per_$":0.0002675,"Female_TU_per_$":0.0003725},{"Age":21,"Male_NTU_per_$":0.0003116666667,"Male_TU_per_$":0.0004091666667,"Female_NTU_per_$":0.0002683333333,"Female_TU_per_$":0.0003791666667},{"Age":22,"Male_NTU_per_$":0.0003133333333,"Male_TU_per_$":0.0004166666667,"Female_NTU_per_$":0.00027,"Female_TU_per_$":0.000385},{"Age":23,"Male_NTU_per_$":0.000315,"Male_TU_per_$":0.0004225,"Female_NTU_per_$":0.0002716666667,"Female_TU_per_$":0.0003916666667},{"Age":24,"Male_NTU_per_$":0.0003166666667,"Male_TU_per_$":0.0004291666667,"Female_NTU_per_$":0.0002725,"Female_TU_per_$":0.0004},{"Age":25,"Male_NTU_per_$":0.0003191666667,"Male_TU_per_$":0.0004375,"Female_NTU_per_$":0.0002741666667,"Female_TU_per_$":0.0004066666667},{"Age":26,"Male_NTU_per_$":0.0003241666667,"Male_TU_per_$":0.000445,"Female_NTU_per_$":0.0002766666667,"Female_TU_per_$":0.0004166666667},{"Age":27,"Male_NTU_per_$":0.0003275,"Male_TU_per_$":0.0004558333333,"Female_NTU_per_$":0.00028,"Female_TU_per_$":0.000425},{"Age":28,"Male_NTU_per_$":0.0003308333333,"Male_TU_per_$":0.000465,"Female_NTU_per_$":0.0002825,"Female_TU_per_$":0.0004358333333},{"Age":29,"Male_NTU_per_$":0.0003341666667,"Male_TU_per_$":0.0004766666667,"Female_NTU_per_$":0.0002866666667,"Female_TU_per_$":0.000445},{"Age":30,"Male_NTU_per_$":0.0003375,"Male_TU_per_$":0.0004883333333,"Female_NTU_per_$":0.00029,"Female_TU_per_$":0.000455},{"Age":31,"Male_NTU_per_$":0.0003425,"Male_TU_per_$":0.0005008333333,"Female_NTU_per_$":0.0002941666667,"Female_TU_per_$":0.000465},{"Age":32,"Male_NTU_per_$":0.0003491666667,"Male_TU_per_$":0.0005141666667,"Female_NTU_per_$":0.0002983333333,"Female_TU_per_$":0.000475},{"Age":33,"Male_NTU_per_$":0.0003558333333,"Male_TU_per_$":0.00053,"Female_NTU_per_$":0.0003075,"Female_TU_per_$":0.0004891666667},{"Age":34,"Male_NTU_per_$":0.0003666666667,"Male_TU_per_$":0.0005516666667,"Female_NTU_per_$":0.000315,"Female_TU_per_$":0.0005041666667},{"Age":35,"Male_NTU_per_$":0.0003825,"Male_TU_per_$":0.0005766666667,"Female_NTU_per_$":0.0003275,"Female_TU_per_$":0.0005258333333},{"Age":36,"Male_NTU_per_$":0.0004008333333,"Male_TU_per_$":0.0006075,"Female_NTU_per_$":0.0003441666667,"Female_TU_per_$":0.0005483333333},{"Age":37,"Male_NTU_per_$":0.0004225,"Male_TU_per_$":0.0006416666667,"Female_NTU_per_$":0.0003633333333,"Female_TU_per_$":0.0005766666667},{"Age":38,"Male_NTU_per_$":0.0004483333333,"Male_TU_per_$":0.0006825,"Female_NTU_per_$":0.000385,"Female_TU_per_$":0.00061},{"Age":39,"Male_NTU_per_$":0.0004775,"Male_TU_per_$":0.0007291666667,"Female_NTU_per_$":0.0004091666667,"Female_TU_per_$":0.0006483333333},{"Age":40,"Male_NTU_per_$":0.00051,"Male_TU_per_$":0.0007816666667,"Female_NTU_per_$":0.0004366666667,"Female_TU_per_$":0.00069},{"Age":41,"Male_NTU_per_$":0.0005458333333,"Male_TU_per_$":0.00084,"Female_NTU_per_$":0.0004666666667,"Female_TU_per_$":0.0007375},{"Age":42,"Male_NTU_per_$":0.000585,"Male_TU_per_$":0.0009041666667,"Female_NTU_per_$":0.0004991666667,"Female_TU_per_$":0.0007908333333},{"Age":43,"Male_NTU_per_$":0.0006291666667,"Male_TU_per_$":0.0009766666667,"Female_NTU_per_$":0.000535,"Female_TU_per_$":0.0008475},{"Age":44,"Male_NTU_per_$":0.0006783333333,"Male_TU_per_$":0.001055,"Female_NTU_per_$":0.0005758333333,"Female_TU_per_$":0.0009108333333},{"Age":45,"Male_NTU_per_$":0.0007333333333,"Male_TU_per_$":0.001143333333,"Female_NTU_per_$":0.0006225,"Female_TU_per_$":0.00098},{"Age":46,"Male_NTU_per_$":0.0007925,"Male_TU_per_$":0.001241666667,"Female_NTU_per_$":0.0006741666667,"Female_TU_per_$":0.001054166667},{"Age":47,"Male_NTU_per_$":0.0008591666667,"Male_TU_per_$":0.0013475,"Female_NTU_per_$":0.0007308333333,"Female_TU_per_$":0.001134166667},{"Age":48,"Male_NTU_per_$":0.0009316666667,"Male_TU_per_$":0.001461666667,"Female_NTU_per_$":0.0007933333333,"Female_TU_per_$":0.00122},{"Age":49,"Male_NTU_per_$":0.001011666667,"Male_TU_per_$":0.001580833333,"Female_NTU_per_$":0.0008608333333,"Female_TU_per_$":0.0013125},{"Age":50,"Male_NTU_per_$":0.001099166667,"Male_TU_per_$":0.001706666667,"Female_NTU_per_$":0.00093,"Female_TU_per_$":0.00141},{"Age":51,"Male_NTU_per_$":0.001194166667,"Male_TU_per_$":0.001834166667,"Female_NTU_per_$":0.0010025,"Female_TU_per_$":0.001509166667},{"Age":52,"Male_NTU_per_$":0.001299166667,"Male_TU_per_$":0.001973333333,"Female_NTU_per_$":0.001083333333,"Female_TU_per_$":0.00162},{"Age":53,"Male_NTU_per_$":0.001415833333,"Male_TU_per_$":0.002129166667,"Female_NTU_per_$":0.001175833333,"Female_TU_per_$":0.0017425},{"Age":54,"Male_NTU_per_$":0.001550833333,"Male_TU_per_$":0.002304166667,"Female_NTU_per_$":0.0012825,"Female_TU_per_$":0.00188},{"Age":55,"Male_NTU_per_$":0.001704166667,"Male_TU_per_$":0.002505833333,"Female_NTU_per_$":0.001405833333,"Female_TU_per_$":0.0020425},{"Age":56,"Male_NTU_per_$":0.0018775,"Male_TU_per_$":0.002735,"Female_NTU_per_$":0.001549166667,"Female_TU_per_$":0.002225833333},{"Age":57,"Male_NTU_per_$":0.00207,"Male_TU_per_$":0.002989166667,"Female_NTU_per_$":0.001709166667,"Female_TU_per_$":0.002430833333},{"Age":58,"Male_NTU_per_$":0.00228,"Male_TU_per_$":0.003266666667,"Female_NTU_per_$":0.001884166667,"Female_TU_per_$":0.002653333333},{"Age":59,"Male_NTU_per_$":0.002505,"Male_TU_per_$":0.003565,"Female_NTU_per_$":0.002074166667,"Female_TU_per_$":0.0028975}]};
+const A71 = Object.freeze({ car:100000, er:250, hospital:500, icu:1000,
+                            adult:10.88, adultCouple:22.75, senior:30.25, seniorCouple:60.50 });
+
+function nnum(v){ return (v===''||v==null) ? 0 : (Number(v)||0); }
+function isSenior(age){ return nnum(age) >= 60; }
+function rowFor(book, age){ const rows=RATEBOOKS[book]||[]; age=nnum(age); return rows.find(r=>nnum(r.Age)===age)||null; }
+function rateKey(p){ return (p.sex==='F'?'Female':'Male') + '_' + ((p.tobacco||'NTU')==='TU'?'TU':'NTU') + '_per_$'; }
+function lookupRate(product,p){ const row=rowFor(product,p.age); if(!row) return null; const r=nnum(row[rateKey(p)]); return r>0?r:null; }
+// whole-life band by face amount; 60+ always uses the senior graded book
+function autoFuneralProduct(face,age){ age=nnum(age); face=nnum(face);
+  if(age>=60) return 'wlsenior';
+  if(face<=34999) return 'wl';
+  if(face<=59999) return 'pr';
+  if(face<=119999) return 'ex';
+  return 'sl'; }
+function funeralMonthly(p,face){ face=nnum(face); if(!face) return 0; const r=lookupRate(autoFuneralProduct(face,p.age),p); return r?face*r:0; }
+function tenrcMonthly(p,face){ face=nnum(face); if(!face) return 0; const r=lookupRate('tenrc',p); return r?face*r:0; }
+function adbRate(age){ const row=rowFor('adb',age); return row?nnum(row.Individual):null; }
+function adbMonthly(p,face){ face=nnum(face); if(!face) return 0; const r=adbRate(p.age); return r==null?0:face*r; }
+function a71Individual(age){ const row=rowFor('a71',age); if(row&&nnum(row.Individual)>0) return nnum(row.Individual); return isSenior(age)?A71.senior:A71.adult; }
+// couple pricing when both people carry the program
+function a71PremiumMap(people){
+  const on=people.filter(x=>x.ghgp);
+  const out=new Map(people.map(x=>[x.key,0]));
+  if(!on.length) return out;
+  if(on.length===1){ out.set(on[0].key, a71Individual(on[0].age)); return out; }
+  const seniors=on.filter(p=>isSenior(p.age)).length;
+  if(seniors===2){ on.forEach(p=>out.set(p.key,A71.seniorCouple/2)); return out; }
+  if(seniors===0){ on.forEach(p=>out.set(p.key,A71.adultCouple/2)); return out; }
+  on.forEach(p=>out.set(p.key,a71Individual(p.age)));
+  return out;
+}
+
+/* ---- pitch sheet model ---- */
+function psGet(){ return (STATE.ps)||blankPS(); }
+function covKey(opt,who){ return String(opt)+who; }
+function psCov(opt,who){ const ps=psGet(); return (ps.cov&&ps.cov[covKey(opt,who)])||blankCov(); }
+function psPerson(who){
+  const ps=psGet(), b=ps[who]||{};
+  const nm = who==='main' ? (STATE.mainName||'Main') : (STATE.spouseName||'Spouse');
+  return {key:who, label:nm, age:nnum(b.age), sex:b.sex||'M', tobacco:b.tobacco||'NTU', income:nnum(b.income)};
+}
+function psActiveWho(){ const ps=psGet(); return ps.spouseEnabled ? ['main','spouse'] : ['main']; }
+// income protection face = months x that person's own monthly income
+function incFace(p,c){ return nnum(c.inc.months) * p.income; }
+// where the A71 $100k accidental is parked for this person, if anywhere
+function a71Home(c){
+  if(!c.ghgp.on) return null;
+  if(c.col.on && c.col.a71) return 'college';
+  if(c.mtg.on && c.mtg.basis==='adb' && c.mtg.a71) return 'mortgage';
+  return 'standalone';
+}
+function psPersonRows(opt,who){
+  const p=psPerson(who), c=psCov(opt,who);
+  return {p, c, incFace:incFace(p,c), home:a71Home(c)};
+}
+function psPersonMonthly(opt,who,premiums){
+  const {p,c}=psPersonRows(opt,who);
+  let m=0;
+  if(c.fun.on) m+=funeralMonthly(p,c.fun.amt);
+  if(c.inc.on) m+=tenrcMonthly(p,incFace(p,c));
+  if(c.col.on) m+=adbMonthly(p,c.col.amt);                                  // college is always ADB
+  if(c.mtg.on) m+= c.mtg.basis==='adb' ? adbMonthly(p,c.mtg.amt) : tenrcMonthly(p,c.mtg.amt);
+  m += (premiums && premiums.get(who)) || 0;
+  return m;
+}
+function psPremiums(opt){
+  return a71PremiumMap(psActiveWho().map(w=>({key:w, age:psPerson(w).age, ghgp:psCov(opt,w).ghgp.on})));
+}
+function psOptionMonthly(opt){
+  const pm=psPremiums(opt);
+  return psActiveWho().reduce((s,w)=>s+psPersonMonthly(opt,w,pm),0);
+}
+function money(n){ return '$'+Math.round(nnum(n)).toLocaleString('en-US'); }
+function money2(n){ return '$'+nnum(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
 /* ---------------- PRESENTATION (re-render only when visual changes) ---------------- */
 let lastPresentSig=null;
 function renderPresent(){
-  const slides=activeSlides();
-  const s=slides[STATE.slideIndex]||slides[0];
-  const mode=STATE.scriptMode||'HC';
-  // dynamic slides depend on names/SS; static ones (pdf/letter) must not reload on those edits
-  const dyn = (s.visual==='ssgap'||s.visual==='gsb')
-    ? '|'+STATE.mainName+'|'+STATE.spouseName+'|'+STATE.ssMain+'|'+STATE.ssSpouse : '';
-  const sig=mode+'|'+STATE.slideIndex+'|'+STATE.logoUrl+'|'+STATE.letterUrl+dyn;
+  const s=SLIDES[STATE.slideIndex]||SLIDES[0];
+  // the pitch sheet is live-edited, so it has to re-render on every ps change
+  const dyn = (s.visual==='pitchsheet')
+    ? '|'+JSON.stringify(STATE.ps)+'|'+STATE.mainName+'|'+STATE.spouseName : '';
+  const sig=STATE.slideIndex+'|'+STATE.logoUrl+'|'+STATE.letterUrl+dyn;
   if(sig===lastPresentSig) return;         // avoids reloading PDFs when unrelated fields change
   lastPresentSig=sig;
   document.body.style.background='var(--paper)';
@@ -634,87 +939,23 @@ function renderPresent(){
     if(!emb) stage=`<div class="placeholder"><div class="big">Read-Off Letter</div><div>Select a union with a letter on file to display it here.</div></div>`;
     else if(emb.type==='img') stage=`<div class="letter-slide"><img src="${escAttr(emb.src)}" alt="read-off letter"></div>`;
     else stage=`<div class="letter-slide"><iframe src="${escAttr(emb.src)}" title="read-off letter"></iframe></div>`;
-  }else if(s.visual==='ssgap'){
-    stage=ssGapGraphic();
-  }else if(s.visual==='gsb'){
-    stage=gsbGraphic(s.tier||null);
   }else if(s.visual==='fexchart'){
     stage=fexGraphic();
   }else if(s.visual==='incomestats'){
     stage=incomeGraphic();
+  }else if(s.visual==='mortgage'){
+    stage=mortgageGraphic();
+  }else if(s.visual==='logo'){
+    stage=`<div class="logo-slide">${logo?`<img src="${escAttr(logo)}" alt="union logo">`:`<span class="no-logo">American Income Life · Union Benefits</span>`}</div>`;
+  }else if(s.visual==='pitchsheet'){
+    stage=pitchSheetGraphic(logo);
   }
   root.innerHTML=`<div id="present"><div class="topbar">${logoBox}
     <div class="brandmark"><div class="b1">American Income Life</div><div class="b2">Union Benefits</div></div></div>
     <div class="stage">${stage}</div></div>`;
 }
 
-/* ---------------- Senior graphics ---------------- */
-// Survivor rule: keep the greater SS, lose the lesser. Uses entered amounts, falls back to example.
-function senValues(){
-  const jim  = parseMoney(STATE.ssMain)   || 2000;
-  const mary = parseMoney(STATE.ssSpouse) || 1400;
-  const kept = Math.max(jim,mary), lost = Math.min(jim,mary);
-  return { jim, mary, kept, lost, combined:jim+mary, lostYr:lost*12,
-    nameA:(STATE.mainName||'Member'), nameB:(STATE.spouseName||'Spouse') };
-}
-function ssGapGraphic(){
-  const v=senValues();
-  const pA=Math.max(6,(v.jim/v.combined)*100), pB=Math.max(6,(v.mary/v.combined)*100);
-  const keptPct=Math.max(6,(v.kept/v.combined)*100), lostPct=Math.max(6,(v.lost/v.combined)*100);
-  return `<div class="sen-slide">
-    <div class="sen-head"><span class="eyebrow">Social Security</span><h2>The Survivor Gap</h2></div>
-    <div class="gap-block">
-      <div class="gap-lab">Today, together</div>
-      <div class="gap-bar">
-        <div class="seg segA" style="flex:${v.jim}">${escHtml(v.nameA)}<b>${fmtMoney(v.jim)}</b></div>
-        <div class="seg segB" style="flex:${v.mary}">${escHtml(v.nameB)}<b>${fmtMoney(v.mary)}</b></div>
-      </div>
-      <div class="gap-tot">${fmtMoney(v.combined)}<span>/mo</span></div>
-    </div>
-    <div class="gap-arrow">When one passes, the lesser check is lost — by federal law</div>
-    <div class="gap-block">
-      <div class="gap-lab">The survivor keeps</div>
-      <div class="gap-bar">
-        <div class="seg segKept" style="flex:${v.kept}">Kept<b>${fmtMoney(v.kept)}</b></div>
-        <div class="seg segLost" style="flex:${v.lost}">Lost forever<b>${fmtMoney(v.lost)}</b></div>
-      </div>
-      <div class="gap-tot">${fmtMoney(v.kept)}<span>/mo</span></div>
-    </div>
-    <div class="gap-callout">
-      <div class="gc-lab">The gap this program replaces</div>
-      <div class="gc-big">${'\u2212'}${fmtMoney(v.lost)}<span>/month</span></div>
-      <div class="gc-year">${'\u2212'}${fmtMoney(v.lostYr)} every year</div>
-    </div>
-  </div>`;
-}
-function gsbGraphic(tier){
-  const v=senValues();
-  const tiers=[
-    {k:'bronze', name:'Bronze', months:3,  tag:'Recommended start', hue:'var(--bronze)'},
-    {k:'silver', name:'Silver', months:6,  tag:'Most popular',       hue:'var(--silver)'},
-    {k:'gold',   name:'Gold',   months:12, tag:'Hardest to qualify', hue:'var(--gold)'},
-  ];
-  const cards=tiers.map(t=>{
-    const on = tier ? (tier===t.k) : false;
-    const dim = tier && tier!==t.k;
-    const ring = (!tier && t.k==='silver');   // intro slide circles Silver
-    return `<div class="tier ${on?'on':''} ${dim?'dim':''} ${ring?'ring':''}" style="--hue:${t.hue}">
-      <div class="tier-name">${t.name}</div>
-      <div class="tier-mo"><b>${t.months}</b><span>months of<br>protection</span></div>
-      <div class="tier-line">${fmtMoney(v.lost)}/mo replaced</div>
-      <div class="tier-line">100% Freedom of Choice</div>
-      <div class="tier-line">Paid in 24–48 hrs</div>
-      ${ring?`<div class="tier-badge">Circle this one</div>`:(on?`<div class="tier-badge">This option</div>`:'')}
-    </div>`;
-  }).join('');
-  return `<div class="sen-slide">
-    <div class="sen-head"><span class="eyebrow">Good · Better · Best</span><h2>Gold · Silver · Bronze</h2></div>
-    <div class="tier-row">${cards}</div>
-    <div class="tier-foot">Guaranteed · permanent · builds cash value · locked in for life</div>
-  </div>`;
-}
-
-/* ---------------- Stat graphics (funeral trend / income loss) ---------------- */
+/* ---------------- Stat graphics ---------------- */
 function fexGraphic(){
   const MAX=22000;
   const h=v=>Math.max(9,(v/MAX)*100);
@@ -752,41 +993,157 @@ function incomeGraphic(){
     <div class="stat-note">Sources: Urban Institute / Ganong &amp; Noel, mortgage-default research; LIMRA 2025 Insurance Barometer.</div>
   </div>`;
 }
-
-/* ---------------- CONTROL (script on top) ---------------- */
-let ctrlLoadedMode=null, ctrlLoadingMode=null;
-function ensureCtrlScripts(){
-  const mode=STATE.scriptMode||'HC';
-  if(ctrlLoadedMode===mode || ctrlLoadingMode===mode) return;
-  if(mode==='SEN'){ ctrlLoadedMode='SEN'; return; }   // fully embedded, no fetch
-  ctrlLoadingMode=mode;
-  loadScriptsFor(mode).then(()=>{ ctrlLoadingMode=null; ctrlLoadedMode=mode; if(MODE==='control') renderControl(); });
+function mortgageGraphic(){
+  const who = STATE.spouseName ? escHtml(STATE.spouseName) : 'The family';
+  return `<div class="stat-slide">
+    <div class="sen-head"><span class="eyebrow">The Biggest Liability</span><h2>Who Really Owns the House?</h2></div>
+    <div class="mtg-row">
+      <div class="mtg-card bad">
+        <div class="mtg-lab">Without this benefit</div>
+        <div class="mtg-head">The bank still wants its payment</div>
+        <div class="mtg-sub">The income that made the mortgage payment is gone — the mortgage is not. ${who} has to keep paying it, refinance it, or sell the home.</div>
+      </div>
+      <div class="mtg-vs">vs</div>
+      <div class="mtg-card">
+        <div class="mtg-lab">With this benefit</div>
+        <div class="mtg-head">The home is paid off, free and clear</div>
+        <div class="mtg-sub">The mortgage is retired outright. ${who} keeps the house, the memories, and the one bill that would have forced a move.</div>
+      </div>
+    </div>
+    <div class="stat-note">Your biggest asset is the one the bank holds the title to. This benefit is what turns it back into an asset.</div>
+  </div>`;
 }
+
+/* ---------------- PITCH SHEET (presentation side) ---------------- */
+function psCardHtml(opt,who,premiums){
+  const {p,c,incFace,home}=psPersonRows(opt,who);
+  const rows=[];
+
+  if(c.fun.on){
+    rows.push(`<div class="ps-row funeral">
+      <div><div class="ps-kick">Paid in 24–48 hours</div>
+        <div class="ps-desc">Funeral Benefit<small>Freedom of Choice — any funeral home, cemetery or crematorium in the country. Anything left over is paid to the family.</small></div></div>
+      <div class="ps-amt">${money(c.fun.amt)}</div></div>`);
+  }
+  if(c.inc.on){
+    const mo=nnum(c.inc.months);
+    rows.push(`<div class="ps-row income">
+      <div><div class="ps-kick">Tax free · probate free</div>
+        <div class="ps-desc">Income Protection<small>${money(p.income)} per month continues to the household for ${mo} month${mo===1?'':'s'}.</small></div></div>
+      <div class="ps-amt">${money(incFace)}<em>${mo} months</em></div></div>`);
+  }
+  if(c.col.on){
+    const parked = home==='college';
+    const shown = nnum(c.col.amt) + (parked ? A71.car : 0);
+    rows.push(`<div class="ps-row college">
+      <div><div class="ps-kick">For the kids</div>
+        <div class="ps-desc">College Education Benefit<small>College, trade school, or starting a business.${parked?` Includes the ${money(A71.car)} accidental benefit <b>(car accident)</b>.`:''}</small></div></div>
+      <div class="ps-amt">${money(shown)}</div></div>`);
+  }
+  if(c.mtg.on){
+    const parked = home==='mortgage';
+    const shown = nnum(c.mtg.amt) + (parked ? A71.car : 0);
+    rows.push(`<div class="ps-row mortgage">
+      <div><div class="ps-kick">Keep the home</div>
+        <div class="ps-desc">Mortgage Protection<small>Pays the home off free and clear.${parked?` Includes the ${money(A71.car)} accidental benefit <b>(car accident)</b>.`:''}</small></div></div>
+      <div class="ps-amt">${money(shown)}</div></div>`);
+  }
+  if(c.ghgp.on){
+    rows.push(`<div class="ps-row ghgp">
+      <div class="ps-ghead"><span>Get Hurt, Get Paid Program</span><span>${isSenior(p.age)?'Senior rate':'Adult rate'}</span></div>
+      <div class="ps-ggrid">
+        <div class="ps-gitem"><b>${money(A71.er)}</b><span>ER / urgent care visit</span></div>
+        <div class="ps-gitem"><b>${money(A71.hospital)}</b><span>Hospital night</span></div>
+        <div class="ps-gitem"><b>${money(A71.icu)}</b><span>ICU night, up to 2 weeks</span></div>
+      </div>
+      ${home==='standalone'?`<div class="ps-acc">
+        <div class="l">Accidental Benefit<small>(car accident)</small></div>
+        <div class="v">${money(A71.car)}</div></div>`:''}
+    </div>`);
+  }
+
+  if(!rows.length) rows.push(`<div class="ps-empty">No benefits selected yet.</div>`);
+
+  const ps=psGet();
+  const monthly = psPersonMonthly(opt,who,premiums);
+  const weekly  = monthly*12/52;
+  const priceBlock = ps.showPrices ? `<div class="ps-price">
+      <div class="pw"><b>Weekly</b><span>${money2(weekly)}</span></div>
+      <div class="pm"><b>Total Monthly</b><span>${money2(monthly)}</span></div>
+    </div>` : '';
+
+  return `<section class="ps-card">
+    <div class="ps-head">
+      <div><h3>${escHtml(p.label)}</h3><div class="ps-sub">${p.age?('Age '+p.age):'Permanent &amp; portable'}</div></div>
+      ${c.ghgp.on?'<span class="ps-badge">Program Included</span>':''}
+    </div>
+    ${priceBlock}
+    <div class="ps-rows">${rows.join('')}</div>
+  </section>`;
+}
+
+function pitchSheetGraphic(logo){
+  const ps=psGet(), opt=ps.option||1;
+  const premiums=psPremiums(opt);
+  const cards=psActiveWho().map(w=>psCardHtml(opt,w,premiums)).join('');
+  const total=psOptionMonthly(opt);
+  return `<div class="ps-slide">
+    <div class="ps-top">
+      <div class="ps-topL">
+        ${logo?`<div class="ps-logo"><img src="${escAttr(logo)}" alt="union logo"></div>`:''}
+        <div class="ps-ttl"><b>Your Benefit Package</b><span>American Income Life · Union Benefits</span></div>
+      </div>
+      <span class="ps-badge">Option ${opt}${ps.showPrices?` · ${money2(total)}/mo`:''}</span>
+    </div>
+    <div class="ps-people">${cards}</div>
+    <div class="ps-foot">Permanent · portable · yours whether you quit, leave, or retire. Accidental benefit shown applies to death in a car accident.</div>
+  </div>`;
+}
+
+/* ---------------- CONTROL ---------------- */
+// objection drawer state (local to this window — never shared, never on the presentation)
+let OBJ_OPEN = null;   // null | {scope:'slide', i:0-2} | {scope:'uni', i:n}
+let ctrlPane = null;   // null (auto) | 'script' | 'build'
+let bScroll = 0;       // builder scroll offset, preserved across re-renders
+
 function renderControl(){
   document.body.style.background='var(--slate)';
-  ensureCtrlScripts();
-  const slides=activeSlides();
-  const i=STATE.slideIndex, s=slides[i]||slides[0], total=slides.length;
-  const mode=STATE.scriptMode||'HC';
-  const sen = mode==='SEN';
+  const i=STATE.slideIndex, s=SLIDES[i]||SLIDES[0], total=SLIDES.length;
   const inc=parseMoney(STATE.income), five=inc?inc*60:0;
-  const v=senValues();
 
-  const varsHtml = sen ? `
-        <div class="vars">
-          <div><label>Member</label><input id="cMain" type="text" placeholder="Jim" value="${escAttr(STATE.mainName)}"></div>
-          <div><label>Spouse</label><input id="cSpouse" type="text" placeholder="Mary" value="${escAttr(STATE.spouseName)}"></div>
+  // the builder auto-opens on the pitch sheet slide, but the switch works anywhere
+  if(ctrlPane==null) ctrlPane = (s.visual==='pitchsheet') ? 'build' : 'script';
+  const pane = ctrlPane==='build' ? builderHtml() : `<div class="script" id="script">${renderScriptText(s.script, STATE)}</div>`;
+
+  root.innerHTML=`
+    <div id="control">
+      ${pane}
+
+      <div class="modeseg" id="paneSeg">
+        <button data-p="script" class="${ctrlPane==='script'?'on':''}">Script</button>
+        <button data-p="build" class="${ctrlPane==='build'?'on':''}">Pitch Sheet</button>
+      </div>
+
+      <div class="objbar" id="objbar">
+        ${(s.objections||[]).map((o,idx)=>`
+          <button class="objpill" data-scope="slide" data-i="${idx}" title="${escAttr(o.t)}">
+            <span class="k">${idx+1}</span><span class="t">${escHtml(o.t)}</span>
+          </button>`).join('')}
+        <button class="objpill uni" data-scope="uni" data-i="0" title="Universal objections">
+          <span class="k">U</span><span class="t">Any slide</span>
+        </button>
+      </div>
+
+      <div class="cfoot">
+        <div class="pos">Slide ${i+1} of ${total}${s.eyebrow?` · ${escHtml(s.eyebrow)}`:''}</div>
+        <div class="ctitle">${escHtml(s.title)}</div>
+        <div class="nav">
+          <button class="btn btn-ghost" id="prev" ${i===0?'disabled style="opacity:.4"':''}>← Prev</button>
+          <button class="btn btn-red" id="next" ${i===total-1?'disabled style="opacity:.4"':''}>Next →</button>
         </div>
-        <div class="vars">
-          <div><label>Member SS/mo</label><input id="cSsMain" type="text" inputmode="numeric" placeholder="2,000" value="${escAttr(STATE.ssMain)}"></div>
-          <div><label>Spouse SS/mo</label><input id="cSsSpouse" type="text" inputmode="numeric" placeholder="1,400" value="${escAttr(STATE.ssSpouse)}"></div>
-        </div>
-        <div class="calc">
-          <span class="chip">Combined <b id="chipComb">${fmtMoney(v.combined)}</b></span>
-          <span class="chip">Gap/mo <b id="chipGapM">${'\u2212'}${fmtMoney(v.lost)}</b></span>
-          <span class="chip">Gap/yr <b id="chipGapY">${'\u2212'}${fmtMoney(v.lostYr)}</b></span>
-        </div>`
-    : `
+        <div class="jump"><select id="jump">
+          ${SLIDES.map((sl,idx)=>`<option value="${idx}" ${idx===i?'selected':''}>${String(idx+1).padStart(2,'0')} · ${escHtml(sl.title)}</option>`).join('')}
+        </select></div>
         <div class="vars">
           <div><label>Member</label><input id="cMain" type="text" placeholder="Jim" value="${escAttr(STATE.mainName)}"></div>
           <div><label>Spouse</label><input id="cSpouse" type="text" placeholder="Mary" value="${escAttr(STATE.spouseName)}"></div>
@@ -795,93 +1152,272 @@ function renderControl(){
         <div class="calc">
           <span class="chip">Income/mo <b id="chipInc">${inc?fmtMoney(inc):'—'}</b></span>
           <span class="chip">5-yr protection (×60) <b id="chipFive">${five?fmtMoney(five):'—'}</b></span>
-        </div>`;
-
-  root.innerHTML=`
-    <div id="control">
-      <div class="script" id="script">${scriptHtml(s.id, STATE)}</div>
-      <div class="cfoot">
-        <div class="pos">Slide ${i+1} of ${total} · ${escHtml((MODES[mode]||MODES.HC).label)}${s.eyebrow?` · ${escHtml(s.eyebrow)}`:''}</div>
-        <div class="ctitle">${escHtml(s.title)}</div>
-        <div class="segc" id="modeSegC">
-          ${Object.keys(MODES).map(k=>`<button data-m="${k}" class="${k===mode?'on':''}">${escHtml(MODES[k].label)}</button>`).join('')}
         </div>
-        <div class="nav">
-          <button class="btn btn-ghost" id="prev" ${i===0?'disabled style="opacity:.4"':''}>← Prev</button>
-          <button class="btn btn-red" id="next" ${i===total-1?'disabled style="opacity:.4"':''}>Next →</button>
-        </div>
-        <div class="jump"><select id="jump">
-          ${slides.map((sl,idx)=>`<option value="${idx}" ${idx===i?'selected':''}>${String(idx+1).padStart(2,'0')} · ${escHtml(sl.title)}</option>`).join('')}
-        </select></div>
-        ${varsHtml}
       </div>
+
+      <div id="objdrawer"></div>
     </div>`;
+
   const $=id=>document.getElementById(id);
+  document.getElementById('paneSeg').querySelectorAll('button').forEach(b=>{
+    b.addEventListener('click',()=>{ ctrlPane=b.dataset.p; renderControl(); });
+  });
+  if(ctrlPane==='build') bindBuilder();
   $('prev').addEventListener('click',()=>go(-1));
   $('next').addEventListener('click',()=>go(1));
   $('jump').addEventListener('change',e=>commit({slideIndex:parseInt(e.target.value,10)||0}));
   // silent commits + targeted refresh so the caret never jumps while typing
   $('cMain').addEventListener('input',e=>{ commit({mainName:e.target.value}, true); refreshDerived(); });
   $('cSpouse').addEventListener('input',e=>{ commit({spouseName:e.target.value}, true); refreshDerived(); });
-  if($('cIncome')) $('cIncome').addEventListener('input',e=>{ commit({income:e.target.value}, true); refreshDerived(); });
-  if($('cSsMain')) $('cSsMain').addEventListener('input',e=>{ commit({ssMain:e.target.value}, true); refreshDerived(); });
-  if($('cSsSpouse')) $('cSsSpouse').addEventListener('input',e=>{ commit({ssSpouse:e.target.value}, true); refreshDerived(); });
-  const seg=document.getElementById('modeSegC');
-  if(seg) seg.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>commit({scriptMode:b.dataset.m})));
+  $('cIncome').addEventListener('input',e=>{ commit({income:e.target.value}, true); refreshDerived(); });
+  document.getElementById('objbar').querySelectorAll('.objpill').forEach(b=>{
+    b.addEventListener('click',()=>toggleObj(b.dataset.scope, parseInt(b.dataset.i,10)));
+  });
+  paintObj();
 }
+
 function refreshDerived(){
-  const slides=activeSlides();
-  const s=slides[STATE.slideIndex]||slides[0];
-  const sc=document.getElementById('script'); if(sc) sc.innerHTML=scriptHtml(s.id, STATE);
-  // HC/REF chips
+  const s=SLIDES[STATE.slideIndex]||SLIDES[0];
+  const sc=document.getElementById('script'); if(sc) sc.innerHTML=renderScriptText(s.script, STATE);
   const inc=parseMoney(STATE.income), five=inc?inc*60:0;
   const ci=document.getElementById('chipInc'), cf=document.getElementById('chipFive');
   if(ci) ci.textContent=inc?fmtMoney(inc):'—';
   if(cf) cf.textContent=five?fmtMoney(five):'—';
-  // Senior chips
-  const v=senValues();
-  const cc=document.getElementById('chipComb'), gm=document.getElementById('chipGapM'), gy=document.getElementById('chipGapY');
-  if(cc) cc.textContent=fmtMoney(v.combined);
-  if(gm) gm.textContent='\u2212'+fmtMoney(v.lost);
-  if(gy) gy.textContent='\u2212'+fmtMoney(v.lostYr);
+  if(OBJ_OPEN) paintObj();   // rebuttals substitute names/income too
 }
-function go(delta){ const n=Math.max(0,Math.min(activeSlides().length-1,STATE.slideIndex+delta)); if(n!==STATE.slideIndex) commit({slideIndex:n}); }
+function go(delta){
+  const n=Math.max(0,Math.min(SLIDES.length-1,STATE.slideIndex+delta));
+  if(n!==STATE.slideIndex){ OBJ_OPEN=null; commit({slideIndex:n}); }
+}
+
+/* ---------------- BUILDER (control side) ---------------- */
+function benBlock(id,name,on,body){
+  return `<div class="ben ${on?'on':''}">
+    <div class="bhead"><input type="checkbox" class="bchk" data-ben="${id}" ${on?'checked':''} style="width:16px;height:16px;accent-color:var(--neon);cursor:pointer">
+      <span class="bname">${escHtml(name)}</span></div>
+    ${on?`<div class="bbody">${body}</div>`:''}
+  </div>`;
+}
+function builderHtml(){
+  const ps=psGet(), opt=ps.option||1, who=ps.who||'main';
+  const c=psCov(opt,who), p=psPerson(who), b=ps[who]||{};
+  const premiums=psPremiums(opt);
+  const home=a71Home(c);
+  const mtgAdb = c.mtg.basis==='adb';
+
+  // A71 is the source of the $100k — it can only be parked once, and only if the program is on
+  const colA71 = c.ghgp.on
+    ? `<label class="btoggle"><input type="checkbox" id="bColA71" ${c.col.a71?'checked':''}> Park the ${money(A71.car)} accidental here</label>`
+    : `<div class="bnote">Turn on Get Hurt, Get Paid to place the ${money(A71.car)} accidental benefit.</div>`;
+  const mtgA71 = !c.ghgp.on
+    ? `<div class="bnote">Turn on Get Hurt, Get Paid to place the ${money(A71.car)} accidental benefit.</div>`
+    : (mtgAdb
+      ? `<label class="btoggle"><input type="checkbox" id="bMtgA71" ${c.mtg.a71?'checked':''}> Park the ${money(A71.car)} accidental here</label>`
+      : `<div class="bnote warn">The accidental benefit can only ride on ADB. Switch to ADB to use it here.</div>`);
+
+  const funBody = `<div class="bfield"><label>Face amount</label>
+      <input type="text" inputmode="numeric" id="bFunAmt" value="${escAttr(c.fun.amt||'')}" placeholder="15,000"></div>
+    <div class="bnote">Whole life · ${escHtml(autoFuneralProduct(c.fun.amt,p.age))} band${isSenior(p.age)?' (senior graded)':''}</div>`;
+
+  const incBody = `<div class="bfield"><label>Months of income protection</label>
+      <input type="text" inputmode="numeric" id="bIncMo" value="${escAttr(c.inc.months||'')}" placeholder="60"></div>
+    <div class="bcalc" id="bIncCalc">${money(p.income)}/mo × ${nnum(c.inc.months)} = ${money(incFace(p,c))} of 10RC term</div>
+    ${p.income?'':'<div class="bnote warn">Set this person&rsquo;s monthly income above.</div>'}`;
+
+  const colBody = `<div class="bfield"><label>Benefit amount</label>
+      <input type="text" inputmode="numeric" id="bColAmt" value="${escAttr(c.col.amt||'')}" placeholder="100,000"></div>
+    <div class="bnote">Always written as ADB.</div>
+    ${colA71}`;
+
+  const mtgBody = `<div class="bfield"><label>Benefit amount</label>
+      <input type="text" inputmode="numeric" id="bMtgAmt" value="${escAttr(c.mtg.amt||'')}" placeholder="200,000"></div>
+    <div class="bswitch" id="bMtgBasis">
+      <button data-b="10rc" class="${!mtgAdb?'on':''}">10RC</button>
+      <button data-b="adb" class="${mtgAdb?'on':''}">ADB</button>
+    </div>
+    ${mtgA71}`;
+
+  const ghgpBody = `<div class="bnote">Pays ${money(A71.er)} ER/urgent care · ${money(A71.hospital)} hospital night · ${money(A71.icu)} ICU night.
+      Comes with ${money(A71.car)} accidental <b>(car accident)</b>.</div>
+    <div class="bcalc">${home==='standalone'?`Accidental shows on its own line`:home?`Accidental parked on ${home}`:''}</div>`;
+
+  const totals = ps.showPrices ? `<div class="btot">
+      <div class="c"><b>${escHtml(p.label)} / mo</b><span id="btPerson">${money2(psPersonMonthly(opt,who,premiums))}</span></div>
+      <div class="c"><b>Option ${opt} total</b><span id="btTotal">${money2(psOptionMonthly(opt))}</span></div>
+    </div>` : `<div class="bnote">Prices hidden — flip the switch above to price it.</div>`;
+
+  return `<div class="bwrap" id="bwrap">
+    <div class="bopts" id="bOpt">
+      <button data-o="1" class="${opt===1?'on':''}">Option 1</button>
+      <button data-o="2" class="${opt===2?'on':''}">Option 2</button>
+    </div>
+
+    <div class="bsec">
+      <h4>Family Basics</h4>
+      <label class="btoggle" style="margin-bottom:9px"><input type="checkbox" id="bSpouse" ${ps.spouseEnabled?'checked':''}> Include spouse?</label>
+      <div class="bwho" id="bWho">
+        <button data-w="main" class="${who==='main'?'on':''}">${escHtml(STATE.mainName||'Main')}</button>
+        ${ps.spouseEnabled?`<button data-w="spouse" class="${who==='spouse'?'on':''}">${escHtml(STATE.spouseName||'Spouse')}</button>`:''}
+      </div>
+      <div class="bgrid g3">
+        <div><label>Age</label><input type="text" inputmode="numeric" id="bAge" value="${escAttr(b.age||'')}" placeholder="42"></div>
+        <div><label>Sex</label><select id="bSex">
+          <option value="M" ${b.sex!=='F'?'selected':''}>Male</option>
+          <option value="F" ${b.sex==='F'?'selected':''}>Female</option></select></div>
+        <div><label>Tobacco</label><select id="bTob">
+          <option value="NTU" ${b.tobacco!=='TU'?'selected':''}>No</option>
+          <option value="TU" ${b.tobacco==='TU'?'selected':''}>Yes</option></select></div>
+      </div>
+      <div class="bfield" style="margin-top:7px"><label>Monthly income</label>
+        <input type="text" inputmode="numeric" id="bInc" value="${escAttr(b.income||'')}" placeholder="4,000"></div>
+      <div class="bnote" style="margin-top:7px">Sex and tobacco price the life products (funeral &amp; 10RC). ADB and the program price off age only.</div>
+    </div>
+
+    <div class="bsec">
+      <h4>Coverage — Option ${opt} · ${escHtml(p.label)}</h4>
+      ${benBlock('fun','Funeral Benefit',c.fun.on,funBody)}
+      ${benBlock('inc','Income Protection',c.inc.on,incBody)}
+      ${benBlock('col','College Education Benefit',c.col.on,colBody)}
+      ${benBlock('mtg','Mortgage Protection Benefit',c.mtg.on,mtgBody)}
+      ${benBlock('ghgp','Get Hurt, Get Paid Program',c.ghgp.on,ghgpBody)}
+    </div>
+
+    <div class="bsec">
+      <h4>Pricing</h4>
+      <label class="btoggle"><input type="checkbox" id="bPrices" ${ps.showPrices?'checked':''}> Show prices on the sheet</label>
+      <div style="margin-top:9px">${totals}</div>
+    </div>
+  </div>`;
+}
+
+function bindBuilder(){
+  const $=id=>document.getElementById(id);
+  const ps=psGet(), opt=ps.option||1, who=ps.who||'main';
+  const key=covKey(opt,who);
+  // restore where the agent was, and keep tracking it — every commit re-renders this pane
+  const wrap=$('bwrap');
+  if(wrap){ wrap.scrollTop=bScroll; wrap.addEventListener('scroll',()=>{ bScroll=wrap.scrollTop; }); }
+
+  $('bOpt').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+    psCommit(s=>{ s.option=parseInt(b.dataset.o,10); }); }));
+  const bw=$('bWho'); if(bw) bw.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+    psCommit(s=>{ s.who=b.dataset.w; }); }));
+  $('bSpouse').addEventListener('change',e=>psCommit(s=>{
+    s.spouseEnabled=e.target.checked; if(!e.target.checked) s.who='main'; }));
+  $('bPrices').addEventListener('change',e=>psCommit(s=>{ s.showPrices=e.target.checked; }));
+
+  // person fields — silent commit so the caret holds, then redraw the derived math
+  const person=(field,el,cast)=>{ if(!el) return;
+    el.addEventListener('input',e=>{ psCommit(s=>{ s[who][field]=cast?cast(e.target.value):e.target.value; }, true); redrawSoft(); });
+    el.addEventListener('change',e=>{ psCommit(s=>{ s[who][field]=cast?cast(e.target.value):e.target.value; }); }); };
+  person('age',$('bAge'));
+  person('income',$('bInc'));
+  $('bSex').addEventListener('change',e=>psCommit(s=>{ s[who].sex=e.target.value; }));
+  $('bTob').addEventListener('change',e=>psCommit(s=>{ s[who].tobacco=e.target.value; }));
+
+  // benefit on/off
+  document.querySelectorAll('.bchk').forEach(cb=>cb.addEventListener('change',()=>{
+    const id=cb.dataset.ben;
+    psCommit(s=>{
+      const cc=s.cov[key]; cc[id].on=cb.checked;
+      if(id==='ghgp' && !cb.checked){ cc.col.a71=false; cc.mtg.a71=false; }   // no program, nowhere to park
+      if(id==='col' && !cb.checked) cc.col.a71=false;
+      if(id==='mtg' && !cb.checked) cc.mtg.a71=false;
+    });
+  }));
+
+  const amt=(el,path)=>{ if(!el) return;
+    el.addEventListener('input',e=>{ const v=parseLoose(e.target.value); psCommit(s=>{ setPath(s.cov[key],path,v); }, true); redrawSoft(); });
+    el.addEventListener('change',()=>{}); };
+  amt($('bFunAmt'),'fun.amt');
+  amt($('bIncMo'),'inc.months');
+  amt($('bColAmt'),'col.amt');
+  amt($('bMtgAmt'),'mtg.amt');
+
+  // A71 exclusivity — parking it in one place clears the other
+  const ca=$('bColA71'); if(ca) ca.addEventListener('change',e=>psCommit(s=>{
+    const cc=s.cov[key]; cc.col.a71=e.target.checked; if(e.target.checked) cc.mtg.a71=false; }));
+  const ma=$('bMtgA71'); if(ma) ma.addEventListener('change',e=>psCommit(s=>{
+    const cc=s.cov[key]; cc.mtg.a71=e.target.checked; if(e.target.checked) cc.col.a71=false; }));
+
+  const mb=$('bMtgBasis'); if(mb) mb.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
+    psCommit(s=>{ const cc=s.cov[key]; cc.mtg.basis=b.dataset.b; if(b.dataset.b!=='adb') cc.mtg.a71=false; }); }));
+}
+// light refresh: recompute the builder's derived numbers without stealing focus
+function redrawSoft(){
+  const ps=psGet(), opt=ps.option||1, who=ps.who||'main';
+  const p=psPerson(who), c=psCov(opt,who);
+  const calc=document.getElementById('bIncCalc');
+  if(calc) calc.textContent=`${money(p.income)}/mo × ${nnum(c.inc.months)} = ${money(incFace(p,c))} of 10RC term`;
+  if(ps.showPrices){
+    const prem=psPremiums(opt);
+    const a=document.getElementById('btPerson'), b=document.getElementById('btTotal');
+    if(a) a.textContent=money2(psPersonMonthly(opt,who,prem));
+    if(b) b.textContent=money2(psOptionMonthly(opt));
+  }
+}
+function parseLoose(v){ const s=String(v==null?'':v).replace(/[^0-9.]/g,''); if(s===''||s==='.') return 0;
+  const parts=s.split('.'); return Math.max(0, Number(parts.length>1?parts.shift()+'.'+parts.join(''):s)||0); }
+function setPath(obj,path,val){ const k=path.split('.'); let o=obj; for(let i=0;i<k.length-1;i++) o=o[k[i]]; o[k[k.length-1]]=val; }
+
+/* ---------------- objections ---------------- */
+function objList(scope){
+  if(scope==='uni') return UNIVERSAL;
+  const s=SLIDES[STATE.slideIndex]||SLIDES[0];
+  return s.objections||[];
+}
+function toggleObj(scope, i){
+  if(OBJ_OPEN && OBJ_OPEN.scope===scope && OBJ_OPEN.i===i) OBJ_OPEN=null;
+  else OBJ_OPEN={scope, i};
+  paintObj();
+}
+function closeObj(){ if(OBJ_OPEN){ OBJ_OPEN=null; paintObj(); } }
+function paintObj(){
+  const drawer=document.getElementById('objdrawer');
+  const bar=document.getElementById('objbar');
+  if(!drawer||!bar) return;
+  bar.querySelectorAll('.objpill').forEach(b=>{
+    const on = !!OBJ_OPEN && OBJ_OPEN.scope===b.dataset.scope
+            && (b.dataset.scope==='uni' || OBJ_OPEN.i===parseInt(b.dataset.i,10));
+    b.classList.toggle('on', on);
+  });
+  if(!OBJ_OPEN){ drawer.classList.remove('open'); return; }
+  const list=objList(OBJ_OPEN.scope);
+  const o=list[OBJ_OPEN.i]||list[0];
+  if(!o){ drawer.classList.remove('open'); return; }
+  const body = (o.r && o.r.trim())
+    ? renderScriptText(o.r, STATE)
+    : `<p><em class="todo">No rebuttal written yet — add it to this objection's <code>r</code> field.</em></p>`;
+  const tabs = OBJ_OPEN.scope==='uni'
+    ? `<div class="odtabs">${list.map((u,idx)=>`<button class="odtab ${idx===OBJ_OPEN.i?'on':''}" data-i="${idx}" title="${escAttr(u.t)}">${escHtml(u.t)}</button>`).join('')}</div>`
+    : '';
+  drawer.innerHTML=`
+    <div class="odhead">
+      <div style="flex:1;min-width:0">
+        <div class="odlab">${OBJ_OPEN.scope==='uni'?'Universal objection':'Objection'}</div>
+        <div class="odtrig">${escHtml(o.t)}</div>
+      </div>
+      <button class="odx" id="odx" title="Close (Esc)">×</button>
+    </div>
+    <div class="odbody">${body}</div>
+    ${tabs}`;
+  drawer.classList.add('open');
+  document.getElementById('odx').addEventListener('click', closeObj);
+  drawer.querySelectorAll('.odtab').forEach(b=>{
+    b.addEventListener('click',()=>{ OBJ_OPEN={scope:'uni', i:parseInt(b.dataset.i,10)}; paintObj(); });
+  });
+}
 
 /* ============ script rendering ============ */
-// Resolve script for current mode -> HTML (with load state + missing-file guidance).
-function scriptHtml(id, st){
-  const mode = st.scriptMode || 'HC';
-  const txt = getScript(mode, id);
-  if(txt != null) return renderScriptText(txt, st);
-  const m = MODES[mode] || MODES.HC;
-  if(ctrlLoadingMode === mode){
-    return `<p class="cue">Loading ${escHtml(m.label)} scripts…</p>`;
-  }
-  return `<p class="cue">${escHtml(m.label)} script not loaded.</p>`
-       + `<p style="color:var(--slate-muted)">Add <b>${escHtml(m.folder)}/${escHtml(slideFile(id))}${m.suffix}.txt</b> and open this page over http/https (GitHub Pages or a local server). On a plain file:// open, only the built-in Hard Card set is available.</p>`;
-}
 function renderScriptText(text, st){
   if(!text) return '';
   const inc=parseMoney(st.income);
-  const sen = (st.scriptMode==='SEN');
-  const v = sen ? senValues() : null;
-  const hasSS = sen && (parseMoney(st.ssMain) || parseMoney(st.ssSpouse));
   return text.split(/\n\s*\n/).map(para=>{
     let safe=escHtml(para);
     if(st.mainName) safe=safe.replace(/\(Member\)/g, escHtml(st.mainName));
     if(inc){ safe=safe.replace(/\(client\u2019s monthly income\)/g,escHtml(fmtMoney(inc)))
                      .replace(/\(client's monthly income\)/g,escHtml(fmtMoney(inc)))
                      .replace(/\(clients monthly income\)/g,escHtml(fmtMoney(inc))); }
-    // Senior: fill SS figures (only once real amounts are entered) and personalize Jim/Mary
-    if(hasSS){
-      safe=safe.replace(/\$?\(Jims income\)/gi,       fmtMoney(v.jim))
-               .replace(/\$?\(Marys income\)/gi,      fmtMoney(v.mary))
-               .replace(/\$?\(combined income\)/gi,   fmtMoney(v.combined))
-               .replace(/\$?\(lost monthly income\)/gi,fmtMoney(v.lost))
-               .replace(/\$?\(lost annual income\)/gi, fmtMoney(v.lostYr));
-    }
-    if(sen && st.mainName)   safe=safe.replace(/\bjim\b/gi,  escHtml(st.mainName));
-    if(sen && st.spouseName) safe=safe.replace(/\bmary\b/gi, escHtml(st.spouseName));
     safe=safe.replace(/\([^)]*\)/g, m=>`<span class="cue">${m}</span>`);
     return `<p>${safe}</p>`;
   }).join('');
@@ -893,28 +1429,46 @@ function fmtMoney(n){ return '$'+Math.round(n).toLocaleString('en-US'); }
 function escHtml(s){ return String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
 function escAttr(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-/* ============ keyboard nav ============ */
+/* ============ keyboard ============ */
 if(MODE==='present'||MODE==='control'){
   window.addEventListener('keydown',e=>{
     const t=(e.target&&e.target.tagName||'').toLowerCase();
     if(t==='input'||t==='select'||t==='textarea') return;
-    if(e.key==='ArrowRight'||e.key===' '){ e.preventDefault(); go(1); }
-    else if(e.key==='ArrowLeft'){ e.preventDefault(); go(-1); }
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){ e.preventDefault(); go(1); }
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){ e.preventDefault(); go(-1); }
+    else if(e.key==='Home'){ e.preventDefault(); OBJ_OPEN=null; commit({slideIndex:0}); }
+    else if(e.key==='End'){ e.preventDefault(); OBJ_OPEN=null; commit({slideIndex:SLIDES.length-1}); }
+    if(MODE!=='control') return;
+    if(e.key==='1'||e.key==='2'||e.key==='3'){ e.preventDefault(); toggleObj('slide', parseInt(e.key,10)-1); }
+    else if(e.key==='u'||e.key==='U'||e.key==='4'){ e.preventDefault(); toggleObj('uni', OBJ_OPEN&&OBJ_OPEN.scope==='uni'?OBJ_OPEN.i:0); }
+    else if(e.key==='Escape'||e.key==='0'){ e.preventDefault(); closeObj(); }
   });
 }
 
 /* ============ boot ============ */
+// Opening the launcher starts a new family: nothing from the last sit carries over
+// except the GAS URL. The present/control windows read whatever the launcher set.
+function freshState(keep){
+  const s=JSON.parse(JSON.stringify(DEFAULT_STATE));
+  s.ps=blankPS();
+  s.apiUrl=(keep&&keep.apiUrl)||HARDCODED_API_URL;
+  s._v=((keep&&keep._v)||0)+1;
+  return s;
+}
 (function boot(){
   const sh=readShared();
-  if(sh){ STATE=Object.assign({}, DEFAULT_STATE, sh); localVersion=sh._v||0; }
-  if(MODE==='index' && !STATE.apiUrl) STATE.apiUrl = HARDCODED_API_URL;   // default to the deployed backend
-  if(MODE==='index') commit({apiUrl:STATE.apiUrl}, true);                  // seed/persist shared state
-  render();
-  window.addEventListener('storage', poll);      // live sync (Chrome/Edge fire this across file:// tabs)
-  setInterval(poll, 180);                         // polling fallback, always reliable
-  if(MODE==='index' && STATE.apiUrl){
-    loadUnions().then(()=>{ if(STATE.union){ const u=findUnion(STATE.union); if(u) commit({logoUrl:u.logo, letterUrl:u.letter}); } });
+  if(MODE==='index'){
+    STATE=freshState(sh);
+    try{ localStorage.setItem(LS_KEY, JSON.stringify(STATE)); }catch(e){}
+    localVersion=STATE._v;
+  }else if(sh){
+    STATE=Object.assign({}, DEFAULT_STATE, sh); localVersion=sh._v||0;
   }
+  if(!STATE.apiUrl && HARDCODED_API_URL) STATE.apiUrl=HARDCODED_API_URL;
+  render();
+  if(MODE==='index' && STATE.apiUrl){ loadUnions(); }
+  window.addEventListener('storage', poll);      // live sync (Chrome/Edge fire this across file:// tabs)
+  setInterval(poll, 400);                        // belt & suspenders
 })();
 </script>
 </body>
