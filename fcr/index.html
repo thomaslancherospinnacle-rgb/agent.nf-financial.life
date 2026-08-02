@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FCR AIL — Install</title>
+<style>
+  :root{
+    --bg:#0d0f14; --panel:#151922; --line:#232a36; --txt:#e9ecf1;
+    --dim:#98a2b3; --accent:#5b7cfa; --ok:#6ee7a8; --warn:#f0c674;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);
+       font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+  .wrap{max-width:660px;margin:0 auto;padding:56px 22px 90px}
+  .kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  h1{font-size:31px;margin:8px 0 10px;letter-spacing:-.02em}
+  .lede{color:var(--dim);margin:0 0 32px;font-size:16px}
+  .dl{display:inline-flex;align-items:center;gap:10px;background:var(--accent);color:#fff;
+      text-decoration:none;font-weight:650;padding:14px 26px;border-radius:9px;font-size:16px}
+  .dl:hover{filter:brightness(1.08)}
+  .ver{color:var(--dim);font-size:13px;margin-top:10px}
+  h2{font-size:17px;margin:42px 0 14px;padding-bottom:9px;border-bottom:1px solid var(--line)}
+  ol{padding-left:0;counter-reset:s;list-style:none;margin:0}
+  ol li{counter-increment:s;position:relative;padding:0 0 20px 42px}
+  ol li::before{content:counter(s);position:absolute;left:0;top:1px;width:26px;height:26px;
+      background:var(--panel);border:1px solid var(--line);border-radius:50%;
+      display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;color:var(--accent)}
+  code{background:var(--panel);border:1px solid var(--line);border-radius:4px;
+       padding:2px 7px;font:13px ui-monospace,Menlo,Consolas,monospace;color:#a9c7ff}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:20px 22px;margin:18px 0}
+  .note{border-left:3px solid var(--warn);background:#1a1710;border-radius:0 8px 8px 0;
+        padding:14px 18px;margin:20px 0;font-size:14px;color:#e3d5b0}
+  .note b{color:var(--warn)}
+  ul.plain{padding-left:20px;color:var(--dim);font-size:14.5px;margin:10px 0 0}
+  ul.plain li{margin-bottom:6px}
+  footer{margin-top:54px;padding-top:20px;border-top:1px solid var(--line);
+         color:var(--dim);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="kicker">Chrome Extension</div>
+  <h1>FCR AIL</h1>
+  <p class="lede">One click registers your dialer numbers with the Free Caller Registry.
+     Fills the whole form, walks the wizard, and stops only for the emailed verification code.</p>
+
+  <a class="dl" href="fcr-extension.zip" download>Download extension</a>
+  <div class="ver">v2.1.0 &middot; Chrome, Edge, Brave</div>
+
+  <h2>Install</h2>
+  <ol>
+    <li><b>Unzip the download.</b> You'll get a folder named <code>fcr-extension</code>.
+        Put it somewhere permanent — Documents, not Downloads. Chrome reads from this
+        folder every time it starts, so moving or deleting it breaks the extension.</li>
+    <li><b>Open</b> <code>chrome://extensions</code> — paste that into the address bar.</li>
+    <li><b>Turn on Developer mode</b> using the toggle in the top-right corner.</li>
+    <li><b>Click "Load unpacked"</b> and select the <code>fcr-extension</code> folder.
+        Pick the folder that has <code>manifest.json</code> directly inside it.</li>
+    <li><b>Pin it.</b> Click the puzzle-piece icon in the toolbar, then the pin next to FCR AIL.</li>
+  </ol>
+
+  <div class="note">
+    <b>Windows note:</b> extracting sometimes creates <code>fcr-extension\fcr-extension</code>.
+    If Chrome says the manifest is missing, you selected the outer folder — pick the inner one.
+  </div>
+
+  <h2>First run</h2>
+  <div class="card">
+    A setup page opens automatically. Enter your name, your email, and the phone
+    numbers you're registering — use <b>+ Add another number</b> for more than one,
+    up to 20. Company details are pre-filled with AIL's. Save once and you're done.
+  </div>
+
+  <h2>Every run after</h2>
+  <ul class="plain">
+    <li>Click the FCR AIL icon in your toolbar.</li>
+    <li>The registry opens, fills itself, and requests your verification code.</li>
+    <li>Your cursor lands in the code box — type the 5 digits from your email.</li>
+    <li>It finishes the remaining steps and shows your Feedback ID.</li>
+  </ul>
+
+  <h2>Before you register</h2>
+  <div class="card">
+    The registry requires that you are the business that uses these numbers, and that
+    you're authorized to submit on its behalf. Confirm with your agency how agent
+    numbers should be registered before submitting — carriers can invalidate
+    registrations later if that authorization doesn't hold up.
+  </div>
+
+  <footer>
+    Questions or a number that won't register — reach out before re-submitting.
+    Duplicate submissions of the same number add nothing.
+  </footer>
+
+</div>
+</body>
+</html>
