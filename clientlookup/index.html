@@ -1,295 +1,598 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Client Link Generator</title>
-  <style>
-    * { box-sizing: border-box; }
-    body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 20px; color: #333; }
-    h1 { font-size: 1.4rem; margin-bottom: 4px; }
-    p.sub { color: #666; font-size: 0.9rem; margin-bottom: 20px; }
-
-    .domain-row {
-      display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
-    }
-    .domain-row input {
-      padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px;
-      font-size: 0.95rem; width: 280px;
-    }
-    .domain-row label { font-weight: bold; white-space: nowrap; }
-
-    .upload-area {
-      border: 2px dashed #aaa; border-radius: 8px; padding: 30px;
-      text-align: center; background: #fff; cursor: pointer;
-      margin-bottom: 20px; transition: border-color 0.2s;
-    }
-    .upload-area:hover { border-color: #4a90e2; }
-    .upload-area input { display: none; }
-    .upload-area span { font-size: 1rem; color: #666; }
-
-    .controls { display: flex; gap: 10px; margin-bottom: 16px; align-items: center; }
-    .controls input[type=text] {
-      padding: 7px 12px; border: 1px solid #ccc; border-radius: 6px;
-      font-size: 0.9rem; width: 240px;
-    }
-    button {
-      padding: 8px 16px; border: none; border-radius: 6px;
-      background: #4a90e2; color: #fff; cursor: pointer; font-size: 0.9rem;
-    }
-    button:hover { background: #357abd; }
-    button.sec { background: #6c757d; }
-    button.sec:hover { background: #545b62; }
-
-    #count { font-size: 0.85rem; color: #666; margin-left: auto; }
-
-    table { width: 100%; border-collapse: collapse; background: #fff;
-            border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
-    thead tr { background: #4a90e2; color: #fff; }
-    th, td { padding: 10px 14px; text-align: left; font-size: 0.88rem; border-bottom: 1px solid #eee; }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: #f0f7ff; }
-
-    a { color: #4a90e2; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-
-    .copy-btn {
-      padding: 3px 8px; font-size: 0.75rem; background: #e0e0e0; color: #333;
-      border-radius: 4px; cursor: pointer; border: none; margin-left: 6px;
-    }
-    .copy-btn:hover { background: #ccc; }
-
-    #fastpeoplesearch { text-align: center; color: #aaa; padding: 40px; }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Owner Finder — CSV Lookup Builder</title>
+<style>
+  :root{
+    --bg:#071018;--panel:#0d1822;--panel2:#101f2b;--line:#223241;
+    --text:#ecf5fb;--muted:#8ca4b5;--accent:#63e6be;--accent2:#74c0fc;
+    --warn:#ffd43b;--danger:#ff8787;--shadow:0 14px 40px rgba(0,0,0,.28);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:
+    radial-gradient(900px 500px at 20% -10%,rgba(99,230,190,.10),transparent 60%),
+    radial-gradient(900px 500px at 100% 0%,rgba(116,192,252,.08),transparent 55%),
+    var(--bg);color:var(--text);font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+  button,input,select{font:inherit}
+  .app{max-width:1500px;margin:auto;padding:28px}
+  .top{display:flex;gap:18px;align-items:flex-end;justify-content:space-between;margin-bottom:18px}
+  h1{margin:0;font-size:28px;letter-spacing:-.6px}
+  .sub{color:var(--muted);margin-top:5px}
+  .pill{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:7px 10px;color:var(--muted);background:#0a141d}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 15px var(--accent)}
+  .grid{display:grid;grid-template-columns:minmax(290px,390px) 1fr;gap:18px}
+  .panel{background:linear-gradient(180deg,rgba(255,255,255,.018),transparent 35%),var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+  .side{padding:18px;align-self:start;position:sticky;top:18px}
+  .main{overflow:hidden}
+  .drop{border:1.5px dashed #365064;border-radius:13px;padding:24px 16px;text-align:center;background:#09151e;cursor:pointer;transition:.18s}
+  .drop:hover,.drop.drag{border-color:var(--accent);background:#0b1a23}
+  .drop strong{display:block;font-size:16px;margin-bottom:4px}
+  .muted{color:var(--muted)}
+  .btn{border:1px solid var(--line);background:#122332;color:var(--text);border-radius:10px;padding:9px 12px;cursor:pointer;transition:.15s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:650}
+  .btn:hover{transform:translateY(-1px);border-color:#405b70;background:#162a3b}
+  .btn.primary{background:var(--accent);color:#06231c;border-color:transparent}
+  .btn.blue{background:var(--accent2);color:#071a28;border-color:transparent}
+  .btn.ghost{background:transparent}
+  .btn.small{padding:6px 8px;border-radius:8px;font-size:12px}
+  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .section{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+  .section h3{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:#b9cddd}
+  label{display:block;color:var(--muted);font-size:12px;margin:9px 0 5px}
+  select,input[type=text],input[type=search]{width:100%;border:1px solid var(--line);background:#09141d;color:var(--text);border-radius:9px;padding:9px 10px;outline:none}
+  select:focus,input:focus{border-color:#4f7894}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+  .stat{border:1px solid var(--line);border-radius:10px;padding:10px;background:#09141d}
+  .stat b{display:block;font-size:18px}.stat span{font-size:11px;color:var(--muted)}
+  .toolbar{padding:14px;border-bottom:1px solid var(--line);display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .toolbar .search{min-width:220px;flex:1}
+  .tablewrap{overflow:auto;max-height:calc(100vh - 155px)}
+  table{width:100%;border-collapse:separate;border-spacing:0;min-width:1060px}
+  th{position:sticky;top:0;z-index:2;background:#0e1b26;color:#9db5c6;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.07em;padding:10px;border-bottom:1px solid var(--line)}
+  td{padding:10px;border-bottom:1px solid #192936;vertical-align:top}
+  tr:hover td{background:rgba(255,255,255,.015)}
+  .idx{color:#61798b;width:48px}
+  .person{min-width:180px}.addr{min-width:270px;max-width:370px}
+  .person b{display:block}.person small,.addr small{color:var(--muted)}
+  .links{display:flex;gap:7px;flex-wrap:wrap;min-width:390px;align-items:flex-start}
+  .lookupGroup{position:relative}
+  .lookupToggle{font-size:12px;padding:7px 10px;border-radius:8px;border:1px solid #294154;background:#102332;color:#dcedf7;cursor:pointer;font-weight:700;display:flex;align-items:center;gap:7px}
+  .lookupToggle:hover{border-color:var(--accent2);background:#173044}
+  .lookupToggle .chev{font-size:10px;transition:.15s;opacity:.75}
+  .lookupGroup.open .lookupToggle .chev{transform:rotate(180deg)}
+  .lookupMenu{display:none;position:absolute;z-index:20;top:calc(100% + 6px);left:0;min-width:220px;max-width:310px;padding:7px;background:#09141d;border:1px solid #2a4152;border-radius:10px;box-shadow:0 16px 34px rgba(0,0,0,.38)}
+  .lookupGroup.open .lookupMenu{display:grid;gap:5px}
+  .lookupMenu .site{display:block;width:100%;text-align:left}
+  .site{font-size:11px;padding:7px 9px;border-radius:7px;border:1px solid #294154;background:#102332;color:#dcedf7;text-decoration:none;white-space:nowrap}
+  .site:hover{border-color:var(--accent2);background:#173044}
+  .site.fps{border-color:#2d6758;color:#9ff0d3}.site.tps{border-color:#345b78;color:#9ed8ff}
+  .site.prop{border-color:#665b2b;color:#ffe788}
+  .empty{padding:70px 24px;text-align:center;color:var(--muted)}
+  .empty .big{font-size:38px;margin-bottom:8px}
+  .badge{font-size:10px;border:1px solid var(--line);padding:3px 6px;border-radius:999px;color:var(--muted)}
+  .notice{font-size:12px;color:#9fb4c2;background:#0a151e;border:1px solid var(--line);padding:10px;border-radius:10px;margin-top:12px}
+  .toggle{display:flex;gap:6px;align-items:center;margin-top:8px;color:var(--muted);font-size:12px}
+  .toggle input{accent-color:var(--accent)}
+  @media(max-width:980px){.grid{grid-template-columns:1fr}.side{position:static}.tablewrap{max-height:none}.app{padding:14px}}
+</style>
 </head>
 <body>
+<div class="app">
+  <div class="top">
+    <div>
+      <h1>Owner Finder</h1>
+      <div class="sub">CSV → prefilled people-search, reverse-address, property & web lookup links.</div>
+    </div>
+    <div class="pill"><span class="dot"></span> Runs locally in your browser</div>
+  </div>
 
-<h1>Client Link Generator</h1>
-<p class="sub">Upload your leads CSV to generate address and phone hyperlinks per client.</p>
+  <div class="grid">
+    <aside class="panel side">
+      <input id="file" type="file" accept=".csv,text/csv" hidden />
+      <div id="drop" class="drop">
+        <strong>Drop a CSV here</strong>
+        <span class="muted">or click to choose a file</span>
+      </div>
 
-<div class="domain-row">
-  <label>Domain:</label>
-  <input type="text" id="domain" value="fastpeoplesearch.com" fastpeoplesearch="yourdomain.com">
-  <button onclick="rerender()">Apply</button>
+      <div class="stats">
+        <div class="stat"><b id="rowsCount">0</b><span>Rows</span></div>
+        <div class="stat"><b id="addressCount">0</b><span>Addresses</span></div>
+        <div class="stat"><b id="mappedCount">0</b><span>Mapped</span></div>
+      </div>
+
+      <div class="section">
+        <h3>Column mapping</h3>
+        <label>Name</label><select id="mapName"></select>
+        <label>Address</label><select id="mapAddress"></select>
+        <label>Phone</label><select id="mapPhone"></select>
+        <label>Email</label><select id="mapEmail"></select>
+        <div class="toggle"><input id="preferReferral" type="checkbox"><span>Prefer referral fields when present</span></div>
+      </div>
+
+      <div class="section">
+        <h3>Batch actions</h3>
+        <div class="row">
+          <button id="exportBtn" class="btn primary" disabled>Export CSV + links</button>
+          <button id="copyBtn" class="btn" disabled>Copy visible addresses</button>
+        </div>
+        <div class="notice">
+          The app does <b>not scrape</b> the lookup sites. It creates prefilled/direct lookup URLs, so CAPTCHA/login checks stay inside the original site.
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Included lookup sources</h3>
+        <div class="muted" style="font-size:12px">
+          FastPeopleSearch, TruePeopleSearch, SearchPeopleFree, That'sThem, SmartBackgroundChecks,
+          CyberBackgroundChecks, FamilyTreeNow, property-record searches, Zillow, Realtor, and EnformionGO.
+          People-search buttons use native/direct URL formats instead of Google <code>site:</code> searches.
+        </div>
+      </div>
+    </aside>
+
+    <main class="panel main">
+      <div class="toolbar">
+        <input id="q" class="search" type="search" placeholder="Filter name, address, phone, email…" />
+        <button id="showAddressOnly" class="btn small ghost">Addresses only</button>
+        <span id="visibleBadge" class="badge">0 visible</span>
+      </div>
+      <div id="tablewrap" class="tablewrap">
+        <div id="empty" class="empty">
+          <div class="big">⌂</div>
+          Upload a CSV to generate owner-finding links.
+        </div>
+        <table id="table" hidden>
+          <thead>
+            <tr>
+              <th>#</th><th>Person</th><th>Address</th><th>Phone / Email</th><th>Lookup links</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </main>
+  </div>
 </div>
-
-<div class="upload-area" onclick="document.getElementById('fileInput').click()">
-  <input type="file" id="fileInput" accept=".csv" onchange="handleFile(event)">
-  <span>📂 Click to upload CSV file</span>
-</div>
-
-<div class="controls" id="controls" style="display:none">
-  <input type="text" id="search" fastpeoplesearch="Search by name, address, phone…" oninput="renderTable()">
-  <button class="sec" onclick="exportCSV()">Export with Links</button>
-  <span id="count"></span>
-</div>
-
-<div id="output"><div id="fastpeoplesearch">Upload a CSV to get started.</div></div>
 
 <script>
-let rows = [];
+(() => {
+  "use strict";
+  let rows = [], headers = [], filtered = [];
+  let addressOnly = false;
 
-function handleFile(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    rows = parseCSV(ev.target.result);
-    document.getElementById('controls').style.display = 'flex';
-    renderTable();
-  };
-  reader.readAsText(file);
-}
+  const $ = id => document.getElementById(id);
+  const fileEl=$("file"), drop=$("drop"), table=$("table"), tbody=$("tbody"), empty=$("empty");
+  const maps={name:$("mapName"),address:$("mapAddress"),phone:$("mapPhone"),email:$("mapEmail")};
 
-function parseCSV(text) {
-  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
-  const headers = parseCSVLine(lines[0]);
-  const result = [];
-  for (let i = 1; i < lines.length; i++) {
-    if (!lines[i].trim()) continue;
-    const vals = parseCSVLine(lines[i]);
-    const obj = {};
-    headers.forEach((h, idx) => obj[h.trim()] = (vals[idx] || '').trim());
-    result.push(obj);
-  }
-  return result;
-}
-
-function parseCSVLine(line) {
-  const result = [];
-  let cur = '', inQuote = false;
-  for (let i = 0; i < line.length; i++) {
-    const c = line[i];
-    if (c === '"') { inQuote = !inQuote; }
-    else if (c === ',' && !inQuote) { result.push(cur); cur = ''; }
-    else { cur += c; }
-  }
-  result.push(cur);
-  return result;
-}
-
-function getDomain() {
-  let d = document.getElementById('domain').value.trim();
-  if (!d) d = 'fastpeoplesearch.com';
-  d = d.replace(/^https?:\/\//,'').replace(/\/$/,'');
-  return d;
-}
-
-function stateToAbbr(state) {
-  const map = {
-    'alabama':'al','alaska':'ak','arizona':'az','arkansas':'ar','california':'ca',
-    'colorado':'co','connecticut':'ct','delaware':'de','florida':'fl','georgia':'ga',
-    'hawaii':'hi','idaho':'id','illinois':'il','indiana':'in','iowa':'ia',
-    'kansas':'ks','kentucky':'ky','louisiana':'la','maine':'me','maryland':'md',
-    'massachusetts':'ma','michigan':'mi','minnesota':'mn','mississippi':'ms',
-    'missouri':'mo','montana':'mt','nebraska':'ne','nevada':'nv','new hampshire':'nh',
-    'new jersey':'nj','new mexico':'nm','new york':'ny','north carolina':'nc',
-    'north dakota':'nd','ohio':'oh','oklahoma':'ok','oregon':'or','pennsylvania':'pa',
-    'rhode island':'ri','south carolina':'sc','south dakota':'sd','tennessee':'tn',
-    'texas':'tx','utah':'ut','vermont':'vt','virginia':'va','washington':'wa',
-    'west virginia':'wv','wisconsin':'wi','wyoming':'wy'
-  };
-  return map[state.toLowerCase()] || state.toLowerCase().slice(0,2);
-}
-
-function slugifyAddress(addr) {
-  // CSV format: "4716 WALWIT ST, Dearborn, Michigan, 48126-XXXX"
-  const parts = addr.split(',').map(p => p.trim());
-  const street = (parts[0] || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  const city   = (parts[1] || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-  const stateAbbr = stateToAbbr((parts[2] || '').trim());
-  const zip = (parts[3] || '').trim().replace(/^(\d{5}).*/, '$1');
-  return `${street}_${city}-${stateAbbr}${zip ? '-' + zip : ''}`;
-}
-
-function slugifyPhone(phone) {
-  // Format as digits with dashes: 734-657-3544
-  const digits = phone.replace(/\D/g, '');
-  if (digits.length === 10) return digits.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
-  return digits;
-}
-
-function rerender() { if (rows.length) renderTable(); }
-
-function renderTable() {
-  const domain = getDomain();
-  const q = document.getElementById('search').value.toLowerCase();
-  const filtered = rows.filter(r =>
-    Object.values(r).some(v => v.toLowerCase().includes(q))
-  );
-  document.getElementById('count').textContent = `${filtered.length} of ${rows.length} records`;
-
-  if (!filtered.length) {
-    document.getElementById('output').innerHTML = '<div id="fastpeoplesearch">No matching records.</div>';
-    return;
-  }
-
-  let html = `<table><thead><tr>
-    <th>Name</th><th>Address Link</th><th>Phone Link</th><th>Group</th><th>Email</th>
-  </tr></thead><tbody>`;
-
-  filtered.forEach(r => {
-    const addrSlug = slugifyAddress(r.Address || '');
-    const phoneSlug = slugifyPhone(r.Number || '');
-    const addrURL = `https://${domain}/address/${addrSlug}`;
-    const phoneURL = `https://${domain}/${phoneSlug}`;
-
-    html += `<tr>
-      <td><strong>${r.Name || ''}</strong></td>
-      <td>
-        <a href="${addrURL}" target="_blank">${r.Address || ''}</a>
-        <button class="copy-btn" onclick="copyText('${addrURL}')">Copy</button>
-      </td>
-      <td>
-        <a href="${phoneURL}" target="_blank">${r.Number || ''}</a>
-        <button class="copy-btn" onclick="copyText('${phoneURL}')">Copy</button>
-      </td>
-      <td>${r.Group || ''}</td>
-      <td>${r.Email || ''}</td>
-    </tr>`;
-  });
-
-  html += '</tbody></table>';
-  document.getElementById('output').innerHTML = html;
-}
-
-function copyText(text) {
-  navigator.clipboard.writeText(text).then(() => {
-    alert('Copied: ' + text);
-  });
-}
-
-function exportCSV() {
-  const domain = getDomain();
-  let csv = 'Name,Number,Address,Address URL,Phone URL,Group,Email\n';
-  rows.forEach(r => {
-    const addrURL = `https://${domain}/address/${slugifyAddress(r.Address || '')}`;
-    const phoneURL = `https://${domain}/${slugifyPhone(r.Number || '')}`;
-    csv += [r.Name, r.Number, r.Address, addrURL, phoneURL, r.Group, r.Email]
-      .map(v => `"${(v||'').replace(/"/g,'""')}"`)
-      .join(',') + '\n';
-  });
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'clients-with-links.csv';
-  a.click();
-}
-</script>
-
-
-
-<script>
-(function() {
-  function addBackButton(){
-    if (document.querySelector('[data-global-back-button="1"]')) return;
-
-    var btn = document.createElement("button");
-    btn.setAttribute("data-global-back-button","1");
-    btn.innerHTML = "← Back";
-
-    // Use site styling
-    btn.style.position = "fixed";
-    btn.style.top = "20px";
-    btn.style.left = "20px";
-    btn.style.padding = "10px 18px";
-    btn.style.borderRadius = "8px";
-    btn.style.border = "1px solid rgba(255,255,255,0.1)";
-    btn.style.background = "rgba(255,255,255,0.05)";
-    btn.style.backdropFilter = "blur(6px)";
-    btn.style.color = "inherit";
-    btn.style.fontFamily = "inherit";
-    btn.style.fontSize = "14px";
-    btn.style.fontWeight = "500";
-    btn.style.cursor = "pointer";
-    btn.style.transition = "all 0.2s ease";
-    btn.style.zIndex = "9999";
-
-    btn.addEventListener("mouseenter", function(){
-        btn.style.background = "rgba(255,255,255,0.12)";
-        btn.style.transform = "translateY(-2px)";
-    });
-
-    btn.addEventListener("mouseleave", function(){
-        btn.style.background = "rgba(255,255,255,0.05)";
-        btn.style.transform = "translateY(0px)";
-    });
-
-    btn.addEventListener("click", function() {
-      if (document.referrer && document.referrer !== "") {
-        window.history.back();
+  function parseCSV(text){
+    text = text.replace(/^\uFEFF/,'');
+    const out=[]; let row=[], field='', q=false;
+    for(let i=0;i<text.length;i++){
+      const c=text[i], n=text[i+1];
+      if(q){
+        if(c === '"' && n === '"'){ field+='"'; i++; }
+        else if(c === '"'){ q=false; }
+        else field+=c;
       } else {
-        window.location.href = "/home.html";
+        if(c === '"') q=true;
+        else if(c === ','){ row.push(field); field=''; }
+        else if(c === '\n'){ row.push(field); out.push(row); row=[]; field=''; }
+        else if(c !== '\r') field+=c;
       }
+    }
+    if(field.length || row.length){ row.push(field); out.push(row); }
+    return out.filter(r => r.some(v => String(v).trim() !== ''));
+  }
+
+  const norm=s=>String(s||'').trim();
+  const enc=s=>encodeURIComponent(norm(s));
+  function csvEscape(v){
+    v=String(v??'');
+    return /[",\n\r]/.test(v) ? '"' + v.replaceAll('"','""') + '"' : v;
+  }
+  function slug(s){
+    return norm(s).toLowerCase()
+      .replace(/#/g,' unit ')
+      .replace(/&/g,' and ')
+      .replace(/['’]/g,'')
+      .replace(/[^a-z0-9]+/g,'-')
+      .replace(/^-+|-+$/g,'');
+  }
+  function digits(s){ return norm(s).replace(/\D/g,''); }
+
+  const STATE_NAMES = {
+    AL:'Alabama',AK:'Alaska',AZ:'Arizona',AR:'Arkansas',CA:'California',CO:'Colorado',
+    CT:'Connecticut',DE:'Delaware',FL:'Florida',GA:'Georgia',HI:'Hawaii',ID:'Idaho',
+    IL:'Illinois',IN:'Indiana',IA:'Iowa',KS:'Kansas',KY:'Kentucky',LA:'Louisiana',
+    ME:'Maine',MD:'Maryland',MA:'Massachusetts',MI:'Michigan',MN:'Minnesota',
+    MS:'Mississippi',MO:'Missouri',MT:'Montana',NE:'Nebraska',NV:'Nevada',
+    NH:'New Hampshire',NJ:'New Jersey',NM:'New Mexico',NY:'New York',NC:'North Carolina',
+    ND:'North Dakota',OH:'Ohio',OK:'Oklahoma',OR:'Oregon',PA:'Pennsylvania',
+    RI:'Rhode Island',SC:'South Carolina',SD:'South Dakota',TN:'Tennessee',
+    TX:'Texas',UT:'Utah',VT:'Vermont',VA:'Virginia',WA:'Washington',
+    WV:'West Virginia',WI:'Wisconsin',WY:'Wyoming',DC:'District of Columbia'
+  };
+
+  function hyphenate(s){
+    return norm(s)
+      .replace(/[’']/g,'')
+      .replace(/[#]/g,' ')
+      .replace(/[^A-Za-z0-9]+/g,'-')
+      .replace(/^-+|-+$/g,'');
+  }
+
+  function phoneHyphen(s){
+    const d=digits(s).slice(-10);
+    return d.length===10 ? `${d.slice(0,3)}-${d.slice(3,6)}-${d.slice(6)}` : d;
+  }
+
+  function splitPersonName(full){
+    const parts=norm(full).split(/\s+/).filter(Boolean);
+    if(!parts.length) return {first:'',last:''};
+    if(parts.length===1) return {first:parts[0],last:''};
+    return {first:parts[0],last:parts[parts.length-1]};
+  }
+
+  function splitAddress(raw){
+    const a=norm(raw).replace(/\s+/g,' ');
+    if(!a) return {raw:'',street:'',city:'',state:'',zip:'',cityStateZip:''};
+
+    // Standard "123 Main St, City, ST 12345" or "123 Main St City ST 12345"
+    let m=a.match(/^(.*?)[,\s]+([A-Za-z .'-]+?)[,\s]+([A-Za-z]{2})\s+(\d{5}(?:-\d{4})?)$/);
+    if(m){
+      let street=m[1].replace(/,\s*$/,'').trim();
+      let city=m[2].replace(/^,\s*|,\s*$/g,'').trim();
+      let state=m[3].toUpperCase(), zip=m[4];
+      // Avoid swallowing city into street when commas exist.
+      if(a.includes(',')){
+        const parts=a.split(',').map(x=>x.trim()).filter(Boolean);
+        if(parts.length>=3){
+          street=parts.slice(0,-2).join(', ');
+          city=parts[parts.length-2];
+          const sm=parts[parts.length-1].match(/^([A-Za-z]{2})\s+(\d{5}(?:-\d{4})?)$/);
+          if(sm){ state=sm[1].toUpperCase(); zip=sm[2]; }
+        }
+      }
+      return {raw:a,street,city,state,zip,cityStateZip:`${city}, ${state} ${zip}`};
+    }
+    // Without ZIP.
+    m=a.match(/^(.*?)[,]\s*([A-Za-z .'-]+?)[,]\s*([A-Za-z]{2})$/);
+    if(m){
+      return {raw:a,street:m[1].trim(),city:m[2].trim(),state:m[3].toUpperCase(),zip:'',cityStateZip:`${m[2].trim()}, ${m[3].toUpperCase()}`};
+    }
+    return {raw:a,street:a,city:'',state:'',zip:'',cityStateZip:''};
+  }
+
+  function g(q){ return 'https://www.google.com/search?q='+encodeURIComponent(q); }
+
+  function lookupGroups(r){
+    const name=norm(r._name), address=norm(r._address), phone=norm(r._phone), email=norm(r._email);
+    const p=splitAddress(address), ph=digits(phone).slice(-10), phDash=phoneHyphen(phone);
+    const groups={Address:[],Name:[],Phone:[],Email:[],Property:[]};
+
+    const cityHy=hyphenate(p.city);
+    const state=(p.state||'').toUpperCase();
+    const stateLower=state.toLowerCase();
+    const stateName=STATE_NAMES[state] || state;
+    const streetHy=hyphenate(p.street);
+    const nameHy=hyphenate(name);
+    const person=splitPersonName(name);
+
+    if(address){
+      // Native/direct address URLs based on supplied working URL formats.
+      if(streetHy && cityHy && state){
+        groups.Address.push(
+          ["That'sThem", `https://thatsthem.com/address/${streetHy}-${cityHy}-${state}${p.zip?'-'+p.zip:''}`, ''],
+          ['TruePeopleSearch', `https://www.truepeoplesearch.com/find/address/${streetHy.toLowerCase()}_${cityHy.toLowerCase()}-${stateLower}${p.zip?'-'+p.zip:''}`, 'tps'],
+          ['FastPeopleSearch', `https://www.fastpeoplesearch.com/address/${streetHy.toLowerCase()}_${cityHy.toLowerCase()}-${stateLower}`, 'fps'],
+          ['SearchPeopleFree', `https://www.searchpeoplefree.com/address/${stateLower}/${cityHy.toLowerCase()}/${streetHy}`, ''],
+          ['SmartBackgroundChecks', `https://www.smartbackgroundchecks.com/address-search/${streetHy.toLowerCase()}/${cityHy.toLowerCase()}/${stateLower}`, ''],
+          ['CyberBackgroundChecks', `https://www.cyberbackgroundchecks.com/address/${streetHy.toLowerCase()}/${cityHy.toLowerCase()}/${stateLower}`, '']
+        );
+      }
+
+      if(p.city && state){
+        const streetEncoded=encodeURIComponent(` ${p.street} `);
+        const cityStateZip=encodeURIComponent(`${p.city}, ${stateName}${p.zip?' '+p.zip:''}`);
+        groups.Address.push(
+          ['FamilyTreeNow', `https://www.familytreenow.com/search/genealogy/results?streetaddress=${streetEncoded}&citystatezip=${cityStateZip}`, '']
+        );
+      }
+
+      groups.Property.push(
+        ['Google Exact Address',g(`"${address}"`),'prop'],
+        ['Property Owner Search',g(`"${address}" "property owner"`),'prop'],
+        ['County Assessor',g(`"${address}" county assessor property records`),'prop'],
+        ['Zillow',`https://www.zillow.com/homes/${enc(address)}_rb/`,'prop'],
+        ['Realtor',g(`site:realtor.com "${address}"`),'prop'],
+        ['EnformionGO','https://go.enformion.com/','prop']
+      );
+    }
+
+    if(name){
+      // Name-only and name+location variants.
+      groups.Name.push(
+        ["That'sThem — name", `https://thatsthem.com/name/${nameHy}`, ''],
+        ['TruePeopleSearch — name', `https://www.truepeoplesearch.com/results?name=${enc(name)}`, 'tps'],
+        ['FastPeopleSearch — name', `https://www.fastpeoplesearch.com/name/${nameHy.toLowerCase()}`, 'fps'],
+        ['SearchPeopleFree — name', `https://www.searchpeoplefree.com/find/${nameHy.toLowerCase()}`, ''],
+        ['SmartBackgroundChecks — name', `https://www.smartbackgroundchecks.com/people/${nameHy.toLowerCase()}/`, ''],
+        ['CyberBackgroundChecks — name', `https://www.cyberbackgroundchecks.com/people/${nameHy.toLowerCase()}/`, '']
+      );
+
+      if(p.city && state){
+        groups.Name.unshift(
+          ["That'sThem — name + city", `https://thatsthem.com/name/${nameHy}/${cityHy}-${state}`, ''],
+          ['TruePeopleSearch — name + city', `https://www.truepeoplesearch.com/results?name=${enc(name)}&citystatezip=${enc(`${p.city}, ${state}`)}`, 'tps'],
+          ['FastPeopleSearch — name + city', `https://www.fastpeoplesearch.com/name/${nameHy.toLowerCase()}_${cityHy.toLowerCase()}-${stateLower}`, 'fps'],
+          ['SearchPeopleFree — name + city', `https://www.searchpeoplefree.com/find/${nameHy.toLowerCase()}/${stateLower}/${cityHy.toLowerCase()}`, ''],
+          ['SmartBackgroundChecks — name + city', `https://www.smartbackgroundchecks.com/people/${nameHy.toLowerCase()}/${cityHy.toLowerCase()}/${stateLower}`, ''],
+          ['CyberBackgroundChecks — name + city', `https://www.cyberbackgroundchecks.com/people/${nameHy.toLowerCase()}/${cityHy.toLowerCase()}-${stateLower}`, '']
+        );
+      }
+
+      if(person.first && person.last){
+        const base=`https://www.familytreenow.com/search/genealogy/results?first=${enc(person.first)}&last=${enc(person.last)}`;
+        if(p.city && state){
+          groups.Name.push(['FamilyTreeNow — name + city', `${base}&citystatezip=${enc(`${p.city}, ${state}`)}`, '']);
+        }
+        groups.Name.push(['FamilyTreeNow — name', base, '']);
+      }
+    }
+
+    if(ph){
+      groups.Phone.push(
+        ["That'sThem", `https://thatsthem.com/phone/${phDash}`, ''],
+        ['TruePeopleSearch', `https://www.truepeoplesearch.com/find/phone/${ph}`, 'tps'],
+        ['FastPeopleSearch', `https://www.fastpeoplesearch.com/${phDash}`, 'fps'],
+        ['SearchPeopleFree', `https://www.searchpeoplefree.com/phone-lookup/${phDash}`, ''],
+        ['SmartBackgroundChecks', `https://www.smartbackgroundchecks.com/phone/${ph}`, ''],
+        ['CyberBackgroundChecks', `https://www.cyberbackgroundchecks.com/phone/${phDash}`, ''],
+        ['FamilyTreeNow', `https://www.familytreenow.com/search/people/results?phoneno=${ph}`, '']
+      );
+    }
+
+    if(email){
+      groups.Email.push(['Google Email Search',g(`"${email}"`),'']);
+    }
+
+    return groups;
+  }
+
+  function lookupLinks(r){
+    return Object.values(lookupGroups(r)).flat();
+  }
+
+  const aliases={
+    name:['name','full name','owner name','contact name','referral name'],
+    address:['address','property address','street address','mailing address','home address','referral address'],
+    phone:['number','phone','phone number','cell','mobile','referral phone'],
+    email:['email','email address','referral email']
+  };
+
+  function bestHeader(type){
+    const hs=headers.map(h=>({h,l:h.toLowerCase().trim()}));
+    for(const a of aliases[type]){
+      const exact=hs.find(x=>x.l===a); if(exact) return exact.h;
+    }
+    for(const a of aliases[type]){
+      const partial=hs.find(x=>x.l.includes(a)); if(partial) return partial.h;
+    }
+    return '';
+  }
+
+  function fillSelect(sel, selected){
+    sel.innerHTML='';
+    const blank=document.createElement('option'); blank.value=''; blank.textContent='— none —'; sel.appendChild(blank);
+    headers.forEach(h=>{const o=document.createElement('option');o.value=h;o.textContent=h;sel.appendChild(o)});
+    sel.value=selected||'';
+  }
+
+  function remap(){
+    const pref=$("preferReferral").checked;
+    let mn=maps.name.value, ma=maps.address.value, mp=maps.phone.value, me=maps.email.value;
+    if(pref){
+      if(headers.includes('Referral First Name') || headers.includes('Referral Last Name')) mn='__referral_full__';
+      if(headers.includes('Referral Phone')) mp='Referral Phone';
+      if(headers.includes('Referral Email')) me='Referral Email';
+    }
+    rows.forEach(r=>{
+      r._name = mn==='__referral_full__'
+        ? [r['Referral First Name'],r['Referral Middle'],r['Referral Last Name']].filter(Boolean).join(' ').trim()
+        : norm(r[mn]);
+      r._address=norm(r[ma]); r._phone=norm(r[mp]); r._email=norm(r[me]);
+    });
+    update();
+  }
+
+  function setData(matrix){
+    if(!matrix.length) return;
+    headers=matrix[0].map(h=>norm(h));
+    const body=matrix.slice(1);
+    rows=body.map((arr,i)=>{
+      const o={__index:i+1};
+      headers.forEach((h,j)=>o[h]=arr[j]??'');
+      return o;
     });
 
-    document.body.appendChild(btn);
+    fillSelect(maps.name,bestHeader('name'));
+    fillSelect(maps.address,bestHeader('address'));
+    fillSelect(maps.phone,bestHeader('phone'));
+    fillSelect(maps.email,bestHeader('email'));
+    remap();
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", addBackButton);
-  } else {
-    addBackButton();
+  function update(){
+    const q=$("q").value.toLowerCase().trim();
+    filtered=rows.filter(r=>{
+      if(addressOnly && !r._address) return false;
+      if(!q) return true;
+      return [r._name,r._address,r._phone,r._email].join(' ').toLowerCase().includes(q);
+    });
+    render();
   }
+
+  function makeSite(label,url,cls=''){
+    const a=document.createElement('a');
+    a.className='site '+cls; a.href=url; a.target='_blank'; a.rel='noopener noreferrer'; a.textContent=label;
+    return a;
+  }
+
+  function makeLookupGroup(title, items){
+    const wrap=document.createElement('div');
+    wrap.className='lookupGroup';
+
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.className='lookupToggle';
+    btn.innerHTML=`${title} <span class="chev">▼</span>`;
+
+    const menu=document.createElement('div');
+    menu.className='lookupMenu';
+    items.forEach(([lab,url,cls])=>menu.appendChild(makeSite(lab,url,cls)));
+
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      document.querySelectorAll('.lookupGroup.open').forEach(x=>{ if(x!==wrap) x.classList.remove('open'); });
+      wrap.classList.toggle('open');
+    });
+
+    menu.addEventListener('click',e=>e.stopPropagation());
+    wrap.appendChild(btn);
+    wrap.appendChild(menu);
+    return wrap;
+  }
+
+  function render(){
+    tbody.innerHTML='';
+    $("rowsCount").textContent=rows.length;
+    $("addressCount").textContent=rows.filter(r=>r._address).length;
+    $("mappedCount").textContent=[maps.name.value,maps.address.value,maps.phone.value,maps.email.value].filter(Boolean).length;
+    $("visibleBadge").textContent=`${filtered.length} visible`;
+    $("exportBtn").disabled=!rows.length;
+    $("copyBtn").disabled=!filtered.some(r=>r._address);
+
+    if(!rows.length){table.hidden=true;empty.hidden=false;return}
+    table.hidden=false;empty.hidden=true;
+
+    filtered.forEach(r=>{
+      const tr=document.createElement('tr');
+
+      const td0=document.createElement('td');td0.className='idx';td0.textContent=r.__index;tr.appendChild(td0);
+
+      const td1=document.createElement('td');td1.className='person';
+      const b=document.createElement('b');b.textContent=r._name||'—';td1.appendChild(b);
+      if(r['Sponsor']||r['Organization']){
+        const s=document.createElement('small');s.textContent=[r['Sponsor'],r['Organization']].filter(Boolean).join(' • ');td1.appendChild(s);
+      }
+      tr.appendChild(td1);
+
+      const td2=document.createElement('td');td2.className='addr';
+      const d=document.createElement('div');d.textContent=r._address||'—';td2.appendChild(d);
+      if(r._address){
+        const p=splitAddress(r._address), sm=document.createElement('small');
+        sm.textContent=p.city && p.state ? `Parsed: ${p.city}, ${p.state}${p.zip?' '+p.zip:''}` : 'Exact-address web fallback available';
+        td2.appendChild(sm);
+      }
+      tr.appendChild(td2);
+
+      const td3=document.createElement('td');
+      const p1=document.createElement('div');p1.textContent=r._phone||'—';td3.appendChild(p1);
+      if(r._email){const s=document.createElement('small');s.className='muted';s.textContent=r._email;td3.appendChild(s)}
+      tr.appendChild(td3);
+
+      const td4=document.createElement('td');const box=document.createElement('div');box.className='links';
+      const groups=lookupGroups(r);
+      Object.entries(groups).forEach(([title,items])=>{
+        if(items.length) box.appendChild(makeLookupGroup(title,items));
+      });
+      td4.appendChild(box);tr.appendChild(td4);
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  function exportCSV(){
+    const extra=[
+      'Lookup - FastPeopleSearch Address','Lookup - TruePeopleSearch Address','Lookup - SearchPeopleFree Address',
+      'Lookup - ThatsThem Address','Lookup - SmartBackgroundChecks Address','Lookup - CyberBackgroundChecks Address',
+      'Lookup - FamilyTreeNow Address','Lookup - Property Owner','Lookup - County Assessor','Lookup - EnformionGO'
+    ];
+    const all=[...headers,...extra];
+    const lines=[all.map(csvEscape).join(',')];
+
+    rows.forEach(r=>{
+      const links=lookupLinks(r);
+      const find=l=>links.find(x=>x[0]===l)?.[1]||'';
+      const vals=headers.map(h=>r[h]??'');
+      const groups=lookupGroups(r);
+      const afind=l=>groups.Address.find(x=>x[0]===l)?.[1]||'';
+      const pfind=l=>groups.Property.find(x=>x[0]===l)?.[1]||'';
+      vals.push(
+        afind('FastPeopleSearch'),
+        afind('TruePeopleSearch'),
+        afind('SearchPeopleFree'),
+        afind("That'sThem"),
+        afind('SmartBackgroundChecks'),
+        afind('CyberBackgroundChecks'),
+        afind('FamilyTreeNow'),
+        pfind('Property Owner Search'),
+        pfind('County Assessor'),
+        'https://go.enformion.com/'
+      );
+      lines.push(vals.map(csvEscape).join(','));
+    });
+
+    const blob=new Blob([lines.join('\r\n')],{type:'text/csv;charset=utf-8'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+    a.download=`owner_finder_enriched_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(a.href);
+  }
+
+  async function copyVisible(){
+    const txt=filtered.map(r=>r._address).filter(Boolean).join('\n');
+    if(!txt) return;
+    try{
+      await navigator.clipboard.writeText(txt);
+      const b=$("copyBtn"), old=b.textContent;b.textContent='Copied ✓';setTimeout(()=>b.textContent=old,1200);
+    }catch{
+      const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();
+    }
+  }
+
+  async function loadFile(file){
+    if(!file) return;
+    const text=await file.text();
+    setData(parseCSV(text));
+    drop.innerHTML=`<strong>${file.name}</strong><span class="muted">${rows.length.toLocaleString()} data rows loaded</span>`;
+  }
+
+  drop.addEventListener('click',()=>fileEl.click());
+  fileEl.addEventListener('change',e=>loadFile(e.target.files[0]));
+  ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('drag')}));
+  ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('drag')}));
+  drop.addEventListener('drop',e=>loadFile(e.dataTransfer.files[0]));
+
+  Object.values(maps).forEach(s=>s.addEventListener('change',remap));
+  $("preferReferral").addEventListener('change',remap);
+  $("q").addEventListener('input',update);
+  $("showAddressOnly").addEventListener('click',()=>{
+    addressOnly=!addressOnly;
+    $("showAddressOnly").textContent=addressOnly?'Showing addresses ✓':'Addresses only';
+    update();
+  });
+  $("exportBtn").addEventListener('click',exportCSV);
+  $("copyBtn").addEventListener('click',copyVisible);
+
+  document.addEventListener('click',()=>document.querySelectorAll('.lookupGroup.open').forEach(x=>x.classList.remove('open')));
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape') document.querySelectorAll('.lookupGroup.open').forEach(x=>x.classList.remove('open'));
+  });
+
+  // Initialize mapping controls even before a file.
+  Object.values(maps).forEach(s=>fillSelect(s,''));
 })();
 </script>
 </body>
